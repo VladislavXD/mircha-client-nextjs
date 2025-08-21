@@ -1,0 +1,87 @@
+import React from "react"
+import { useGetAllPostsQuery } from "@/src/services/post/post.service"
+
+import Card from "./components/ui/post/Card"
+import { Spinner } from "@heroui/react"
+import CreatePost from "./components/ui/post/CreatePost"
+
+
+const Posts = () => {
+  const { data, isLoading, error } = useGetAllPostsQuery()
+
+
+  console.log('Posts data:', data, 'isLoading:', isLoading, 'error:', error);
+
+  if (isLoading) return <Spinner className="flex h-full"/>
+  if (error) {
+    console.error('Error loading posts:', error)
+    return <div className="text-center text-red-500">Ошибка загрузки постов</div>
+  }
+  if (!data || !Array.isArray(data)) {
+    return <div className="text-center">Нет постов для отображения</div>
+  }
+  return ( 
+    <>
+      <div className="mb-6 w-full pb-8">
+          <CreatePost/>
+      </div>
+      {
+        data.length > 0 
+        ?
+        data.map(({
+          content,
+          author,
+          id, 
+          authorId,
+          comments, 
+          likes,
+          likeByUser,
+          createdAt,
+          views,
+          imageUrl,
+          
+        })=> {
+          // Отладка данных автора
+          console.log('Author data in HomePage:', {
+            name: author?.name,
+            followersCount: author?.followers?.length,
+            followingCount: author?.following?.length,
+            followers: author?.followers,
+            following: author?.following,
+            isFolow: author?.isFolow
+          });
+          
+          return (
+          <Card
+            key={id}
+            avatarUrl={author?.avatarUrl ?? ''}
+            avatarFrameUrl={author?.avatarFrameUrl ?? ''}
+            backgroundUrl={author?.backgroundUrl ?? ''}
+            dateOfBirth={author?.dateOfBirth}
+            bio={author?.bio ?? ''}
+            authorCreatedAt={author?.createdAt}
+            followersCount={author?.followers?.length ?? 0}
+            followingCount={author?.following?.length ?? 0}
+            isFollowing={author?.isFolow ?? false}
+            content={content}
+            name={author?.name ?? ''}
+            likesCount={likes?.length ?? 0}
+            commentsCount={comments?.length ?? 0}
+            authorId={authorId}
+            likeByUser={likeByUser}
+            createdAt={createdAt}
+            cardFor="post"
+            id={id}
+            views={views?.length ?? 0}
+            usernameFrameUrl={author?.usernameFrameUrl ?? ''}
+            imageUrl={imageUrl}
+          />
+        )})  
+        : 
+        <div className="text-center text-gray-500">Нет постов для отображения</div>
+      }
+    </>
+  )
+}
+
+export default Posts
