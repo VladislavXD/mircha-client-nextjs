@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import {Button, CardBody, CardFooter, CardHeader, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Card as NextCard, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Image} from '@heroui/react'
 import { unLikePost, useLikePostMutation, useUnLikePostMutation } from '@/src/services/post/likes.service';
-import { deletePost, useDeletePostMutation, useGetViewsQuery, useLazyGetAllPostsQuery, useLazyGetPostByIdQuery, useLazyGetViewsQuery } from '@/src/services/post/post.service';
+import { deletePost, useDeletePostMutation, useGetViewsQuery, useLazyGetAllPostsQuery, useLazyGetPostByIdQuery, useLazyGetViewsQuery, useAddViewMutation } from '@/src/services/post/post.service';
 
 import { useDeleteCommentMutation } from '@/src/services/post/comments.service';
 import Link from 'next/link';
@@ -17,13 +17,16 @@ import MetaInfo from '../../MetaInfo';
 import { FcDislike } from 'react-icons/fc';
 import { MdOutlineFavoriteBorder } from 'react-icons/md';
 import { FaRegComment } from 'react-icons/fa';
+import { Eye } from 'lucide-react';
 import ErrorMessage from '../../ErrorMessage';
 import { hasErrorField } from '@/app/utils/hasErrorField';
+import { useViewsManager } from '@/app/utils/viewsManager';
 import { useEffect, useRef } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '@/src/constants/api.url';
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { SlOptions } from "react-icons/sl";
+import { EmojiText } from '../../EmojiText';
 
 
 type Props = {
@@ -41,6 +44,7 @@ type Props = {
     views?: number
     usernameFrameUrl?: string;
     imageUrl?: string; // URL изображения поста
+    emojiUrls?: string[]; // Массив URL emoji
     avatarFrameUrl?: string; // Добавлено для соответствия с типами
     backgroundUrl?: string; // Добавлено для соответствия с типами
     dateOfBirth?: Date; // Добавлено для соответствия с типами
@@ -71,6 +75,7 @@ const Card = ({
     views = 0,
     usernameFrameUrl,
     imageUrl,
+    emojiUrls = [],
     avatarFrameUrl,
     backgroundUrl,
     dateOfBirth,
@@ -83,8 +88,7 @@ const Card = ({
 }: Props) => {
     console.log('nameCard', name)
     const [likePost, {isLoading}] = useLikePostMutation();
-    // TODO
-    const [setView] = useLazyGetViewsQuery();
+    const { addView: addViewToQueue } = useViewsManager();
     const [unlikePost, {isLoading: unlikeLoading}] =useUnLikePostMutation();
     const [triggerAllPosts] = useLazyGetAllPostsQuery();
     const [triggerGetPostById] = useLazyGetPostByIdQuery();
@@ -174,12 +178,15 @@ const Card = ({
             }
         }
     }
-    // Отправка просмотра (1 раз при появлении в зоне видимости)
-    const handleView = async ({ postId }: ViewProps)=> {
-        try{
-            await axios.post(`${BASE_URL}/api/posts/${postId}/views`)
-        }catch(err){
-            console.log(err);
+    // Отправка просмотра через менеджер (батчинг)
+    const handleView = ({ postId }: ViewProps) => {
+        if (!postId || viewSent) return;
+        
+        try {
+            addViewToQueue(postId as string);
+            console.log('Просмотр добавлен в очередь для поста:', postId);
+        } catch (err) {
+            console.log('Ошибка при добавлении просмотра в очередь:', err);
         }
     }
 
@@ -187,21 +194,45 @@ const Card = ({
     const [viewSent, setViewSent] = useState(false)
 
     useEffect(() => {
-        if(viewSent) return
-        const el = inViewRef.current
-        if(!el || !id) return
+        if (viewSent || !id || cardFor !== 'post') return;
+        
+        const el = inViewRef.current;
+        if (!el) return;
+        
+        let timeoutId: NodeJS.Timeout;
+        
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if(entry.isIntersecting){
-                    handleView({postId: id})
-                    setViewSent(true)
-                    observer.disconnect()
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                    // Добавляем задержку для более точного учета просмотра
+                    timeoutId = setTimeout(() => {
+                        if (entry.isIntersecting) {
+                            handleView({ postId: id });
+                            setViewSent(true);
+                            observer.disconnect();
+                        }
+                    }, 1000); // Пост должен быть виден 1 секунду
+                } else {
+                    // Очищаем таймер если пост ушел из зоны видимости
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                    }
                 }
-            })
-        }, { threshold: 0.3 })
-        observer.observe(el)
-        return () => observer.disconnect()
-    }, [id, viewSent])
+            });
+        }, { 
+            threshold: 0.5, // 50% поста должно быть видно
+            rootMargin: '0px 0px -100px 0px' // Учитываем нижнюю часть экрана
+        });
+        
+        observer.observe(el);
+        
+        return () => {
+            observer.disconnect();
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
+    }, [id, viewSent, cardFor]);
 
   return (
     <NextCard className='mb-5'>
@@ -263,7 +294,10 @@ const Card = ({
         </CardHeader>
         <CardBody className='px-3 py-2 mb-5'>
             <div ref={inViewRef}>
-                <Typography>{content}</Typography>
+                <EmojiText 
+                    text={content} 
+                    emojiUrls={emojiUrls} 
+                />
                 
                 {/* Отображение изображения поста */}
                 {imageUrl && (
@@ -281,7 +315,13 @@ const Card = ({
             
         </CardBody>
 
-                <div className='text-small text-default-400 pl-3 '> Views {views}</div>
+                <div className='text-small text-default-400 pl-3 flex items-center gap-1'> 
+                    <Eye size={16} />
+                    {views > 1000 
+                        ? `${(views / 1000).toFixed(1)}k` 
+                        : views
+                    } {views === 1 ? 'просмотр' : views < 5 ? 'просмотра' : 'просмотров'}
+                </div>
 
         {
             cardFor !== 'comment' && (
@@ -298,7 +338,7 @@ const Card = ({
                                 />
                             }
                             
-
+                                    
                         </div>
                         <div className="">
                             {
@@ -317,6 +357,8 @@ const Card = ({
                                 Icon={FaRegComment}
                             />
                         </Link>
+                        
+                        
                     </div>
                     <ErrorMessage error={error}/>
                 </CardFooter>

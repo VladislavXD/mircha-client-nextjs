@@ -166,61 +166,61 @@ export const ChatList: React.FC = () => {
             <Card
               key={chat.id}
               isPressable
-              className={`p-4 cursor-pointer transition-all hover:scale-[1.02] ${
-                chat.unreadCount > 0 ? 'ring-2 ring-blue-500 ring-opacity-50' : ''
+              className={`p-4 cursor-pointer transition-all hover:scale-[1.02] w-full max-w-full min-[330px]:w-[310px] ${
+              chat.unreadCount > 0 ? 'ring-2 ring-blue-500 ring-opacity-50' : ''
               }`}
               onClick={() => handleChatClick(chat)}
             >
-              <div className="flex items-start space-x-3">
-                <div className="relative flex-shrink-0">
-                  <Badge
-                    content=""
-                    color={isOnline ? "success" : "default"}
-                    variant={isOnline ? "solid" : "flat"}
-                    size="sm"
-                    isInvisible={!isOnline}
-                    placement="bottom-right"
-                  >
-                    <User
-                      name=""
-                      description=""
-                      avatarProps={{
-                        src: chat.otherParticipant?.avatarUrl || undefined,
-                        size: 'lg'
-                      }}
-                    />
-                  </Badge>
-                </div>
-
-                {/* Левая часть: Имя и описание */}
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-base truncate mb-1">
-                    {chat.otherParticipant?.name || 'Неизвестный пользователь'}
-                  </div>
-                  <div className="text-sm text-gray-500 truncate max-w-[200px]">
-                    {chat.otherParticipant?.bio || (!isOnline ? formatOnlineStatus(isOnline, chat.otherParticipant?.lastSeen) : 'Пользователь')}
-                  </div>
-                </div>
-
-                {/* Правая часть: Время, последнее сообщение и счетчик */}
-                <div className="flex flex-col items-end justify-between min-w-0 max-w-[160px] h-full">
-                  <div className="text-xs text-gray-500 mb-2">
-                    {formatChatTime(chat.lastMessageAt)}
-                  </div>
-                  
-                  <div className="flex flex-col items-end">
-                    <div className="text-sm text-gray-600 truncate w-28 text-right mb-1">
-                      {chat.lastMessage || 'Нет сообщений'}
-                    </div>
-                    {chat.unreadCount > 0 && (
-                      <div className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
-                        {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
-                      </div>
-                    )}
-                  </div>
-                </div>
+              <div className="flex items-start space-x-3 w-full overflow-hidden">
+              <div className="relative flex-shrink-0">
+              <Badge
+              content=""
+              color={isOnline ? "success" : "default"}
+              variant={isOnline ? "solid" : "flat"}
+              size="sm"
+              isInvisible={!isOnline}
+              placement="bottom-right"
+              >
+              <User
+                name=""
+                description=""
+                avatarProps={{
+                src: chat.otherParticipant?.avatarUrl || undefined,
+                size: 'lg'
+                }}
+              />
+              </Badge>
               </div>
-          </Card>
+
+              {/* Левая часть: Имя и описание */}
+              <div className="flex-1 min-w-0 overflow-hidden">
+              <div className="font-semibold text-base truncate mb-1">
+              {chat.otherParticipant?.name || 'Неизвестный пользователь'}
+              </div>
+              <div className="text-sm text-gray-500 truncate">
+              {chat.otherParticipant?.bio || (!isOnline ? formatOnlineStatus(isOnline, chat.otherParticipant?.lastSeen) : 'Пользователь')}
+              </div>
+              </div>
+
+              {/* Правая часть: Время, последнее сообщение и счетчик */}
+              <div className="flex flex-col items-end justify-between min-w-0 flex-shrink-0 w-16 min-[330px]:w-20 sm:w-32 h-full">
+              <div className="text-xs text-gray-500 mb-2 whitespace-nowrap">
+              {formatChatTime(chat.lastMessageAt)}
+              </div>
+              
+              <div className="flex flex-col items-end w-full">
+              <div className="text-sm text-gray-600 truncate w-full text-right mb-1">
+                {chat.lastMessage || 'Нет сообщений'}
+              </div>
+              {chat.unreadCount > 0 && (
+                <div className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
+                {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
+                </div>
+              )}
+              </div>
+              </div>
+              </div>
+            </Card>
           );
         })}
       </div>

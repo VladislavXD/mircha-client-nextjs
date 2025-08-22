@@ -2,9 +2,6 @@
 import {
   Button,
   Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Image,
   Spinner,
   useDisclosure,
@@ -39,7 +36,6 @@ import {
   MdOutlinePersonAddDisabled,
 } from "react-icons/md";
 import { CiEdit } from "react-icons/ci";
-import ProfileInfo from "@/app/components/ui/profile/ProfileInfo";
 import { formatToClientDate } from "../../../utils/formatToClientDate";
 import confetti from "canvas-confetti";
 import EditProfile from "@/app/components/ui/profile/EditProfile";
@@ -188,48 +184,89 @@ const UserProfile = () => {
   return (
     <>
       <GoBack />
-      <div className="items-center gap-4 relative">
-        <video
-          key={data.backgroundUrl} // Добавляем key для принудительного пересоздания
-          loop
-          muted
-          autoPlay
-          id="myVideo"
-          className="absolute rounded-2xl inset-0 w-full h-full object-cover z-0 brightness-[0.75]"
-        >
-          {data.backgroundUrl && (
-            <source src={`${data.backgroundUrl}`} type="video/mp4" />
-          )}
-        </video>
-        <div className="absolute inset-0 bg-black/20 z-0" aria-hidden="true" />
-
-        <Card
-          className={`space-y-4 p-5 relative z-10 backdrop-blur-xs ${data.backgroundUrl ? "bg-background/30" : ""}`}
-        >
-          <CardHeader>
-            <div className="w-full flex justify-between flex-col xs:flex-row ">
-              <div className="img mb-5 xs:mb-0">
-                <div className="relative w-[200px] h-[200px]">
-                  <img
-                    src={data.avatarFrameUrl || ""}
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute inset-0 w-full h-full pointer-events-none select-none z-100"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Верхняя секция с фоном */}
+        <div className="relative rounded-2xl overflow-hidden mb-6 shadow-2xl">
+          {/* Фоновое видео */}
+          <div className="relative h-64 md:h-80">
+            <video
+              key={data.backgroundUrl}
+              loop
+              muted
+              autoPlay
+              className="absolute inset-0 w-full h-full object-cover"
+            >
+              {data.backgroundUrl && (
+                <source src={`${data.backgroundUrl}`} type="video/mp4" />
+              )}
+            </video>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            
+            {/* Кнопки управления профилем в правом верхнем углу */}
+            {currentUser?.id === id && (
+              <div className="absolute top-4 right-4 flex gap-2">
+                <Button 
+                  onClick={() => onOpen()} 
+                  size="sm"
+                  variant="flat"
+                  className="bg-white/20 backdrop-blur-sm text-white border-white/30"
+                  endContent={<CiEdit />}
+                >
+                  Редактировать
+                </Button>
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button 
+                      variant="flat" 
+                      size="sm"
+                      className="bg-white/20 backdrop-blur-sm text-white border-white/30"
+                    >
+                      Оформление
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu
+                    aria-label="Appearance actions"
+                    onAction={(key) =>
+                      openAppearance(key as "frame" | "background")
+                    }
+                  >
+                    <DropdownItem key="frame">Рамка аватара</DropdownItem>
+                    <DropdownItem key="background">Фон профиля</DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+            )}
+          </div>
+          
+          {/* Основная информация профиля */}
+          <div className="relative bg-background/95 backdrop-blur-sm p-6">
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
+              {/* Аватар с рамкой */}
+              <div className="relative shrink-0 mx-auto lg:mx-0">
+                <div className="relative w-32 h-32 lg:w-40 lg:h-40 -mt-16 lg:-mt-20">
+                  {data.avatarFrameUrl && (
+                    <img
+                      src={data.avatarFrameUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+                    />
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center p-3">
                     <Image
                       isBlurred
                       src={data.avatarUrl || "/default-avatar.png"}
                       alt={data.name}
-                      width={160}
-                      height={160}
-                      className={`w-full h-full object-cover rounded-xl shadow-sm ${!data.avatarFrameUrl ? "border-3 border-white" : ""}`}
+                      className={`w-full h-full object-cover rounded-2xl shadow-lg ${!data.avatarFrameUrl ? "border-4 border-white dark:border-gray-700" : ""}`}
                     />
                   </div>
                 </div>
-                <div className="pt-3 ps-0">
-                  <div className="relative inline-block">
-                    {/* Анимация рамки для никнейма поверх текста */}
+              </div>
+              
+              {/* Информация пользователя */}
+              <div className="flex-1 text-center lg:text-left">
+                <div className="mb-4">
+                  <div className="relative inline-block mb-2">
                     {data.usernameFrameUrl && (
                       <div 
                         className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
@@ -241,24 +278,68 @@ const UserProfile = () => {
                         }}
                       />
                     )}
-                    <h4 className="relative flex-col mb-1 z-0 text-2xl font-bold gap-4 items-center px-2">
+                    <h1 className="relative z-0 text-3xl lg:text-4xl font-bold px-2">
                       {data.name}
-                    </h4>
+                    </h1>
                   </div>
-                  <h5 className="text-small tracking-tight text-default-400">
-                    @ {data.email.split("@")[0]}
-                  </h5>
+                  <p className="text-default-500 text-lg">
+                    @{data.email.split("@")[0]}
+                  </p>
+                </div>
+                
+                {/* Биография */}
+                {data.bio && (
+                  <p className="text-default-600 mb-4 max-w-2xl leading-relaxed">
+                    {data.bio}
+                  </p>
+                )}
+                
+                {/* Дополнительная информация в горизонтальном расположении */}
+                <div className="flex flex-wrap gap-4 text-sm text-default-500 mb-4 justify-center lg:justify-start">
+                  {data.dateOfBirth && (
+                    <div className="flex items-center gap-2">
+                      <span>🎂</span>
+                      <span>{formatToClientDate(data.dateOfBirth)}</span>
+                    </div>
+                  )}
+                  {data.location && (
+                    <div className="flex items-center gap-2">
+                      <span>📍</span>
+                      <span>{data.location}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <span>📅</span>
+                    <span>Присоединился {formatToClientDate(data.createdAt)}</span>
+                  </div>
+                </div>
+                
+                {/* Статистика подписчиков */}
+                <div className="flex gap-6 mb-4 justify-center lg:justify-start">
+                  <Link href={`/following/${data.id}`} className="group">
+                    <div className="flex items-center gap-1 group-hover:text-primary transition-colors">
+                      <span className="font-bold text-lg">{data.following.length}</span>
+                      <span className="text-default-500">Подписки</span>
+                    </div>
+                  </Link>
+                  <Link href={`/followers/${data.id}`} className="group">
+                    <div className="flex items-center gap-1 group-hover:text-primary transition-colors">
+                      <span className="font-bold text-lg">{data.followers.length}</span>
+                      <span className="text-default-500">Подписчики</span>
+                    </div>
+                  </Link>
                 </div>
               </div>
-
+              
+              {/* Кнопки действий */}
               {currentUser?.id !== id ? (
-                <span className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3 shrink-0">
                   <Button
                     color={data.isFolow ? "default" : "primary"}
-                    variant="flat"
+                    variant={data.isFolow ? "flat" : "solid"}
                     isLoading={isLoading}
-                    disableRipple
-                    className="relative  overflow-visible rounded-full hover:-translate-y-1 px-12 shadow-xl bg-background/30 after:content-[''] after:absolute after:rounded-full after:inset-0 after:bg-background/40 after:z-[-1] after:transition after:!duration-500 hover:after:scale-150 hover:after:opacity-0"
+                    size="lg"
+                    className="min-w-[140px] font-semibold"
                     onClick={handleFollow}
                     endContent={
                       data.isFolow ? (
@@ -272,73 +353,58 @@ const UserProfile = () => {
                   </Button>
 
                   <Button
-                    color={"default"}
                     variant="flat"
-                    disableRipple
-                    className="relative  overflow-visible rounded-full hover:-translate-y-1 px-12 shadow-xl bg-background/30 after:content-[''] after:absolute after:rounded-full after:inset-0 after:bg-background/40 after:z-[-1] after:transition after:!duration-500 hover:after:scale-150 hover:after:opacity-0"
-                    endContent={
-                      <SendHorizontal
-                        className="dark:text-white text-black"
-                        size={15}
-                      />
-                    }
+                    size="lg"
+                    className="min-w-[140px]"
+                    endContent={<SendHorizontal size={16} />}
                   >
                     <Link href={`/chat/${data.id}`}>Сообщение</Link>
                   </Button>
-                </span>
-              ) : (
-                <div className="flex flex-col gap-2 items-start">
-                  <Button onClick={() => onOpen()} endContent={<CiEdit />}>
-                    Редактировать
-                  </Button>
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button variant="flat" size="sm">
-                        Оформление
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="Appearance actions"
-                      onAction={(key) =>
-                        openAppearance(key as "frame" | "background")
-                      }
-                    >
-                      <DropdownItem key="frame">Рамка аватара</DropdownItem>
-                      <DropdownItem key="background">Фон профиля</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
                 </div>
-              )}
+              ) : null}
             </div>
-          </CardHeader>
-          <CardBody className="gap-2">
-            <p className="font-semibold text-sm max-w-[400px] w-full text-slate-200  ">
-              {data.bio}
-            </p>
-            <ProfileInfo
-              title="Дата Рождения: "
-              info={formatToClientDate(data.dateOfBirth)}
-            />
-            <ProfileInfo title="Местоположение: " info={data.location} />
-          </CardBody>
-
-          <CardFooter>
-            <div className="flex gap-5">
-              <Link href={`/followers/${data.id}`} className="flex gap-1">
-                <p className="font-semibold  text-small">
-                  {data.followers.length}
-                </p>
-                <p className="text-default-400 text-small">Подписчики</p>
-              </Link>
-              <Link href={`/following/${data.id}`} className="flex gap-1">
-                <p className="font-semibold text-small">
-                  {data.following.length}
-                </p>
-                <p className=" text-default-400 text-small">Подписки</p>
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
+        
+        {/* Дополнительный контент профиля (посты, активность и т.д.) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Левая колонка - краткая информация */}
+          <div className="md:col-span-1">
+            <Card className="p-4">
+              <h3 className="font-semibold mb-3">О пользователе</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-default-500">Подписчики:</span>
+                  <span className="font-medium">{data.followers.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-default-500">Подписки:</span>
+                  <span className="font-medium">{data.following.length}</span>
+                </div>
+                {data.location && (
+                  <div className="flex justify-between">
+                    <span className="text-default-500">Локация:</span>
+                    <span className="font-medium">{data.location}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-default-500">Регистрация:</span>
+                  <span className="font-medium">{formatToClientDate(data.createdAt)}</span>
+                </div>
+              </div>
+            </Card>
+          </div>
+          
+          {/* Правая колонка - основной контент */}
+          <div className="md:col-span-2">
+            <Card className="p-4">
+              <h3 className="font-semibold mb-3">Активность</h3>
+              <div className="text-center text-default-500 py-8">
+                <p>Здесь будут отображаться посты и активность пользователя</p>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
       <EditProfile isOpen={isOpen} onClose={handleClose} user={data} />
 

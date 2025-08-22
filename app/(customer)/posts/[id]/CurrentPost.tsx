@@ -28,6 +28,9 @@ const CurrentPost = () => {
 		author,
 		likeByUser,
 		createdAt,
+		emojiUrls,
+		imageUrl,
+		views,
 	} = data
 	return (
 		<>
@@ -43,6 +46,9 @@ const CurrentPost = () => {
 				id={id}
 				likeByUser={likeByUser}
 				createdAt={createdAt}
+				emojiUrls={emojiUrls}
+				imageUrl={imageUrl}
+				views={views?.length || 0}
 			/>
 			<div className="mt-10">
 				<CreateComment />

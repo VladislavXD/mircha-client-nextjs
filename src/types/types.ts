@@ -32,6 +32,7 @@ export type User = {
     id: string
     content: string
     imageUrl?: string // URL изображения поста (опционально)
+    emojiUrls?: string[] // Массив URL emoji (опционально)
     author: User
     authorId: string
     likes: Like[]

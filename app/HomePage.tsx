@@ -4,17 +4,16 @@ import { useGetAllPostsQuery } from "@/src/services/post/post.service"
 import Card from "./components/ui/post/Card"
 import { Spinner } from "@heroui/react"
 import CreatePost from "./components/ui/post/CreatePost"
-
+import emoji from '@/public/emoji/vikostvspack_agad2zmaakpyuuo_AgAD2zMAAkPYUUo_small.gif'
 
 const Posts = () => {
   const { data, isLoading, error } = useGetAllPostsQuery()
 
 
-  console.log('Posts data:', data, 'isLoading:', isLoading, 'error:', error);
 
   if (isLoading) return <Spinner className="flex h-full"/>
   if (error) {
-    console.error('Error loading posts:', error)
+
     return <div className="text-center text-red-500">Ошибка загрузки постов</div>
   }
   if (!data || !Array.isArray(data)) {
@@ -24,6 +23,7 @@ const Posts = () => {
     <>
       <div className="mb-6 w-full pb-8">
           <CreatePost/>
+          <img src={emoji.src} className="size-10" alt="" />
       </div>
       {
         data.length > 0 
@@ -39,6 +39,7 @@ const Posts = () => {
           createdAt,
           views,
           imageUrl,
+          emojiUrls,
           
         })=> {
           // Отладка данных автора
@@ -75,6 +76,7 @@ const Posts = () => {
             views={views?.length ?? 0}
             usernameFrameUrl={author?.usernameFrameUrl ?? ''}
             imageUrl={imageUrl}
+            emojiUrls={emojiUrls}
           />
         )})  
         : 

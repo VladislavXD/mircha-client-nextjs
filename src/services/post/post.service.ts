@@ -31,6 +31,30 @@ export const postApi = api.injectEndpoints({
             })
         }),
 
+        addView: builder.mutation<
+            { message: string; viewsCount: number },
+            { postId: string }
+        >({
+            query: (data) => ({
+                url: "/posts/view",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ['Post'],
+        }),
+
+        addViewsBatch: builder.mutation<
+            { message: string; processedCount: number; postIds: string[] },
+            { postIds: string[] }
+        >({
+            query: (data) => ({
+                url: "/posts/views/batch",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ['Post'],
+        }),
+
         deletePost: builder.mutation<void, string>({
             query: (id)=> ({
                 url: `/posts/${id}`,
@@ -48,9 +72,11 @@ export const {
     useDeletePostMutation,
     useGetPostByIdQuery,
     useLazyGetAllPostsQuery,
-    useLazyGetPostByIdQuery
+    useLazyGetPostByIdQuery,
+    useAddViewMutation,
+    useAddViewsBatchMutation
 } = postApi
 
 export const {
-    endpoints: {getAllPosts, getPostById,createPost, deletePost, getViews}
+    endpoints: {getAllPosts, getPostById,createPost, deletePost, getViews, addView, addViewsBatch}
 } = postApi

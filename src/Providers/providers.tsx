@@ -10,6 +10,8 @@ import { store } from "../store/store";
 import { selectIsAuthenticated, selectUser } from "../store/user/user.slice";
 import { useRouter } from "next/navigation";
 
+import { ViewsProvider } from "@/app/components/providers/ViewsProvider";
+
 export interface ProvidersProps {
   children: React.ReactNode;
   themeProps?: ThemeProviderProps;
@@ -19,7 +21,11 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   return (
     <HeroUIProvider>
       <Provider store={store}>
-        <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+        <NextThemesProvider {...themeProps}>
+          <ViewsProvider>
+            {children}
+          </ViewsProvider>
+        </NextThemesProvider>
       </Provider>
     </HeroUIProvider>
   );

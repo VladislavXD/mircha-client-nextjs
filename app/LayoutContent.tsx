@@ -44,7 +44,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
                 </div>
                 
                 {/* Основной контент с прокруткой без видимого скроллбара */}
-                <div className="flex-1 flex flex-col min-w-0 border-zinc-700 border-r overflow-hidden">
+                <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                   <div className="flex-1 p-4 overflow-y-auto scrollbar-hide">
                     <AuthGuard>{children}</AuthGuard>
                   </div>
