@@ -15,6 +15,7 @@ import { useGetUserChatsQuery } from "@/src/services/caht.service"
 import { socketService } from "@/app/utils/socketService"
 import NavButton from "../../ui/navButton"
 import { MdOutlineForum } from "react-icons/md"
+import { CiSearch } from "react-icons/ci"
 
 const Navbar = () => {
   const currentUser = useSelector(selectCurrent);
@@ -64,6 +65,11 @@ const Navbar = () => {
         <li>
           <NavButton href="/" icon={<BsPostcard />}>
             Посты
+          </NavButton>
+        </li>
+        <li>
+          <NavButton href="/search" icon={<CiSearch />}>
+            Найти
           </NavButton>
         </li>
         <li>

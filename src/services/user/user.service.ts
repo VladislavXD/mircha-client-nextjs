@@ -53,6 +53,13 @@ export const userApi = api.injectEndpoints({
                 body: { avatarFrameUrl, backgroundUrl }
             }),
             invalidatesTags: (result, error, {id}) => [{ type: 'User', id }, 'User']
+        }),
+        searchUsers: builder.query<User[], string>({
+            query: (q) => ({
+                url: `/user/search?query=${encodeURIComponent(q)}`,
+                method: 'GET'
+            }),
+            providesTags: ['User']
         })
     }),
     overrideExisting: false
@@ -66,9 +73,10 @@ export const {
     useGetUserByIdQuery,
     useUpdateUserMutation,
     useLazyGetUserByIdQuery,
-    useUpdateAppearanceMutation
+    useUpdateAppearanceMutation,
+    useSearchUsersQuery
 } = userApi
 
 export const {
-    endpoints: {login, register, current, getUserById, updateUser, updateAppearance}
+    endpoints: {login, register, current, getUserById, updateUser, updateAppearance, searchUsers}
 } = userApi

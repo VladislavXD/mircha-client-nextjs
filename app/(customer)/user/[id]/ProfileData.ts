@@ -1,5 +1,13 @@
 const ProfileBackground = [
+		{
+		
+		id: 0,
+		name: 'Ничего',
+		url: "none",
+		type: 'none'
+	},
 	{
+
 		id: 1,
 		name: 'Plasma',
 		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/579720/8144c4de0312c256889580d7e7de5bc4ccf84fda.mp4",
@@ -54,21 +62,92 @@ const ProfileBackground = [
 		type: 'video'
 	},
 	{
-		id: 10,
-		name: 'Gamedust - Inner Plasma',
-		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/579720/8144c4de0312c256889580d7e7de5bc4ccf84fda.mp4",
+		id: 12,
+		name: 'Optika - Nebula X',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/1636420/c588325b959d8f9abe102f95dbffee8b2b069761.mp4",
 		type: 'video'
 	},
 	{
-		id: 11,
-		name: 'Back_anim',
-		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/1636420/c588325b959d8f9abe102f95dbffee8b2b069761.mp4",
+		id: 13,
+		name: 'Space Beach',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/1239690/f032ec4916fad9f6f64ecb7a9f083e835f65e362.mp4",
+		type: 'video'
+	},
+	{
+		id: 14,
+		name: 'DHP NEBULA',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/874400/2fda5d3781c6d198d70775f53809db245151928d.mp4",
+		type: 'video'
+	},
+	{
+		id: 15,
+		name: 'RetroWave Planet',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/601220/2c41221bc39d4b87682307a664c39cf3a17156bb.mp4",
+		type: 'video'
+	},
+	{
+		id: 16,
+		name: 'WS_Aback_2',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/3103330/95d391d48ac004c166beddbac83cdd38787458c9.mp4",
+		type: 'video'
+	},
+	{
+		id: 17,
+		name: 'Glitch Sansui-zu',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/1492660/70c3ff97957a8a23fdf7a688f2583d5462fd8c4c.mp4",
+		type: 'video'
+	},
+	{
+		id: 18,
+		name: 'Testa Ride',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/1239690/dcfed8cceb3d7c74432294aec5fff49050b2ef1b.mp4",
+		type: 'video'
+	},
+	{
+		id: 19,
+		name: 'Car',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/1263950/b31c14955cd9e39d704f7dfd36cb9cc2129d6fbc.mp4",
+		type: 'video'
+	},
+	{
+		id: 20,
+		name: 'Silent Grove',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/2861700/1e12a183139d56d904ec334bd8e8c07b386d6a48.mp4",
+		type: 'video'
+	},
+	{
+		id: 21,
+		name: 'Neon',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/601220/ab101a835aa5fd4d2643b057281362faa75abeaf.mp4",
+		type: 'video'
+	},
+	{
+		id: 22,
+		name: 'SWS',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/2265180/533bdec2099cc8f058efa01c3db01deb1e851c8a.mp4",
+		type: 'video'
+	},
+	{
+		id: 23,
+		name: 'HPC2_Aback_2',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/2316400/fa00e26e263543ef86a2cdbe6563f5714e2bac49.mp4",
+		type: 'video'
+	},
+	{
+		id: 24,
+		name: 'Oil Rig',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/252490/dd88f3fdf5d94fe91c769a58084c9efe536de3a5.mp4",
 		type: 'video'
 	},
 ]
 
 
 const ProfileFrames = [
+	{
+		id: 0,
+		name: 'Ничего',
+		url: 'none',
+	},
 	{
 		id: 1,
 		name: 'Tron',
@@ -143,6 +222,81 @@ const ProfileFrames = [
 		id: 15,
 		name: 'Black mist',
 		url: 'https://shared.akamai.steamstatic.com/community_assets/images/items/1276790/af29092a7a426368d8a3bcd9bb6ed7aec1357c8a.png',
+	},
+	{
+		id: 16,
+		name: 'Pink flame',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/2887910/03752cfffc9e55445b9c9aef299ed991ff54e18b.png',
+	},
+	{
+		id: 17,
+		name: 'Vanadis',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/1232580/400a2d0836f66c37626071ef8ae10554b481bd80.png',
+	},
+	{
+		id: 18,
+		name: 'Gawr guda',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/3543350/cba50921f8e75291b6ddd7556a16445018499eca.png',
+	},
+	{
+		id: 19,
+		name: 'Lonized',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/933820/b6080a0f52bfc036e7de284754c2ea8781323d7b.png',
+	},
+	{
+		id: 20,
+		name: 'Blue flame',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/2887910/1ef4776b39ff5ca26da9fb8d7564d06ea479c5b6.png',
+	},
+	{
+		id: 21,
+		name: 'seen frame',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/1069740/85030942387d8c7803922f84c31e82bc42728279.png',
+	},
+	{
+		id: 22,
+		name: 'tunnel of love',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/1676840/05ee638859c560a8ffd09664debfe41d491aa9f3.png',
+	},
+	{
+		id: 23,
+		name: 'red heat',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/805940/116131b20248f356924a68abb2d5ea13dfc9db4e.png',
+	},
+	{
+		id: 24,
+		name: 'sleeping holo',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/1065970/84cbb511c3c7522147f04ee9c3516c6c9cdf06ef.png',
+	},
+	{
+		id: 25,
+		name: 'dvd',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/978460/485d032b6fae3e5bd806c40906df6562c9d4f6aa.png',
+	},
+	{
+		id: 26,
+		name: 'circle',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/2181610/b6c6f3d1d8e3ef87e50c0197fb1f79fe77a6731a.png',
+	},
+	{
+		id: 27,
+		name: 'mission computer',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/1012790/25b112bc186c9e41c74979aa5ae6dfb029e3419c.png',
+	},
+	{
+		id: 28,
+		name: 'under construction',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/648800/b07eff97390a85d0e13ef21c9e01612ce51795c3.png',
+	},
+	{
+		id: 29,
+		name: 'leaves',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/1574580/b57d38316272a0c198856be113a505efd73a794b.png',
+	},
+	{
+		id: 30,
+		name: 'agility',
+		url: 'https://shared.fastly.steamstatic.com/community_assets/images/items/1218900/1eeb706141080466dfc06761d6acd263dcfd4bc6.png',
 	},
 ]
 

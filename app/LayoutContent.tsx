@@ -6,6 +6,7 @@ import Navbar from "./components/layout/Navbar";
 import AuthGuard from "./AuthGuard";
 import TokenInitializer from "./TokenInitializer";
 import BottomNav from "./components/layout/BottomNavbar";
+import RightSideBar from "./components/layout/RightSideBar";
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -47,6 +48,12 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                   <div className="flex-1 p-4 overflow-y-auto scrollbar-hide">
                     <AuthGuard>{children}</AuthGuard>
+                  </div>
+                </div>
+                
+                <div className="hidden md:block w-72 shrink-0 flex-col border-l border-zinc-700 overflow-y-auto">
+                  <div className="p-4">
+                    <RightSideBar />
                   </div>
                 </div>
               </div>

@@ -41,6 +41,9 @@ import confetti from "canvas-confetti";
 import EditProfile from "@/app/components/ui/profile/EditProfile";
 import { SendHorizontal } from "lucide-react";
 import { ProfileBackground, ProfileFrames } from "./ProfileData";
+import defaultProfileBg from '@/public/images/default_profile_bg.png';
+
+
 
 // Типы пресетов
 interface FramePreset {
@@ -186,7 +189,9 @@ const UserProfile = () => {
       <GoBack />
       <div className="max-w-4xl mx-auto">
         {/* Верхняя секция с фоном */}
-        <div className="relative rounded-2xl overflow-hidden mb-6 shadow-2xl">
+        <div  style={{ backgroundImage: `url(${data.backgroundUrl === 'none' && defaultProfileBg.src })` }} className={`relative rounded-2xl overflow-hidden mb-6 shadow-2xl`}>
+
+
           {/* Фоновое видео */}
           <div className="relative h-64 md:h-80">
             <video
@@ -244,14 +249,14 @@ const UserProfile = () => {
               {/* Аватар с рамкой */}
               <div className="relative shrink-0 mx-auto lg:mx-0">
                 <div className="relative w-32 h-32 lg:w-40 lg:h-40 -mt-16 lg:-mt-20">
-                  {data.avatarFrameUrl && (
+                  {data.avatarFrameUrl !== 'none' ? (
                     <img
                       src={data.avatarFrameUrl}
                       alt=""
                       aria-hidden="true"
-                      className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+                      className="absolute inset-0 w-full h-full pointer-events-none select-none z-100"
                     />
-                  )}
+                  ) : ''}
                   <div className="absolute inset-0 flex items-center justify-center p-3">
                     <Image
                       isBlurred
@@ -428,7 +433,7 @@ const UserProfile = () => {
                   ).map((item) => (
                     <div
                       key={item.id}
-                      className="group relative border rounded-lg p-2 bg-background/40 hover:bg-background/60 transition cursor-pointer"
+                      className="group relative  rounded-lg p-2 bg-background/40 hover:bg-background/60 transition cursor-pointer"
                     >
                       <div className="aspect-square relative flex items-center justify-center overflow-hidden rounded">
                         {appearanceType === "frame" ? (
@@ -438,7 +443,7 @@ const UserProfile = () => {
                               alt={item.label}
                               className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                             />
-                            <Image
+                            <img
                               src={data.avatarUrl || "/default-avatar.png"}
                               alt="preview"
                               className="w-2/3 h-2/3 object-cover rounded"

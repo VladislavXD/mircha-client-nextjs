@@ -4,17 +4,20 @@ import { api } from "@/src/services/api"
 import user from '@/src/store/user/user.slice'
 import { listenerMiddleware } from "@/app/middleware/auth"
 import { chatApi } from "../services/caht.service"
+import { newsApi } from "../services/news.service"
 
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
     [chatApi.reducerPath]: chatApi.reducer,
+    [newsApi.reducerPath]: newsApi.reducer,
     user,
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware()
     .concat(api.middleware)
     .concat(chatApi.middleware)
+    .concat(newsApi.middleware)
     .prepend(listenerMiddleware.middleware)
   },
 })

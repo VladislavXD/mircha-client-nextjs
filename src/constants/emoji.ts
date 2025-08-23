@@ -1,4 +1,4 @@
-const emojiDataList = [
+export const emojiDataList = [
 	{
 		id: 1,
 		name: 'gif1',

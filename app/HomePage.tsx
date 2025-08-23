@@ -1,13 +1,26 @@
-import React from "react"
+'use client'
+import React, { useEffect } from "react"
 import { useGetAllPostsQuery } from "@/src/services/post/post.service"
 
 import Card from "./components/ui/post/Card"
 import { Spinner } from "@heroui/react"
 import CreatePost from "./components/ui/post/CreatePost"
 import emoji from '@/public/emoji/vikostvspack_agad2zmaakpyuuo_AgAD2zMAAkPYUUo_small.gif'
+import axios from "axios"
 
 const Posts = () => {
   const { data, isLoading, error } = useGetAllPostsQuery()
+
+  useEffect(()=> {
+    const key = 'c3aee40fa7bd44689311929ecb336252'
+    const url ='https://newsapi.org/v2/top-headlines?' +
+          'country=us&' +
+          'apiKey='+key;
+    axios.get(url).then(res=> {
+
+      console.log('new response ', res.data.articles)
+    })
+  }, [])
 
 
 
@@ -23,7 +36,7 @@ const Posts = () => {
     <>
       <div className="mb-6 w-full pb-8">
           <CreatePost/>
-          <img src={emoji.src} className="size-10" alt="" />
+
       </div>
       {
         data.length > 0 
