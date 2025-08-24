@@ -1,8 +1,8 @@
 "use client"
 import React, { useState } from 'react'
-import {Button, CardBody, CardFooter, CardHeader, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Card as NextCard, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Image} from '@heroui/react'
+import {Button, CardBody, CardFooter, CardHeader, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Card as NextCard, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Image, Textarea} from '@heroui/react'
 import { unLikePost, useLikePostMutation, useUnLikePostMutation } from '@/src/services/post/likes.service';
-import { deletePost, useDeletePostMutation, useGetViewsQuery, useLazyGetAllPostsQuery, useLazyGetPostByIdQuery, useLazyGetViewsQuery, useAddViewMutation } from '@/src/services/post/post.service';
+import { deletePost, useDeletePostMutation, useGetViewsQuery, useLazyGetAllPostsQuery, useLazyGetPostByIdQuery, useLazyGetViewsQuery, useAddViewMutation, useUpdatePostMutation } from '@/src/services/post/post.service';
 
 import { useDeleteCommentMutation } from '@/src/services/post/comments.service';
 import Link from 'next/link';
@@ -27,6 +27,7 @@ import { BASE_URL } from '@/src/constants/api.url';
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { SlOptions } from "react-icons/sl";
 import { EmojiText } from '../../EmojiText';
+import EditPostModal from '../EditPostModal';
 
 
 type Props = {
@@ -94,9 +95,12 @@ const Card = ({
     const [triggerGetPostById] = useLazyGetPostByIdQuery();
     const [deletePost, deletePostStatus] = useDeletePostMutation();
     const [deleteComment, deleteCommentStatus] = useDeleteCommentMutation();
+    // const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
     const [error, setError] = useState('');
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
-		const router = useRouter()
+    const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
+    // const [editValue, setEditValue] = useState(content);
+			const router = useRouter()
     const currentUser = useSelector(selectCurrent) 
 
 
@@ -127,7 +131,7 @@ const Card = ({
                     break
                 case 'current-post':
                     await deletePost(id).unwrap();
-										router.push('/')
+						router.push('/')
                     break
                 case 'comment':
                     await deleteComment(commentId).unwrap();
@@ -151,6 +155,25 @@ const Card = ({
     const handleDeleteClick = () => {
         onDeleteOpen();
     }
+
+    const handleEditClick = () => {
+        onEditOpen();
+    }
+
+    // const handleUpdate = async () => {
+    //     if (!id) return;
+    //     try {
+    //         await updatePost({ id, content: editValue }).unwrap();
+    //         await refetchPost();
+    //         onEditClose();
+    //     } catch (err) {
+    //         if (hasErrorField(err)){
+    //             setError(err.data.error)
+    //         } else {
+    //             setError(err as string)
+    //         }
+    //     }
+    // }
 
 
 
@@ -282,6 +305,9 @@ const Card = ({
                                 if (key === 'delete') {
                                     handleDeleteClick();
                                 }
+                                if (key === 'edit') {
+                                    handleEditClick();
+                                }
                             }}>
                                 <DropdownItem key='edit'>Изменить</DropdownItem>
                                 <DropdownItem key='delete' className='text-danger' color='danger'>Удалить</DropdownItem>
@@ -392,6 +418,16 @@ const Card = ({
                 )}
             </ModalContent>
         </Modal>
+
+        {/* Модалка редактирования поста вынесена в отдельный компонент */}
+        <EditPostModal
+          isOpen={isEditOpen}
+          onClose={onEditClose}
+          postId={id}
+          initialContent={content}
+          initialEmojiUrls={emojiUrls}
+          onUpdated={refetchPost}
+        />
     </NextCard>
   )
 }

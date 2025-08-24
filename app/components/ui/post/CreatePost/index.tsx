@@ -8,7 +8,7 @@ import { useCreatePostMutation, useLazyGetAllPostsQuery } from '@/src/services/p
 import ImageUpload from '../ImageUpload';
 import EmojiPicker from '../EmojiPicker';
 import { EmojiText } from '../../EmojiText';
-import { createImagePreview, revokeImagePreview, createPostFormData } from '../ImageUpload/utils';
+import { createImagePreview, revokeImagePreview } from '../ImageUpload/utils';
 
 type Props = {}
 
@@ -78,28 +78,6 @@ const CreatePost = (props: Props) => {
             textarea.setSelectionRange(newCursorPosition, newCursorPosition);
             textarea.focus();
         }, 0);
-    };
-
-    const removeEmoji = (indexToRemove: number) => {
-        // Удаляем emoji из списка и обновляем маркеры в тексте
-        const newEmojis = selectedEmojis.filter((_, index) => index !== indexToRemove);
-        setSelectedEmojis(newEmojis);
-        
-        // Обновляем текст, перенумеровывая маркеры
-        let updatedText = currentText;
-        
-        // Сначала удаляем маркер удаленного emoji
-        const markerToRemove = `[emoji:${indexToRemove}]`;
-        updatedText = updatedText.replace(markerToRemove, '');
-        
-        // Затем перенумеровываем все маркеры после удаленного
-        for (let i = indexToRemove + 1; i < selectedEmojis.length; i++) {
-            const oldMarker = `[emoji:${i}]`;
-            const newMarker = `[emoji:${i - 1}]`;
-            updatedText = updatedText.replace(oldMarker, newMarker);
-        }
-        
-        setValue('post', updatedText);
     };
 
     const createPostFormDataWithEmojis = (content: string, image?: File) => {
