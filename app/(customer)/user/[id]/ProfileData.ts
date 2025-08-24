@@ -139,6 +139,12 @@ const ProfileBackground = [
 		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/252490/dd88f3fdf5d94fe91c769a58084c9efe536de3a5.mp4",
 		type: 'video'
 	},
+	{
+		id: 25,
+		name: 'FCS_Aback_1',
+		url: "https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/2331970/ff11f066f408f8a37532aae2abcdfaeb41b8707f.mp4",
+		type: 'video'
+	},
 ]
 
 

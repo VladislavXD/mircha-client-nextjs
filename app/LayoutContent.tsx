@@ -26,7 +26,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         </div>
       ) : (
         /* Обычный Layout с AuthGuard для защищённых страниц */
-        <div className="relative flex flex-col h-screen">
+        <div className="relative flex flex-col h-screen mb-0">
           {/* Основной контент без отступа от header */}
           <div className="flex flex-1 overflow-hidden">
             <div className="container mx-auto max-w-7xl px-6 flex flex-1 overflow-hidden flex-col">
@@ -46,7 +46,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
                 
                 {/* Основной контент с прокруткой без видимого скроллбара */}
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                  <div className="flex-1 p-4 overflow-y-auto scrollbar-hide">
+                  <div className="flex-1 p-4 overflow-y-auto scrollbar-hide mb-8">
                     <AuthGuard>{children}</AuthGuard>
                   </div>
                 </div>

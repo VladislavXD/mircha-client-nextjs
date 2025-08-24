@@ -56,14 +56,6 @@ const Posts = () => {
           
         })=> {
           // Отладка данных автора
-          console.log('Author data in HomePage:', {
-            name: author?.name,
-            followersCount: author?.followers?.length,
-            followingCount: author?.following?.length,
-            followers: author?.followers,
-            following: author?.following,
-            isFolow: author?.isFolow
-          });
           
           return (
           <Card

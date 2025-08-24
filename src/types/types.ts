@@ -19,6 +19,7 @@ export type User = {
     comments: Comment[]
     isFolow?: boolean
     followersCount?: number
+    
   }
   
   export type Follows = {

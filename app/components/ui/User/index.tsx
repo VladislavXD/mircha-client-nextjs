@@ -136,7 +136,7 @@ const User = ({
                       {/* Рамка для аватара если есть */}
                       {avatarFrameUrl && avatarFrameUrl.trim() !== "" && (
                         <div 
-                          className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+                          className="absolute inset-0 w-full h-full pointer-events-none select-none z-100"
                           style={{
                             backgroundImage: `url(${avatarFrameUrl})`,
                             backgroundSize: 'auto 250%',
