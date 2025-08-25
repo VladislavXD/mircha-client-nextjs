@@ -16,6 +16,7 @@ import { socketService } from "@/app/utils/socketService"
 import NavButton from "../../ui/navButton"
 import { MdOutlineForum } from "react-icons/md"
 import { CiSearch } from "react-icons/ci"
+import { IoMdNotificationsOutline } from "react-icons/io"
 
 const Navbar = () => {
   const currentUser = useSelector(selectCurrent);
@@ -70,6 +71,11 @@ const Navbar = () => {
         <li>
           <NavButton href="/search" icon={<CiSearch />}>
             Найти
+          </NavButton>
+        </li>
+        <li>
+          <NavButton href="/search" icon={<IoMdNotificationsOutline  />}>
+            Уведомления
           </NavButton>
         </li>
         <li>

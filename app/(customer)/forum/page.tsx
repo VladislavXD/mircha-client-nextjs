@@ -5,6 +5,7 @@ import FurumPage from './FurumPage'
 
 export const metadata: Metadata = {
 	title: 'Forum',
+	description: 'Forum page',
 	// ...NO_INDEX_PAGE
 }
 

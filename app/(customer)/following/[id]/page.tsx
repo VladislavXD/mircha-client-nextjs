@@ -5,6 +5,7 @@ import Following from './FollowingPage'
 
 export const metadata: Metadata = {
 	title: 'Following',
+	description: 'List of following',
 	// ...NO_INDEX_PAGE
 }
 

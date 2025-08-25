@@ -5,6 +5,7 @@ import UserProfile from './ProfilePage'
 
 export const metadata: Metadata = {
 	title: 'User Profile',
+	description: 'User profile page',
 	// ...NO_INDEX_PAGE
 }
 

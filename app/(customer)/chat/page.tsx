@@ -6,6 +6,7 @@ import Container from '@/app/components/layout/container'
 
 export const metadata: Metadata = {
 	title: 'Chat List',
+  description: 'List of chat conversations',
 	// ...NO_INDEX_PAGE
 }
 

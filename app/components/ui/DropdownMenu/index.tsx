@@ -64,6 +64,9 @@ const MenuDropdown = () => {
         </DropdownItem>
         <DropdownItem key="analytics">Настройки</DropdownItem>
         <DropdownItem key="help_and_feedback">Обратная связь</DropdownItem>
+        <DropdownItem key="about">
+          <Link href={`/about`}>О нас</Link>
+        </DropdownItem>
         <DropdownItem
           key="logout "
           onClick={handleLogout}

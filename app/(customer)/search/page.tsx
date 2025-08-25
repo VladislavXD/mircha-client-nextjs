@@ -6,6 +6,7 @@ import SearchPage from './searchPage'
 
 export const metadata: Metadata = {
 	title: 'Search',
+	description: 'Search page',
 	// ...NO_INDEX_PAGE
 }
 

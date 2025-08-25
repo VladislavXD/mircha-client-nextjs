@@ -5,6 +5,7 @@ import CurrentPost from './CurrentPost'
 
 export const metadata: Metadata = {
 	title: 'Post Details',
+	description: 'Details of the post',
 	// ...NO_INDEX_PAGE
 }
 

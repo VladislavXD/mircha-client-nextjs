@@ -5,6 +5,7 @@ import Followers from './FollowersPage'
 
 export const metadata: Metadata = {
 	title: 'Followers',
+	description: 'List of followers',
 	// ...NO_INDEX_PAGE
 }
 

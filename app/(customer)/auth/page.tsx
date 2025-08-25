@@ -5,7 +5,8 @@ import AuthPage from './AuthPage'
 
 export const metadata: Metadata = {
 	title: 'Authentication',
-	// ...NO_INDEX_PAGE
+	description: 'Authentication page',
+	
 }
 
 export default function Authentication() {
