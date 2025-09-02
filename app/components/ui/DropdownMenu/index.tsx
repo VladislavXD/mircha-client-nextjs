@@ -10,6 +10,7 @@ import {
   Button,
 } from "@heroui/react"
 import { useDispatch, useSelector } from "react-redux"
+import { signOut } from "next-auth/react"
 
 
 import Link from "next/link"
@@ -32,8 +33,14 @@ const MenuDropdown = () => {
   const dispatch = useDispatch()
   const router = useRouter()
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Очищаем Redux store и localStorage
     dispatch(logout())
+    
+    // Очищаем NextAuth сессию
+    await signOut({ redirect: false })
+    
+    // Перенаправляем на страницу авторизации
     router.push("/auth")
   }
   const {theme} = useTheme()

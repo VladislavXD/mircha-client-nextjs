@@ -1,6 +1,8 @@
 'use client'
 import React, { useEffect } from "react"
 import { useGetAllPostsQuery } from "@/src/services/post/post.service"
+import { useAppSelector } from "@/src/hooks/reduxHooks"
+import { selectIsAuthenticated } from "@/src/store/user/user.slice"
 
 import Card from "./components/ui/post/Card"
 import { Spinner } from "@heroui/react"
@@ -9,24 +11,32 @@ import emoji from '@/public/emoji/vikostvspack_agad2zmaakpyuuo_AgAD2zMAAkPYUUo_s
 import axios from "axios"
 
 const Posts = () => {
-  const { data, isLoading, error } = useGetAllPostsQuery()
+  const isAuthenticated = useAppSelector(selectIsAuthenticated)
+  
+  // Загружаем посты только после авторизации
+  const { data, isLoading, error } = useGetAllPostsQuery(undefined, {
+    skip: !isAuthenticated
+  })
 
   useEffect(()=> {
+    if (!isAuthenticated) return
+    
     const key = 'c3aee40fa7bd44689311929ecb336252'
     const url ='https://newsapi.org/v2/top-headlines?' +
           'country=us&' +
           'apiKey='+key;
     axios.get(url).then(res=> {
-
       console.log('new response ', res.data.articles)
     })
-  }, [])
+  }, [isAuthenticated])
 
-
+  // Показываем загрузку пока не авторизованы
+  if (!isAuthenticated) {
+    return <Spinner className="flex h-full"/>
+  }
 
   if (isLoading) return <Spinner className="flex h-full"/>
   if (error) {
-
     return <div className="text-center text-red-500">Ошибка загрузки постов</div>
   }
   if (!data || !Array.isArray(data)) {

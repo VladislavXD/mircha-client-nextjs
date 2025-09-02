@@ -7,6 +7,7 @@ import AuthGuard from "./AuthGuard";
 import TokenInitializer from "./TokenInitializer";
 import BottomNav from "./components/layout/BottomNavbar";
 import RightSideBar from "./components/layout/RightSideBar";
+import GoogleAuthHandler from "@/components/GoogleAuthHandler";
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   return (
     <>
       <TokenInitializer />
+      <GoogleAuthHandler />
       {/* Если страница auth - рендерим без Layout */}
       {isAuthPage ? (
         <div className="relative flex flex-col h-screen">

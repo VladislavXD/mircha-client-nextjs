@@ -1,7 +1,7 @@
 export type User = {
     id: string
     email: string
-    password: string
+    password?: string
     name?: string
     avatarUrl?: string
     avatarFrameUrl?: string
@@ -12,6 +12,8 @@ export type User = {
     updatedAt: Date
     bio?: string
     location?: string
+    provider?: string
+    googleId?: string
     post: Post[]
     following: Follows[]
     followers: Follows[]
