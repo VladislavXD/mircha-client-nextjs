@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardBody, Tab, Tabs, Divider } from "@heroui/react"
+import { Card, CardBody, Tab, Tabs, Divider, Button } from "@heroui/react"
 import React, { useEffect, useState } from "react"
 import Login from "../../components/features/user/Login"
 import Register from "../../components/features/user/Register"
@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { selectIsAuthenticated } from "@/src/store/user/user.slice"
 import { useAppSelector } from "@/src/hooks/reduxHooks"
 import GoogleSignIn from "@/components/GoogleSignIn"
+import Link from "next/link";
 
 const AuthPage = () => {
   const [selected, setSelected] = useState("login")
@@ -25,6 +26,7 @@ const AuthPage = () => {
             >
               <Tab key="login" title="Вход">
                 <Login setSelected={setSelected} />
+                <Button as={Link} href="/forum" fullWidth className="mt-4"> Открыть форум анонимно</Button>
                 <div className="mt-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Divider className="flex-1" />

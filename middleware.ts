@@ -11,7 +11,8 @@ const publicPaths = [
   '/static',
   '/images',
   '/icons',
-  '/about'
+  '/about',
+  '/forum'
 ]
 
 // Проверяем, является ли путь публичным

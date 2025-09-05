@@ -23,6 +23,80 @@ export type User = {
     followersCount?: number
     
   }
+
+  // Forum types
+  export type Board = {
+    id: string
+    name: string
+    title: string
+    description?: string
+    isNsfw: boolean
+    maxFileSize: number
+    allowedFileTypes: string[]
+    postsPerPage: number
+    threadsPerPage: number
+    bumpLimit: number
+    imageLimit: number
+    isActive: boolean
+    createdAt: Date
+    _count?: {
+      threads: number
+      replies: number
+    }
+  }
+
+  export type Thread = {
+    id: string
+    shortId: string
+    boardId: string
+    subject?: string
+    content: string
+    authorName?: string
+    authorTrip?: string
+    posterHash: string
+    imageUrl?: string
+    imagePublicId?: string
+    imageName?: string
+    imageSize?: number
+    thumbnailUrl?: string
+    isPinned: boolean
+    isLocked: boolean
+    isClosed: boolean
+    isArchived: boolean
+    replyCount: number
+    imageCount: number
+    uniquePosters: number
+    lastBumpAt: Date
+    createdAt: Date
+    lastReply?: Date
+    board?: Board
+    replies?: Reply[]
+    _count?: {
+      replies: number
+    }
+  }
+
+  export type Reply = {
+    id: string
+    shortId: string
+    threadId: string
+    content: string
+    authorName?: string
+    authorTrip?: string
+    posterHash: string
+    postNumber: number
+    imageUrl?: string
+    imagePublicId?: string
+    imageName?: string
+    imageSize?: number
+    thumbnailUrl?: string
+    replyTo: string[]  // Массив shortId вместо номеров
+    quotedBy: string[] // Массив shortId вместо номеров
+    isDeleted: boolean
+    deletedAt?: Date
+    createdAt: Date
+    thread?: Thread
+  }
   
   export type Follows = {
     id: string
