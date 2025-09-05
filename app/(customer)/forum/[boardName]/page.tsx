@@ -116,8 +116,7 @@ const BoardPage = () => {
         <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           <span>Тредов: {board._count?.threads || 0}</span>
           <span>Постов: {board._count?.replies || 0}</span>
-          <span className="hidden sm:inline">Макс. размер файла: {Math.round((board.maxFileSize || 0) / 1024 / 1024)}MB</span>
-          <span className="sm:hidden">Файлы: {Math.round((board.maxFileSize || 0) / 1024 / 1024)}MB</span>
+          <span>Файлы: {Math.round((board.maxFileSize || 0) / 1024 / 1024)}MB</span>
         </div>
       </div>
 
@@ -134,8 +133,8 @@ const BoardPage = () => {
                     </h3>
                     <div className="flex items-center gap-1 sm:gap-2 mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex-wrap">
                       <span>Анон</span>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="text-xs">
+                      <span>•</span>
+                      <span>
                         {formatDistanceToNow(new Date(thread.createdAt), { 
                           addSuffix: true, 
                           locale: ru 
@@ -146,16 +145,15 @@ const BoardPage = () => {
                   
                   <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
                     <Chip color="default" size="sm" variant="flat" className="text-xs">
-                      <span className="hidden sm:inline">{thread._count?.replies || 0} ответов</span>
-                      <span className="sm:hidden">{thread._count?.replies || 0}</span>
+                      {thread._count?.replies || 0} ответов
                     </Chip>
                     {thread.isPinned && (
-                      <Chip color="warning" size="sm" variant="flat" className="text-xs hidden sm:flex">
+                      <Chip color="warning" size="sm" variant="flat" className="text-xs">
                         Закреплён
                       </Chip>
                     )}
                     {thread.isLocked && (
-                      <Chip color="secondary" size="sm" variant="flat" className="text-xs hidden sm:flex">
+                      <Chip color="secondary" size="sm" variant="flat" className="text-xs">
                         Заблокирован
                       </Chip>
                     )}
@@ -191,8 +189,7 @@ const BoardPage = () => {
                 {thread.lastReply && (
                   <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span className="hidden sm:inline">Последний ответ: Анон</span>
-                      <span className="sm:hidden">Анон</span>
+                      <span>Последний ответ: Анон</span>
                       <span>
                         {formatDistanceToNow(new Date(thread.lastReply), { 
                           addSuffix: true, 

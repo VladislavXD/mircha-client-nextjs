@@ -121,8 +121,7 @@ const ThreadPage = () => {
           <div className="flex gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 flex-wrap">
             <span>{thread._count?.replies || 0} ответов</span>
             <span>{thread.imageCount} изображений</span>
-            <span className="hidden sm:inline">{thread.uniquePosters} уникальных постеров</span>
-            <span className="sm:hidden">{thread.uniquePosters} постеров</span>
+            <span>{thread.uniquePosters} постеров</span>
           </div>
         </div>
         

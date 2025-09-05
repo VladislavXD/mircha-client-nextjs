@@ -266,14 +266,20 @@ const PostContent: React.FC<PostContentProps> = ({
             <span className="font-medium text-green-600 text-sm sm:text-base truncate">
               {post.authorName || 'Анон'}
             </span>
-            <span className="text-xs sm:text-sm text-gray-500 hidden sm:inline">
+            <span className="text-xs sm:text-sm text-gray-500">
               {formatDistanceToNow(new Date(post.createdAt), { 
                 addSuffix: true, 
                 locale: ru 
               })}
             </span>
-            <span className="text-xs text-gray-400 hidden md:inline">
-              {new Date(post.createdAt).toLocaleString('ru-RU')}
+            <span className="text-xs text-gray-400">
+              {new Date(post.createdAt).toLocaleString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: isMobile ? '2-digit' : 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
             </span>
             
             <span 
@@ -298,12 +304,12 @@ const PostContent: React.FC<PostContentProps> = ({
           
           <div className="flex gap-1 shrink-0 ml-2">
             {isThread && (post as Thread).isPinned && (
-              <Chip size="sm" color="warning" variant="flat" className="text-xs hidden sm:flex">
+              <Chip size="sm" color="warning" variant="flat" className="text-xs">
                 Закреплён
               </Chip>
             )}
             {isThread && (post as Thread).isLocked && (
-              <Chip size="sm" color="secondary" variant="flat" className="text-xs hidden sm:flex">
+              <Chip size="sm" color="secondary" variant="flat" className="text-xs">
                 Заблокирован
               </Chip>
             )}

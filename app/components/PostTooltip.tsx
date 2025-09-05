@@ -24,13 +24,13 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
             <span className="font-medium text-green-600">
               {post.authorName || 'Анон'}
             </span>
-            <span className="text-gray-500 hidden sm:inline">
+            <span className="text-gray-500">
               {formatDistanceToNow(new Date(post.createdAt), { 
                 addSuffix: true, 
                 locale: ru 
               })}
             </span>
-            <span className="text-gray-400 hidden md:inline">
+            <span className="text-gray-400">
               {new Date(post.createdAt).toLocaleString('ru-RU', {
                 day: '2-digit',
                 month: '2-digit',
