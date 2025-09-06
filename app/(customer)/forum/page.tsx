@@ -8,19 +8,12 @@ import {
   CardHeader,
   Chip,
   Spinner,
-  Button,
 } from "@heroui/react";
 import Link from "next/link";
-import { useState } from "react";
-import CreateBoardModal from "./components/CreateBoardModal";
 import { useTheme } from "next-themes";
-
-
-
 
 const ForumPage = () => {
   const { data: boards, isLoading, error } = useGetBoardsQuery();
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const { theme } = useTheme();
 
   if (isLoading) {
@@ -42,7 +35,7 @@ const ForumPage = () => {
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-6xl">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-4">
+      <div className="flex justify-center sm:justify-start mb-4 sm:mb-6">
         <span
           className="font-bold text-inherit flex items-center gap-2"
         >
@@ -53,16 +46,6 @@ const ForumPage = () => {
           />
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Mirchan - Forum</h1>
         </span>
-        <Button
-          color="primary"
-          variant="flat"
-          size="sm"
-          onPress={() => setShowCreateModal(true)}
-          className="self-start sm:self-auto"
-        >
-          <span className="hidden sm:inline">Создать борд</span>
-          <span className="sm:hidden">Создать</span>
-        </Button>
       </div>
 
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -105,28 +88,10 @@ const ForumPage = () => {
         <div className="text-center py-8 sm:py-12">
           <h2 className="text-lg sm:text-xl font-semibold mb-2">Нет доступных бордов</h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-            Создайте первый борд для начала дискуссии
+            Борды создаются администраторами
           </p>
         </div>
       )}
-
-      {/* Плавающая кнопка создания борда */}
-      <div className="fixed bottom-4 right-2 sm:right-4 z-50">
-        <Button
-          color="primary"
-          size="md"
-          onPress={() => setShowCreateModal(true)}
-          className="rounded-full shadow-lg text-sm sm:text-base"
-        >
-          <span className="hidden sm:inline">Создать</span>
-          <span className="sm:hidden">+</span>
-        </Button>
-      </div>
-
-      <CreateBoardModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-      />
     </div>
   );
 };

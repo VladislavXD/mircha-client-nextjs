@@ -264,7 +264,7 @@ const PostContent: React.FC<PostContentProps> = ({
         <div className="flex justify-between items-start w-full">
           <div className="flex items-center gap-1 sm:gap-2 flex-wrap min-w-0 flex-1">
             <span className="font-medium text-green-600 text-sm sm:text-base truncate">
-              {post.authorName || 'Анон'}
+              {post.authorName || 'Аноним'}
             </span>
             <span className="text-xs sm:text-sm text-gray-500">
               {formatDistanceToNow(new Date(post.createdAt), { 
@@ -327,21 +327,91 @@ const PostContent: React.FC<PostContentProps> = ({
       </CardHeader>
       
       <CardBody className="pt-0 px-3 sm:px-6">
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           {/* Медиа превью */}
-          {post.imageUrl && (
-            <div className="flex-shrink-0 self-start">
-              <MediaThumbnail
-                url={post.imageUrl}
-                thumbnailUrl={post.thumbnailUrl}
-                name={post.imageName}
-                size={post.imageSize}
-                variant={isOP ? (isMobile ? 'medium' : 'large') : 'medium'}
-                showInfo={true}
-                className="border border-gray-200 dark:border-gray-700 w-full sm:w-auto max-w-full"
-              />
+          {(post.mediaFiles && post.mediaFiles.length > 0) || post.imageUrl ? (
+            <div className="w-full">
+              {/* Новый формат - множественные медиафайлы */}
+              {post.mediaFiles && post.mediaFiles.length > 0 ? (
+                <div className="space-y-2">
+                  {/* Один файл - показываем большим */}
+                  {post.mediaFiles.length === 1 ? (
+                    <div className="max-w-lg">
+                      <MediaThumbnail
+                        url={post.mediaFiles[0].url}
+                        thumbnailUrl={post.mediaFiles[0].thumbnailUrl}
+                        name={post.mediaFiles[0].name}
+                        size={post.mediaFiles[0].size}
+                        type={post.mediaFiles[0].type}
+                        variant={isOP ? 'large' : 'medium'}
+                        showInfo={true}
+                        className="border border-gray-200 dark:border-gray-700 w-full"
+                      />
+                    </div>
+                  ) : (
+                    /* Множественные файлы - адаптивная сетка */
+                    <>
+                      <div className={`grid gap-2 ${
+                        post.mediaFiles.length === 2 
+                          ? 'grid-cols-1 sm:grid-cols-2' 
+                          : post.mediaFiles.length === 3
+                          ? 'grid-cols-2 sm:grid-cols-3'
+                          : 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3'
+                      }`}>
+                        {post.mediaFiles.slice(0, isMobile ? 4 : 6).map((media, index) => (
+                          <div key={media.id} className="relative">
+                            <MediaThumbnail
+                              url={media.url}
+                              thumbnailUrl={media.thumbnailUrl}
+                              name={media.name}
+                              size={media.size}
+                              type={media.type}
+                              variant={post.mediaFiles!.length <= 2 ? 'medium' : 'small'}
+                              showInfo={index < 2}
+                              className="border border-gray-200 dark:border-gray-700 w-full h-full aspect-square object-cover"
+                            />
+                            {/* Показать "+N" для оставшихся файлов */}
+                            {((isMobile && index === 3 && post.mediaFiles!.length > 4) || 
+                              (!isMobile && index === 5 && post.mediaFiles!.length > 6)) && (
+                              <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg">
+                                <span className="text-white font-bold text-lg">
+                                  +{post.mediaFiles!.length - (isMobile ? 4 : 6)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Показать количество файлов */}
+                      {post.mediaFiles.length > 1 && (
+                        <div className="text-xs text-gray-500 flex items-center gap-1">
+                          <span>📎 {post.mediaFiles.length} файлов</span>
+                          <span>•</span>
+                          <span>
+                            {(post.mediaFiles.reduce((acc, file) => acc + (file.size || 0), 0) / 1024 / 1024).toFixed(1)} MB
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ) : (
+                /* Старый формат - одиночный файл для обратной совместимости */
+                <div className="max-w-lg">
+                  <MediaThumbnail
+                    url={post.imageUrl!}
+                    thumbnailUrl={post.thumbnailUrl}
+                    name={post.imageName}
+                    size={post.imageSize}
+                    variant={isOP ? (isMobile ? 'medium' : 'large') : 'medium'}
+                    showInfo={true}
+                    className="border border-gray-200 dark:border-gray-700 w-full"
+                  />
+                </div>
+              )}
             </div>
-          )}
+          ) : null}
           
           {/* Содержание поста */}
           <div className="flex-1 min-w-0">

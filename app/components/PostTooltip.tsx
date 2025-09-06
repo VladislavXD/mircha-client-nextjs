@@ -66,19 +66,43 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
       <CardBody className="pt-0 px-3">
         <div className="flex gap-2 sm:gap-3">
           {/* Медиа превью */}
-          {post.imageUrl && (
+          {(post.mediaFiles && post.mediaFiles.length > 0) || post.imageUrl ? (
             <div className="flex-shrink-0">
-              <MediaThumbnail
-                url={post.imageUrl}
-                thumbnailUrl={post.thumbnailUrl}
-                name={post.imageName}
-                size={post.imageSize}
-                variant="small"
-                showInfo={false}
-                className="border border-gray-200 dark:border-gray-700"
-              />
+              {/* Новый формат - множественные медиафайлы */}
+              {post.mediaFiles && post.mediaFiles.length > 0 ? (
+                <div className="space-y-1">
+                  {/* Показываем только первый файл в тултипе */}
+                  <MediaThumbnail
+                    url={post.mediaFiles[0].url}
+                    thumbnailUrl={post.mediaFiles[0].thumbnailUrl}
+                    name={post.mediaFiles[0].name}
+                    size={post.mediaFiles[0].size}
+                    type={post.mediaFiles[0].type}
+                    variant="small"
+                    showInfo={false}
+                    className="border border-gray-200 dark:border-gray-700"
+                  />
+                  {/* Показываем количество файлов если их больше одного */}
+                  {post.mediaFiles.length > 1 && (
+                    <div className="text-xs text-gray-500 text-center">
+                      +{post.mediaFiles.length - 1} файлов
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Старый формат - одиночный файл */
+                <MediaThumbnail
+                  url={post.imageUrl!}
+                  thumbnailUrl={post.thumbnailUrl}
+                  name={post.imageName}
+                  size={post.imageSize}
+                  variant="small"
+                  showInfo={false}
+                  className="border border-gray-200 dark:border-gray-700"
+                />
+              )}
             </div>
-          )}
+          ) : null}
           
           {/* Содержание поста */}
           <div className="flex-1 min-w-0">
@@ -91,14 +115,27 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
               </p>
             </div>
             
-            {/* Информация о файле */}
-            {post.imageUrl && (
+            {/* Информация о файлах */}
+            {((post.mediaFiles && post.mediaFiles.length > 0) || post.imageUrl) && (
               <div className="mt-2 text-xs text-gray-500">
-                {post.imageName && (
-                  <div className="truncate">📎 {post.imageName}</div>
-                )}
-                {post.imageSize && (
-                  <div>{(post.imageSize / 1024).toFixed(1)} KB</div>
+                {post.mediaFiles && post.mediaFiles.length > 0 ? (
+                  <>
+                    <div className="truncate">
+                      📎 {post.mediaFiles.length} файлов
+                    </div>
+                    <div>
+                      {(post.mediaFiles.reduce((acc, file) => acc + (file.size || 0), 0) / 1024).toFixed(1)} KB
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {post.imageName && (
+                      <div className="truncate">📎 {post.imageName}</div>
+                    )}
+                    {post.imageSize && (
+                      <div>{(post.imageSize / 1024).toFixed(1)} KB</div>
+                    )}
+                  </>
                 )}
               </div>
             )}

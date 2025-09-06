@@ -36,7 +36,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
     content: '',
     authorName: ''
   })
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,15 +46,20 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
       return
     }
 
+    if (selectedFiles.length > 5) {
+      toast.error('Максимум 5 файлов')
+      return
+    }
+
     try {
       const formDataToSend = new FormData()
       formDataToSend.append('subject', formData.subject)
       formDataToSend.append('content', formData.content)
       formDataToSend.append('authorName', formData.authorName || 'Аноним')
       
-      if (selectedFile) {
-        formDataToSend.append('image', selectedFile)
-      }
+      selectedFiles.forEach(file => {
+        formDataToSend.append('images', file)
+      })
 
       await createThread({ 
         boardName, 
@@ -68,34 +73,44 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
         content: '',
         authorName: ''
       })
-      setSelectedFile(null)
+      setSelectedFiles([])
     } catch (error: any) {
       toast.error(error?.data?.error || 'Ошибка создания треда')
     }
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
+    const files = Array.from(e.target.files || [])
+    
+    if (files.length === 0) return
+
+    // Проверка количества файлов
+    if (selectedFiles.length + files.length > 5) {
+      toast.error('Максимум 5 файлов')
+      return
+    }
+
+    // Проверка каждого файла
+    for (const file of files) {
       // Проверка размера файла
       if (file.size > (board.maxFileSize || 5242880)) {
-        toast.error(`Файл слишком большой. Максимальный размер: ${Math.round((board.maxFileSize || 5242880) / 1024 / 1024)}MB`)
+        toast.error(`Файл ${file.name} слишком большой. Максимальный размер: ${Math.round((board.maxFileSize || 5242880) / 1024 / 1024)}MB`)
         return
       }
 
       // Проверка типа файла
       const fileExt = file.name.split('.').pop()?.toLowerCase()
       if (fileExt && board.allowedFileTypes && !board.allowedFileTypes.includes(fileExt)) {
-        toast.error(`Тип файла не поддерживается. Разрешённые типы: ${board.allowedFileTypes.join(', ')}`)
+        toast.error(`Тип файла ${fileExt} не поддерживается. Разрешённые типы: ${board.allowedFileTypes.join(', ')}`)
         return
       }
-
-      setSelectedFile(file)
     }
+
+    setSelectedFiles(prev => [...prev, ...files])
   }
 
-  const removeFile = () => {
-    setSelectedFile(null)
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   return (
@@ -148,9 +163,10 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 
             {/* Загрузка файла */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Изображение/Видео</label>
+              <label className="text-sm font-medium">Изображения/Видео</label>
               <input
                 type="file"
+                multiple
                 accept={board.allowedFileTypes?.map(type => `.${type}`).join(',')}
                 onChange={handleFileChange}
                 className="block w-full text-sm text-gray-500
@@ -161,23 +177,86 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                   hover:file:bg-primary-100"
               />
               
-              {selectedFile && (
-                <div className="flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                  <span className="text-sm">{selectedFile.name}</span>
-                  <Button
-                    size="sm"
-                    color="danger"
-                    variant="light"
-                    onPress={removeFile}
-                  >
-                    Удалить
-                  </Button>
+              {/* Список выбранных файлов */}
+              {selectedFiles.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">Выбранные файлы ({selectedFiles.length}/5):</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {selectedFiles.map((file, index) => {
+                      const fileURL = URL.createObjectURL(file);
+                      const isImage = file.type.startsWith('image/');
+                      const isVideo = file.type.startsWith('video/');
+                      
+                      return (
+                        <div key={index} className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                          {/* Превью медиа */}
+                          <div className="aspect-square relative bg-gray-200 dark:bg-gray-700">
+                            {isImage ? (
+                              <img
+                                src={fileURL}
+                                alt={file.name}
+                                className="w-full h-full object-cover"
+                                onLoad={() => URL.revokeObjectURL(fileURL)}
+                              />
+                            ) : isVideo ? (
+                              <video
+                                src={fileURL}
+                                className="w-full h-full object-cover"
+                                muted
+                                onLoadedData={() => URL.revokeObjectURL(fileURL)}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                                    <span className="text-xl">📄</span>
+                                  </div>
+                                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                                    {file.name.split('.').pop()?.toUpperCase()}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Кнопка удаления */}
+                            <Button
+                              size="sm"
+                              color="danger"
+                              variant="solid"
+                              className="absolute top-1 right-1 min-w-unit-6 w-6 h-6 p-0"
+                              onPress={() => removeFile(index)}
+                            >
+                              ×
+                            </Button>
+
+                            {/* Индикатор типа файла */}
+                            {isVideo && (
+                              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">
+                                ▶
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Информация о файле */}
+                          <div className="p-2">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate" title={file.name}>
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {(file.size / 1024 / 1024).toFixed(1)}MB
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
               {/* Информация о лимитах */}
               <div className="text-xs text-gray-500 space-y-1">
-                <p>Максимальный размер: {Math.round((board.maxFileSize || 5242880) / 1024 / 1024)}MB</p>
+                <p>Максимальный размер файла: {Math.round((board.maxFileSize || 5242880) / 1024 / 1024)}MB</p>
+                <p>Максимум файлов: 5</p>
                 <div className="flex flex-wrap gap-1">
                   <span>Поддерживаемые форматы:</span>
                   {board.allowedFileTypes?.map(type => (

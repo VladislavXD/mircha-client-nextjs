@@ -164,17 +164,37 @@ const BoardPage = () => {
               <CardBody className="pt-0 px-3 sm:px-6">
                 {/* Превью контента треда */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                  {thread.imageUrl && (
+                  {/* Отображение медиафайлов */}
+                  {thread.mediaFiles && thread.mediaFiles.length > 0 && (
                     <div className="flex-shrink-0 self-start">
-                      <MediaThumbnail
-                        url={thread.imageUrl}
-                        thumbnailUrl={thread.thumbnailUrl}
-                        name={thread.imageName}
-                        size={thread.imageSize}
-                        variant="medium"
-                        showInfo={false}
-                        className="border border-gray-200 dark:border-gray-700 w-full sm:w-auto max-w-full"
-                      />
+                      {thread.mediaFiles.length === 1 ? (
+                        // Один файл - показываем как обычно
+                        <MediaThumbnail
+                          url={thread.mediaFiles[0].url}
+                          thumbnailUrl={thread.mediaFiles[0].thumbnailUrl}
+                          name={thread.mediaFiles[0].name}
+                          size={thread.mediaFiles[0].size}
+                          variant="medium"
+                          showInfo={false}
+                          className="border border-gray-200 dark:border-gray-700 w-full sm:w-auto max-w-full"
+                        />
+                      ) : (
+                        // Несколько файлов - показываем сетку с индикатором количества
+                        <div className="relative">
+                          <MediaThumbnail
+                            url={thread.mediaFiles[0].url}
+                            thumbnailUrl={thread.mediaFiles[0].thumbnailUrl}
+                            name={thread.mediaFiles[0].name}
+                            size={thread.mediaFiles[0].size}
+                            variant="medium"
+                            showInfo={false}
+                            className="border border-gray-200 dark:border-gray-700 w-full sm:w-auto max-w-full"
+                          />
+                          <div className="absolute top-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+                            +{thread.mediaFiles.length - 1}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   

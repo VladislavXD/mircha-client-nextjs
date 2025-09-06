@@ -3,6 +3,7 @@ export type User = {
     email: string
     password?: string
     name?: string
+    role?: 'ADMIN' | 'MODERATOR' | 'USER'
     avatarUrl?: string
     avatarFrameUrl?: string
     backgroundUrl?: string
@@ -25,6 +26,23 @@ export type User = {
   }
 
   // Forum types
+  export type MediaFile = {
+    id: string
+    url: string
+    publicId: string
+    name?: string
+    size?: number
+    type: 'image' | 'video'
+    mimeType: string
+    thumbnailUrl?: string
+    width?: number
+    height?: number
+    duration?: number
+    threadId?: string
+    replyId?: string
+    createdAt: Date
+  }
+
   export type Board = {
     id: string
     name: string
@@ -54,6 +72,9 @@ export type User = {
     authorName?: string
     authorTrip?: string
     posterHash: string
+    // Новые поля для множественных медиафайлов
+    mediaFiles?: MediaFile[]
+    // Старые поля для обратной совместимости
     imageUrl?: string
     imagePublicId?: string
     imageName?: string
@@ -85,6 +106,9 @@ export type User = {
     authorTrip?: string
     posterHash: string
     postNumber: number
+    // Новые поля для множественных медиафайлов
+    mediaFiles?: MediaFile[]
+    // Старые поля для обратной совместимости
     imageUrl?: string
     imagePublicId?: string
     imageName?: string

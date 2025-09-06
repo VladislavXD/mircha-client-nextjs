@@ -40,13 +40,13 @@ const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
   const getDefaultSize = () => {
     switch (variant) {
       case 'small':
-        return { width: 60, height: 60, smWidth: 80, smHeight: 80 }
+        return { width: 100, height: 100, smWidth: 120, smHeight: 120 }
       case 'medium':
-        return { width: 120, height: 120, smWidth: 150, smHeight: 150 }
+        return { width: 180, height: 180, smWidth: 200, smHeight: 200 }
       case 'large':
-        return { width: 200, height: 160, smWidth: 250, smHeight: 200 }
+        return { width: 280, height: 220, smWidth: 350, smHeight: 280 }
       default:
-        return { width: 120, height: 120, smWidth: 150, smHeight: 150 }
+        return { width: 180, height: 180, smWidth: 200, smHeight: 200 }
     }
   }
 
@@ -83,12 +83,12 @@ const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
   return (
     <div className="flex flex-col gap-1 sm:gap-2">
       <div 
-        className={`relative cursor-pointer group overflow-hidden rounded-lg ${className}`}
+        className={`relative cursor-pointer group overflow-hidden rounded-lg hover:shadow-lg transition-all duration-200 ${className}`}
         style={{ 
           width: finalWidth, 
           height: finalHeight,
           maxWidth: '100%',
-          minWidth: variant === 'small' ? '60px' : variant === 'medium' ? '120px' : '200px'
+          minWidth: variant === 'small' ? '100px' : variant === 'medium' ? '180px' : '280px'
         }}
         onClick={handleClick}
       >
