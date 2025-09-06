@@ -136,19 +136,19 @@ const AdminPage: React.FC = () => {
   const {theme} = useTheme()
   return (
     <div className={`min-h-screen ${theme} `}>
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold">
+              <h1 className="text-2xl sm:text-3xl font-bold">
                 Администрирование
               </h1>
-              <p className="mt-2 ">
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base">
                 Панель управления форумом
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <Chip color="primary" variant="flat">
+              <Chip color="primary" variant="flat" size="sm">
                 {currentUser?.role === 'ADMIN' ? 'Администратор' : 'Модератор'}
               </Chip>
             </div>
@@ -161,10 +161,10 @@ const AdminPage: React.FC = () => {
               selectedKey={activeTab}
               onSelectionChange={(key) => setActiveTab(key as string)}
               classNames={{
-                tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+                tabList: "gap-2 sm:gap-6 w-full relative rounded-none p-0 border-b border-divider overflow-x-auto",
                 cursor: "w-full bg-primary",
-                tab: "max-w-fit px-6 h-12",
-                tabContent: "group-data-[selected=true]:text-primary"
+                tab: "max-w-fit px-3 sm:px-6 h-10 sm:h-12 flex-shrink-0",
+                tabContent: "group-data-[selected=true]:text-primary text-xs sm:text-sm"
               }}
             >
               {availableTabs.map((tab) => {
@@ -173,9 +173,10 @@ const AdminPage: React.FC = () => {
                   <Tab
                     key={tab.id}
                     title={
-                      <div className="flex items-center space-x-2">
-                        <IconComponent className="w-4 h-4" />
-                        <span>{tab.label}</span>
+                      <div className="flex items-center space-x-1 sm:space-x-2">
+                        <IconComponent className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{tab.label}</span>
+                        <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
                       </div>
                     }
                   />
@@ -183,7 +184,7 @@ const AdminPage: React.FC = () => {
               })}
             </Tabs>
 
-            <div className="p-6">
+            <div className="p-3 sm:p-6">
               {currentTab?.component}
             </div>
           </CardBody>

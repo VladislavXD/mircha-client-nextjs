@@ -287,17 +287,20 @@ const UserManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex justify-between items-center">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold">Управление пользователями</h2>
-            <p className="text-gray-600">Всего пользователей: {total}</p>
+            <h2 className="text-xl sm:text-2xl font-bold">Управление пользователями</h2>
+            <p className="text-sm sm:text-base text-gray-600">Всего пользователей: {total}</p>
           </div>
           <Button
             color="primary"
             startContent={<MdPersonAdd />}
             onPress={onCreateModalOpen}
+            size="sm"
+            className="w-full sm:w-auto"
           >
-            Добавить пользователя
+            <span className="hidden sm:inline">Добавить пользователя</span>
+            <span className="sm:hidden">Добавить</span>
           </Button>
         </CardHeader>
         <CardBody>
@@ -307,13 +310,13 @@ const UserManagement: React.FC = () => {
               placeholder="Поиск по имени или email..."
               startContent={<MdSearch />}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="sm:max-w-xs"
+              className="w-full sm:max-w-xs"
             />
             <Select
               placeholder="Роль"
               startContent={<MdFilterList />}
               onChange={(e) => handleRoleFilterChange(e.target.value)}
-              className="sm:max-w-xs"
+              className="w-full sm:max-w-xs"
             >
               <SelectItem key="all">Все роли</SelectItem>
               <SelectItem key="USER">Пользователь</SelectItem>
@@ -323,7 +326,7 @@ const UserManagement: React.FC = () => {
             <Select
               placeholder="Статус"
               onChange={(e) => handleStatusFilterChange(e.target.value)}
-              className="sm:max-w-xs"
+              className="w-full sm:max-w-xs"
             >
               <SelectItem key="all">Все статусы</SelectItem>
               <SelectItem key="active">Активные</SelectItem>
@@ -332,53 +335,54 @@ const UserManagement: React.FC = () => {
           </div>
 
           {/* Таблица пользователей */}
-          <Table aria-label="Таблица пользователей">
-            <TableHeader>
-              <TableColumn>ПОЛЬЗОВАТЕЛЬ</TableColumn>
-              <TableColumn>РОЛЬ</TableColumn>
-              <TableColumn>СТАТУС</TableColumn>
-              <TableColumn>СТАТИСТИКА</TableColumn>
-              <TableColumn>СОЗДАН</TableColumn>
-              <TableColumn width={100}>ДЕЙСТВИЯ</TableColumn>
-            </TableHeader>
-            <TableBody emptyContent="Пользователи не найдены">
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-semibold">{user.username}</p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      className={getRoleColor(user.role)}
-                      size="sm"
-                      variant="flat"
-                    >
-                      {getRoleText(user.role)}
-                    </Chip>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      className={getStatusColor(user.isActive)}
-                      size="sm"
-                      variant="flat"
-                    >
-                      {getStatusText(user.isActive)}
-                    </Chip>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <div>Посты: {user._count?.posts || 0}</div>
-                      <div>Ответы: {user._count?.replies || 0}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {formatAdminDate(user.createdAt)}
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table aria-label="Таблица пользователей" className="min-w-full">
+              <TableHeader>
+                <TableColumn className="min-w-48">ПОЛЬЗОВАТЕЛЬ</TableColumn>
+                <TableColumn className="min-w-24">РОЛЬ</TableColumn>
+                <TableColumn className="min-w-24">СТАТУС</TableColumn>
+                <TableColumn className="min-w-32 hidden sm:table-cell">СТАТИСТИКА</TableColumn>
+                <TableColumn className="min-w-32 hidden md:table-cell">СОЗДАН</TableColumn>
+                <TableColumn width={100}>ДЕЙСТВИЯ</TableColumn>
+              </TableHeader>
+              <TableBody emptyContent="Пользователи не найдены">
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="min-w-48">
+                      <div>
+                        <p className="font-semibold text-sm sm:text-base">{user.username}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 break-all">{user.email}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-24">
+                      <Chip
+                        className={getRoleColor(user.role)}
+                        size="sm"
+                        variant="flat"
+                      >
+                        {getRoleText(user.role)}
+                      </Chip>
+                    </TableCell>
+                    <TableCell className="min-w-24">
+                      <Chip
+                        className={getStatusColor(user.isActive)}
+                        size="sm"
+                        variant="flat"
+                      >
+                        {getStatusText(user.isActive)}
+                      </Chip>
+                    </TableCell>
+                    <TableCell className="min-w-32 hidden sm:table-cell">
+                      <div className="text-xs sm:text-sm">
+                        <div>Посты: {user._count?.posts || 0}</div>
+                        <div>Ответы: {user._count?.replies || 0}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-32 hidden md:table-cell">
+                      <div className="text-xs sm:text-sm">
+                        {formatAdminDate(user.createdAt)}
+                      </div>
+                    </TableCell>
                   <TableCell>
                     <Dropdown>
                       <DropdownTrigger>
@@ -420,6 +424,7 @@ const UserManagement: React.FC = () => {
               ))}
             </TableBody>
           </Table>
+          </div>
 
           {/* Пагинация */}
           {totalPages > 1 && (
@@ -436,7 +441,18 @@ const UserManagement: React.FC = () => {
       </Card>
 
       {/* Модальное окно создания пользователя */}
-      <Modal isOpen={isCreateModalOpen} onClose={onCreateModalClose}>
+      <Modal 
+        isOpen={isCreateModalOpen} 
+        onClose={onCreateModalClose}
+        size="2xl"
+        scrollBehavior="inside"
+        classNames={{
+          base: "mx-2 sm:mx-4",
+          body: "px-4 sm:px-6",
+          header: "px-4 sm:px-6",
+          footer: "px-4 sm:px-6"
+        }}
+      >
         <ModalContent>
           <ModalHeader>Создать пользователя</ModalHeader>
           <ModalBody>
@@ -475,14 +491,19 @@ const UserManagement: React.FC = () => {
               </Select>
             </div>
           </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onCreateModalClose}>
+          <ModalFooter className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              variant="light" 
+              onPress={onCreateModalClose}
+              className="w-full sm:w-auto order-2 sm:order-1"
+            >
               Отмена
             </Button>
             <Button 
               color="primary" 
               onPress={handleCreateUser}
               isLoading={isCreating}
+              className="w-full sm:w-auto order-1 sm:order-2"
             >
               Создать
             </Button>
@@ -491,7 +512,18 @@ const UserManagement: React.FC = () => {
       </Modal>
 
       {/* Модальное окно редактирования пользователя */}
-      <Modal isOpen={isEditModalOpen} onClose={onEditModalClose}>
+      <Modal 
+        isOpen={isEditModalOpen} 
+        onClose={onEditModalClose}
+        size="2xl"
+        scrollBehavior="inside"
+        classNames={{
+          base: "mx-2 sm:mx-4",
+          body: "px-4 sm:px-6",
+          header: "px-4 sm:px-6",
+          footer: "px-4 sm:px-6"
+        }}
+      >
         <ModalContent>
           <ModalHeader>Редактировать пользователя</ModalHeader>
           <ModalBody>

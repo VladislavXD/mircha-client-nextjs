@@ -205,17 +205,18 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
   return (
     <div className={className}>
       <Card>
-        <CardHeader className="flex justify-between items-center">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <MdForum className="text-primary" size={24} />
-            <h2 className="text-xl font-semibold">Управление тредами</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">Управление тредами</h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button
               size="sm"
               variant="flat"
               startContent={<MdFilterList />}
               onPress={() => setIsFiltersVisible(!isFiltersVisible)}
+              className="w-full sm:w-auto"
             >
               Фильтры
             </Button>
@@ -233,6 +234,7 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
                 startContent={<MdSearch />}
                 className="flex-1"
                 isClearable
+                size="sm"
               />
             </div>
 
@@ -308,62 +310,62 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
                 aria-label="Таблица тредов"
                 className="min-h-[400px]"
                 classNames={{
-                  wrapper: "shadow-none border border-divider",
+                  wrapper: "shadow-none border border-divider overflow-x-auto",
                 }}
               >
                 <TableHeader>
-                  <TableColumn>ТРЕД</TableColumn>
-                  <TableColumn>АВТОР</TableColumn>
-                  <TableColumn>БОРДА</TableColumn>
-                  <TableColumn>ОТВЕТЫ</TableColumn>
-                  <TableColumn>СТАТУС</TableColumn>
-                  <TableColumn>СОЗДАН</TableColumn>
-                  <TableColumn>ДЕЙСТВИЯ</TableColumn>
+                  <TableColumn className="min-w-48">ТРЕД</TableColumn>
+                  <TableColumn className="min-w-32 hidden sm:table-cell">АВТОР</TableColumn>
+                  <TableColumn className="min-w-24">БОРДА</TableColumn>
+                  <TableColumn className="min-w-20 hidden md:table-cell">ОТВЕТЫ</TableColumn>
+                  <TableColumn className="min-w-24">СТАТУС</TableColumn>
+                  <TableColumn className="min-w-32 hidden lg:table-cell">СОЗДАН</TableColumn>
+                  <TableColumn className="min-w-24">ДЕЙСТВИЯ</TableColumn>
                 </TableHeader>
                 <TableBody emptyContent="Треды не найдены">
                   {threads.map((thread: AdminThread) => (
                     <TableRow key={thread.id}>
-                      <TableCell>
+                      <TableCell className="min-w-48">
                         <div className="max-w-xs">
-                          <p className="font-medium truncate">
+                          <p className="font-medium truncate text-sm sm:text-base">
                             {thread.title || 'Без названия'}
                           </p>
-                          <p className="text-small text-default-500 truncate">
+                          <p className="text-xs sm:text-small text-default-500 truncate">
                             {thread.content}
                           </p>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="min-w-32 hidden sm:table-cell">
                         <div className="flex items-center gap-2">
                           <MdPerson className="text-default-400" />
-                          <span className="text-small">
+                          <span className="text-xs sm:text-small">
                             {thread.author?.username || thread.authorIp || 'Аноним'}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="min-w-24">
                         <Chip size="sm" variant="flat">
                           /{thread.board?.shortId}/
                         </Chip>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="min-w-20 hidden md:table-cell">
                         <div className="flex items-center gap-1">
                           <MdForum className="text-default-400" size={16} />
-                          <span>{thread.repliesCount || 0}</span>
+                          <span className="text-xs sm:text-small">{thread.repliesCount || 0}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="min-w-24">
                         {getThreadStatusChip(thread)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="min-w-32 hidden lg:table-cell">
                         <div className="flex items-center gap-1">
                           <MdSchedule className="text-default-400" size={16} />
-                          <span className="text-small">
+                          <span className="text-xs sm:text-small">
                             {formatDate(thread.createdAt)}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="min-w-24">
                         <div className="flex items-center gap-1">
                           <Tooltip content="Просмотр">
                             <Button

@@ -243,17 +243,20 @@ const BoardManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex justify-between items-center">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold">Управление бордами</h2>
-            <p className="text-gray-600">Всего бордов: {total}</p>
+            <h2 className="text-xl sm:text-2xl font-bold">Управление бордами</h2>
+            <p className="text-sm sm:text-base text-gray-600">Всего бордов: {total}</p>
           </div>
           <Button
             color="primary"
             startContent={<MdAdd />}
             onPress={onCreateModalOpen}
+            size="sm"
+            className="w-full sm:w-auto"
           >
-            Добавить борд
+            <span className="hidden sm:inline">Добавить борд</span>
+            <span className="sm:hidden">Добавить</span>
           </Button>
         </CardHeader>
         <CardBody>
@@ -263,13 +266,13 @@ const BoardManagement: React.FC = () => {
               placeholder="Поиск по названию или описанию..."
               startContent={<MdSearch />}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="sm:max-w-xs"
+              className="w-full sm:max-w-xs"
             />
             <Select
               placeholder="Статус"
               startContent={<MdFilterList />}
               onChange={(e) => handleStatusFilterChange(e.target.value)}
-              className="sm:max-w-xs"
+              className="w-full sm:max-w-xs"
             >
               <SelectItem key="all">Все статусы</SelectItem>
               <SelectItem key="active">Активные</SelectItem>
@@ -278,52 +281,53 @@ const BoardManagement: React.FC = () => {
           </div>
 
           {/* Таблица бордов */}
-          <Table aria-label="Таблица бордов">
-            <TableHeader>
-              <TableColumn>БОРД</TableColumn>
-              <TableColumn>СТАТУС</TableColumn>
-              <TableColumn>ТРЕДЫ</TableColumn>
-              <TableColumn>СОЗДАН</TableColumn>
-              <TableColumn width={100}>ДЕЙСТВИЯ</TableColumn>
-            </TableHeader>
-            <TableBody emptyContent="Борды не найдены">
-              {boards.map((board) => (
-                <TableRow key={board.id}>
-                  <TableCell>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold">{board.title}</span>
-                        <Chip size="sm" variant="bordered">/{board.shortName}/</Chip>
+          <div className="overflow-x-auto">
+            <Table aria-label="Таблица бордов" className="min-w-full">
+              <TableHeader>
+                <TableColumn className="min-w-48">БОРД</TableColumn>
+                <TableColumn className="min-w-24">СТАТУС</TableColumn>
+                <TableColumn className="min-w-24 hidden sm:table-cell">ТРЕДЫ</TableColumn>
+                <TableColumn className="min-w-32 hidden md:table-cell">СОЗДАН</TableColumn>
+                <TableColumn width={100}>ДЕЙСТВИЯ</TableColumn>
+              </TableHeader>
+              <TableBody emptyContent="Борды не найдены">
+                {boards.map((board) => (
+                  <TableRow key={board.id}>
+                    <TableCell className="min-w-48">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-sm sm:text-base">{board.title}</span>
+                          <Chip size="sm" variant="bordered">/{board.shortName}/</Chip>
+                        </div>
+                        <p className="text-xs sm:text-sm text-gray-500">{board.name}</p>
+                        {board.description && (
+                          <p className="text-xs text-gray-400 mt-1 line-clamp-2">
+                            {board.description}
+                          </p>
+                        )}
                       </div>
-                      <p className="text-sm text-gray-500">{board.name}</p>
-                      {board.description && (
-                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">
-                          {board.description}
-                        </p>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      className={getStatusColor(board.isActive)}
-                      size="sm"
-                      variant="flat"
-                      startContent={board.isActive ? <MdVisibility /> : <MdVisibilityOff />}
-                    >
-                      {getStatusText(board.isActive)}
-                    </Chip>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <span className="font-medium">{board._count?.threads || 0}</span>
-                      <span className="text-gray-500 ml-1">тредов</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {formatAdminDate(board.createdAt)}
-                    </div>
-                  </TableCell>
+                    </TableCell>
+                    <TableCell className="min-w-24">
+                      <Chip
+                        className={getStatusColor(board.isActive)}
+                        size="sm"
+                        variant="flat"
+                        startContent={board.isActive ? <MdVisibility /> : <MdVisibilityOff />}
+                      >
+                        {getStatusText(board.isActive)}
+                      </Chip>
+                    </TableCell>
+                    <TableCell className="min-w-24 hidden sm:table-cell">
+                      <div className="text-xs sm:text-sm">
+                        <span className="font-medium">{board._count?.threads || 0}</span>
+                        <span className="text-gray-500 ml-1">тредов</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-32 hidden md:table-cell">
+                      <div className="text-xs sm:text-sm">
+                        {formatAdminDate(board.createdAt)}
+                      </div>
+                    </TableCell>
                   <TableCell>
                     <Dropdown>
                       <DropdownTrigger>
@@ -365,6 +369,7 @@ const BoardManagement: React.FC = () => {
               ))}
             </TableBody>
           </Table>
+          </div>
 
           {/* Пагинация */}
           {totalPages > 1 && (

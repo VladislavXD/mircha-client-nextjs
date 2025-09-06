@@ -172,17 +172,18 @@ export default function ReplyManagement({ className }: ReplyManagementProps) {
   return (
     <div className={className}>
       <Card>
-        <CardHeader className="flex justify-between items-center">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <MdReply className="text-primary" size={24} />
-            <h2 className="text-xl font-semibold">Управление ответами</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">Управление ответами</h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button
               size="sm"
               variant="flat"
               startContent={<MdFilterList />}
               onPress={() => setIsFiltersVisible(!isFiltersVisible)}
+              className="w-full sm:w-auto"
             >
               Фильтры
             </Button>

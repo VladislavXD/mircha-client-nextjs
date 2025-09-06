@@ -112,10 +112,16 @@ const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({
       onClose={onClose}
       size="2xl"
       scrollBehavior="inside"
+      classNames={{
+        base: "mx-2 sm:mx-4",
+        body: "px-4 sm:px-6",
+        header: "px-4 sm:px-6",
+        footer: "px-4 sm:px-6"
+      }}
     >
       <ModalContent>
         <ModalHeader>
-          <h3 className="text-lg font-semibold">Создать новый борд</h3>
+          <h3 className="text-lg sm:text-xl font-semibold">Создать новый борд</h3>
         </ModalHeader>
         
         <ModalBody className="space-y-4">
@@ -219,12 +225,13 @@ const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({
           </Switch>
         </ModalBody>
         
-        <ModalFooter>
+        <ModalFooter className="flex flex-col sm:flex-row gap-3">
           <Button
             color="danger"
             variant="light"
             onPress={onClose}
             disabled={isLoading}
+            className="w-full sm:w-auto order-2 sm:order-1"
           >
             Отмена
           </Button>
@@ -232,6 +239,7 @@ const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({
             color="primary"
             onPress={handleSubmit}
             isLoading={isLoading}
+            className="w-full sm:w-auto order-1 sm:order-2"
           >
             Создать борд
           </Button>
