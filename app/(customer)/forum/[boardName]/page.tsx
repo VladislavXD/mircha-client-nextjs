@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { 
   useGetBoardByNameQuery, 
@@ -26,6 +26,11 @@ const BoardPage = () => {
   const params = useParams()
   const boardName = params.boardName as string
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showNsfwWarning, setShowNsfwWarning] = useState(false)
+  const [nsfwConsent, setNsfwConsent] = useState(false)
+
+
+
 
   const { 
     data: board, 
@@ -38,6 +43,42 @@ const BoardPage = () => {
     isLoading: threadsLoading, 
     error: threadsError 
   } = useGetThreadsQuery(boardName)
+
+
+   useEffect(()=> {
+    if (board?.isNsfw){
+      const saveConsent = localStorage.getItem(`nsfw_consent_${boardName}`)
+      const sessionConsent  = sessionStorage.getItem(`nsfw_consent_${boardName}`)
+
+      if (saveConsent === 'true' || sessionConsent === 'true'){
+        setNsfwConsent(true)
+        setShowNsfwWarning(false)
+      }
+      else{
+        setNsfwConsent(false)
+        setShowNsfwWarning(true)
+      }
+      
+    }else{
+        setNsfwConsent(true)
+        setShowNsfwWarning(false)
+      }
+   }, [board?.isNsfw, boardName])
+
+   const handleNsfwAccept = () => {
+    localStorage.setItem(`nsfw_consent_${boardName}`, 'true')
+    sessionStorage.setItem(`nsfw_consent_${boardName}`, 'true')
+
+    setNsfwConsent(true)
+    setShowNsfwWarning(false)
+   }
+
+   const handleNsfwDecline = () => {
+    localStorage.removeItem(`nsfw_consent_${boardName}`)
+    sessionStorage.removeItem(`nsfw_consent_${boardName}`)
+
+    window.location.href = '/forum'
+   }
 
   if (boardLoading || threadsLoading) {
     return (
@@ -70,6 +111,46 @@ const BoardPage = () => {
     )
   }
 
+ 
+  if (board.isNsfw && showNsfwWarning && !nsfwConsent) {
+    return (
+      <>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="max-w-md w-full">
+            <CardHeader>
+              <h2 className="text-xl font-bold text-center">Предупреждение о содержимом 18+</h2>
+            </CardHeader>
+            <CardBody className="text-center space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Этот борд содержит материалы для взрослых. Вам должно быть не менее 18 лет для просмотра этого контента.
+              </p>
+              <p className="text-sm text-gray-500">
+                Подтвердите, что вам исполнилось 18 лет.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button
+                  color="danger"
+                  variant="flat"
+                  onPress={handleNsfwDecline}
+                >
+                  Мне нет 18
+                </Button>
+                <Button
+                  color="primary"
+                  onPress={handleNsfwAccept}
+                >
+                  Мне есть 18
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+          
+
+      </>
+    )
+  }
+
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-6xl">
       {/* Хлебные крошки */}
@@ -90,7 +171,7 @@ const BoardPage = () => {
               <span className="break-words">/{board.name}/ - {board.title}</span>
               {board.isNsfw && (
                 <Chip color="danger" size="sm" variant="flat" className="text-xs">
-                  NSFW
+                  18+
                 </Chip>
               )}
             </h1>

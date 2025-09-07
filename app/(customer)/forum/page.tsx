@@ -62,7 +62,7 @@ const ForumPage = () => {
                 <div className="flex flex-col gap-1 ml-2 shrink-0">
                   {board.isNsfw && (
                     <Chip color="danger" size="sm" variant="flat" className="text-xs">
-                      NSFW
+                      18+
                     </Chip>
                   )}
                   <Chip color="default" size="sm" variant="flat" className="text-xs">
