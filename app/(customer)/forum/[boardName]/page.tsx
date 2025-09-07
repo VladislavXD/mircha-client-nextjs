@@ -21,6 +21,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import CreateThreadModal from './components/CreateThreadModal'
 import MediaThumbnail from '@/app/components/MediaThumbnail'
+import { useRouter } from 'next/navigation'
 
 const BoardPage = () => {
   const params = useParams()
@@ -29,6 +30,7 @@ const BoardPage = () => {
   const [showNsfwWarning, setShowNsfwWarning] = useState(false)
   const [nsfwConsent, setNsfwConsent] = useState(false)
 
+  const router = useRouter()
 
 
 
@@ -77,7 +79,8 @@ const BoardPage = () => {
     localStorage.removeItem(`nsfw_consent_${boardName}`)
     sessionStorage.removeItem(`nsfw_consent_${boardName}`)
 
-    window.location.href = '/forum'
+    router.push('/forum')
+
    }
 
   if (boardLoading || threadsLoading) {
