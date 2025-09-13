@@ -246,7 +246,7 @@ const BoardManagement: React.FC = () => {
         <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold">Управление бордами</h2>
-            <p className="text-sm sm:text-base text-gray-600">Всего бордов: {total}</p>
+            <p className="text-sm sm:text-base text-gray-600">Всего бордов: sdfdsf{total}</p>
           </div>
           <Button
             color="primary"
