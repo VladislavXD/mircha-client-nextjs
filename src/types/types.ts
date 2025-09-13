@@ -66,7 +66,9 @@ export type User = {
   export type Thread = {
     id: string
     shortId: string
+    slug?: string
     boardId: string
+    categoryId?: string
     subject?: string
     content: string
     authorName?: string
@@ -92,6 +94,19 @@ export type User = {
     lastReply?: Date
     board?: Board
     replies?: Reply[]
+    threadTags?: Array<{
+      id: string
+      threadId: string
+      tagId: string
+      tag: {
+        id: string
+        name: string
+        slug: string
+        icon?: string
+        color?: string
+        description?: string
+      }
+    }>
     _count?: {
       replies: number
     }
@@ -161,3 +176,4 @@ export type User = {
     post: Post
     postId: string
   }
+

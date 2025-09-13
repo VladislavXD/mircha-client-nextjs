@@ -85,7 +85,7 @@ const UserProfile = () => {
                   ).map((item: any) => (
                     <div
                       key={item.id}
-                      className="group relative rounded-lg p-2 bg-background/40 hover:bg-background/60 transition cursor-pointer"
+                      className="group relative rounded-lg p-2 bg-background/40 hover:bg-background/60 transition cursor-pointer overflow-hidden"
                     >
                       <div className="aspect-square relative flex items-center justify-center overflow-hidden rounded">
                         {appearanceType === "frame" ? (
@@ -93,13 +93,12 @@ const UserProfile = () => {
                             <img
                               src={item.url}
                               alt={item.label}
-                              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                              className="absolute inset-0 w-full h-full object-contain pointer-events-none "
                             />
                             <img
                               src={data.avatarUrl || "/default-avatar.png"}
                               alt="preview"
-                              className="w-2/3 h-2/3 object-cover rounded"
-                            />
+                              className="w-2/3 h-2/3 object-cover rounded pointer-events-none "         />
                           </>
                         ) : item.type === "video" ? (
                           <video

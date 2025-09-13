@@ -27,17 +27,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onEditOpen,
   onOpenAppearance,
 }) => {
-		const { id } = useParams<{ id: string }>();
-	
+  const { id } = useParams<{ id: string }>();
 
-	const {
-			data: dataBio,
-			currentUser,
-			isFollowLoading,
-			handleFollow,
-			
-		} = useUserProfile(id);
-	
+  const {
+    data: dataBio,
+    currentUser,
+    isFollowLoading,
+    handleFollow,
+  } = useUserProfile(id);
+
   return (
     <>
       <div
@@ -98,25 +96,35 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <div className="relative bg-background/95 backdrop-blur-sm p-6">
           <div className="flex flex-col lg:flex-row gap-6 items-start">
             <div className="relative shrink-0 mx-auto lg:mx-0">
-              <div className="relative w-32 h-32 lg:w-40 lg:h-40 -mt-16 lg:-mt-20">
-                {data.avatarFrameUrl !== "none" ? (
-                  <img
-                    src={data.avatarFrameUrl}
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute inset-0 w-full h-full pointer-events-none select-none z-100"
-                  />
-                ) : null}
-                <div className="absolute inset-0 flex items-center justify-center p-3">
+              <div className="relative w-32 h-32 lg:w-40 lg:h-40 -mt-16  lg:-mt-20">
+                <div className="absolute inset-0 flex items-center justify-center p-3 overflow-hidden">
                   <Image
                     isBlurred
                     src={data.avatarUrl || "/default-avatar.png"}
                     alt={data.name}
-                    className={`w-full h-full object-cover rounded-2xl shadow-lg ${!data.avatarFrameUrl ? "border-4 border-white dark:border-gray-700" : ""}`}
+                    className={`w-full h-full object-cover rounded-2xl  shadow-lg ${
+                      !data.avatarFrameUrl
+                        ? "border-4 border-white dark:border-gray-700"
+                        : ""
+                    }`}
+                    style={{
+                      width: "150px",
+                      maxHeight: "130px",
+                    }}
                   />
+                  
+                  {data.avatarFrameUrl !== "none" ? (
+                    <img
+                      src={data.avatarFrameUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 w-full h-full   pointer-events-none select-none z-100"
+                    />
+                  ) : null}
                 </div>
               </div>
             </div>
+            
 
             {/* Slot для остальной информации */}
             <div className="flex-1">

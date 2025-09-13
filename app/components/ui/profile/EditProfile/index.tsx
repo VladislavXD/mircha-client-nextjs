@@ -71,6 +71,8 @@ const EditProfile = ({ isOpen, onClose, user }: Props) => {
     }
   }
 
+  if (!control) return null
+  
   return (
     <Modal
       isOpen={isOpen}

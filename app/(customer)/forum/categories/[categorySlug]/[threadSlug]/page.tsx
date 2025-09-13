@@ -3,7 +3,8 @@
 import React, { useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { 
-  useGetThreadQuery 
+  useGetCategoryQuery,
+  useGetThreadByCategoryAndSlugQuery
 } from '@/src/services/forum.service'
 import { 
   Card, 
@@ -21,24 +22,25 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import CreateReplyModal from './components/CreateReplyModal'
-import ReplyToPostModal from '@/app/components/ReplyToPostModal'
 import PostContent from '@/app/components/PostContent'
 import type { Thread, Reply } from '@/src/types/types'
+import TagChip from '@/app/components/TagChip'
 import MobileForumExtras from '@/app/components/forum/MobileForumExtras'
 
-const ThreadPage = () => {
+const CategoryThreadPage = () => {
   const params = useParams()
-  const boardName = params.boardName as string
-  const threadId = params.threadId as string
+  const categorySlug = params.categorySlug as string
+  const threadSlug = params.threadSlug as string
+  
   const [showReplyModal, setShowReplyModal] = useState(false)
-  const [showReplyToPostModal, setShowReplyToPostModal] = useState(false)
-  const [replyToPost, setReplyToPost] = useState<{post: Thread | Reply, id: string} | null>(null)
+
+  const { data: category } = useGetCategoryQuery(categorySlug)
 
   const { 
     data: thread, 
     isLoading, 
     error 
-  } = useGetThreadQuery({ boardName, threadId })
+  } = useGetThreadByCategoryAndSlugQuery({ categorySlug, threadSlug })
 
   // Создаем массив всех постов для передачи в PostContent для тултипов
   const allPosts = useMemo(() => {
@@ -46,12 +48,9 @@ const ThreadPage = () => {
     return [thread, ...(thread.replies || [])]
   }, [thread])
 
-  // Обработчик ответа на конкретный пост
+  // Обработчик ответа на конкретный пост (пока просто открываем обычный ответ)
   const handleReplyToPost = (postId: string, post?: Thread | Reply) => {
-    if (post) {
-      setReplyToPost({ post, id: postId })
-      setShowReplyToPostModal(true)
-    }
+    setShowReplyModal(true)
   }
 
   if (isLoading) {
@@ -76,9 +75,9 @@ const ThreadPage = () => {
       <div className="text-center p-8">
         <h2 className="text-xl font-bold mb-2">Тред не найден</h2>
         <p>Тред не существует или был удалён</p>
-        <Link href={`/forum/${boardName}`}>
+        <Link href={`/forum/categories/${categorySlug}`}>
           <Button color="primary" className="mt-4">
-            Вернуться к борду
+            Вернуться к категории
           </Button>
         </Link>
       </div>
@@ -93,11 +92,14 @@ const ThreadPage = () => {
           <Link href="/forum">Форум</Link>
         </BreadcrumbItem>
         <BreadcrumbItem>
-          <Link href={`/forum/${boardName}`}>/{boardName}/</Link>
+          <Link href="/forum/categories">Категории</Link>
         </BreadcrumbItem>
         <BreadcrumbItem>
-          <span className="hidden sm:inline">Тред #{threadId}</span>
-          <span className="sm:hidden">#{threadId}</span>
+          <Link href={`/forum/categories/${categorySlug}`}>{category?.name || categorySlug}</Link>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <span className="hidden sm:inline">{thread.subject || `Тред #${thread.id}`}</span>
+          <span className="sm:hidden">#{thread.id}</span>
         </BreadcrumbItem>
       </Breadcrumbs>
 
@@ -119,6 +121,16 @@ const ThreadPage = () => {
               </Chip>
             )}
           </h1>
+
+          {/* Теги треда */}
+          {thread.threadTags && thread.threadTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {thread.threadTags.map(({ tag }) => (
+                <TagChip key={tag.id} tag={{ id: tag.id, name: tag.name, slug: tag.slug, icon: tag.icon, color: tag.color }} />
+              ))}
+            </div>
+          )}
+
           <div className="flex gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 flex-wrap">
             <span>{thread._count?.replies || 0} ответов</span>
             <span>{thread.imageCount} изображений</span>
@@ -197,22 +209,9 @@ const ThreadPage = () => {
       <CreateReplyModal 
         isOpen={showReplyModal}
         onClose={() => setShowReplyModal(false)}
-        boardName={boardName}
-        threadId={threadId}
+        categorySlug={categorySlug}
+        threadId={thread.id}
         thread={thread}
-      />
-
-      <ReplyToPostModal 
-        isOpen={showReplyToPostModal}
-        onClose={() => {
-          setShowReplyToPostModal(false)
-          setReplyToPost(null)
-        }}
-        boardName={boardName}
-        threadId={threadId}
-        thread={thread}
-        replyToPost={replyToPost?.post}
-        replyToPostId={replyToPost?.id}
       />
 
       {/* Мобильные виджеты: внизу страницы */}
@@ -221,4 +220,4 @@ const ThreadPage = () => {
   )
 }
 
-export default ThreadPage
+export default CategoryThreadPage

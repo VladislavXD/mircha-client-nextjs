@@ -25,6 +25,8 @@ import BoardManagement from '@/app/components/admin/BoardManagement'
 import ThreadManagement from '@/app/components/admin/ThreadManagement'
 import ReplyManagement from '@/app/components/admin/ReplyManagement'
 import MediaManagement from '@/app/components/admin/MediaManagement'
+import CategoryManagement from '@/app/components/admin/CategoryManagement'
+import TagManagement from '@/app/components/admin/TagManagement'
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/src/store/store'
 import { useCurrentQuery } from '@/src/services/user/user.service'
@@ -94,6 +96,20 @@ const AdminPage: React.FC = () => {
       label: 'Борды',
       icon: MdViewModule,
       component: <BoardManagement />,
+      allowedRoles: ['ADMIN']
+    },
+    {
+      id: 'categories',
+      label: 'Категории',
+      icon: MdViewModule,
+      component: <CategoryManagement />,
+      allowedRoles: ['ADMIN']
+    },
+    {
+      id: 'tags',
+      label: 'Теги',
+      icon: MdViewModule,
+      component: <TagManagement />,
       allowedRoles: ['ADMIN']
     },
     {

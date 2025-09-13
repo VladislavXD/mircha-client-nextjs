@@ -73,7 +73,7 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({
             {avatarFrameUrl && avatarFrameUrl !== 'none' && (
               <img src={avatarFrameUrl} alt="frame" className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none" />
             )}
-            <Image src={authorAvatarUrl || "/default-avatar.png"} alt={authorName} className="w-9 h-9 rounded-xl object-cover" />
+            <Image src={authorAvatarUrl || "/default-avatar.png"} alt={authorName} className="w-9 h-9 rounded-xl object-cover " />
           </div>
           <div className="flex flex-col leading-tight">
             <div className="flex items-center gap-2">
