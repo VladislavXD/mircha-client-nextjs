@@ -13,7 +13,7 @@ import {
 } from '@/src/services/user/follow.service';
 import confetti from 'canvas-confetti';
 import { useDisclosure } from '@heroui/react';
-import { ProfileBackground, ProfileFrames } from '@/app/(customer)/user/[id]/ProfileData';
+import { ProfileBackground, ProfileFrames } from '@/app/[locale]/(customer)/user/[id]/ProfileData';
 
 export type AppearanceType = 'frame' | 'background' | null;
 

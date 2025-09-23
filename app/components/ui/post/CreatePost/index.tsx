@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react'
 
 import { Controller, useForm } from 'react-hook-form';
@@ -9,6 +10,8 @@ import ImageUpload from '../ImageUpload';
 import EmojiPicker from '../EmojiPicker';
 import { EmojiText } from '../../EmojiText';
 import { createImagePreview, revokeImagePreview } from '../ImageUpload/utils';
+import { useTranslations } from 'next-intl';
+
 
 type Props = {}
 
@@ -115,6 +118,8 @@ const CreatePost = (props: Props) => {
         }
     })
 
+  const t =   useTranslations('HomePage')
+
     return (
         <form className='flex-grow' onSubmit={onSubmit}>
             <Controller
@@ -126,13 +131,13 @@ const CreatePost = (props: Props) => {
                         {...field}
                         ref={textareaRef}
                         labelPlacement='outside'
-                        placeholder='О чем думаете?'
+                        placeholder={t('CreatePost.CreatePostInput')}
                         className='mb-5'
                     />
 
                 )}
             />
-            
+
             <div className="mb-5 flex gap-3">
                 <ImageUpload
                     onImageSelect={handleImageSelect}
@@ -149,7 +154,7 @@ const CreatePost = (props: Props) => {
                 <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-default-50 to-default-100 border border-default-200 shadow-sm">
                     <div className="flex items-center gap-2 mb-3">
                         <div className="w-2 h-2 rounded-full bg-primary"></div>
-                        <span className="text-sm font-medium text-default-600">Превью поста</span>
+                        <span className="text-sm font-medium text-default-600">{t('CreatePost.previewPost')}</span>
                     </div>
                     <div className="bg-background/70 backdrop-blur-sm rounded-lg p-3 border border-default-200/50">
                         <EmojiText 
@@ -173,7 +178,7 @@ const CreatePost = (props: Props) => {
                 endContent={<IoMdCreate/>}
                 type='submit'
             >
-                Добавить
+                {t('CreatePost.addPost')}
             </Button>
         </form>
     )

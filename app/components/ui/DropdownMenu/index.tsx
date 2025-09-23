@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation"
 import { CiSettings } from "react-icons/ci"
 import { logout, selectCurrent, selectIsAuthenticated } from "@/src/store/user/user.slice"
 import { useTheme } from "next-themes"
+import { LocaleSwitcherSelect } from "../selects/localeSwitcherSelect"
+import { useTranslations } from "next-intl"
 
 const MenuDropdown = () => {
   const [settings, setSettings] = useState()
@@ -45,6 +47,8 @@ const MenuDropdown = () => {
   }
   const {theme} = useTheme()
   
+
+  const t = useTranslations("HomePage.navbar.dropdownMenu")
   return (
     <Dropdown
       placement="bottom-start"
@@ -63,16 +67,22 @@ const MenuDropdown = () => {
       </DropdownTrigger>
       <DropdownMenu aria-label="User Actions" variant="flat">
         <DropdownItem key={id} className="h-14 gap-2">
-          <p className="font-bold">Зарегестрирован</p>
+          <p className="font-bold">{t("registered")}</p>
           <p className="font-bold">@{email}</p>
         </DropdownItem>
         <DropdownItem key="settings" className="hidden sm:block">
-          <Link href={`/user/${id}`}>Профиль</Link>
+          <Link href={`/user/${id}`}>{t("profile")}</Link>
         </DropdownItem>
-        <DropdownItem key="analytics">Настройки</DropdownItem>
-        <DropdownItem key="help_and_feedback">Обратная связь</DropdownItem>
+        <DropdownItem key="analytics">{t("settings")}</DropdownItem>
+        <DropdownItem key="help_and_feedback">{t("feedback")}</DropdownItem>
+        <DropdownItem key="language"
+        isReadOnly
+
+        >
+          <LocaleSwitcherSelect />
+        </DropdownItem>
         <DropdownItem key="about">
-          <Link href={`/about`}>О нас</Link>
+          <Link href={`/about`}>{t("about")}</Link>
         </DropdownItem>
         <DropdownItem
           key="logout "
@@ -80,7 +90,7 @@ const MenuDropdown = () => {
           className="text-danger-400 flex"
           color="danger"
         >
-          {isAuthenticated ? <p>Выйти из аккаунта</p> : <p>Войти</p>}
+          {isAuthenticated ? <p>{t("logout")}</p> : <p>{t("login")}</p>}
         </DropdownItem>
       </DropdownMenu>
     </Dropdown>

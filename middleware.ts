@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import createIntlMiddleware from 'next-intl/middleware';
 
-// Публичные страницы, которые не требуют авторизации
 const publicPaths = [
   '/auth',
   '/favicon.ico',
@@ -13,54 +13,58 @@ const publicPaths = [
   '/icons',
   '/about',
   '/forum'
-]
+];
 
-// Проверяем, является ли путь публичным
+// i18n middleware
+const intlMiddleware = createIntlMiddleware({
+  locales: ['ru', 'en'],
+  defaultLocale: 'en'
+});
+
 function isPublicPath(pathname: string): boolean {
-  return publicPaths.some(path => pathname.startsWith(path))
+  return publicPaths.some(path => pathname.startsWith(path));
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  
-  console.log(`[Middleware] Processing: ${pathname}`)
-  
-  // Пропускаем публичные пути
+  const { pathname } = request.nextUrl;
+  console.log(`[Middleware] Processing: ${pathname}`);
+
+  // 1. Сначала применяем next-intl (он добавит locale в url при необходимости)
+  const intlResponse = intlMiddleware(request);
+  if (intlResponse) return intlResponse;
+
+  // 2. Дальше твоя авторизационная логика
   if (isPublicPath(pathname)) {
-    console.log(`[Middleware] Public path, skipping: ${pathname}`)
-    return NextResponse.next()
+    console.log(`[Middleware] Public path, skipping: ${pathname}`);
+    return NextResponse.next();
   }
 
-  // Проверяем NextAuth токен
-  const nextAuthToken = await getToken({ 
+  const nextAuthToken = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET 
-  })
+    secret: process.env.NEXTAUTH_SECRET
+  });
 
-  // Получаем обычный токен из cookie (для обратной совместимости)
-  const regularToken = request.cookies.get('token')?.value
-  
-  const hasAuth = !!(nextAuthToken || regularToken)
-  console.log(`[Middleware] Auth status - NextAuth: ${!!nextAuthToken}, Regular: ${!!regularToken}`)
+  const regularToken = request.cookies.get('token')?.value;
+  const hasAuth = !!(nextAuthToken || regularToken);
 
-  // Если нет авторизации и это не публичная страница - редиректим на /auth
+  console.log(`[Middleware] Auth status - NextAuth: ${!!nextAuthToken}, Regular: ${!!regularToken}`);
+
   if (!hasAuth) {
-    console.log(`[Middleware] No auth, redirecting to /auth`)
-    const authUrl = new URL('/auth', request.url)
-    return NextResponse.redirect(authUrl)
+    console.log(`[Middleware] No auth, redirecting to /auth`);
+    const authUrl = new URL('/auth', request.url);
+    return NextResponse.redirect(authUrl);
   }
 
-  // Если есть авторизация, но пользователь на странице /auth - редиректим на главную
   if (hasAuth && pathname === '/auth') {
-    console.log(`[Middleware] Has auth but on /auth page, redirecting to /`)
-    const homeUrl = new URL('/', request.url)
-    return NextResponse.redirect(homeUrl)
+    console.log(`[Middleware] Has auth but on /auth page, redirecting to /`);
+    const homeUrl = new URL('/', request.url);
+    return NextResponse.redirect(homeUrl);
   }
 
-  console.log(`[Middleware] Allowing access to: ${pathname}`)
-  return NextResponse.next()
+  console.log(`[Middleware] Allowing access to: ${pathname}`);
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)']
-}
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|images|icons|static|trpc|.*\\..*).*)',  '/((?!api|trpc|_next|_vercel|.*\\..*).*)']
+};

@@ -39,6 +39,7 @@ const   Header = () => {
       </NavbarBrand>
 
       <NavbarContent justify="end">
+
         <NavbarItem
           className="lg:flex text-3xl cursor-pointer"
           // onClick={() => toggleTheme()}

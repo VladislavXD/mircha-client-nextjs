@@ -1,0 +1,51 @@
+{
+  "HomePage": {
+    
+    "CreatePost": {
+      "addPost": "Добавить",
+      "CreatePostInput": "О чем думаете?",
+      "addImage": "Добавить  фото",
+      "previewPost": "Превью поста",
+      "EmojiPicker": "Выберите эмодзи"
+    },
+    "sidebar": {
+      "posts": "Посты",
+      "search": "Поиск",
+      "nottifications": "Уведомления",
+      "messages": "Сообщения",
+      "forum": "Форум",
+      "followers": "Подписчики",
+      "follows": "Подписки"
+    },
+    "navbar": {
+      "dropdownMenu": {
+        "profile": "Профиль",
+        "settings": "Настройки",
+        "logout": "Выйти из аккаунта",
+        "about": "О нас",
+        "feedback": "Обратная связь",
+        "login": "Войти",
+        "registered": "Зарегестрирован"
+      }
+    },
+    "rightSidebar": {
+      "search": "Поиск",
+      "news": "Новости",
+      "whatsNew": "Что нового",
+      "basedOn": "Основано на",
+      "showAll": "Показать все",
+      "statisticforum": "Статистика форума",
+      "boards": "Доски",
+      "threads": "Темы",
+      "posts": "Ответы",
+      "media": "Медиа",
+      "images": "Изображения",
+      "videos": "Видео",
+      "categories": "Категории",
+      "tags": "Теги",
+      "lastActive": "Последняя активность"
+    }
+    
+
+  }
+} 

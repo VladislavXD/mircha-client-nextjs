@@ -5,6 +5,7 @@ import { useGetForumStatsQuery } from '@/src/services/forum.service'
 import { Spinner } from '@heroui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { useTranslations } from 'next-intl'
 
 const StatItem = ({ label, value }: { label: string; value: number | string }) => (
   <div className="flex items-center justify-between text-sm">
@@ -16,9 +17,11 @@ const StatItem = ({ label, value }: { label: string; value: number | string }) =
 export default function ForumStats() {
   const { data, isLoading, error } = useGetForumStatsQuery()
 
+
+  const t = useTranslations("HomePage.rightSidebar")
   return (
     <div className="rounded-medium border border-default-200 dark:border-default-100/20 p-3">
-      <h3 className="text-sm font-semibold mb-2">Статистика форума</h3>
+      <h3 className="text-sm font-semibold mb-2">{t("statisticforum")}</h3>
       {isLoading && (
         <div className="flex justify-center py-4"><Spinner size="sm" /></div>
       )}
@@ -27,24 +30,24 @@ export default function ForumStats() {
       )}
       {data && (
         <div className="space-y-1.5">
-          <StatItem label="Борды" value={data.boards} />
-          <StatItem label="Треды" value={data.threads} />
-          <StatItem label="Ответы" value={data.replies} />
-          <StatItem label="Медиа" value={data.media} />
+          <StatItem label={t("boards")} value={data.boards} />
+          <StatItem label={t("threads")} value={data.threads} />
+          <StatItem label={t("posts")} value={data.replies} />
+          <StatItem label={t("media")} value={data.media} />
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-small bg-default-100/50 py-1.5 px-2 text-center">
-              <div className="text-[11px] text-foreground-500">Изображения</div>
+              <div className="text-[11px] text-foreground-500">{t("images")}</div>
               <div className="text-sm font-medium">{data.images}</div>
             </div>
             <div className="rounded-small bg-default-100/50 py-1.5 px-2 text-center">
-              <div className="text-[11px] text-foreground-500">Видео</div>
+              <div className="text-[11px] text-foreground-500">{t("videos")}</div>
               <div className="text-sm font-medium">{data.videos}</div>
             </div>
           </div>
-          <StatItem label="Категории" value={data.categories} />
-          <StatItem label="Теги" value={data.tags} />
+          <StatItem label={t("categories")} value={data.categories} />
+          <StatItem label={t("tags")} value={data.tags} />
           <div className="text-[11px] text-foreground-500 mt-2">
-            Последняя активность: {data.lastActivity ? formatDistanceToNow(new Date(data.lastActivity), { addSuffix: true, locale: ru }) : '—'}
+            {t("lastActive")}: {data.lastActivity ? formatDistanceToNow(new Date(data.lastActivity), { addSuffix: true, locale: ru }) : '—'}
           </div>
         </div>
       )}

@@ -3,6 +3,7 @@ import { Button } from '@heroui/react';
 import { IoImageOutline, IoClose } from 'react-icons/io5';
 import { ImageUploadProps } from './types';
 import { validateImageFile, createImagePreview, revokeImagePreview } from './utils';
+import { useTranslations } from 'next-intl';
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
   onImageSelect,
@@ -45,6 +46,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
+  const t = useTranslations('HomePage.CreatePost');
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
       <input
@@ -66,7 +68,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           disabled={disabled}
           className="w-fit"
         >
-          Добавить фото
+          {t('addImage')}
         </Button>
       ) : (
         <div className="relative inline-block">

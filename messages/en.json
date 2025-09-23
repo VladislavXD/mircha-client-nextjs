@@ -1,0 +1,48 @@
+{
+  "HomePage": {
+    "CreatePost": {
+      "addPost": "Add post",
+      "CreatePostInput": "What are you thinking?",
+      "addImage": "Add image",
+      "previewPost": "Post preview",
+      "EmojiPicker": "Choose emoji"
+    },
+    "sidebar": {
+      "posts": "Posts",
+      "search": "Search",
+      "nottifications": "Notifications",
+      "messages": "Messages",
+      "forum": "Forum",
+      "followers": "Followers",
+      "follows": "Follows"
+    },
+    "navbar": {
+      "dropdownMenu": {
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Log out",
+        "about": "About",
+        "feedback": "Feedback", 
+        "login": "Log in",
+        "registered": "Registered"
+      }
+    },
+     "rightSidebar": {
+      "search": "Search",
+      "news": "News",
+      "whatsNew": "What's new",
+      "basedOn": "Based on",
+      "showAll": "Show all",
+      "statisticforum": "Forum statistics",
+      "boards": "Boards",
+      "threads": "Threads",
+      "posts": "Posts",
+      "media": "Media",
+      "images": "Images",
+      "videos": "Videos",
+      "categories": "Categories",
+      "tags": "Tags",
+      "lastActive": "Last active"
+    }
+  }
+}

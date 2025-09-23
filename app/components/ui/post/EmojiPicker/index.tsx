@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/react';
 import { MdOutlineEmojiEmotions } from 'react-icons/md';
 import { emojiDataList } from '@/src/constants/emoji';
+import { useTranslations } from 'next-intl';
 
 
 interface EmojiPickerProps {
@@ -17,6 +18,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, disabled = fal
     setIsOpen(false);
   };
 
+  const t = useTranslations('HomePage.CreatePost');
   return (
     <Dropdown 
       isOpen={isOpen} 
@@ -44,7 +46,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, disabled = fal
           <div className="p-4">
             <div className="flex items-center gap-2 mb-3 pb-2 border-b border-default-200">
               <MdOutlineEmojiEmotions className="text-primary" size={16} />
-              <span className="text-sm font-medium text-default-600">Выберите эмодзи</span>
+              <span className="text-sm font-medium text-default-600">{t('EmojiPicker')}</span>
             </div>
             <div className="grid grid-cols-6 gap-3 max-h-80 overflow-y-auto custom-scrollbar">
               {emojiDataList.map((emoji) => (

@@ -3,7 +3,7 @@ import { usePathname } from "next/navigation";
 import Header from "./components/layout/Header";
 import Container from "./components/layout/container";
 import Navbar from "./components/layout/Navbar";
-import AuthGuard from "./AuthGuard";
+import AuthGuard from "./[locale]/AuthGuard";
 import TokenInitializer from "./TokenInitializer";
 import BottomNav from "./components/layout/BottomNavbar";
 import RightSideBar from "./components/layout/RightSideBar";

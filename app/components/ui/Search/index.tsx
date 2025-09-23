@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 import { useSearchUsersQuery } from '@/src/services/user/user.service';
 import { useDebounce } from '@/app/hooks/useDebounce';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 const SearchUser = () => {
 	const [query, setQuery] = useState('');
@@ -20,10 +21,12 @@ const SearchUser = () => {
 
 	const showResults = query.length >= 2;
 
+
+	const t = useTranslations("HomePage.rightSidebar")
 	return (
 		<div className="relative w-full">
 			<Input
-				placeholder="Поиск"
+				placeholder={t("search")}
 				value={query}
 				variant='bordered'
 				onChange={(e) => setQuery(e.target.value)}

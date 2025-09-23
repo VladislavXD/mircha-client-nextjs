@@ -9,7 +9,7 @@ import {
   Link,
   Button,
 } from "@heroui/react";
-import Posts from "./HomePage";
+import Posts from "../HomePage";
 
 export default function Home() {
   return ( <>

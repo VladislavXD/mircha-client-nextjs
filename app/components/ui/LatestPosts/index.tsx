@@ -7,6 +7,7 @@ import { useGetLatestPostsQuery, LatestThreadItem } from '@/src/services/forum.s
 import TagChip from '@/app/components/TagChip'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { useTranslations } from 'next-intl'
 
 type Props = {
 	limit?: number
@@ -16,11 +17,13 @@ const LatestPosts = ({ limit = 8 }: Props) => {
 	const { data, isLoading, error } = useGetLatestPostsQuery({ page: 1, limit, nsfw: '0' })
 	const items = data?.items || []
 
+
+	const t = useTranslations("HomePage.rightSidebar")
 	return (
 		<div className="rounded-medium border border-default-200 dark:border-default-100/20 p-3">
 			<div className="flex items-center justify-between mb-2">
-				<h3 className="text-sm font-semibold">Что нового</h3>
-				<Link href="/forum/whats-new" className="text-xs text-primary hover:underline">Показать все</Link>
+				<h3 className="text-sm font-semibold">{t("whatsNew")}</h3>
+				<Link href="/forum/whats-new" className="text-xs text-primary hover:underline">{t("showAll")}</Link>
 			</div>
 
 			{isLoading && (

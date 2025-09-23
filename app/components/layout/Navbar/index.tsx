@@ -14,6 +14,8 @@ import NavButton from "../../ui/navButton"
 import { MdOutlineForum } from "react-icons/md"
 import { CiSearch } from "react-icons/ci"
 import { IoMdNotificationsOutline } from "react-icons/io"
+import { LocaleSwitcherSelect } from "../../ui/selects/localeSwitcherSelect"
+import { useTranslations } from "next-intl"
 
 const Navbar = () => {
   const currentUser = useSelector(selectCurrent);
@@ -30,22 +32,24 @@ const Navbar = () => {
     return chats?.reduce((sum, chat) => sum + chat.unreadCount, 0) || 0
   }, [chats])
 
+
+  const t = useTranslations('HomePage.sidebar')
   return (
     <nav className="h-full">
       <ul className="flex flex-col gap-5">
         <li>
           <NavButton href="/" icon={<BsPostcard />}>
-            Посты
+            {t('posts')}
           </NavButton>
         </li>
         <li>
           <NavButton href="/search" icon={<CiSearch />}>
-            Найти
+            {t('search')}
           </NavButton>
         </li>
         <li>
           <NavButton href="/search" icon={<IoMdNotificationsOutline />}>
-            Уведомления
+            {t('nottifications')}
           </NavButton>
         </li>
         <li>
@@ -58,24 +62,24 @@ const Navbar = () => {
               placement="top-right"
             >
               <NavButton href="/chat" icon={<AiOutlineMessage />}>
-                Сообщения
+                {t('messages')}
               </NavButton>
             </Badge>
           </div>
         </li>
         <li>
           <NavButton href="/forum" icon={<MdOutlineForum />}>
-            Форум
+            {t('forum')}
           </NavButton>
         </li>
         <li>
           <NavButton href={`/following/${currentUser?.id}`} icon={<FiUsers />}>
-            Подписки
+            {t('follows')}
           </NavButton>
         </li>
         <li>
           <NavButton href={`/followers/${currentUser?.id}`} icon={<FaUsers />}>
-            Подписчики
+            {t('followers')}
           </NavButton>
         </li>
       </ul>

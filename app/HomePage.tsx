@@ -10,6 +10,7 @@ import CreatePost from "./components/ui/post/CreatePost"
 import emoji from '@/public/emoji/vikostvspack_agad2zmaakpyuuo_AgAD2zMAAkPYUUo_small.gif'
 import axios from "axios"
 
+
 const Posts = () => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   
@@ -42,12 +43,16 @@ const Posts = () => {
   if (!data || !Array.isArray(data)) {
     return <div className="text-center">Нет постов для отображения</div>
   }
+
+
+
   return ( 
     <>
       <div className="mb-6 w-full pb-8">
           <CreatePost/>
 
       </div>
+
       {
         data.length > 0 
         ?

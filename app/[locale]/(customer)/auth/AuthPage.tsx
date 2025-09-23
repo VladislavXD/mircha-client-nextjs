@@ -1,8 +1,8 @@
 "use client";
 import { Card, CardBody, Tab, Tabs, Divider, Button } from "@heroui/react"
 import React, { useEffect, useState } from "react"
-import Login from "../../components/features/user/Login"
-import Register from "../../components/features/user/Register"
+import Login from "../../../components/features/user/Login"
+import Register from "../../../components/features/user/Register"
 import { useRouter } from "next/navigation"
 import { selectIsAuthenticated } from "@/src/store/user/user.slice"
 import { useAppSelector } from "@/src/hooks/reduxHooks"

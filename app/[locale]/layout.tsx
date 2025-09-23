@@ -2,7 +2,12 @@ import "@/src/assets/styles/globals.css";
 import clsx from "clsx";
 import { fontSans } from "@/src/config/fonts";
 import type { Metadata, Viewport } from "next";
-import ClientProviders from "./ClientProvider";
+
+import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
+import ClientProviders from "../ClientProviders";
+import { getMessages } from "next-intl/server";
+import { Locale, routing } from "@/src/i18n/routing";
+import { notFound } from "next/navigation";
 
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
 const siteUrl = "https://mirchan.vercel.app";
@@ -22,7 +27,7 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName: "Mirchan",
-    title: "Mirchan - Анонимная социальная сеть",
+    title: "Mirchan - Аноним/*  */ная социальная сеть",
     description:
       "Делитесь мыслями и творчеством анонимно. Присоединяйтесь и найдите единомышленников!",
     images: [{ url: ogImage, width: 1200, height: 630, alt: "Mirchan" }],
@@ -54,16 +59,35 @@ export const viewport: Viewport = {
   themeColor: "#000000"
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+
+interface RootLayoutProps {
+  children: React.ReactNode;
+  params: { locale: string };
+}
+
+export default async function RootLayout({ children, params: {locale} }: Readonly<RootLayoutProps>) {
+
+
+  const messages = (await import(`@/messages/${locale}.json`)).default;
+
+  if (!routing.locales.includes(locale as Locale)) {
+    notFound();
+  }
+
   return (
-    <html suppressHydrationWarning lang="ru">
+    <html suppressHydrationWarning lang={locale}>
       <body
         className={clsx(
           "min-h-screen text-foreground bg-background font-sans antialiased",
           fontSans.variable
         )}
       >
-        <ClientProviders>{children}</ClientProviders>
+          <NextIntlClientProvider messages={messages } locale={locale}>
+            <ClientProviders>
+            {children}
+            </ClientProviders>
+          </NextIntlClientProvider>
+        
       </body>
     </html>
   );

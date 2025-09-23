@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 import SearchUser from '../../ui/Search'
 import NewsWidget from '../../ui/NewsWidget'

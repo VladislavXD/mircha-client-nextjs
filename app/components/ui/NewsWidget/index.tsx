@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader, Skeleton, Link } from '@heroui/react';
 import { useGetTopHeadlinesQuery } from '@/src/services/news.service';
 import { Clock, ExternalLink } from 'lucide-react';
 import FallbackNewsWidget from '../FallbackNewsWidget';
+import { useTranslations } from 'next-intl';
 
 const NewsWidget = () => {
   const { 
@@ -60,11 +61,13 @@ const NewsWidget = () => {
 
   const articles = newsData?.articles?.slice(0, 5) || [];
 
+
+  const t = useTranslations("HomePage.rightSidebar")
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between w-full">
-          <h3 className="text-lg font-bold">📰 Новости</h3>
+          <h3 className="text-lg font-bold">📰 {t("news")}</h3>
           <div className="text-xs text-default-400 flex items-center gap-1">
             <Clock size={12} />
             Live
@@ -130,7 +133,7 @@ const NewsWidget = () => {
               rel="noopener noreferrer"
               className="text-xs text-default-400 hover:text-default-600 transition-colors flex items-center gap-1"
             >
-              Основано на NewsAPI
+              {t("basedOn")} NewsAPI
               <ExternalLink size={10} />
             </Link>
           </div>
