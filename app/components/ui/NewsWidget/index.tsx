@@ -16,6 +16,8 @@ const NewsWidget = () => {
     lang: 'ru',
     category: 'технологии OR программирование OR разработка'
   });
+  const t = useTranslations("HomePage.rightSidebar")
+
 
   const formatTimeAgo = (dateString: string) => {
     const now = new Date();
@@ -62,7 +64,6 @@ const NewsWidget = () => {
   const articles = newsData?.articles?.slice(0, 5) || [];
 
 
-  const t = useTranslations("HomePage.rightSidebar")
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
