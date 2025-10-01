@@ -44,7 +44,7 @@ const MenuDropdown = () => {
     
     // Перенаправляем на страницу авторизации
     router.push("/auth")
-  }
+  } 
   const {theme} = useTheme()
   
 

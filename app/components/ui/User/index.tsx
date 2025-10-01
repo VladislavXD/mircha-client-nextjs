@@ -1,5 +1,6 @@
-import { User as NextUser, Tooltip, Button } from "@heroui/react";
-import React, { useState, useEffect } from "react";
+import { User as NextUser } from "@heroui/react";
+import React from "react";
+import SmartTooltip from "../SmartTooltip";
 
 type Props = {
   name?: string;
@@ -54,61 +55,14 @@ const User = ({
   const tooltipDescription = bio || description || "Нет описания";
 
   // Отладка данных подписчиков
-  console.log('User component props:', {
-    name,
-    followersCount,
-    followingCount,
-    isFollowing,
-    bio
-  });
 
-  // Определяем, является ли устройство мобильным
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    // Закрытие tooltip при клике вне области на мобильных устройствах
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isMobile && isTooltipOpen) {
-        const target = event.target as Element;
-        if (!target.closest('[data-tooltip-content]') && !target.closest('[data-tooltip-trigger]')) {
-          setIsTooltipOpen(false);
-        }
-      }
-    };
-
-    if (isMobile) {
-      document.addEventListener('click', handleClickOutside);
-    }
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isMobile, isTooltipOpen]);
-
-  // Обработчик клика для мобильных устройств
-  const handleMobileClick = (e: React.MouseEvent) => {
-    if (isMobile) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsTooltipOpen(!isTooltipOpen);
-    }
-  };
+  // Локальная логика мобильного/открытия перенесена в SmartTooltip
 
   return (
     <>
-      <Tooltip
-        isOpen={isMobile ? isTooltipOpen : undefined}
+      <SmartTooltip
         content={
-          <div className="relative rounded-lg min-w-[280px] max-w-[320px] shadow-lg overflow-hidden bg-white dark:bg-gray-800" data-tooltip-content>
+          <div className="relative rounded-lg min-w-[280px] max-w-[320px] shadow-lg overflow-hidden bg-white dark:bg-gray-800">
             {/* Background видео на весь tooltip */}
             <div className="relative h-32">
               {backgroundUrl ? (
@@ -247,16 +201,8 @@ const User = ({
         className="z-50"
         placement="top"
         showArrow
-        delay={isMobile ? 0 : 300}
-        closeDelay={0}
-        shouldCloseOnBlur={!isMobile}
-        onOpenChange={(isOpen) => {
-          if (isMobile) {
-            setIsTooltipOpen(isOpen);
-          }
-        }}
       >
-        <div onClick={handleMobileClick}>
+        <div>
           <NextUser
             name={
               usernameFrameUrl && usernameFrameUrl.trim() !== "" ? (
@@ -284,7 +230,7 @@ const User = ({
             }}
           />
         </div>
-      </Tooltip>
+  </SmartTooltip>
     </>
   );
 };

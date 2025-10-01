@@ -59,7 +59,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
           {isOwner && (
-            <div className="absolute top-4 right-4 flex gap-2">
+            <div className="absolute top-4 right-4 flexi gap-2">
               <Button
                 onClick={onEditOpen}
                 size="sm"

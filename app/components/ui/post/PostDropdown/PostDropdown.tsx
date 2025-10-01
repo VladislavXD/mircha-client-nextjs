@@ -7,6 +7,7 @@ import { selectCurrent } from '@/src/store/user/user.slice'
 import { IoAddCircleOutline } from 'react-icons/io5'
 import { MdBlockFlipped, MdOutlineEdit, MdOutlineReportGmailerrorred } from 'react-icons/md'
 import { RiDeleteBin7Line } from 'react-icons/ri'
+import { useUserProfile } from '@/src/hooks/useUserProfile'
 
 interface PostDropdownProps {
   isLoading?: boolean
@@ -18,8 +19,12 @@ interface PostDropdownProps {
 
 const PostDropdown: React.FC<PostDropdownProps> = ({ isLoading, onEdit, onDelete, authorId }) => {
 
+
+
   const currentUser = useSelector(selectCurrent)
-  console.log(authorId === currentUser?.id);
+
+
+  const {isFollowLoading, handleFollow, data } = useUserProfile(authorId)
   return (
     <Dropdown>
       <DropdownTrigger>
@@ -41,7 +46,12 @@ const PostDropdown: React.FC<PostDropdownProps> = ({ isLoading, onEdit, onDelete
         ) : null}
           {
             authorId !== currentUser?.id ? (
-              <DropdownItem key='follow' startContent={<SlUserFollow />}>Подписаться</DropdownItem>
+              <DropdownItem 
+              key='follow' 
+              startContent={<SlUserFollow />}
+              onClick={handleFollow}
+              >
+                {data?.isFolow ? <><SlUserFollow />Отписаться</> : <><SlUserFollow />Подписаться</>}</DropdownItem>
             ) : null
           }
           <DropdownItem key='save' startContent={<IoAddCircleOutline />}>Сохранить </DropdownItem>

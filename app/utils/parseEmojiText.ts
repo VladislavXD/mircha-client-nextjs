@@ -1,7 +1,9 @@
 export interface EmojiTextSegment {
-  type: 'text' | 'emoji';
+  type: 'text' | 'emoji' | 'mention';
   content: string;
   emojiUrl?: string;
+  mentionId?: string;
+  mentionName?: string;
 }
 
 /**
@@ -15,8 +17,9 @@ export const parseEmojiText = (text: string, emojiUrls: string[] = []): EmojiTex
   
   const segments: EmojiTextSegment[] = [];
   const emojiRegex = /\[emoji:(\d+)\]/g;
+  const mentionRegex = /\[mention:([^|\]]+)\|([^\]]+)\]/g; // [mention:<id>|<name>]
   let lastIndex = 0;
-  let match;
+  let match: RegExpExecArray | null;
 
   while ((match = emojiRegex.exec(text)) !== null) {
     const beforeMatch = text.slice(lastIndex, match.index);
@@ -49,14 +52,31 @@ export const parseEmojiText = (text: string, emojiUrls: string[] = []): EmojiTex
     lastIndex = match.index + match[0].length;
   }
 
-  // Добавляем оставшийся текст после последнего emoji
-  const remainingText = text.slice(lastIndex);
-  if (remainingText) {
-    segments.push({
-      type: 'text',
-      content: remainingText
-    });
+  // Теперь обрабатываем упоминания внутри уже получившихся сегментов текста
+  // Для простоты пройдёмся по копии и разобьём текстовые сегменты по mentionRegex
+  const finalSegments: EmojiTextSegment[] = [];
+  for (const seg of segments.length ? segments : [{ type: 'text', content: text } as EmojiTextSegment]) {
+    if (seg.type !== 'text') {
+      finalSegments.push(seg);
+      continue;
+    }
+    const s = seg.content;
+    let idx = 0;
+    let m: RegExpExecArray | null;
+    while ((m = mentionRegex.exec(s)) !== null) {
+      const before = s.slice(idx, m.index);
+      if (before) finalSegments.push({ type: 'text', content: before });
+      finalSegments.push({
+        type: 'mention',
+        content: m[0],
+        mentionId: m[1],
+        mentionName: m[2]
+      });
+      idx = m.index + m[0].length;
+    }
+    const rest = s.slice(idx);
+    if (rest) finalSegments.push({ type: 'text', content: rest });
   }
 
-  return segments;
+  return finalSegments;
 };
