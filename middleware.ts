@@ -15,7 +15,6 @@ const publicPaths = [
   '/forum'
 ];
 
-// i18n middleware
 const intlMiddleware = createIntlMiddleware({
   locales: ['ru', 'en'],
   defaultLocale: 'en'
@@ -29,16 +28,13 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   console.log(`[Middleware] Processing: ${pathname}`);
 
-  // 1. Сначала применяем next-intl (он добавит locale в url при необходимости)
-  const intlResponse = intlMiddleware(request);
-  if (intlResponse) return intlResponse;
-
-  // 2. Дальше твоя авторизационная логика
+  // 1. Публичные пути пропускаем через i18n
   if (isPublicPath(pathname)) {
     console.log(`[Middleware] Public path, skipping: ${pathname}`);
-    return NextResponse.next();
+    return intlMiddleware(request);
   }
 
+  // 2. Авторизация
   const nextAuthToken = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET
@@ -49,22 +45,32 @@ export async function middleware(request: NextRequest) {
 
   console.log(`[Middleware] Auth status - NextAuth: ${!!nextAuthToken}, Regular: ${!!regularToken}`);
 
+  // --- ВАЖНОЕ ИЗМЕНЕНИЕ ---
+  // Если пользователь уже на /auth (или /ru/auth), НЕ редиректим снова
+  if (!hasAuth && pathname.match(/^\/(ru|en)?\/?auth/)) {
+    console.log(`[Middleware] No auth, but already on /auth, allow`);
+    return intlMiddleware(request);
+  }
+
   if (!hasAuth) {
     console.log(`[Middleware] No auth, redirecting to /auth`);
     const authUrl = new URL('/auth', request.url);
     return NextResponse.redirect(authUrl);
   }
 
-  if (hasAuth && pathname === '/auth') {
+  if (hasAuth && pathname.startsWith('/auth')) {
     console.log(`[Middleware] Has auth but on /auth page, redirecting to /`);
     const homeUrl = new URL('/', request.url);
     return NextResponse.redirect(homeUrl);
   }
 
   console.log(`[Middleware] Allowing access to: ${pathname}`);
-  return NextResponse.next();
+  return intlMiddleware(request);
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|images|icons|static|trpc|.*\\..*).*)',  '/((?!api|trpc|_next|_vercel|.*\\..*).*)']
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|images|icons|static|trpc|.*\\..*).*)',
+    '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
+  ]
 };
