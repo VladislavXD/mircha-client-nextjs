@@ -24,9 +24,10 @@ const PostDropdown: React.FC<PostDropdownProps> = ({ isLoading, onEdit, onDelete
   const currentUser = useSelector(selectCurrent)
 
 
-  const {isFollowLoading, handleFollow, data } = useUserProfile(authorId)
+
+  const {isFollowLoading, isUnfollowLoading, handleFollow, data } = useUserProfile(authorId)
   return (
-    <Dropdown>
+    <Dropdown closeOnSelect={false}>
       <DropdownTrigger>
         <Button className="capitalize" isIconOnly color='default' variant='bordered'>
           {isLoading ? <Spinner /> : <SlOptions />}
@@ -46,12 +47,14 @@ const PostDropdown: React.FC<PostDropdownProps> = ({ isLoading, onEdit, onDelete
         ) : null}
           {
             authorId !== currentUser?.id ? (
-              <DropdownItem 
-              key='follow' 
-              startContent={<SlUserFollow />}
-              onClick={handleFollow}
+              <DropdownItem
+                key='follow'
+                startContent={data?.isFolow ? <SlUserFollow /> : <SlUserFollow />}
+                onClick={handleFollow}
+                isDisabled={isFollowLoading || isUnfollowLoading}
+
               >
-                {data?.isFolow ? <><SlUserFollow />Отписаться</> : <><SlUserFollow />Подписаться</>}</DropdownItem>
+                {data?.isFolow ? <>Отписаться</> : <>Подписаться</>}</DropdownItem>
             ) : null
           }
           <DropdownItem key='save' startContent={<IoAddCircleOutline />}>Сохранить </DropdownItem>

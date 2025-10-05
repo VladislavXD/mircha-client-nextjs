@@ -5,6 +5,7 @@ import { Providers } from '@/src/Providers/providers';
 import LayoutContent from './LayoutContent';
 import NextAuthProvider from '@/providers/NextAuthProvider';
 import GoogleAuthSync from '@/components/GoogleAuthSync';
+import { ToastProvider } from '@heroui/react';
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -23,6 +24,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
       <NextAuthProvider>
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <GoogleAuthSync />
+          <ToastProvider/>
           <LayoutContent>{children}</LayoutContent>
         </Providers>
       </NextAuthProvider>

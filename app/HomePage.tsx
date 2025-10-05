@@ -5,10 +5,11 @@ import { useAppSelector } from "@/src/hooks/reduxHooks"
 import { selectIsAuthenticated } from "@/src/store/user/user.slice"
 
 import Card from "./components/ui/post/Card"
-import { Spinner } from "@heroui/react"
+import { Button, Spinner, addToast } from "@heroui/react"
 import CreatePost from "./components/ui/post/CreatePost"
-import emoji from '@/public/emoji/vikostvspack_agad2zmaakpyuuo_AgAD2zMAAkPYUUo_small.gif'
+
 import axios from "axios"
+
 
 
 const Posts = () => {
@@ -46,11 +47,11 @@ const Posts = () => {
 
 
 
+  
   return ( 
     <>
       <div className="mb-6 w-full pb-8">
           <CreatePost/>
-
       </div>
 
       {
@@ -99,6 +100,8 @@ const Posts = () => {
             emojiUrls={emojiUrls}
           />
         )})  
+      
+
         : 
         <div className="text-center text-gray-500">Нет постов для отображения</div>
       }

@@ -31,7 +31,7 @@ export const useUserProfile = (id?: string) => {
 
   const { data, refetch } = useGetUserByIdQuery(id ?? '', { skip: !id });
   const [followUser, { isLoading: isFollowLoading }] = useFollowUserMutation();
-  const [unfollowUser] = useUnFollowUserMutation();
+  const [unfollowUser, { isLoading: isUnfollowLoading }] = useUnFollowUserMutation();
   const [triggerGetUserByIdQuery] = useLazyGetUserByIdQuery();
   const [triggerCurrentQuery] = useLazyCurrentQuery();
   const [updateAppearance, { isLoading: isUpdating }] = useUpdateAppearanceMutation();
@@ -138,6 +138,7 @@ export const useUserProfile = (id?: string) => {
 
     // loading flags
     isFollowLoading,
+    isUnfollowLoading,
     isUpdating,
 
     // appearance state
