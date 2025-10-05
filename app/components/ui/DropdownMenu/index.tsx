@@ -8,6 +8,7 @@ import {
   Avatar,
   User,
   Button,
+  useDisclosure,
 } from "@heroui/react"
 import { useDispatch, useSelector } from "react-redux"
 import { signOut } from "next-auth/react"
@@ -20,6 +21,7 @@ import { logout, selectCurrent, selectIsAuthenticated } from "@/src/store/user/u
 import { useTheme } from "next-themes"
 import { LocaleSwitcherSelect } from "../selects/localeSwitcherSelect"
 import { useTranslations } from "next-intl"
+import FeedBackModal from "../Modals/FeedBack.modal"
 
 const MenuDropdown = () => {
   const [settings, setSettings] = useState()
@@ -49,11 +51,14 @@ const MenuDropdown = () => {
   
 
   const t = useTranslations("HomePage.navbar.dropdownMenu")
+  const {onOpen, isOpen, onOpenChange, onClose} = useDisclosure()
   return (
+    <>
     <Dropdown
       placement="bottom-start"
       className={`bottom-start ${theme === "dark" ? "text-white" : "text-black"}  ${theme}`}
     >
+      
       <DropdownTrigger>
         <div className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer ${theme === "dark" ? "bg-black" : "bg-white"}`}>
           <CiSettings className={`flex sm:hidden size-8 ${theme}`} />
@@ -64,6 +69,7 @@ const MenuDropdown = () => {
             name={`${name}`}
           />
         </div>
+        
       </DropdownTrigger>
       <DropdownMenu aria-label="User Actions" variant="flat">
         <DropdownItem key={id} className="h-14 gap-2">
@@ -74,7 +80,7 @@ const MenuDropdown = () => {
           <Link href={`/user/${id}`}>{t("profile")}</Link>
         </DropdownItem>
         <DropdownItem key="analytics">{t("settings")}</DropdownItem>
-        <DropdownItem key="help_and_feedback">{t("feedback")}</DropdownItem>
+        <DropdownItem onClick={onOpen} key="help_and_feedback">{t("feedback")}</DropdownItem>
         <DropdownItem key="language"
         isReadOnly
 
@@ -94,6 +100,8 @@ const MenuDropdown = () => {
         </DropdownItem>
       </DropdownMenu>
     </Dropdown>
+    <FeedBackModal isOpen={isOpen} onClosse={onClose} onOpenChange={onOpenChange} />
+    </>
   )
 }
 
