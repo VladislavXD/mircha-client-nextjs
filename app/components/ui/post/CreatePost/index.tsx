@@ -126,16 +126,16 @@ const CreatePost = (props: Props) => {
   const t = useTranslations("HomePage");
 
   const [mention, setMention] = useState<string>("");
-  const [postValue, setPostValue] = useState<string>("");
   const [showHit, setShowHit] = useState<boolean>(false);
   const [atStartIndex, setAtStartIndex] = useState<number | null>(null);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const newValue = e.target.value;
+    // синхронизируем с react-hook-form
     const atIndex = newValue.lastIndexOf("@");
-    setPostValue(newValue);
+    setValue("post", newValue, { shouldDirty: true, shouldValidate: true });
 
     if (atIndex !== -1) {
       // берём всё, что после последнего @
@@ -169,14 +169,13 @@ const CreatePost = (props: Props) => {
     // формируем токен упоминания: [mention:<id>|<name>]
     const token = `[mention:${user.id}|${name || 'user'}]`;
 
-    const before = postValue.slice(0, atStartIndex);
+  const before = currentText.slice(0, atStartIndex);
     // пропускаем @ и текущий ввод после него до текущей позиции курсора
     const cursor = textarea.selectionStart || (atStartIndex + 1);
-    const after = postValue.slice(cursor);
+  const after = currentText.slice(cursor);
     const next = `${before}${token}${after}`;
 
-    setPostValue(next);
-    setValue('post', next);
+  setValue('post', next, { shouldDirty: true, shouldValidate: true });
     setShowHit(false);
     setMention("");
     setAtStartIndex(null);
@@ -203,8 +202,12 @@ const CreatePost = (props: Props) => {
               labelPlacement="outside"
               placeholder={t("CreatePost.CreatePostInput")}
               className="mb-5"
-              value={postValue}
-              onChange={(e) => handleChange(e)}
+              onChange={(e) => {
+                // обновляем RHF и локальную логику подсказок одновременно
+                field.onChange(e);
+                const evt = e as unknown as React.ChangeEvent<HTMLTextAreaElement>;
+                handleChange(evt);
+              }}
             />
           </>
         )}
@@ -233,6 +236,7 @@ const CreatePost = (props: Props) => {
           </div>
           <div className="bg-background/70 backdrop-blur-sm rounded-lg p-3 border border-default-200/50">
             <EmojiText
+              key={currentText}
               text={currentText || "Начните писать..."}
               emojiUrls={selectedEmojis}
               className="text-default-700 leading-relaxed"
