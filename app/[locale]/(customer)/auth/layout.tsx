@@ -12,9 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   console.log('[AuthLayout] isAuthenticated:', isAuthenticated, 'token:', !!token);
 
   useEffect(() => {
-    console.log('[AuthLayout] useEffect triggered, isAuthenticated:', isAuthenticated);
     if (isAuthenticated) {
-      console.log('[AuthLayout] Redirecting to home because user is authenticated');
       router.push("/")
     }
   }, [isAuthenticated, router])

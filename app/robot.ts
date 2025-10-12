@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function Robot(): MetadataRoute.Robots {
-	const BASE_URL = 'https://mirchan.vercel.app'
+	const BASE_URL = 'https://mirchan.site'
 	return {
 		rules: {
 			userAgent: '*',

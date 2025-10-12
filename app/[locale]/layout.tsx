@@ -10,7 +10,7 @@ import { Locale, routing } from "@/src/i18n/routing";
 import { notFound } from "next/navigation";
 
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
-const siteUrl = "https://mirchan.vercel.app";
+const siteUrl = "https://mirchan.site";
 const ogImage = "/images/mirchanLogo.jpg";
 
 export const metadata: Metadata = {
