@@ -5,8 +5,8 @@ interface Props {
   params: { locale: string };
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+
   
   const titles = {
     ru: "Вход в аккаунт",
@@ -18,21 +18,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     en: "Sign in to your Mirchan account to access anonymous communication, forums and content sharing",
   };
 
-  const title = titles[locale as keyof typeof titles] || titles.ru;
-  const description = descriptions[locale as keyof typeof descriptions] || descriptions.ru;
+  const title = 'Авторизация';
+  const description = 'Введите свои учетные данные для доступа к вашему аккаунту';
 
   return {
     title,
     description,
     robots: {
-      index: false, // Страницы входа обычно не индексируют
+      index: false, 
       follow: true,
     },
     openGraph: {
       title: `${title} | Mirchan`,
       description,
       type: "website",
-      locale: locale === "ru" ? "ru_RU" : "en_US",
       images: [
         {
           url: "/images/mirchanLogo.jpg",
