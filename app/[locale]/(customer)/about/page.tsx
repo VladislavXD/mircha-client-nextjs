@@ -3,6 +3,10 @@ import AboutPage from './aboutPage'
 
 export const metadata: Metadata = {
 	metadataBase: new URL('https://mirchan.site'),
+	robots: {
+		index: true,
+		follow: true,
+	},
 	title: {
 		default: 'О проекта | Mirchan',
 		template: '%s | Mirchan',
