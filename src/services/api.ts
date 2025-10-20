@@ -5,7 +5,12 @@ import type { RootState } from "@/src/store/store"
 const baseQuery = fetchBaseQuery({
   baseUrl: `${BASE_URL}/api`,
   prepareHeaders: (headers: Headers, {getState}: { getState: () => unknown }) => {
-      const token = (getState() as RootState).user.token || localStorage.getItem('token')
+      const state = getState() as RootState
+      const tokenFromState = state.user.token
+      const tokenFromLocalStorage = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null
+      const token = tokenFromState || tokenFromLocalStorage
+      
+    
       if (token){
           headers.set('authorization', `Bearer ${token}`)
       }

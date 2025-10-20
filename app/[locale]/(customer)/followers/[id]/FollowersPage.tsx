@@ -6,16 +6,22 @@ import { Card, CardBody } from '@heroui/react';
 import User from '@/app/components/ui/User';
 import GoBack from '@/app/components/ui/GoBack';
 import { useGetUserByIdQuery } from '@/src/services/user/user.service';
+import { useSelector } from 'react-redux';
+import { selectCurrent } from '@/src/store/user/user.slice';
+import NotAuthenticated from '@/app/components/ui/notAuthenticated';
 
 const Followers = () => {
   const {id} = useParams<{ id: string }>()
+  const current = useSelector(selectCurrent)
   const {data, isLoading, error} = useGetUserByIdQuery(id ?? '')
 
+  if(!current){
+    return <NotAuthenticated/>
+  }
   if (isLoading) return <div>Загрузка...</div>
   if (error) return <div>Ошибка загрузки данных</div>
   if (!data) return <div>Данные не найдены</div>
   if (!data.followers || !Array.isArray(data.followers)) return <div>Список подписчиков недоступен</div>
-
 
 
   return data.followers.length > 0 ?  (

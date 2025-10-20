@@ -1,10 +1,12 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { Button } from '@heroui/react';
+import { addToast, Button } from '@heroui/react';
 import { MdOutlinePersonAddAlt1, MdOutlinePersonAddDisabled } from 'react-icons/md';
 import { SendHorizontal } from 'lucide-react';
 import { formatToClientDate } from '@/app/utils/formatToClientDate';
+import { useSelector } from 'react-redux';
+import { selectCurrent } from '@/src/store/user/user.slice';
 
 interface ProfileInfoProps {
   data: any;
@@ -13,7 +15,10 @@ interface ProfileInfoProps {
   onFollow: () => void;
 }
 
+
 export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollowLoading, onFollow }) => {
+  const current = useSelector(selectCurrent);
+  console.log(current);
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
       <div className="flex-1 text-center lg:text-left">
@@ -32,7 +37,7 @@ export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollo
             )}
             <h1 className="relative z-0 text-3xl lg:text-4xl font-bold px-2">{data.name}</h1>
           </div>
-          <p className="text-default-500 text-lg">@{data.email.split('@')[0]}</p>
+          <p className="text-default-500 text-lg">{current ? `@${data.username ? 'username' : data.username}` : null}</p>
         </div>
 
         {data.bio && <p className="text-default-600 mb-4 max-w-2xl leading-relaxed">{data.bio}</p>}
@@ -53,6 +58,10 @@ export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollo
           <div className="flex items-center gap-2">
             <span>📅</span>
             <span>Присоединился {formatToClientDate(data.createdAt)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <p>{data.status}</p>
+
           </div>
         </div>
 
@@ -75,19 +84,39 @@ export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollo
       {!isOwner && (
         <div className="flex flex-col gap-3 shrink-0">
           <Button
-            color={data.isFolow ? 'default' : 'primary'}
-            variant={data.isFolow ? 'flat' : 'solid'}
+            color={data.isFollow ? 'default' : 'primary'}
+            variant={data.isFollow ? 'flat' : 'solid'}
             isLoading={isFollowLoading}
             size="lg"
             className="min-w-[140px] font-semibold"
-            onClick={onFollow}
-            endContent={data.isFolow ? <MdOutlinePersonAddDisabled /> : <MdOutlinePersonAddAlt1 />}
+            onClick={() => !current ? 
+              addToast({
+              title: "Вы не авторизованы",
+              description: "Пожалуйста, войдите в систему.",
+              
+              color: 'danger',
+            })
+             : onFollow()}
+            endContent={data.isFollow ? <MdOutlinePersonAddDisabled /> : <MdOutlinePersonAddAlt1 />}
           >
-            {data.isFolow ? 'Отписаться' : 'Подписаться'}
+            {data.isFollow ? 'Отписаться' : 'Подписаться'}
           </Button>
 
-          <Button variant="flat" size="lg" className="min-w-[140px]" endContent={<SendHorizontal size={16} />}>
-            <Link href={`/chat/${data.id}`}>Сообщение</Link>
+          <Button 
+          variant="flat" size="lg" 
+          className="min-w-[140px]" 
+          endContent={<SendHorizontal size={16} />}
+          onPress={()=> !current ?   
+          addToast({
+              title: "Вы не авторизованы",
+              description: "Пожалуйста, войдите в систему.",
+              
+              color: 'danger',
+            }) : null}
+          
+             
+          >
+            <Link href={`${!current ? "#"  : `/chat/${data.id}` }`}>Сообщение</Link>
           </Button>
         </div>
       )}

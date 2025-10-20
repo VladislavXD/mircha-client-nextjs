@@ -70,9 +70,10 @@ export const useUserProfile = (id?: string) => {
   );
 
   const handleFollow = async () => {
-    if (!id) return;
+    if (!id) return
+    
     try {
-      if (data?.isFolow) {
+      if (data?.isFollow) {
         await unfollowUser(id).unwrap();
       } else {
         await followUser({ followingId: id }).unwrap();

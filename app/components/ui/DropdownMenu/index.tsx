@@ -26,16 +26,19 @@ import FeedBackModal from "../Modals/FeedBack.modal"
 const MenuDropdown = () => {
   const [settings, setSettings] = useState()
   const current = useSelector(selectCurrent)
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  const dispatch = useDispatch()
+  const router = useRouter()
+  const {theme} = useTheme()
+  const t = useTranslations("HomePage.navbar.dropdownMenu")
+  const {onOpen, isOpen, onOpenChange, onClose} = useDisclosure()
 
+  // Все хуки вызваны, теперь можно делать раннее возвращение
   if (!current) {
     return null
   }
 
   const { avatarUrl, name, email, id } = current
-
-  const isAuthenticated = useSelector(selectIsAuthenticated)
-  const dispatch = useDispatch()
-  const router = useRouter()
 
   const handleLogout = async () => {
     // Очищаем Redux store и localStorage
@@ -46,12 +49,7 @@ const MenuDropdown = () => {
     
     // Перенаправляем на страницу авторизации
     router.push("/auth")
-  } 
-  const {theme} = useTheme()
-  
-
-  const t = useTranslations("HomePage.navbar.dropdownMenu")
-  const {onOpen, isOpen, onOpenChange, onClose} = useDisclosure()
+  }
   return (
     <>
     <Dropdown

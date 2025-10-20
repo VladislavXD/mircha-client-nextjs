@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import { Controller, useForm } from "react-hook-form";
-import { Button, Textarea } from "@heroui/react";
+import { addToast, Button, Textarea } from "@heroui/react";
 import ErrorMessage from "../../ErrorMessage";
 import { IoMdCreate } from "react-icons/io";
 import {
@@ -14,6 +14,8 @@ import { EmojiText } from "../../EmojiText";
 import { createImagePreview, revokeImagePreview } from "../ImageUpload/utils";
 import { useTranslations } from "next-intl";
 import Mention from "./Mention";
+import { useSelector } from "react-redux";
+import { selectCurrent } from "@/src/store/user/user.slice";
 
 type Props = {};
 
@@ -24,6 +26,7 @@ const CreatePost = (props: Props) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const current = useSelector(selectCurrent);
 
   const {
     handleSubmit,
@@ -102,6 +105,23 @@ const CreatePost = (props: Props) => {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
+      if (!current) {
+        addToast({
+          title: "Вы не авторизованы",
+          description: "Пожалуйста, войдите в систему.",
+
+          color: "danger",
+
+        });
+        setValue("post", "");
+        setSelectedImage(null);
+        setSelectedEmojis([]);
+        if (imagePreview) {
+          revokeImagePreview(imagePreview);
+          setImagePreview(null);
+        }
+        return;
+      }
       const formData = createPostFormDataWithEmojis(
         data.post,
         selectedImage || undefined
@@ -129,9 +149,7 @@ const CreatePost = (props: Props) => {
   const [showHit, setShowHit] = useState<boolean>(false);
   const [atStartIndex, setAtStartIndex] = useState<number | null>(null);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     // синхронизируем с react-hook-form
     const atIndex = newValue.lastIndexOf("@");
@@ -149,7 +167,6 @@ const CreatePost = (props: Props) => {
         setMention(query);
         setShowHit(true);
         setAtStartIndex(atIndex);
-        console.log("ищем пользователя:", query);
 
         // здесь запрос к серверу
         // fetch(`/api/search?username=${query}`).then(...)
@@ -163,19 +180,19 @@ const CreatePost = (props: Props) => {
 
   const handleSelectMention = (user: { id: string; name?: string | null }) => {
     const textarea = textareaRef.current;
-    const name = (user.name || '').trim();
+    const name = (user.name || "").trim();
     if (!textarea || atStartIndex === null) return;
 
     // формируем токен упоминания: [mention:<id>|<name>]
-    const token = `[mention:${user.id}|${name || 'user'}]`;
+    const token = `[mention:${user.id}|${name || "user"}]`;
 
-  const before = currentText.slice(0, atStartIndex);
+    const before = currentText.slice(0, atStartIndex);
     // пропускаем @ и текущий ввод после него до текущей позиции курсора
-    const cursor = textarea.selectionStart || (atStartIndex + 1);
-  const after = currentText.slice(cursor);
+    const cursor = textarea.selectionStart || atStartIndex + 1;
+    const after = currentText.slice(cursor);
     const next = `${before}${token}${after}`;
 
-  setValue('post', next, { shouldDirty: true, shouldValidate: true });
+    setValue("post", next, { shouldDirty: true, shouldValidate: true });
     setShowHit(false);
     setMention("");
     setAtStartIndex(null);
@@ -205,7 +222,8 @@ const CreatePost = (props: Props) => {
               onChange={(e) => {
                 // обновляем RHF и локальную логику подсказок одновременно
                 field.onChange(e);
-                const evt = e as unknown as React.ChangeEvent<HTMLTextAreaElement>;
+                const evt =
+                  e as unknown as React.ChangeEvent<HTMLTextAreaElement>;
                 handleChange(evt);
               }}
             />
@@ -214,7 +232,11 @@ const CreatePost = (props: Props) => {
       />
       {/* отображение отмеченных людей */}
       {showHit && (
-        <Mention showHit={showHit} mention={mention} onSelect={handleSelectMention} />
+        <Mention
+          showHit={showHit}
+          mention={mention}
+          onSelect={handleSelectMention}
+        />
       )}
 
       <div className="mb-5 flex gap-3">

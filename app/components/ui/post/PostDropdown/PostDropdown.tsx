@@ -49,12 +49,12 @@ const PostDropdown: React.FC<PostDropdownProps> = ({ isLoading, onEdit, onDelete
             authorId !== currentUser?.id ? (
               <DropdownItem
                 key='follow'
-                startContent={data?.isFolow ? <SlUserFollow /> : <SlUserFollow />}
+                startContent={data?.isFollow ? <SlUserFollow /> : <SlUserFollow />}
                 onClick={handleFollow}
                 isDisabled={isFollowLoading || isUnfollowLoading}
 
               >
-                {data?.isFolow ? <>Отписаться</> : <>Подписаться</>}</DropdownItem>
+                {data?.isFollow ? <>Отписаться</> : <>Подписаться</>}</DropdownItem>
             ) : null
           }
           <DropdownItem key='save' startContent={<IoAddCircleOutline />}>Сохранить </DropdownItem>

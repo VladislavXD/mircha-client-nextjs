@@ -10,7 +10,6 @@ import {
   Button,
 } from "@heroui/react";
 import Posts from "../HomePage";
-
 export default function Home() {
   return ( <>
     <Posts/>
