@@ -8,10 +8,13 @@ import { socketService } from '../../../utils/socketService';
 import { formatChatTime, formatOnlineStatus } from '../../../utils/formatChatTime';
 import { Chat } from '@/src/services/caht.service';
 import { useAppSelector } from '@/src/hooks/reduxHooks';
+import { useSelector } from 'react-redux';
+import { selectCurrent } from '@/src/store/user/user.slice';
+import NotAuthenticated from '@/app/components/ui/notAuthenticated';
 
 export const ChatList: React.FC = () => {
   const router = useRouter()
-  const currentUser = useAppSelector(state => state.user.current);
+  const current = useSelector(selectCurrent)
   const token = useAppSelector(state => state.user.token);
   
   const { data: chats, isLoading, error, refetch } = useGetUserChatsQuery(undefined, {
@@ -21,7 +24,7 @@ export const ChatList: React.FC = () => {
   });
   const [chatStatuses, setChatStatuses] = useState<{[key: string]: boolean}>({});
 
-  console.log(chats);
+
 
   // Обновляем данные при каждом монтировании компонента
   useEffect(() => {
@@ -113,6 +116,10 @@ export const ChatList: React.FC = () => {
   const handleChatClick = (chat: any) => {
     router.push(`/chat/${chat.otherParticipant?.id}`);
   };
+
+  if(!current){
+    return <NotAuthenticated/>
+  }
 
   if (isLoading) {
     return (

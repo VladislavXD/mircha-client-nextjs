@@ -7,12 +7,16 @@ import {
   DropdownTrigger,
   DropdownItem,
   Image,
+  Badge,
+  useDisclosure,
 } from "@heroui/react";
 import { CiEdit } from "react-icons/ci";
 import defaultProfileBg from "@/public/images/default_profile_bg.png";
 import ProfileInfo from "./ProfileInfo";
 import { useUserProfile } from "@/src/hooks/useUserProfile";
 import { useParams } from "next/navigation";
+import ProfileStatus from "./ProfileStatus";
+import StatusModal from "./ProfileModals/Status.Modals";
 
 interface ProfileHeaderProps {
   data: any;
@@ -36,6 +40,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     handleFollow,
   } = useUserProfile(id);
 
+  // for modal status
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+
+
+  const isCurrentUser = currentUser?.id === id;
   return (
     <>
       <div
@@ -112,17 +121,23 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                       maxHeight: "130px",
                     }}
                   />
-                  
+
                   {data.avatarFrameUrl !== "none" ? (
                     <img
-                      src={data.avatarFrameUrl}
-                      alt=""
-                      aria-hidden="true"
-                      className="absolute inset-0 w-full h-full   pointer-events-none select-none z-100"
+                    src={data.avatarFrameUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full   pointer-events-none select-none z-100"
                     />
                   ) : null}
                 </div>
+                  
               </div>
+              {!isCurrentUser ? (data.status && 
+              <ProfileStatus status={data.status} currentId={currentUser?.id} />) 
+              : <ProfileStatus status={data.status} currentId={currentUser?.id}  onOpen={onOpen} /> }
+              
+              <StatusModal isOpen={isOpen} onOpenChange={onOpenChange} userAvatalUrl={data.avatarUrl} />
             </div>
             
 

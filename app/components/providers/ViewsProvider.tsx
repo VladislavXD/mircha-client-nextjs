@@ -2,6 +2,8 @@
 import React, { useEffect } from 'react';
 import { useAddViewsBatchMutation } from '@/src/services/post/post.service';
 import { viewsManager } from '@/app/utils/viewsManager';
+import { useSelector } from 'react-redux';
+import { selectCurrent } from '@/src/store/user/user.slice';
 
 interface ViewsProviderProps {
   children: React.ReactNode;
@@ -9,6 +11,13 @@ interface ViewsProviderProps {
 
 export const ViewsProvider: React.FC<ViewsProviderProps> = ({ children }) => {
   const [addViewsBatch] = useAddViewsBatchMutation();
+  const current = useSelector(selectCurrent)
+
+ useEffect(() => {
+    if (!current) {
+      return
+    }
+  }, [current]);
 
   useEffect(() => {
     // Устанавливаем callback для отправки батчей

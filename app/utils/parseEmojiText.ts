@@ -16,60 +16,67 @@ export const parseEmojiText = (text: string, emojiUrls: string[] = []): EmojiTex
   if (!text) return [];
   
   const segments: EmojiTextSegment[] = [];
-  
-  // Объединённый regex для всех токенов: emoji и mentions
-  const tokenRegex = /\[emoji:(\d+)\]|\[mention:([^|\]]+)\|([^\]]+)\]/g;
+  const emojiRegex = /\[emoji:(\d+)\]/g;
+  const mentionRegex = /\[mention:([^|\]]+)\|([^\]]+)\]/g; // [mention:<id>|<name>]
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
-  while ((match = tokenRegex.exec(text)) !== null) {
-    // Добавляем текст перед токеном
-    if (match.index > lastIndex) {
+  while ((match = emojiRegex.exec(text)) !== null) {
+    const beforeMatch = text.slice(lastIndex, match.index);
+    const emojiIndex = parseInt(match[1], 10);
+    const emojiUrl = emojiUrls[emojiIndex];
+
+    // Добавляем текст перед emoji (если есть)
+    if (beforeMatch) {
       segments.push({
         type: 'text',
-        content: text.slice(lastIndex, match.index)
+        content: beforeMatch
       });
     }
 
-    // Определяем тип токена по группам захвата
-    if (match[1] !== undefined) {
-      // Это [emoji:N]
-      const emojiIndex = parseInt(match[1], 10);
-      const emojiUrl = emojiUrls[emojiIndex];
-      
-      if (emojiUrl) {
-        segments.push({
-          type: 'emoji',
-          content: match[0],
-          emojiUrl
-        });
-      } else {
-        // URL не найден - оставляем как текст
-        segments.push({
-          type: 'text',
-          content: match[0]
-        });
-      }
-    } else if (match[2] !== undefined && match[3] !== undefined) {
-      // Это [mention:id|name]
+    // Добавляем emoji (если URL существует)
+    if (emojiUrl) {
       segments.push({
-        type: 'mention',
-        content: match[0],
-        mentionId: match[2],
-        mentionName: match[3]
+        type: 'emoji',
+        content: match[0], // оригинальный маркер для fallback
+        emojiUrl
+      });
+    } else {
+      // Если URL не найден, оставляем как текст
+      segments.push({
+        type: 'text',
+        content: match[0]
       });
     }
 
     lastIndex = match.index + match[0].length;
   }
 
-  // Добавляем оставшийся текст после последнего токена
-  if (lastIndex < text.length) {
-    segments.push({
-      type: 'text',
-      content: text.slice(lastIndex)
-    });
+  // Теперь обрабатываем упоминания внутри уже получившихся сегментов текста
+  // Для простоты пройдёмся по копии и разобьём текстовые сегменты по mentionRegex
+  const finalSegments: EmojiTextSegment[] = [];
+  for (const seg of segments.length ? segments : [{ type: 'text', content: text } as EmojiTextSegment]) {
+    if (seg.type !== 'text') {
+      finalSegments.push(seg);
+      continue;
+    }
+    const s = seg.content;
+    let idx = 0;
+    let m: RegExpExecArray | null;
+    while ((m = mentionRegex.exec(s)) !== null) {
+      const before = s.slice(idx, m.index);
+      if (before) finalSegments.push({ type: 'text', content: before });
+      finalSegments.push({
+        type: 'mention',
+        content: m[0],
+        mentionId: m[1],
+        mentionName: m[2]
+      });
+      idx = m.index + m[0].length;
+    }
+    const rest = s.slice(idx);
+    if (rest) finalSegments.push({ type: 'text', content: rest });
   }
 
-  return segments;
+  return finalSegments;
 };

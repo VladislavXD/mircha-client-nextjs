@@ -18,7 +18,6 @@ import { usePathname } from "next/navigation";
 
 import { MdForum, MdOutlineForum } from "react-icons/md";
 
-
 const useScrollDirection = () => {
   const [scrollDirection, setScrollDirection] = useState("up");
 
@@ -80,9 +79,9 @@ const BottomNav = () => {
     }
   }, [current?.id, token, refetch]);
 
-  if (!current) return null;
 
-  const { avatarUrl, id } = current;
+  const avatarUrl = current?.avatarUrl;
+  const id = current?.id
 
   return (
     <>
@@ -139,17 +138,19 @@ const BottomNav = () => {
               )}
             </Badge>
           </Link>
-          <Link href={`/user/${id}`} className="flex items-center">
-            <User
-              avatarProps={{
-                src: `${avatarUrl}`,
-                isBordered: true,
-                size: "sm",
-              }}
-              className="transition-transform md:text-xs"
-              name=""
-            />
-          </Link>
+          {current && (
+            <Link href={`/user/${id}`} className="flex items-center">
+              <User
+                avatarProps={{
+                  src: `${avatarUrl}`,
+                  isBordered: true,
+                  size: "sm",
+                }}
+                className="transition-transform md:text-xs"
+                name=""
+              />
+            </Link>
+          )}
         </div>
       </div>
     </>

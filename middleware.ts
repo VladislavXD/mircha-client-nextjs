@@ -52,11 +52,11 @@ export async function middleware(request: NextRequest) {
     return intlMiddleware(request);
   }
 
-  if (!hasAuth) {
-    console.log(`[Middleware] No auth, redirecting to /auth`);
-    const authUrl = new URL('/auth', request.url);
-    return NextResponse.redirect(authUrl);
-  }
+  // if (!hasAuth) {
+  //   console.log(`[Middleware] No auth, redirecting to /auth`);
+  //   const authUrl = new URL('/auth', request.url);
+  //   return NextResponse.redirect(authUrl);
+  // }
 
   if (hasAuth && pathname.startsWith('/auth')) {
     console.log(`[Middleware] Has auth but on /auth page, redirecting to /`);

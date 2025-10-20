@@ -4,6 +4,8 @@ export type User = {
     password?: string
     name?: string
     role?: 'ADMIN' | 'MODERATOR' | 'USER'
+    status?: string
+    username?: string
     avatarUrl?: string
     avatarFrameUrl?: string
     backgroundUrl?: string
@@ -20,7 +22,7 @@ export type User = {
     followers: Follows[]
     likes: Like[]
     comments: Comment[]
-    isFolow?: boolean
+    isFollow?: boolean
     followersCount?: number
     
   }

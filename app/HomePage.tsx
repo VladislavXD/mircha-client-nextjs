@@ -2,22 +2,23 @@
 import React, { useEffect } from "react"
 import { useGetAllPostsQuery } from "@/src/services/post/post.service"
 import { useAppSelector } from "@/src/hooks/reduxHooks"
-import { selectIsAuthenticated } from "@/src/store/user/user.slice"
+import { selectCurrent, selectIsAuthenticated } from "@/src/store/user/user.slice"
 
 import Card from "./components/ui/post/Card"
 import { Button, Spinner, addToast } from "@heroui/react"
 import CreatePost from "./components/ui/post/CreatePost"
 
 import axios from "axios"
+import { useSelector } from "react-redux"
 
 
 
 const Posts = () => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
-  
-  // Загружаем посты только после авторизации
+  const current = useSelector(selectCurrent)
+  // Загружаем посты всегда, независимо от авторизации
   const { data, isLoading, error } = useGetAllPostsQuery(undefined, {
-    skip: !isAuthenticated
+    skip: false // Убираем ограничение
   })
 
   useEffect(()=> {
@@ -33,9 +34,12 @@ const Posts = () => {
   }, [isAuthenticated])
 
   // Показываем загрузку пока не авторизованы
-  if (!isAuthenticated) {
+  if (current ){
+    if (!isAuthenticated) {
     return <Spinner className="flex h-full"/>
   }
+  }
+  
 
   if (isLoading) return <Spinner className="flex h-full"/>
   if (error) {
@@ -84,7 +88,7 @@ const Posts = () => {
             authorCreatedAt={author?.createdAt}
             followersCount={author?.followers?.length ?? 0}
             followingCount={author?.following?.length ?? 0}
-            isFollowing={author?.isFolow ?? false}
+            isFollowing={author?.isFollow ?? false}
             content={content}
             name={author?.name ?? ''}
             likesCount={likes?.length ?? 0}
