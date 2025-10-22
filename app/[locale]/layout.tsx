@@ -22,6 +22,7 @@ export const metadata: Metadata = {
   description:
     "Mirchan - это анонимная социальная сеть, где вы можете делиться своими мыслями, идеями и творчеством без страха осуждения.",
   applicationName: "Mirchan",
+  
   alternates: { canonical: siteUrl },
   openGraph: {
     type: "website",
