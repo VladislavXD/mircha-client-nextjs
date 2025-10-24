@@ -35,9 +35,9 @@ export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollo
                 }}
               />
             )}
-            <h1 className="relative z-0 text-3xl lg:text-4xl font-bold px-2">{data.name}</h1>
+            <h1 className="relative z-0 text-3xl lg:text-4xl font-bold px-0">{data.name}</h1>
           </div>
-          <p className="text-default-500 text-lg">{current ? `@${data.username ? 'username' : data.username}` : null}</p>
+          <p className="text-default-500 text-lg">@{data.username}</p>
         </div>
 
         {data.bio && <p className="text-default-600 mb-4 max-w-2xl leading-relaxed">{data.bio}</p>}
@@ -60,8 +60,6 @@ export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollo
             <span>Присоединился {formatToClientDate(data.createdAt)}</span>
           </div>
           <div className="flex items-center gap-2">
-            <p>{data.status}</p>
-
           </div>
         </div>
 
