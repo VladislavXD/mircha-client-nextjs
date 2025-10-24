@@ -40,6 +40,7 @@ const EditProfile = ({ isOpen, onClose, user }: Props) => {
       dateOfBirth: user?.dateOfBirth,
       bio: user?.bio,
       location: user?.location,
+      username: user?.username
     },
   })
 
@@ -55,6 +56,7 @@ const EditProfile = ({ isOpen, onClose, user }: Props) => {
         const formData = new FormData()
         data.name && formData.append("name", data.name)
         data.email && data.email !== user?.email && formData.append("email", data.email)
+        data.username && formData.append("username", data.username)
         data.dateOfBirth &&
           formData.append("dateOfBirth", new Date(data.dateOfBirth).toISOString())
         data.bio && formData.append("bio", data.bio)
@@ -63,6 +65,7 @@ const EditProfile = ({ isOpen, onClose, user }: Props) => {
 
         await updateUser({ userData: formData, id }).unwrap()
         onClose()
+        setError("")
       } catch (err) {
         if (hasErrorField(err)) {
           setError(err.data.error)
@@ -99,7 +102,8 @@ const EditProfile = ({ isOpen, onClose, user }: Props) => {
                   type="email"
                   endContent={<MdOutlineEmail />}
                 />
-                <Input control={control} name="name" label="Имя" type="text" />
+                <Input control={control} name="name" label="Никнейм" type="text" />
+                <Input control={control} name="username" label="Имя пользователя" type="text" />
                 <label
                   className="block mt-3 text-sm font-medium text-gray-900 dark:text-white"
                   htmlFor="small_size"
