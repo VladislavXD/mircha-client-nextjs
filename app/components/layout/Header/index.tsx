@@ -51,7 +51,7 @@ const Header = () => {
             width={40}
             height={40}
             alt="Mirchan Logo"
-            priority
+            priority 
           />
           Mirchan
         </Link>

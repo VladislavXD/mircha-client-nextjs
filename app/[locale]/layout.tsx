@@ -10,7 +10,7 @@ import { Locale, routing } from "@/src/i18n/routing";
 import { notFound } from "next/navigation";
 
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
-const siteUrl = "https://mirchan.site";
+const siteUrl = "https://mirchan.site/ru";
 const ogImage = "/images/mirchanLogo.jpg";
 
 export const metadata: Metadata = {
