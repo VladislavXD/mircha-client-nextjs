@@ -145,7 +145,7 @@ const UserProfile = () => {
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
-                  Закрыть
+                  Закрыть.
                 </Button>
               </ModalFooter>
             </>
