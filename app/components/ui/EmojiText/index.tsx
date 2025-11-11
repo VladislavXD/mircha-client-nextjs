@@ -39,7 +39,7 @@ export const EmojiText: React.FC<EmojiTextProps> = ({
   };
 
   // Функция для форматирования даты
-  const formatDate = (date: Date | undefined) => {
+  const formatDate = (date: Date | undefined | string) => {
     if (!date) return "";
     return new Date(date).toLocaleDateString('ru-RU', {
       year: 'numeric',
