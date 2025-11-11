@@ -62,6 +62,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             key={data.backgroundUrl}
             loop
             muted
+            playsInline
+            webkit-playsinline
             autoPlay
             className="absolute inset-0 w-full h-full object-cover"
           >

@@ -104,6 +104,8 @@ const UserProfile = () => {
                           <video
                             autoPlay
                             loop
+                            playsInline
+                            webkit-playsinline
                             muted
                             className="absolute inset-0 w-full h-full object-cover"
                           >
