@@ -68,7 +68,12 @@ const Header = () => {
 
         <NavbarItem>
 
-          { isLoading ? (<ProfileSkeleton />) : isAuthenticated ? (
+          {isLoading ? (
+            // ✅ Скелетон только на ПК (≥1024px), на мобильном ничего не показываем
+            <div className="hidden lg:block">
+              <ProfileSkeleton />
+            </div>
+          ) : isAuthenticated ? (
             <MenuDropdown />
           ) : (
             <Button as={Link} href="/auth" variant="shadow" color="success">
