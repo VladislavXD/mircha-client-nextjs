@@ -29,8 +29,34 @@ import type {
   DeleteReplyResponse
 } from "@/src/types/forum.types"
 
-// Новые типы для категорий и тегов
-// Типы вынесены в @/src/types/forum.types
+export type {
+  Category,
+  Tag,
+  ForumStats,
+  LatestThreadItem,
+  LatestPostsResponse,
+  BoardThreadsResponse,
+  BoardInfoResponse,
+  CategoryThreadsResponse,
+  LatestPostsQuery,
+  CategoryThreadsQuery,
+  BoardThreadsQuery,
+  GetThreadQuery,
+  GetThreadByCategoryAndSlugQuery,
+  CreateThreadRequest,
+  CreateThreadInCategoryRequest,
+  CreateReplyRequest,
+  CreateReplyInCategoryRequest,
+  AssignTagToThreadRequest,
+  AssignTagToThreadResponse,
+  CreateBoardResponse,
+  UpdateBoardRequest,
+  UpdateBoardResponse,
+  DeleteThreadRequest,
+  DeleteThreadResponse,
+  DeleteReplyRequest,
+  DeleteReplyResponse
+}
 
 
 
