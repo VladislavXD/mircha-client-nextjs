@@ -1,5 +1,5 @@
 "use client";
-import { Badge, User } from "@heroui/react";
+import { Badge, Skeleton, User } from "@heroui/react";
 import React, { useEffect, useState } from "react";
 import { selectCurrent } from "@/src/store/user/user.slice";
 import { useSelector } from "react-redux";
@@ -19,6 +19,7 @@ import { usePathname } from "next/navigation";
 import { MdForum, MdOutlineForum } from "react-icons/md";
 import { House, MessageCircleDashed, MessagesSquare, Search } from "lucide-react";
 import { FaUserSecret } from "react-icons/fa";
+import { useCurrentQuery } from "@/src/services/user/user.service";
 
 const useScrollDirection = () => {
   const [scrollDirection, setScrollDirection] = useState("up");
@@ -38,16 +39,16 @@ const useScrollDirection = () => {
 };
 
 const BottomNav = () => {
-  // Все хуки вызываются безусловно и в одном порядке на каждом рендере
   const scrollDirection = useScrollDirection();
   const navClass = scrollDirection === "up" ? "" : "opacity-25 duration-500";
 
   const current = useSelector(selectCurrent);
   const token = useAppSelector((state) => state.user.token);
   const pathname = usePathname();
-  const { theme } = useTheme(); // перенесено выше условного return
+  const { theme } = useTheme();
+  const { isLoading } = useCurrentQuery();
 
-  // Запрос чатов всегда вызываем, но с skip чтобы не ломать порядок хуков
+
   const { data: chats, refetch } = useGetUserChatsQuery(undefined, {
     skip: !token || !current?.id,
     refetchOnFocus: true,
@@ -81,13 +82,11 @@ const BottomNav = () => {
     }
   }, [current?.id, token, refetch]);
 
-
   const avatarUrl = current?.avatarUrl;
-  const id = current?.id
+  const id = current?.id;
 
   // Проверяем активность страницы с учетом локализации /ru или /en
   const isActivePage = (path: string) => {
-    // Убираем префикс локализации из pathname
     const cleanPathname = pathname.replace(/^\/(ru|en)/, '') || '/';
     
     if (path === '/') {
@@ -96,13 +95,17 @@ const BottomNav = () => {
     return cleanPathname === path || cleanPathname.startsWith(`${path}/`);
   };
 
-  // Определяем цвет в зависимости от темы (с fallback)
+  // ✅ ИСПРАВЛЕНО: Активная страница = белый/черный, неактивная = серый
   const getIconColor = (isActive: boolean) => {
     const isDark = theme === "dark";
+    
     if (isActive) {
+      // На активной странице - яркий цвет
       return isDark ? "#ffffff" : "#000000";
+    } else {
+      // На неактивной странице - серый
+      return isDark ? "#6b7280" : "#9ca3af";
     }
-    return isDark ? "#6b7280" : "#9ca3af";
   };
 
   return (
@@ -111,6 +114,7 @@ const BottomNav = () => {
         className={`fixed bottom-0 w-full py-3 z-10 bg-zinc-100 dark:bg-zinc-950 border-t dark:border-zinc-800 border-zinc-200 shadow-lg sm:hidden ${navClass}`}
       >
         <div className="flex flex-row justify-around items-center bg-transparent w-full">
+          {/* Home */}
           <Link href="/" className="flex items-center relative">
             <House
               size={28}
@@ -120,6 +124,8 @@ const BottomNav = () => {
               className="transition-colors ease-out"
             />
           </Link>
+
+          {/* Search */}
           <Link href="/search" className="flex items-center">
             <Search
               size={28}
@@ -129,6 +135,8 @@ const BottomNav = () => {
               className="transition-colors ease-out"
             />
           </Link>
+
+          {/* Forum */}
           <Link href="/forum" className="flex items-center">
             <FaUserSecret
               className="size-7 transition-colors ease-out"
@@ -137,6 +145,8 @@ const BottomNav = () => {
               }}
             />
           </Link>
+
+          {/* Chat */}
           <Link
             href="/chat"
             className="flex items-center transition-all ease-out relative"
@@ -157,7 +167,12 @@ const BottomNav = () => {
               />
             </Badge>
           </Link>
-          {current && (
+
+          {/* Profile */}
+          { isLoading 
+          ? (<Skeleton className="flex rounded-full w-10 h-10" />) 
+          : 
+          current && (
             <Link href={`/user/${id}`} className="flex items-center">
               <User
                 avatarProps={{
