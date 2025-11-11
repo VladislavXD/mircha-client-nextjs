@@ -1,4 +1,4 @@
-import { useDebounce } from "@/app/hooks/useDebounce";
+import { useDebounce } from "@/src/hooks/useDebounce";
 import { useSearchUsersQuery } from "@/src/services/user/user.service";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Avatar } from "@heroui/react";

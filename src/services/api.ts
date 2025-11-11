@@ -9,21 +9,22 @@ const baseQuery = fetchBaseQuery({
       const tokenFromState = state.user.token
       const tokenFromLocalStorage = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null
       const token = tokenFromState || tokenFromLocalStorage
-      
-    
+                                                
+
       if (token){
           headers.set('authorization', `Bearer ${token}`)
       }
       return headers
   }
 })
-
+ 
 const baseQueryRetry = retry(baseQuery, { maxRetries: 1 })
 
 export const api = createApi({
   reducerPath: "splitApi",
   baseQuery: baseQueryRetry,
   refetchOnMountOrArgChange: true,
-  tagTypes: ['User', 'Post', 'Board', 'Thread', 'Reply', 'Media', 'Category', 'Tag'],
+  tagTypes: ['User', 'Post', 'Board', 'Thread', 'Reply', 'Media', 'Category', 'Tag'], 
+  
   endpoints: () => ({}),
 })

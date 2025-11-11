@@ -38,6 +38,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     currentUser,
     isFollowLoading,
     handleFollow,
+    isDataLoading,
+    isUnfollowLoading,
+    followError,
+    unfollowError
   } = useUserProfile(id);
 
   // for modal status
@@ -145,8 +149,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div className="flex-1">
               <ProfileInfo
                 data={dataBio}
+                followError={followError}
+                unfollowError={unfollowError}
                 isOwner={currentUser?.id === id}
                 isFollowLoading={isFollowLoading}
+                isDataLoading={isDataLoading}
+                isUnfollowLoading={isUnfollowLoading}
                 onFollow={handleFollow}
               />
             </div>

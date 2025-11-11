@@ -1,4 +1,3 @@
-"use client";
 import React, { useState } from "react";
 import {
   Button,
@@ -25,12 +24,13 @@ import {
   useLazyGetViewsQuery,
   useAddViewMutation,
   useUpdatePostMutation,
+  postApi,
 } from "@/src/services/post/post.service";
 
 import { useDeleteCommentMutation } from "@/src/services/post/comments.service";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSelector, UseSelector } from "react-redux";
+import { useDispatch, useSelector, UseSelector } from "react-redux";
 import { selectCurrent } from "@/src/store/user/user.slice";
 import User from "../../User";
 import { formatToClientDate } from "@/app/utils/formatToClientDate";
@@ -48,10 +48,15 @@ import { useEffect, useRef } from "react";
 import axios from "axios";
 import { BASE_URL } from "@/src/constants/api.url";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
-import PostDropdown from '../PostDropdown/PostDropdown';
+import PostDropdown from "../PostDropdown/PostDropdown";
 import { EmojiText } from "../../EmojiText";
 import EditPostModal from "../PostModals/EditPost";
 import DeletePost from "../PostModals/DeletePost";
+
+import { useThrottle } from "@/src/hooks/useAntiSpam";
+import { Heart } from 'lucide-react';
+
+
 
 type Props = {
   avatarUrl: string;
@@ -61,7 +66,7 @@ type Props = {
   commentId?: string;
   likesCount?: number;
   commentsCount?: number;
-  createdAt?: Date;
+  createdAt?: string;
   id?: string;
   cardFor: "comment" | "post" | "current-post";
   likeByUser?: boolean;
@@ -110,16 +115,20 @@ const Card = ({
   isFollowing,
   onFollowToggle,
 }: Props) => {
-  console.log("nameCard", name);
+
   const [likePost, { isLoading }] = useLikePostMutation();
-  const { addView: addViewToQueue } = useViewsManager();
   const [unlikePost, { isLoading: unlikeLoading }] = useUnLikePostMutation();
+
+  const { addView: addViewToQueue } = useViewsManager();
+
   const [triggerAllPosts] = useLazyGetAllPostsQuery();
   const [triggerGetPostById] = useLazyGetPostByIdQuery();
+
   const [deletePost, deletePostStatus] = useDeletePostMutation();
   const [deleteComment, deleteCommentStatus] = useDeleteCommentMutation();
-  // const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
+
   const [error, setError] = useState("");
+
   const {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
@@ -132,6 +141,9 @@ const Card = ({
   } = useDisclosure();
   // const [editValue, setEditValue] = useState(content);
   const router = useRouter();
+  const currentUser = useSelector(selectCurrent);
+  const dispatch = useDispatch()
+
 
   const refetchPost = async () => {
     switch (cardFor) {
@@ -186,41 +198,39 @@ const Card = ({
     onEditOpen();
   };
 
-  // const handleUpdate = async () => {
-  //     if (!id) return;
-  //     try {
-  //         await updatePost({ id, content: editValue }).unwrap();
-  //         await refetchPost();
-  //         onEditClose();
-  //     } catch (err) {
-  //         if (hasErrorField(err)){
-  //             setError(err.data.error)
-  //         } else {
-  //             setError(err as string)
-  //         }
-  //     }
-  // }
-
-  const handleLike = async () => {
-    try {
-      likeByUser
-        ? await unlikePost(id).unwrap()
-        : await likePost({ postId: id }).unwrap();
-
-      if (cardFor == "current-post") {
-        await triggerGetPostById(id).unwrap();
-      }
-      if (cardFor == "post") {
-        await triggerAllPosts().unwrap();
-      }
-    } catch (err) {
-      if (hasErrorField(err)) {
-        setError(err.data.error);
-      } else {
-        setError(err as string);
-      }
+  // Простой обработчик лайка - оптимистичные обновления в likes.service.ts
+  const handleLike = () => {
+    // НЕ используем await - запускаем мутацию и сразу выходим
+    // Оптимистичное обновление сработает мгновенно через onQueryStarted
+    if (likeByUser) {
+      unlikePost(id).unwrap().catch((err) => {
+        // Обработка ошибки асинхронно
+        if (hasErrorField(err)) {
+          setError(err.data.error);
+        } else {
+          setError(err as string);
+        }
+      });
+    } else {
+      likePost({ postId: id }).unwrap().catch((err) => {
+        // Обработка ошибки асинхронно
+        if (hasErrorField(err)) {
+          setError(err.data.error);
+        } else {
+          setError(err as string);
+        }
+      });
     }
+    // Функция завершается мгновенно, UI уже обновлён!
   };
+
+  // ===== АНТИ-СПАМ ЗАЩИТА ДЛЯ ЛАЙКОВ =====
+  // Throttle с задержкой 800мс - предотвращает спам кликов
+  const { throttledCallback: handleLikeWithThrottle, isThrottled } = useThrottle(
+    handleLike,
+    2000 // минимум 800мс между кликами
+  );
+  
   // Отправка просмотра через менеджер (батчинг)
   const handleView = ({ postId }: ViewProps) => {
     if (!postId || viewSent) return;
@@ -282,7 +292,7 @@ const Card = ({
 
   return (
     <NextCard className="mb-5">
-      <CardHeader className="justify-between items-center bg-transparent">
+      <CardHeader className="justify-between  items-center bg-transparent">
         <Link href={`/user/${authorId}`}>
           <User
             usernameFrameUrl={usernameFrameUrl}
@@ -301,14 +311,16 @@ const Card = ({
             description={createdAt && formatToClientDate(createdAt)}
           />
         </Link>
+        
 
-          <PostDropdown
-            isLoading={deletePostStatus.isLoading || deleteCommentStatus.isLoading}
-            onEdit={handleEditClick}
-            onDelete={handleDeleteClick}
-            authorId={authorId}
-          />
-
+        <PostDropdown
+          isLoading={
+            deletePostStatus.isLoading || deleteCommentStatus.isLoading
+          }
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+          authorId={authorId}
+        />
       </CardHeader>
       <CardBody className="px-3 py-2 mb-5">
         <div ref={inViewRef}>
@@ -329,7 +341,7 @@ const Card = ({
         </div>
       </CardBody>
 
-      <div className="text-small text-default-400 pl-3 flex items-center gap-1">
+      <div className="text-small text-default-400 pl-3 flex items-center g1000">
         <Eye size={16} />
         {views > 1000 ? `${(views / 1000).toFixed(1)}k` : views}{" "}
         {views === 1 ? "просмотр" : views < 5 ? "просмотра" : "просмотров"}
@@ -338,26 +350,21 @@ const Card = ({
       {cardFor !== "comment" && (
         <CardFooter className="gap-3">
           <div className="flex gap-5 items-center">
-            <div onClick={handleLike}>
-              {isLoading || unlikeLoading ? (
-                <Spinner size="sm" className="mx-1" />
-              ) : (
-                <MetaInfo
-                  count={likesCount}
-                  Icon={likeByUser ? FcDislike : MdOutlineFavoriteBorder}
-                />
-              )}
+            <div 
+              onClick={handleLikeWithThrottle} 
+              className={`cursor-pointer transition-opacity ${
+                isThrottled || isLoading || unlikeLoading ? 'opacity-50' : 'opacity-100'
+              }`}
+              title={isThrottled ? 'Подождите немного перед следующим лайком' : ''}
+            >
+              <MetaInfo
+                {...(likeByUser ? { fill: "#d91002", color: "#d91002",  } : {})}
+                count={likesCount}
+                type="heart"
+                Icon={likeByUser ? Heart : Heart}
+              />
             </div>
-            <div className="">
-              {isLoading || unlikeLoading ? (
-                <Spinner size="sm" className="mx-1" />
-              ) : (
-                <MetaInfo
-                  count={likesCount}
-                  Icon={likeByUser ? FcDislike : MdOutlineEmojiEmotions}
-                />
-              )}
-            </div>
+            
             <Link href={`/posts/${id}`}>
               <MetaInfo count={commentsCount} Icon={FaRegComment} />
             </Link>

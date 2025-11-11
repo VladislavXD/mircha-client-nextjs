@@ -29,9 +29,9 @@ export const useUserProfile = (id?: string) => {
   const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrent);
 
-  const { data, refetch } = useGetUserByIdQuery(id ?? '', { skip: !id });
-  const [followUser, { isLoading: isFollowLoading }] = useFollowUserMutation();
-  const [unfollowUser, { isLoading: isUnfollowLoading }] = useUnFollowUserMutation();
+  const { data, isLoading: isDataLoading, refetch } = useGetUserByIdQuery(id ?? '', { skip: !id });
+  const [followUser, { isLoading: isFollowLoading, error: followError }] = useFollowUserMutation();
+  const [unfollowUser, { isLoading: isUnfollowLoading, error: unfollowError }] = useUnFollowUserMutation();
   const [triggerGetUserByIdQuery] = useLazyGetUserByIdQuery();
   const [triggerCurrentQuery] = useLazyCurrentQuery();
   const [updateAppearance, { isLoading: isUpdating }] = useUpdateAppearanceMutation();
@@ -141,6 +141,7 @@ export const useUserProfile = (id?: string) => {
     isFollowLoading,
     isUnfollowLoading,
     isUpdating,
+    isDataLoading,
 
     // appearance state
     appearanceType,
@@ -156,6 +157,8 @@ export const useUserProfile = (id?: string) => {
 
     // actions
     handleFollow,
+    followError,
+    unfollowError,
     openAppearance,
     handleSelectAppearance,
     handleConfirmAppearance,
