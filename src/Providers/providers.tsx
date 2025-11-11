@@ -7,10 +7,9 @@ import { HeroUIProvider } from "@heroui/system";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { Provider, useSelector } from "react-redux";
 import { store } from "../store/store";
-import { selectIsAuthenticated, selectUser } from "../store/user/user.slice";
-import { useRouter } from "next/navigation";
 
 import { ViewsProvider } from "@/app/components/providers/ViewsProvider";
+import ReCapchaProvider from "./ReCapchaProvider";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -21,11 +20,11 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   return (
     <HeroUIProvider>
       <Provider store={store}>
-        <NextThemesProvider {...themeProps}>
-          <ViewsProvider>
-            {children}
-          </ViewsProvider>
-        </NextThemesProvider>
+        <ReCapchaProvider>
+          <NextThemesProvider {...themeProps}>
+            <ViewsProvider>{children}</ViewsProvider>
+          </NextThemesProvider>
+        </ReCapchaProvider>
       </Provider>
     </HeroUIProvider>
   );

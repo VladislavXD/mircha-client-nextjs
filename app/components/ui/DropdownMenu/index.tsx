@@ -24,7 +24,6 @@ import { useTranslations } from "next-intl"
 import FeedBackModal from "../Modals/FeedBack.modal"
 
 const MenuDropdown = () => {
-  const [settings, setSettings] = useState()
   const current = useSelector(selectCurrent)
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const dispatch = useDispatch()
@@ -43,7 +42,6 @@ const MenuDropdown = () => {
   const handleLogout = async () => {
     // Очищаем Redux store и localStorage
     dispatch(logout())
-    
     // Очищаем NextAuth сессию
     await signOut({ redirect: false })
     
@@ -54,7 +52,7 @@ const MenuDropdown = () => {
     <>
     <Dropdown
       placement="bottom-start"
-      className={`bottom-start ${theme === "dark" ? "text-white" : "text-black"}  ${theme}`}
+      className={`bottom-start  ${theme === "dark" ? "text-white" : "text-black"}  ${theme}`}
     >
       
       <DropdownTrigger>
@@ -94,7 +92,7 @@ const MenuDropdown = () => {
           className="text-danger-400 flex"
           color="danger"
         >
-          {isAuthenticated ? <p>{t("logout")}</p> : <p>{t("login")}</p>}
+          { <p>{t("logout")}</p>}
         </DropdownItem>
       </DropdownMenu>
     </Dropdown>

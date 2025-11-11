@@ -157,8 +157,8 @@ export type User = {
     likes: Like[]
     comments: Comment[]
     likeByUser: boolean
-    createdAt: Date
-    updatedAt: Date
+    createdAt: string
+    updatedAt: string
     views: string[]
   }
   

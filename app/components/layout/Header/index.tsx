@@ -7,30 +7,30 @@ import {
   NavbarContent,
   NavbarItem,
   Button,
-  Avatar,
+
 } from "@heroui/react";
-import { FaRegMoon } from "react-icons/fa";
-import { LuSunMedium } from "react-icons/lu";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import MenuDropdown from "../../ui/DropdownMenu";
 import {
   selectCurrent,
   selectIsAuthenticated,
 } from "@/src/store/user/user.slice";
 import { ThemeSwitch } from "@/src/Providers/theme-switch";
-import MirchanIcon from "@/public/favicon.ico";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
 import { useAppSelector } from "@/src/hooks/reduxHooks";
-import { Logo } from "@/src/Providers/icons";
+
 import Image from "next/image";
+import { useCurrentQuery } from "@/src/services/user/user.service";
+import ProfileSkeleton from "./ProfileSceleton";
 
 const Header = () => {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
   const current = useSelector(selectCurrent);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const { isLoading, error } = useCurrentQuery()
 
   useEffect(() => {
     setMounted(true);
@@ -67,7 +67,8 @@ const Header = () => {
         </NavbarItem>
 
         <NavbarItem>
-          {isAuthenticated ? (
+
+          { isLoading ? (<ProfileSkeleton />) : isAuthenticated ? (
             <MenuDropdown />
           ) : (
             <Button as={Link} href="/auth" variant="shadow" color="success">

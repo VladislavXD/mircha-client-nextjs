@@ -1,6 +1,6 @@
 "use client"
 
-import { useGoogleAuth } from '@/hooks/useGoogleAuth'
+import { useGoogleAuth } from '@/src/hooks/useGoogleAuth'
 
 export default function GoogleAuthHandler() {
   useGoogleAuth()

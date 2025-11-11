@@ -1,16 +1,18 @@
 import React, { useState } from "react"
 import Input from "../../ui/Input/Input"
 import { useForm } from "react-hook-form"
-import { Button, Link } from "@heroui/react"
+import { addToast, Button, Link } from "@heroui/react"
 
 import { useRegisterMutation } from "@/src/services/user/user.service"
 import { hasErrorField } from "@/src/utils/hasErrorField"
 import ErrorMessage from "../../ui/ErrorMessage"
+import { useReCaptcha } from "@/src/hooks/useReCapcha"
 
 type Register = {
   email: string
   name: string
-  password: string
+  password: string,
+  recaptchaToken?: string
 }
 
 type Props = {
@@ -29,16 +31,35 @@ const Register = ({ setSelected }: Props) => {
       email: "",
       password: "",
       name: "",
+      recaptchaToken: "",
     },
   })
 
+  const { verifyRecaptcha, isVerifying } = useReCaptcha()
+
   const onSubmit = async (data: Register) => {
+      const recaptchaToken = await verifyRecaptcha('register')
+      if(!recaptchaToken){
+          return
+      }
     try {
-        await register(data).unwrap()
+        await register({...data, recaptchaToken}).unwrap()
         setSelected('login')
     } catch (err: unknown) {
         if(hasErrorField(err)){
-            setError(err.data.error)
+            const errors = err.data.errors || [err.data.error]
+
+            errors.forEach((errMsg: string, index: number) => {
+              setTimeout(()=> {
+                addToast({
+                  title: 'Ошибка регистрации',
+                  description: errMsg,
+                  color: 'danger'
+                })
+              }, index * 1000)
+            })
+            setError(errors.join(', '))
+            
         }
     }
   }
@@ -82,8 +103,8 @@ const Register = ({ setSelected }: Props) => {
         </Link>
       </p>
       <div className="flex gap-2 justify-end">
-        <Button fullWidth color="primary" type="submit" isLoading={isLoading}>
-          Зарегестрироваться
+        <Button fullWidth disabled={isVerifying} color="primary" type="submit" isLoading={isLoading}>
+          {isVerifying ? "Проверка..." : "Зарегистрироваться"}
         </Button>
       </div>
     </form>

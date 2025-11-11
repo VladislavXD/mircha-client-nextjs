@@ -1,9 +1,9 @@
 import type { User } from "@/src/types/types";
 import { api } from "@/src/services/api";
 
-interface LoginRequest { email: string; password: string }
+interface LoginRequest { email: string; password: string, recaptchaToken: string }
 interface LoginResponse { token: string }
-interface RegisterRequest { email: string; password: string; name: string }
+interface RegisterRequest { email: string; password: string; name: string, recaptchaToken: string }
 interface RegisterResponse { email: string; password: string; name: string }
 interface UpdateUserRequest { userData: FormData; id: string }
 interface UpdateAppearanceRequest { id: string; avatarFrameUrl?: string; backgroundUrl?: string }
@@ -23,7 +23,7 @@ export const userApi = api.injectEndpoints({
                 method: 'POST',
                 body: userData,
             })
-        }),
+        }), 
         current: builder.query<User, void>({
             query: () => ({
                 url: '/current',
@@ -45,7 +45,7 @@ export const userApi = api.injectEndpoints({
                 body: userData
             }),
             invalidatesTags: (result, error, {id}) => [{ type: 'User', id }, 'User']
-        }),
+        }), 
         updateAppearance: builder.mutation<User, UpdateAppearanceRequest>({
             query: ({id, avatarFrameUrl, backgroundUrl}) => ({
                 url: `/user/${id}`,

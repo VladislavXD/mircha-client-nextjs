@@ -71,6 +71,7 @@ class ViewsManager {
 
     try {
       console.log(`Обрабатываем батч из ${postIds.length} просмотров:`, postIds);
+      
       await this.addViewCallback(postIds);
       console.log(`Отправлен батч просмотров для ${postIds.length} постов:`, postIds);
     } catch (error) {
