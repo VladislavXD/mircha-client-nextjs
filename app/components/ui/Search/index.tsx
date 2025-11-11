@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Input, Card, CardBody, Avatar, Spinner } from '@heroui/react';
 import { Search } from 'lucide-react';
 import { useSearchUsersQuery } from '@/src/services/user/user.service';
-import { useDebounce } from '@/app/hooks/useDebounce';
+import { useDebounce } from '@/src/hooks/useDebounce';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 

@@ -2,7 +2,7 @@
 
 import NextTopLoader from 'nextjs-toploader';
 import { Providers } from '@/src/Providers/providers';
-import LayoutContent from './LayoutContent';
+import LayoutContent from '../../app/LayoutContent';
 import NextAuthProvider from '@/providers/NextAuthProvider';
 import GoogleAuthSync from '@/components/GoogleAuthSync';
 import { ToastProvider } from '@heroui/react';

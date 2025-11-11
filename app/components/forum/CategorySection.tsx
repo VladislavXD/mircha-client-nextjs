@@ -3,8 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { Card, CardBody, CardHeader, Chip, Button } from '@heroui/react'
-import type { Category } from '@/src/services/forum.service'
-
+import type { Category } from '@/src/types/forum.types'
 type Props = { title: string; categories: Category[] }
 
 export default function CategorySection({ title, categories }: Props){
