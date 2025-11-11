@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { useAppSelector } from "@/src/hooks/reduxHooks";
 
 import Link from "next/link";
-import { IoHomeSharp } from "react-icons/io5";
+import { IoHomeSharp, IoSearchOutline } from "react-icons/io5";
 import { AiFillMessage, AiOutlineMessage } from "react-icons/ai";
 import { CiSearch } from "react-icons/ci";
 import { IoMdNotificationsOutline } from "react-icons/io";
@@ -17,6 +17,8 @@ import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 
 import { MdForum, MdOutlineForum } from "react-icons/md";
+import { House, MessageCircleDashed, MessagesSquare, Search } from "lucide-react";
+import { FaUserSecret } from "react-icons/fa";
 
 const useScrollDirection = () => {
   const [scrollDirection, setScrollDirection] = useState("up");
@@ -83,6 +85,26 @@ const BottomNav = () => {
   const avatarUrl = current?.avatarUrl;
   const id = current?.id
 
+  // Проверяем активность страницы с учетом локализации /ru или /en
+  const isActivePage = (path: string) => {
+    // Убираем префикс локализации из pathname
+    const cleanPathname = pathname.replace(/^\/(ru|en)/, '') || '/';
+    
+    if (path === '/') {
+      return cleanPathname === '/';
+    }
+    return cleanPathname === path || cleanPathname.startsWith(`${path}/`);
+  };
+
+  // Определяем цвет в зависимости от темы (с fallback)
+  const getIconColor = (isActive: boolean) => {
+    const isDark = theme === "dark";
+    if (isActive) {
+      return isDark ? "#ffffff" : "#000000";
+    }
+    return isDark ? "#6b7280" : "#9ca3af";
+  };
+
   return (
     <>
       <div
@@ -90,31 +112,30 @@ const BottomNav = () => {
       >
         <div className="flex flex-row justify-around items-center bg-transparent w-full">
           <Link href="/" className="flex items-center relative">
-            {pathname === "/" ? (
-              <IoHomeSharp
-                className={`size-7 ${theme === "dark" ? "text-gray-100" : "text-gray-950"} transition-colors ease-out`}
-              />
-            ) : (
-              <IoHomeSharp
-                className={`size-7 ${theme === "dark" ? "text-gray-400" : "text-gray-500"} transition-colors ease-out`}
-              />
-            )}
-          </Link>
-          <Link href="/search" className="flex items-center">
-            <CiSearch
-              className={`size-7 ${theme === "dark" ? "text-gray-100" : "text-gray-950"} transition-colors ease-out`}
+            <House
+              size={28}
+              stroke={getIconColor(isActivePage("/"))}
+              strokeWidth={2}
+              fill="none"
+              className="transition-colors ease-out"
             />
           </Link>
-          <Link href="/forum">
-            {pathname === "/forum" ? (
-              <MdForum
-                className={`size-7 ${theme === "dark" ? "text-gray-100" : "text-gray-950"} transition-colors ease-out`}
-              />
-            ) : (
-              <MdOutlineForum
-                className={`size-7 ${theme === "dark" ? "text-gray-400" : "text-gray-500"} transition-colors ease-out`}
-              />
-            )}
+          <Link href="/search" className="flex items-center">
+            <Search
+              size={28}
+              stroke={getIconColor(isActivePage("/search"))}
+              strokeWidth={2}
+              fill="none"
+              className="transition-colors ease-out"
+            />
+          </Link>
+          <Link href="/forum" className="flex items-center">
+            <FaUserSecret
+              className="size-7 transition-colors ease-out"
+              style={{
+                color: getIconColor(isActivePage("/forum"))
+              }}
+            />
           </Link>
           <Link
             href="/chat"
@@ -127,15 +148,13 @@ const BottomNav = () => {
               isInvisible={totalUnreadCount === 0}
               placement="top-right"
             >
-              {pathname === "/chat" || pathname.startsWith("/chat/") ? (
-                <AiFillMessage
-                  className={`size-7 ${theme === "dark" ? "text-gray-100" : "text-gray-950"} transition-colors ease-out`}
-                />
-              ) : (
-                <AiOutlineMessage
-                  className={`size-7 ${theme === "dark" ? "text-gray-400" : "text-gray-500"} transition-colors ease-out`}
-                />
-              )}
+              <MessageCircleDashed
+                size={28}
+                stroke={getIconColor(isActivePage("/chat"))}
+                strokeWidth={2}
+                fill="none"
+                className="transition-colors ease-out"
+              />
             </Badge>
           </Link>
           {current && (

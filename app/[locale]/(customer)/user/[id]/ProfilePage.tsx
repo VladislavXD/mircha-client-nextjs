@@ -65,7 +65,7 @@ const UserProfile = () => {
       </div>
 
       {/* Модальные окна оформления */}
-      <Modal
+    <Modal
         isOpen={appearanceModal.isOpen}
         onClose={appearanceModal.onClose}
         size="lg"

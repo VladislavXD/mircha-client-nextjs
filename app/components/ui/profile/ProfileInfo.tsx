@@ -12,13 +12,26 @@ interface ProfileInfoProps {
   data: any;
   isOwner: boolean;
   isFollowLoading: boolean;
+  isDataLoading: boolean;
+  isUnfollowLoading: boolean;
+  unfollowError: any;
+  followError: any;
   onFollow: () => void;
 }
 
 
-export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollowLoading, onFollow }) => {
+export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollowLoading, isDataLoading, isUnfollowLoading, followError, unfollowError, onFollow }) => {
   const current = useSelector(selectCurrent);
-  console.log(current);
+
+  if (followError || unfollowError){
+    addToast({
+      title: "Ошибка подписки",
+      description: "Не удалось выполнить действие. Пожалуйста, попробуйте через 15 мин.",
+      color: 'danger',
+    })
+  }
+
+  
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
       <div className="flex-1 text-center lg:text-left">
@@ -80,11 +93,12 @@ export const ProfileInfo: React.FC<ProfileInfoProps> = ({ data, isOwner, isFollo
       </div>
 
       {!isOwner && (
-        <div className="flex flex-col gap-3 shrink-0">
+        <div className="flex flex-col gap-3 shrink-0 w-full lg:w-auto items-center lg:items-start">
           <Button
             color={data.isFollow ? 'default' : 'primary'}
             variant={data.isFollow ? 'flat' : 'solid'}
-            isLoading={isFollowLoading}
+            disabled={isDataLoading || isFollowLoading || isUnfollowLoading}
+            isDisabled={isDataLoading || isFollowLoading || isUnfollowLoading}
             size="lg"
             className="min-w-[140px] font-semibold"
             onClick={() => !current ? 

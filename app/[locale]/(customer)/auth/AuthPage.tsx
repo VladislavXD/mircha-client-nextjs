@@ -16,7 +16,7 @@ const AuthPage = () => {
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="flex flex-col">
-        <Card className="max-w-full w-[340px] h-[500px]">
+        <Card className="max-w-full w-[340px] ">
           <CardBody className="overflow-hidden">
             <Tabs
               fullWidth

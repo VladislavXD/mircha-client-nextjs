@@ -1,88 +1,69 @@
 import { api } from "@/src/services/api"
 import type { Board, Thread, Reply } from "@/src/types/types"
+import type {
+  Category,
+  Tag,
+  ForumStats,
+  LatestThreadItem,
+  LatestPostsResponse,
+  BoardThreadsResponse,
+  BoardInfoResponse,
+  CategoryThreadsResponse,
+  LatestPostsQuery,
+  CategoryThreadsQuery,
+  BoardThreadsQuery,
+  GetThreadQuery,
+  GetThreadByCategoryAndSlugQuery,
+  CreateThreadRequest,
+  CreateThreadInCategoryRequest,
+  CreateReplyRequest,
+  CreateReplyInCategoryRequest,
+  AssignTagToThreadRequest,
+  AssignTagToThreadResponse,
+  CreateBoardResponse,
+  UpdateBoardRequest,
+  UpdateBoardResponse,
+  DeleteThreadRequest,
+  DeleteThreadResponse,
+  DeleteReplyRequest,
+  DeleteReplyResponse
+} from "@/src/types/forum.types"
 
-// Новые типы для категорий и тегов
-export interface Category {
-  id: string
-  name: string
-  slug: string
-  imageUrl?: string
-  icon?: string
-  color?: string
-  description?: string
-  parentId?: string | null
-  parent?: Category | null
-  children?: Category[]
-  group?: string | null
-  createdAt: string
-  updatedAt: string
-  _count?: { threads: number }
+export type {
+  Category,
+  Tag,
+  ForumStats,
+  LatestThreadItem,
+  LatestPostsResponse,
+  BoardThreadsResponse,
+  BoardInfoResponse,
+  CategoryThreadsResponse,
+  LatestPostsQuery,
+  CategoryThreadsQuery,
+  BoardThreadsQuery,
+  GetThreadQuery,
+  GetThreadByCategoryAndSlugQuery,
+  CreateThreadRequest,
+  CreateThreadInCategoryRequest,
+  CreateReplyRequest,
+  CreateReplyInCategoryRequest,
+  AssignTagToThreadRequest,
+  AssignTagToThreadResponse,
+  CreateBoardResponse,
+  UpdateBoardRequest,
+  UpdateBoardResponse,
+  DeleteThreadRequest,
+  DeleteThreadResponse,
+  DeleteReplyRequest,
+  DeleteReplyResponse
 }
 
-export interface Tag {
-  id: string
-  name: string
-  slug: string
-  icon?: string
-  color?: string
-  description?: string
-  createdAt: string
-  _count?: { threadTags: number }
-}
 
-// Сводная статистика форума
-export interface ForumStats {
-  boards: number
-  threads: number
-  replies: number
-  media: number
-  images: number
-  videos: number
-  categories: number
-  tags: number
-  lastActivity: string | null
-}
-
-// Тип элемента ленты последних тредов (OP)
-export interface LatestThreadItem extends Pick<Thread,
-  'id' | 'shortId' | 'slug' | 'subject' | 'content' | 'imageUrl' | 'thumbnailUrl' |
-  'mediaFiles' | 'createdAt' | '_count' | 'replyCount' | 'categoryId'
-> {
-  lastReplyAuthorName?: string | null
-  lastReplyAuthorTrip?: string | null
-  lastReplyAt?: string
-  board?: { name: string; title: string; isNsfw: boolean } | null
-  category?: { id: string; name: string; slug: string } | null
-  tags?: Tag[]
-}
-
-// Типы для API ответов
-interface BoardThreadsResponse {
-  board: Board
-  threads: Thread[]
-  pagination: {
-    page: number
-    totalPages: number
-    totalThreads: number
-  }
-}
-
-interface BoardInfoResponse extends Board {
-  stats: {
-    totalThreads: number
-    totalReplies: number
-    totalImages: number
-    lastActivity: string | null
-  }
-}
 
 export const forumApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // -------- Последние посты (OP тредов) --------
-    getLatestPosts: builder.query<
-      { items: LatestThreadItem[]; pagination: { page: number; limit: number; total: number; totalPages: number } },
-      { page?: number; limit?: number; board?: string; category?: string; tag?: string; nsfw?: '0' | '1' }
-    >({
+    getLatestPosts: builder.query<LatestPostsResponse, LatestPostsQuery>({
       query: ({ page = 1, limit = 20, board, category, tag, nsfw } = {}) => {
         const params = new URLSearchParams()
         params.set('page', String(page))
@@ -115,7 +96,7 @@ export const forumApi = api.injectEndpoints({
       query: (slug) => ({ url: `/forum/categories/${slug}`, method: 'GET' }),
       providesTags: (r, e, slug) => [{ type: 'Category', id: slug }]
     }),
-    getCategoryThreads: builder.query<{ category: Pick<Category,'id'|'name'|'slug'|'color'>; threads: Thread[]; pagination: { page: number; limit: number; total: number; totalPages: number } }, { slug: string; tag?: string; page?: number; limit?: number }>({
+  getCategoryThreads: builder.query<CategoryThreadsResponse, CategoryThreadsQuery>({
       query: ({ slug, tag, page = 1, limit = 10 }) => ({
         url: `/forum/categories/${slug}/threads${tag ? `?tag=${encodeURIComponent(tag)}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`}`,
         method: 'GET'
@@ -130,7 +111,7 @@ export const forumApi = api.injectEndpoints({
       query: (formData) => ({ url: '/forum/tags', method: 'POST', body: formData }),
       invalidatesTags: ['Tag']
     }),
-    assignTagToThread: builder.mutation<{ id: string; threadId: string; tagId: string }, { threadId: string; tagSlug: string }>({
+    assignTagToThread: builder.mutation<AssignTagToThreadResponse, AssignTagToThreadRequest>({
       query: ({ threadId, tagSlug }) => ({ url: `/forum/threads/${threadId}/tags/${tagSlug}`, method: 'POST' }),
       invalidatesTags: (r, e, { threadId }) => [{ type: 'Thread', id: threadId }]
     }),
@@ -181,7 +162,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Получить треды борда
-    getBoardThreads: builder.query<BoardThreadsResponse, { boardName: string; page?: number; tag?: string }>({
+    getBoardThreads: builder.query<BoardThreadsResponse, BoardThreadsQuery>({
       query: ({ boardName, page = 1, tag }) => ({
         url: `/forum/boards/${boardName}/full?page=${page}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`,
         method: 'GET'
@@ -193,7 +174,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Получить конкретный тред
-    getThread: builder.query<Thread, { boardName: string; threadId: string }>({
+    getThread: builder.query<Thread, GetThreadQuery>({
       query: ({ boardName, threadId }) => ({
         url: `/forum/boards/${boardName}/threads/${threadId}`,
         method: 'GET'
@@ -205,7 +186,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Создать новый борд
-    createBoard: builder.mutation<{ message: string; board: Board }, Partial<Board>>({
+    createBoard: builder.mutation<CreateBoardResponse, Partial<Board>>({
       query: (boardData) => ({
         url: '/forum/boards',
         method: 'POST',
@@ -215,10 +196,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Создать новый тред (в борде)
-    createThread: builder.mutation<Thread, { 
-      boardName: string; 
-      formData: FormData 
-    }>({
+    createThread: builder.mutation<Thread, CreateThreadRequest>({
       query: ({ boardName, formData }) => ({
         url: `/forum/boards/${boardName}/threads`,
         method: 'POST',
@@ -231,7 +209,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Создать тред (в категории)
-    createThreadInCategory: builder.mutation<Thread, { slug: string; formData: FormData }>({
+    createThreadInCategory: builder.mutation<Thread, CreateThreadInCategoryRequest>({
       query: ({ slug, formData }) => ({
         url: `/forum/categories/${slug}/threads`,
         method: 'POST',
@@ -241,11 +219,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Создать ответ в треде (в борде)
-    createReply: builder.mutation<Reply, { 
-      boardName: string; 
-      threadId: string; 
-      formData: FormData 
-    }>({
+    createReply: builder.mutation<Reply, CreateReplyRequest>({
       query: ({ boardName, threadId, formData }) => ({
         url: `/forum/boards/${boardName}/threads/${threadId}/replies`,
         method: 'POST',
@@ -258,7 +232,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Создать ответ в треде (в категории)
-    createReplyInCategory: builder.mutation<Reply, { categorySlug: string; threadId: string; formData: FormData }>({
+    createReplyInCategory: builder.mutation<Reply, CreateReplyInCategoryRequest>({
       query: ({ categorySlug, threadId, formData }) => ({
         url: `/forum/categories/${categorySlug}/threads/${threadId}/replies`,
         method: 'POST',
@@ -272,7 +246,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Получить тред по категории и slug
-    getThreadByCategoryAndSlug: builder.query<Thread, { categorySlug: string; threadSlug: string }>({
+    getThreadByCategoryAndSlug: builder.query<Thread, GetThreadByCategoryAndSlugQuery>({
       query: ({ categorySlug, threadSlug }) => ({
         url: `/forum/categories/${categorySlug}/threads/${threadSlug}`,
         method: 'GET'
@@ -283,10 +257,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Обновить настройки борда
-    updateBoard: builder.mutation<{ message: string; board: Board }, { 
-      boardName: string; 
-      data: Partial<Board> 
-    }>({
+    updateBoard: builder.mutation<UpdateBoardResponse, UpdateBoardRequest>({
       query: ({ boardName, data }) => ({
         url: `/forum/boards/${boardName}`,
         method: 'PUT',
@@ -299,7 +270,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Деактивировать борд
-    deactivateBoard: builder.mutation<{ message: string; board: Board }, string>({
+    deactivateBoard: builder.mutation<UpdateBoardResponse, string>({
       query: (boardName) => ({
         url: `/forum/boards/${boardName}`,
         method: 'DELETE'
@@ -308,10 +279,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Удалить тред
-    deleteThread: builder.mutation<{ message: string; deletedMediaCount: number }, { 
-      boardName: string; 
-      threadId: string 
-    }>({
+    deleteThread: builder.mutation<DeleteThreadResponse, DeleteThreadRequest>({
       query: ({ boardName, threadId }) => ({
         url: `/forum/boards/${boardName}/threads/${threadId}`,
         method: 'DELETE'
@@ -323,10 +291,7 @@ export const forumApi = api.injectEndpoints({
     }),
 
     // Удалить ответ
-    deleteReply: builder.mutation<{ message: string }, { 
-      boardName: string; 
-      replyId: string 
-    }>({
+    deleteReply: builder.mutation<DeleteReplyResponse, DeleteReplyRequest>({
       query: ({ boardName, replyId }) => ({
         url: `/forum/boards/${boardName}/replies/${replyId}`,
         method: 'DELETE'
@@ -335,7 +300,7 @@ export const forumApi = api.injectEndpoints({
         { type: 'Reply', id: replyId }
       ]
     })
-
+    
    
   })
 })
