@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction, type ActionReducerMapBuilder } from "@
 import type { User } from "@/src/types/types";
 import { userApi } from "@/src/services/user/user.service";
 import type { RootState } from "@/src/store/store";
-import { socketService } from "@/app/utils/socketService";
+import { socketService } from "@/src/services/socketService";
 
 interface InitialState {
 		user: User | null;

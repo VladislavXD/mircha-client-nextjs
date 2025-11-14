@@ -23,7 +23,7 @@ import { useAppSelector } from "@/src/hooks/reduxHooks";
 
 import Image from "next/image";
 import { useCurrentQuery } from "@/src/services/user/user.service";
-import ProfileSkeleton from "./ProfileSceleton";
+import ProfileHeaderSkeleton from "../../ui/profile/ProfileHeaderSkeleton";
 
 const Header = () => {
   const [mounted, setMounted] = useState(false);
@@ -71,7 +71,7 @@ const Header = () => {
           {isLoading ? (
             // ✅ Скелетон только на ПК (≥1024px), на мобильном ничего не показываем
             <div className="hidden lg:block">
-              <ProfileSkeleton />
+              <ProfileHeaderSkeleton />
             </div>
           ) : isAuthenticated ? (
             <MenuDropdown />
