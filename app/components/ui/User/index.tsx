@@ -1,6 +1,7 @@
 import { User as NextUser } from "@heroui/react";
 import React from "react";
 import SmartTooltip from "../SmartTooltip";
+import Image from "next/image";
 
 type Props = {
   name?: string;
@@ -99,7 +100,12 @@ const User = ({
                           }}
                         />
                       )}
-                      <img
+                      <Image
+                        width={64}
+                        height={64}
+                        unoptimized={false}
+                        quality={75}
+                        loading="eager"
                         src={avatarUrl || "/default-avatar.png"}
                         alt={name || "User"}
                         className="w-16 h-16 rounded-lg object-cover border-2 border-white/80 relative z-0"

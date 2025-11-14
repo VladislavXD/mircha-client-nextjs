@@ -6,7 +6,7 @@ import {
   useLazyGetOrCreateChatQuery,
   useMarkMessagesAsReadMutation,
 } from "@/src/services/caht.service"
-import { socketService } from "@/app/utils/socketService"
+import { socketService } from "@/src/services/socketService"
 import { Card, Input, Button, User, Spinner, Badge } from "@heroui/react"
 import { Send, ArrowLeft, Phone, Video } from "lucide-react"
 import type { Message } from "@/src/services/caht.service"

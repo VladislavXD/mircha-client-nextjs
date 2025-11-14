@@ -17,6 +17,7 @@ import ProfileHeader from "@/app/components/ui/profile/ProfileHeader";
 import ProfileInfo from "@/app/components/ui/profile/ProfileInfo";
 import ProfileAboutCard from "@/app/components/ui/profile/ProfileAboutCard";
 import ProfileActivityCard from "@/app/components/ui/profile/ProfileActivityCard";
+import ProfileSkeleton from "@/app/components/ui/profile/ProfileSkeleton";
 
 const UserProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,7 @@ const UserProfile = () => {
   const {
     data,
     currentUser,
+    isDataLoading,
     isFollowLoading,
     isUpdating,
     appearanceType,
@@ -40,6 +42,15 @@ const UserProfile = () => {
 
   const editModal = useDisclosure();
 
+  if (isDataLoading) {
+    return (
+      <>
+        <GoBack />
+        <ProfileSkeleton />
+      </>
+    );
+  }
+
   if (!data) return null;
 
   return (
@@ -53,7 +64,7 @@ const UserProfile = () => {
           onOpenAppearance={openAppearance}
         />
 
-
+      
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           <div className="md:col-span-1">
             <ProfileAboutCard data={data} />

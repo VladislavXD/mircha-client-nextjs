@@ -45,21 +45,24 @@ const Login = ({ setSelected }: Props) => {
   const onSubmit = async (data: Login) => {
     const recaptchaToken = await verifyRecaptcha("login");
 
+    
+    console.log(recaptchaToken);
     if (!recaptchaToken) {
-      addToast({
-        title: "Ошибка верификации",
-        description:
-          "Не удалось пройти проверку reCAPTCHA. Пожалуйста, попробуйте еще раз.",
-        color: "danger",
-      });
-      return;
-    }
-    console.log({ ...data, recaptchaToken });
+    addToast({
+      title: "Ошибка верификации",
+      description:
+        "Не удалось пройти проверку reCAPTCHA. Пожалуйста, попробуйте еще раз.",
+      color: "danger",
+    });
+    return;
+  }
     try {
+
       await login({ ...data, recaptchaToken }).unwrap();
       await triggerCurrentCuery().unwrap();
       router.push("/");
     } catch (err: unknown) {
+      console.log(err);
       if (hasErrorField(err)) {
         const errors = err.data.errors || [err.data.error];
 

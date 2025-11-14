@@ -1,9 +1,10 @@
 import { io, Socket } from 'socket.io-client';
-import { BASE_URL } from '@/src/constants/api.url';
 
 class SocketService {
   private socket: Socket | null = null;
   private isConnected = false;
+
+  private SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002' ;
 
   connect(token: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -12,8 +13,8 @@ class SocketService {
         return;
       }
 
-      // Создаем подключение к Socket.IO серверу
-      this.socket = io(BASE_URL, {
+      // Создаем подключение к Socket.IO серверу (отдельный микросервис)
+      this.socket = io(this.SOCKET_URL, {
         auth: {
           token
         },

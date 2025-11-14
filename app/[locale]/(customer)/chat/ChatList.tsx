@@ -4,7 +4,7 @@ import { useGetUserChatsQuery } from '@/src/services/caht.service';
 import { useRouter } from 'next/navigation';
 import { Card, User, Button, Spinner, Badge } from '@heroui/react';
 import { MessageCircle, Users } from 'lucide-react';
-import { socketService } from '../../../utils/socketService';
+import { socketService } from '../../../../src/services/socketService';
 import { formatChatTime, formatOnlineStatus } from '../../../utils/formatChatTime';
 import { Chat } from '@/src/services/caht.service';
 import { useAppSelector } from '@/src/hooks/reduxHooks';

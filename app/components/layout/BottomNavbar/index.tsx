@@ -12,7 +12,7 @@ import { CiSearch } from "react-icons/ci";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { IoIosNotifications } from "react-icons/io";
 import { useGetUserChatsQuery } from "@/src/services/caht.service";
-import { socketService } from "@/app/utils/socketService";
+import { socketService } from "@/src/services/socketService";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 
