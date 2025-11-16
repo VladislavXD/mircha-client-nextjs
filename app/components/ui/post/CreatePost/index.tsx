@@ -218,7 +218,7 @@ const CreatePost = (props: Props) => {
               ref={textareaRef}
               labelPlacement="outside"
               placeholder={t("CreatePost.CreatePostInput")}
-              className="mb-5"
+              className="mb-5 whitespace-pre-wrap"
               onChange={(e) => {
                 // обновляем RHF и локальную логику подсказок одновременно
                 field.onChange(e);
