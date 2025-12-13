@@ -21,7 +21,7 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import CreateReplyModal from './components/CreateReplyModal'
-import ReplyToPostModal from '@/shared/components/ReplyToPostModal'
+// import ReplyToPostModal from '@/shared/components/ReplyToPostModal'
 import PostContent from '@/shared/components/PostContent'
 import type { Thread, Reply } from '@/src/features/forum'
 import MobileForumExtras from '@/shared/components/forum/MobileForumExtras'
@@ -202,7 +202,7 @@ const ThreadPage = () => {
         thread={thread}
       />
 
-      <ReplyToPostModal 
+      {/* <ReplyToPostModal 
         isOpen={showReplyToPostModal}
         onClose={() => {
           setShowReplyToPostModal(false)
@@ -213,7 +213,7 @@ const ThreadPage = () => {
         thread={thread as any}
         replyToPost={replyToPost?.post as any}
         replyToPostId={replyToPost?.id}
-      />
+      /> */}
 
       {/* Мобильные виджеты: внизу страницы */}
       <MobileForumExtras />

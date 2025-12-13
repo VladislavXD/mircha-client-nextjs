@@ -43,7 +43,7 @@ export function ResetPasswordForm() {
 			heading={t('title')}
 			description={t('description')}
 			backButtonLabel={t('backToLogin')}
-			backButtonHref='/auth/login'
+			backButtonHref='/auth'
 		>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
@@ -76,7 +76,7 @@ export function ResetPasswordForm() {
 					>
 						<ReCAPTCHA
 							sitekey={
-								process.env.RECAPTCHA_SITE_KEY as string
+								process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string
 							}
 							onChange={setRecaptchaValue}
 							onExpired={() => setRecaptchaValue(null)}

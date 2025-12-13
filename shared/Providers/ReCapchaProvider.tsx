@@ -11,7 +11,7 @@ interface ReCaptchaProviderProps {
 const ReCapchaProvider: React.FC<ReCaptchaProviderProps> = ({ children }) => {
 	return (
 		<GoogleReCaptchaProvider
-			reCaptchaKey={process.env.RECAPTCHA_SITE_KEY || ""}
+			reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
 			language="en"
 			// scriptProps={{
 			// 	async: true,
