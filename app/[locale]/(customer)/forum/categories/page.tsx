@@ -3,10 +3,11 @@
 import React from "react";
 import { Spinner } from "@heroui/react";
 import { useTheme } from "next-themes";
-import { useGetCategoriesQuery } from "@/src/services/forum.service";
+// TODO: Migrate to React Query: Create useCategories hook
+import { useGetCategoriesQuery } from "@/src/services/forum.service.old";
 import Link from "next/link";
 import { Card, CardBody, CardHeader, Chip } from "@heroui/react";
-import MobileForumExtras from "@/app/components/forum/MobileForumExtras";
+import MobileForumExtras from "@/shared/components/forum/MobileForumExtras";
 
 const CategoriesPage = () => {
   const { theme } = useTheme();

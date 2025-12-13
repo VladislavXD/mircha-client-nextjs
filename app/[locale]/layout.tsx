@@ -4,7 +4,7 @@ import { fontSans } from "@/src/config/fonts";
 import type { Metadata, Viewport } from "next";
 
 import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
-import ClientProviders from "../../src/Providers/ClientProviders";
+import ClientProviders from "@/shared/Providers/ClientProviders";
 import { getMessages } from "next-intl/server";
 import { Locale, routing } from "@/src/i18n/routing";
 import { notFound } from "next/navigation";

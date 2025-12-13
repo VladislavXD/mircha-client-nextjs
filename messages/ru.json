@@ -1,10 +1,9 @@
 {
   "HomePage": {
-    
     "CreatePost": {
       "addPost": "Добавить",
       "CreatePostInput": "О чем думаете?",
-      "addImage": "Добавить  фото",
+      "addImage": "Добавить фото",
       "previewPost": "Превью поста",
       "EmojiPicker": "Выберите эмодзи"
     },
@@ -45,7 +44,289 @@
       "tags": "Теги",
       "lastActive": "Последняя активность"
     }
-    
-
+  },
+  "Settings": {
+    "title": "Настройки",
+    "sidebar": {
+      "profile": "Профиль",
+      "profileDesc": "Основная информация и аватар",
+      "security": "Безопасность",
+      "securityDesc": "Пароль и двухфакторная аутентификация",
+      "privacy": "Конфиденциальность",
+      "privacyDesc": "Видимость профиля и активности",
+      "appearance": "Оформление",
+      "appearanceDesc": "Фон, рамки и персонализация",
+      "notifications": "Уведомления",
+      "notificationsDesc": "Настройки оповещений",
+      "language": "Язык и регион",
+      "languageDesc": "Локализация интерфейса"
+    },
+    "profile": {
+      "title": "Профиль",
+      "description": "Управляйте основной информацией о себе",
+      "loading": "Загружаем профиль…",
+      "notFound": "Пользователь не найден",
+      "name": "Имя",
+      "email": "Email",
+      "username": "Никнейм",
+      "dateOfBirth": "Дата рождения",
+      "bio": "О себе",
+      "status": "Статус",
+      "location": "Местоположение",
+      "avatar": "Аватар",
+      "changeAvatar": "Изменить аватар",
+      "saveChanges": "Сохранить изменения"
+    },
+    "security": {
+      "title": "Безопасность",
+      "description": "Управляйте безопасностью своего аккаунта",
+      "loading": "Загружаем настройки…",
+      "password": "Пароль",
+      "passwordDesc": "Последнее изменение: никогда",
+      "changePassword": "Изменить пароль",
+      "twoFactor": "Двухфакторная аутентификация",
+      "twoFactorDesc": "Дополнительная защита вашего аккаунта",
+      "enable2FA": "Включить 2FA",
+      "disable2FA": "Отключить 2FA",
+      "saveChanges": "Сохранить изменения"
+    },
+    "privacy": {
+      "title": "Конфиденциальность",
+      "description": "Управляйте видимостью вашего профиля и активности",
+      "publicProfile": "Публичный профиль",
+      "publicProfileDesc": "Разрешить другим пользователям просматривать ваш профиль",
+      "showEmail": "Отображать email",
+      "showEmailDesc": "Показывать ваш email адрес в профиле",
+      "showActivity": "Активность",
+      "showActivityDesc": "Показывать вашу активность (лайки, комментарии) другим пользователям",
+      "allowMessages": "Личные сообщения",
+      "allowMessagesDesc": "Разрешить другим пользователям отправлять вам сообщения",
+      "showOnlineStatus": "Онлайн статус",
+      "showOnlineStatusDesc": "Показывать когда вы онлайн",
+      "saveChanges": "Сохранить изменения"
+    },
+    "appearance": {
+      "title": "Оформление",
+      "description": "Персонализируйте внешний вид вашего профиля",
+      "loading": "Загружаем настройки…",
+      "backgroundPreview": "Предпросмотр фона профиля",
+      "backgroundUrl": "URL фона профиля",
+      "backgroundUrlPlaceholder": "https://example.com/image.jpg",
+      "usernameFrame": "Рамка никнейма",
+      "usernameFrameUrl": "URL рамки для никнейма",
+      "avatarFrame": "Рамка аватара",
+      "avatarFrameUrl": "URL рамки для аватара",
+      "saveChanges": "Сохранить изменения"
+    },
+    "common": {
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "back": "Назад",
+      "loading": "Загрузка…",
+      "saving": "Сохранение…"
+    }
+  },
+  "Auth": {
+    "login": {
+      "title": "Вход",
+      "email": "Email",
+      "password": "Пароль",
+      "forgotPassword": "Забыли пароль?",
+      "submit": "Войти",
+      "noAccount": "Нет аккаунта?",
+      "register": "Зарегистрироваться",
+      "twoFactorCode": "Код двухфакторной аутентификации",
+      "twoFactorDesc": "Введите код двух фактороной аутентификации",
+      "enterCode": "Введите код из 6 цифр"
+    },
+    "register": {
+      "title": "Регистрация",
+      "name": "Имя",
+      "email": "Email",
+      "password": "Пароль",
+      "confirmPassword": "Повторите пароль",
+      "submit": "Зарегистрироваться",
+      "hasAccount": "Уже есть аккаунт?",
+      "login": "Войти"
+    },
+    "resetPassword": {
+      "title": "Восстановление пароля",
+      "description": "Введите адрес электронной почты, и мы отправим ссылку для восстановления пароля",
+      "email": "Email",
+      "submit": "Отправить ссылку",
+      "sending": "Отправляем ссылку…",
+      "backToLogin": "Вернуться ко входу"
+    },
+    "newPassword": {
+      "title": "Новый пароль",
+      "description": "Придумайте новый пароль для вашего аккаунта",
+      "password": "Новый пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "submit": "Обновить пароль",
+      "updating": "Обновляем пароль…",
+      "hint": "Пароль должен содержать минимум 8 символов"
+    },
+    "verification": {
+      "title": "Подтверждение email",
+      "description": "Мы отправили письмо с ссылкой для подтверждения",
+      "submit": "Войти в аккаунт"
+    },
+    "tabs": {
+      "login": "Вход",
+      "register": "Регистрация"
+    },
+    "page": {
+      "title": "Авторизация",
+      "description": "Введите свои учетные данные для доступа к вашему аккаунту"
+    }
+  },
+  "Posts": {
+    "create": {
+      "placeholder": "О чем думаете?",
+      "addImage": "Добавить фото",
+      "submit": "Опубликовать",
+      "preview": "Превью поста"
+    },
+    "actions": {
+      "like": "Нравится",
+      "comment": "Комментировать",
+      "share": "Поделиться",
+      "delete": "Удалить",
+      "edit": "Редактировать"
+    },
+    "comments": {
+      "title": "Комментарии",
+      "placeholder": "Напишите комментарий...",
+      "submit": "Отправить",
+      "noComments": "Пока нет комментариев"
+    },
+    "errors": {
+      "loadError": "Ошибка загрузки постов",
+      "createError": "Ошибка создания поста",
+      "deleteError": "Ошибка удаления поста"
+    }
+  },
+  "Chat": {
+    "list": {
+      "title": "Сообщения",
+      "search": "Поиск чатов",
+      "noChats": "Нет чатов",
+      "unknownUser": "Неизвестный пользователь",
+      "noMessages": "Нет сообщений",
+      "loadError": "Ошибка загрузки чатов"
+    },
+    "window": {
+      "typingPlaceholder": "Введите сообщение...",
+      "send": "Отправить",
+      "online": "В сети",
+      "offline": "Не в сети",
+      "typing": "печатает...",
+      "loadError": "Ошибка загрузки чата"
+    },
+    "status": {
+      "online": "В сети",
+      "lastSeen": "был(а) {{time}}"
+    }
+  },
+  "Forum": {
+    "board": {
+      "createThread": "Создать тред",
+      "threads": "Треды",
+      "posts": "Посты",
+      "lastPost": "Последний пост",
+      "loadError": "Ошибка загрузки"
+    },
+    "thread": {
+      "replies": "Ответов",
+      "views": "Просмотров",
+      "created": "Создан",
+      "lastReply": "Последний ответ",
+      "anonymous": "Аноним"
+    },
+    "createThread": {
+      "title": "Создать тред",
+      "nameLabel": "Имя",
+      "namePlaceholder": "Анон",
+      "nameDescription": "Оставьте пустым для анонимности",
+      "subjectLabel": "Тема",
+      "subjectPlaceholder": "Введите тему треда",
+      "contentLabel": "Содержание",
+      "tagsLabel": "Выберите теги",
+      "tagsPlaceholder": "Подберите подходящие теги",
+      "fileLabel": "Загрузка файла",
+      "submit": "Создать тред",
+      "cancel": "Отмена",
+      "errorRequired": "Содержание треда обязательно",
+      "errorCreate": "Ошибка создания треда"
+    },
+    "createReply": {
+      "title": "Ответить",
+      "nameLabel": "Имя",
+      "namePlaceholder": "Аноним",
+      "nameDescription": "Оставьте пустым для анонимности",
+      "contentLabel": "Ответ",
+      "fileLabel": "Загрузка файлов",
+      "submit": "Отправить",
+      "cancel": "Отмена",
+      "errorRequired": "Содержание ответа обязательно",
+      "errorCreate": "Ошибка отправки ответа"
+    },
+    "createBoard": {
+      "title": "Создать борд",
+      "nameLabel": "Название борда",
+      "titleLabel": "Заголовок",
+      "descriptionLabel": "Описание",
+      "maxFileSizeLabel": "Максимальный размер файла",
+      "postsPerPageLabel": "Постов на странице",
+      "threadsPerPageLabel": "Тредов на странице",
+      "bumpLimitLabel": "Лимит бампов",
+      "imageLimitLabel": "Лимит изображений",
+      "submit": "Создать",
+      "cancel": "Отмена",
+      "errorRequired": "Название и заголовок обязательны",
+      "errorCreate": "Ошибка создания борда"
+    },
+    "category": {
+      "filterByTag": "Фильтр по тегу",
+      "allThreads": "Все треды",
+      "back": "Назад"
+    },
+    "whatsNew": {
+      "lastReply": "Последний",
+      "anonymous": "Аноним"
+    },
+    "post": {
+      "imageAlt": "Изображение поста"
+    }
+  },
+  "Profile": {
+    "followers": "Подписчики",
+    "following": "Подписки",
+    "posts": "Посты",
+    "follow": "Подписаться",
+    "unfollow": "Отписаться",
+    "edit": "Редактировать",
+    "loading": "Загрузка...",
+    "loadError": "Ошибка загрузки данных"
+  },
+  "Common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "back": "Назад",
+    "submit": "Отправить",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "noData": "Нет данных"
+  },
+  "CreatePost": {
+    "addPost": "Добавить",
+    "CreatePostInput": "О чем думаете?",
+    "addImage": "Добавить фото",
+    "previewPost": "Превью поста",
+    "EmojiPicker": "Выберите эмодзи"
   }
 } 

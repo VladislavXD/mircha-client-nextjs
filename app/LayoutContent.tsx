@@ -1,24 +1,50 @@
 "use client";
 import { usePathname } from "next/navigation";
-import Header from "./components/layout/Header";
-import Container from "./components/layout/container";
-import Navbar from "./components/layout/Navbar";
+import Header from "../shared/components/layout/Header";
+import Container from "../shared/components/layout/container";
+import Navbar from "../shared/components/layout/Navbar";
 import AuthGuard from "./[locale]/AuthGuard";
-import TokenInitializer from "./TokenInitializer";
-import BottomNav from "./components/layout/BottomNavbar";
-import RightSideBar from "./components/layout/RightSideBar";
-import GoogleAuthHandler from "@/components/GoogleAuthHandler";
+import BottomNav from "../shared/components/layout/BottomNavbar";
+import RightSideBar from "../shared/components/layout/RightSideBar";
+import Snowfall from "../shared/components/layout/Seasonal/Snowfall";
+import FestiveBanner from "../shared/components/layout/Seasonal/FestiveBanner";
+import { useState, useEffect } from "react";
+
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [snowEnabled, setSnowEnabled] = useState(true);
+  
+  // Читаем настройку снега из localStorage при монтировании
+  useEffect(() => {
+    const saved = localStorage.getItem("snowfall-enabled");
+    if (saved !== null) {
+      setSnowEnabled(saved === "true");
+    }
+    
+    // Слушаем событие переключения снега из Header
+    const handleToggle = (e: CustomEvent<boolean>) => {
+      setSnowEnabled(e.detail);
+    };
+    
+    window.addEventListener('snowfall-toggle', handleToggle as EventListener);
+    return () => {
+      window.removeEventListener('snowfall-toggle', handleToggle as EventListener);
+    };
+  }, []);
   
   // Убираем сложную логику проверки - middleware уже все сделал
   const isAuthPage = pathname?.startsWith('/auth');
+  const hideRightSidebar = pathname?.includes('/dashboard/settings');
   
   return (
     <>
-      <TokenInitializer />
-      <GoogleAuthHandler />
+      {/* Праздничная гирлянда */}
+      <FestiveBanner />
+      
+      {/* Новогодний снег на всём сайте */}
+      <Snowfall enabled={snowEnabled} density={50} />
+
       {/* Если страница auth - рендерим без Layout */}
       {isAuthPage ? (
         <div className="relative flex flex-col h-screen">
@@ -53,11 +79,13 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
                   </div>
                 </div>
                 
-                <div className="hidden md:block w-72 shrink-0 flex-col border-l border-zinc-700 overflow-y-auto">
-                  <div className="p-4">
-                    <RightSideBar />
+                {!hideRightSidebar && (
+                  <div className="hidden md:block w-72 shrink-0 flex-col border-l border-zinc-700 overflow-y-auto">
+                    <div className="p-4">
+                      <RightSideBar />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

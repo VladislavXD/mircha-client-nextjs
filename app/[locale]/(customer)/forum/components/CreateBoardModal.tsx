@@ -15,8 +15,10 @@ import {
   SelectItem,
   Chip
 } from '@heroui/react'
-import { useCreateBoardMutation } from '@/src/services/forum.service'
+// TODO: Migrate to React Query: Create useCreateBoard hook
+import { useCreateBoardMutation } from '@/src/services/forum.service.old'
 import { toast } from 'react-hot-toast'
+import { useTranslations } from 'next-intl'
 
 interface CreateBoardModalProps {
   isOpen: boolean
@@ -24,6 +26,7 @@ interface CreateBoardModalProps {
 }
 
 const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) => {
+  const t = useTranslations('Forum.createBoard')
   const [createBoard, { isLoading }] = useCreateBoardMutation()
   
   const [formData, setFormData] = useState({
@@ -47,7 +50,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
     e.preventDefault()
     
     if (!formData.name.trim() || !formData.title.trim()) {
-      toast.error('Название и заголовок обязательны')
+      toast.error(t('errorRequired'))
       return
     }
 
@@ -68,7 +71,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
         imageLimit: 150
       })
     } catch (error: any) {
-      toast.error(error?.data?.error || 'Ошибка создания борда')
+      toast.error(error?.data?.error || t('errorCreate'))
     }
   }
 
@@ -99,13 +102,13 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader>
-            <h2 className="text-xl font-bold">Создать новый борд</h2>
+            <h2 className="text-xl font-bold">{t('title')}</h2>
           </ModalHeader>
           
           <ModalBody className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Input
-                label="Название борда"
+                label={t('nameLabel')}
                 placeholder="b, g, v..."
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -115,7 +118,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
               />
               
               <Input
-                label="Заголовок"
+                label={t('titleLabel')}
                 placeholder="Random, Technology..."
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
@@ -124,7 +127,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
             </div>
 
             <Textarea
-              label="Описание"
+              label={t('descriptionLabel')}
               placeholder="Описание борда..."
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -141,7 +144,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
             </div>
 
             <Select
-              label="Максимальный размер файла"
+              label={t('maxFileSizeLabel')}
               selectedKeys={[formData.maxFileSize.toString()]}
               onSelectionChange={(keys) => {
                 const value = Array.from(keys)[0] as string
@@ -178,7 +181,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
             <div className="grid grid-cols-2 gap-4">
               <Input
                 type="number"
-                label="Постов на странице"
+                label={t('postsPerPageLabel')}
                 value={formData.postsPerPage.toString()}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
@@ -190,7 +193,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
               
               <Input
                 type="number"
-                label="Тредов на странице"
+                label={t('threadsPerPageLabel')}
                 value={formData.threadsPerPage.toString()}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
@@ -204,7 +207,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
             <div className="grid grid-cols-2 gap-4">
               <Input
                 type="number"
-                label="Лимит бампов"
+                label={t('bumpLimitLabel')}
                 value={formData.bumpLimit.toString()}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
@@ -216,7 +219,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
               
               <Input
                 type="number"
-                label="Лимит изображений"
+                label={t('imageLimitLabel')}
                 value={formData.imageLimit.toString()}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
@@ -234,14 +237,14 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) 
               onPress={onClose}
               disabled={isLoading}
             >
-              Отмена
+              {t('cancel')}
             </Button>
             <Button 
               color="primary" 
               type="submit"
               isLoading={isLoading}
             >
-              Создать борд
+              {t('submit')}
             </Button>
           </ModalFooter>
         </form>

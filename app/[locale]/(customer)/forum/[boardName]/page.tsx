@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { 
-  useGetBoardByNameQuery, 
-  useGetThreadsQuery 
-} from '@/src/services/forum.service'
+  useBoardByName, 
+  useBoardThreads 
+} from '@/src/features/forum'
 import { 
   Card, 
   CardBody, 
@@ -20,9 +20,9 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import CreateThreadModal from './components/CreateThreadModal'
-import MediaThumbnail from '@/app/components/MediaThumbnail'
+import MediaThumbnail from '@/shared/components/MediaThumbnail'
 import { useRouter } from 'next/navigation'
-import MobileForumExtras from '@/app/components/forum/MobileForumExtras'
+import MobileForumExtras from '@/shared/components/forum/MobileForumExtras'
 
 const BoardPage = () => {
   const params = useParams()
@@ -39,13 +39,16 @@ const BoardPage = () => {
     data: board, 
     isLoading: boardLoading, 
     error: boardError 
-  } = useGetBoardByNameQuery(boardName)
+  } = useBoardByName(boardName)
 
   const { 
-    data: threads, 
+    data: threadsData, 
     isLoading: threadsLoading, 
     error: threadsError 
-  } = useGetThreadsQuery(boardName)
+  } = useBoardThreads(boardName, 1)
+
+  // Извлекаем threads из ответа API
+  const threads = threadsData?.threads
 
 
    useEffect(()=> {

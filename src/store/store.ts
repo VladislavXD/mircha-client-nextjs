@@ -1,36 +1,60 @@
-import type { Action, ThunkAction } from "@reduxjs/toolkit"
-import { configureStore } from "@reduxjs/toolkit"
-import { api } from "@/src/services/api"
-import { adminApi } from "@/src/services/admin.service"
-import user from '@/src/store/user/user.slice'
-import { listenerMiddleware } from "@/app/middleware/auth"
-import { chatApi } from "../services/caht.service"
-import { newsApi } from "../services/news.service"
+import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import {
+	FLUSH,
+	PAUSE,
+	PERSIST,
+	PURGE,
+	REGISTER,
+	REHYDRATE,
+	persistStore
+} from 'redux-persist'
+import { userSlice } from './user/user.slice'
+import onlineStatusReducer from './onlineStatus/onlineStatus.slice'
+
+// import { filtersSlice } from './filters/filters.slice'
+
+
+//сохранять в store пользователя из поиска по которому кликнул
+//сохранять статус nsfw пользователя для треда
+//online status for user - DONE (Redux slice)
+// а так же сохранять еще что то
+
+
+const isClient = typeof window !== 'undefined'
+
+const combinedReducers = combineReducers({
+	user: userSlice.reducer,
+	onlineStatus: onlineStatusReducer,
+	// filters: filtersSlice.reducer
+})
+
+let mainReducer = combinedReducers
+
+if (isClient) {
+	const { persistReducer } = require('redux-persist')
+	const storage = require('redux-persist/lib/storage').default
+
+	const persistConfig = {
+		key: 'mirchanRoot',
+		storage,
+		whitelist: ['user'] // onlineStatus НЕ сохраняем - он должен обновляться при каждом входе
+	}
+
+	mainReducer = persistReducer(persistConfig, combinedReducers)
+}
 
 export const store = configureStore({
-  reducer: {
-    [api.reducerPath]: api.reducer,
-    [adminApi.reducerPath]: adminApi.reducer,
-    [chatApi.reducerPath]: chatApi.reducer,
-    [newsApi.reducerPath]: newsApi.reducer,
-    user,
-  },
-  middleware: (getDefaultMiddleware) => {
-    return getDefaultMiddleware()
-    .concat(api.middleware)
-    .concat(adminApi.middleware)
-    .concat(chatApi.middleware)
-    .concat(newsApi.middleware)
-    .prepend(listenerMiddleware.middleware)
-  },
+	reducer: mainReducer,
+	middleware: getDefaultMiddleware =>
+		getDefaultMiddleware({
+			serializableCheck: {
+				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
+			}
+		})
 })
-// Infer the type of `store`
-export type AppStore = typeof store
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = AppStore["dispatch"]
-export type AppThunk<ThunkReturnType = void> = ThunkAction<
-  ThunkReturnType,
-  RootState,
-  unknown,
-  Action
->
+
+export const persistor = persistStore(store)
+
+export type TypeRootState = ReturnType<typeof mainReducer>
+export type RootState = TypeRootState // Алиас для совместимости
+export type AppDispatch = typeof store.dispatch
