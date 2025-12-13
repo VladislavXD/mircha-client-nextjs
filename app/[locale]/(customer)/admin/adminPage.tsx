@@ -19,37 +19,27 @@ import {
   MdPhoto,
   MdSettings 
 } from 'react-icons/md'
-import AdminDashboard from '@/app/components/admin/AdminDashboard'
-import UserManagement from '@/app/components/admin/UserManagement'
-import BoardManagement from '@/app/components/admin/BoardManagement'
-import ThreadManagement from '@/app/components/admin/ThreadManagement'
-import ReplyManagement from '@/app/components/admin/ReplyManagement'
-import MediaManagement from '@/app/components/admin/MediaManagement'
-import CategoryManagement from '@/app/components/admin/CategoryManagement'
-import TagManagement from '@/app/components/admin/TagManagement'
-import { useSelector } from 'react-redux'
-import type { RootState } from '@/src/store/store'
-import { useCurrentQuery } from '@/src/services/user/user.service'
+import AdminDashboard from '@/shared/components/admin/AdminDashboard'
+import { BoardManagement, ThreadManagement, UserManagement } from '@/src/features/admin'
 import { useTheme } from 'next-themes'
+import { useCurrentUser } from '@/src/hooks/user'
+import Cookies from 'js-cookie'
+import CategoryManagement from '@/shared/components/admin/CategoryManagement'
 
 const AdminPage: React.FC = () => {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('dashboard')
   
   // Используем готовый хук для получения текущего пользователя
-  const { data: currentUser, isLoading: isLoadingUser, error: userError } = useCurrentQuery()
+  const { user: currentUser, isLoading: isLoadingUser, error: userError } = useCurrentUser()
 
   useEffect(() => {
     checkAdminAccess()
   }, [currentUser, userError])
 
   const checkAdminAccess = () => {
-    // Если нет токена в localStorage, перенаправляем
-    const token = localStorage.getItem('token')
-    if (!token) {
-      router.push('/')
-      return
-    }
+    // Проверяем наличие токена в cookies
+    
 
     // Если произошла ошибка при загрузке пользователя (например, токен недействителен)
     if (userError) {
@@ -58,9 +48,9 @@ const AdminPage: React.FC = () => {
       return
     }
 
-    // Если пользователь загружен, проверяем его роль
+    // Если пользователь загружен, проверяем его роль (только ADMIN)
     if (currentUser) {
-      if (currentUser.role !== 'ADMIN' && currentUser.role !== 'MODERATOR') {
+      if (currentUser.role !== 'ADMIN') {
         alert('У вас нет прав доступа к админ панели')
         router.push('/')
         return
@@ -82,14 +72,14 @@ const AdminPage: React.FC = () => {
       label: 'Панель управления',
       icon: MdDashboard,
       component: <AdminDashboard />,
-      allowedRoles: ['ADMIN', 'MODERATOR']
+      allowedRoles: ['ADMIN']
     },
     {
       id: 'users',
       label: 'Пользователи',
       icon: MdPeople,
       component: <UserManagement />,
-      allowedRoles: ['ADMIN', 'MODERATOR']
+      allowedRoles: ['ADMIN']
     },
     {
       id: 'boards',
@@ -102,14 +92,7 @@ const AdminPage: React.FC = () => {
       id: 'categories',
       label: 'Категории',
       icon: MdViewModule,
-      component: <CategoryManagement />,
-      allowedRoles: ['ADMIN']
-    },
-    {
-      id: 'tags',
-      label: 'Теги',
-      icon: MdViewModule,
-      component: <TagManagement />,
+      component: <CategoryManagement/>,
       allowedRoles: ['ADMIN']
     },
     {
@@ -117,21 +100,21 @@ const AdminPage: React.FC = () => {
       label: 'Треды',
       icon: MdForum,
       component: <ThreadManagement />,
-      allowedRoles: ['ADMIN', 'MODERATOR']
+      allowedRoles: ['ADMIN']
     },
     {
       id: 'replies',
       label: 'Ответы',
       icon: MdReply,
-      component: <ReplyManagement />,
-      allowedRoles: ['ADMIN', 'MODERATOR']
+      component: <div>Ответы (в разработке)</div>,
+      allowedRoles: ['ADMIN']
     },
     {
       id: 'media',
       label: 'Медиа',
       icon: MdPhoto,
-      component: <MediaManagement />,
-      allowedRoles: ['ADMIN', 'MODERATOR']
+      component: <div>Медиа (в разработке)</div>,
+      allowedRoles: ['ADMIN']
     },
     {
       id: 'settings',
@@ -142,10 +125,8 @@ const AdminPage: React.FC = () => {
     }
   ]
 
-  // Фильтруем вкладки по ролям пользователя
-  const availableTabs = tabs.filter(tab => 
-    currentUser?.role && tab.allowedRoles.includes(currentUser.role)
-  )
+  // Фильтруем вкладки по ролям пользователя (только ADMIN)
+  const availableTabs = tabs.filter(tab => currentUser?.role === 'ADMIN' && tab.allowedRoles.includes(currentUser.role))
 
   const currentTab = tabs.find(tab => tab.id === activeTab)
 
@@ -164,9 +145,9 @@ const AdminPage: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <Chip color="primary" variant="flat" size="sm">
-                {currentUser?.role === 'ADMIN' ? 'Администратор' : 'Модератор'}
-              </Chip>
+              {currentUser?.role === 'ADMIN' && (
+                <Chip color="primary" variant="flat" size="sm">Администратор</Chip>
+              )}
             </div>
           </div>
         </div>

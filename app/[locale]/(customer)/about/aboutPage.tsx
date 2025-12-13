@@ -13,7 +13,7 @@ export default function AboutPage() {
 
   if (!mounted) return null;
 
-  const logoSrc = theme === 'dark' ? '/darkLogo.svg' : '/lightLogo.svg';
+  const logoSrc = theme === 'dark' ? '/mirchan-logo-icon-light.svg' : '/mirchan-logo-icon-dark.svg';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-content/5">
@@ -23,11 +23,11 @@ export default function AboutPage() {
         <div className="relative max-w-7xl mx-auto px-6 text-center">
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary to-secondary rounded-full blur-xl opacity-30 animate-pulse" />
+              <div className="absolute -inset-2 bg-gradient-to-r from-primary to-secondary rounded-full blur-xl opacity-30 animate-pulse" />
               <Image
                 src={logoSrc}
                 alt="Mirchan"
-                className="w-32 h-32 relative z-10"
+                className="w-20 h-40 relative z-10"
                 radius="full"
               />
             </div>

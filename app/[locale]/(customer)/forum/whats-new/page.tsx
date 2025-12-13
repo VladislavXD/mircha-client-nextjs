@@ -2,9 +2,10 @@
 
 import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useGetLatestPostsQuery, LatestThreadItem } from '@/src/services/forum.service'
+// TODO: Migrate to React Query: Create useLatestPosts hook
+import { useGetLatestPostsQuery, LatestThreadItem } from '@/src/services/forum.service.old'
 import { Card, CardBody, CardHeader, Chip, Pagination, Spinner } from '@heroui/react'
-import TagChip from '@/app/components/TagChip'
+import TagChip from '@/shared/components/TagChip'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
