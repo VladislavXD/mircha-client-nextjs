@@ -22,12 +22,12 @@
         "settings": "Settings",
         "logout": "Log out",
         "about": "About",
-        "feedback": "Feedback", 
+        "feedback": "Feedback",
         "login": "Log in",
         "registered": "Registered"
       }
     },
-     "rightSidebar": {
+    "rightSidebar": {
       "search": "Search",
       "news": "News",
       "whatsNew": "What's new",
@@ -44,5 +44,289 @@
       "tags": "Tags",
       "lastActive": "Last active"
     }
+  },
+  "Settings": {
+    "title": "Settings",
+    "sidebar": {
+      "profile": "Profile",
+      "profileDesc": "Basic information and avatar",
+      "security": "Security",
+      "securityDesc": "Password and two-factor authentication",
+      "privacy": "Privacy",
+      "privacyDesc": "Profile and activity visibility",
+      "appearance": "Appearance",
+      "appearanceDesc": "Background, frames and personalization",
+      "notifications": "Notifications",
+      "notificationsDesc": "Notification settings",
+      "language": "Language and region",
+      "languageDesc": "Interface localization"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Manage your basic information",
+      "loading": "Loading profile…",
+      "notFound": "User not found",
+      "name": "Name",
+      "email": "Email",
+      "username": "Username",
+      "dateOfBirth": "Date of birth",
+      "bio": "Bio",
+      "status": "Status",
+      "location": "Location",
+      "avatar": "Avatar",
+      "changeAvatar": "Change avatar",
+      "saveChanges": "Save changes"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Manage your account security",
+      "loading": "Loading settings…",
+      "password": "Password",
+      "passwordDesc": "Last changed: never",
+      "changePassword": "Change password",
+      "twoFactor": "Two-factor authentication",
+      "twoFactorDesc": "Additional protection for your account",
+      "enable2FA": "Enable 2FA",
+      "disable2FA": "Disable 2FA",
+      "saveChanges": "Save changes"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "description": "Manage your profile and activity visibility",
+      "publicProfile": "Public profile",
+      "publicProfileDesc": "Allow other users to view your profile",
+      "showEmail": "Show email",
+      "showEmailDesc": "Display your email address in profile",
+      "showActivity": "Activity",
+      "showActivityDesc": "Show your activity (likes, comments) to other users",
+      "allowMessages": "Direct messages",
+      "allowMessagesDesc": "Allow other users to send you messages",
+      "showOnlineStatus": "Online status",
+      "showOnlineStatusDesc": "Show when you are online",
+      "saveChanges": "Save changes"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Personalize your profile appearance",
+      "loading": "Loading settings…",
+      "backgroundPreview": "Profile background preview",
+      "backgroundUrl": "Profile background URL",
+      "backgroundUrlPlaceholder": "https://example.com/image.jpg",
+      "usernameFrame": "Username frame",
+      "usernameFrameUrl": "Username frame URL",
+      "avatarFrame": "Avatar frame",
+      "avatarFrameUrl": "Avatar frame URL",
+      "saveChanges": "Save changes"
+    },
+    "common": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "back": "Back",
+      "loading": "Loading…",
+      "saving": "Saving…"
+    }
+  },
+  "Auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Log in",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up",
+      "twoFactorCode": "Two-factor authentication code",
+      "twoFactorDesc": "Enter the code for two-factor authentication",
+      "enterCode": "Enter 6-digit code"
+    },
+    "register": {
+      "title": "Sign up",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "submit": "Sign up",
+      "hasAccount": "Already have an account?",
+      "login": "Log in"
+    },
+    "resetPassword": {
+      "title": "Password recovery",
+      "description": "Enter your email address and we'll send you a password reset link",
+      "email": "Email",
+      "submit": "Send link",
+      "sending": "Sending link…",
+      "backToLogin": "Back to login"
+    },
+    "newPassword": {
+      "title": "New password",
+      "description": "Create a new password for your account",
+      "password": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Update password",
+      "updating": "Updating password…",
+      "hint": "Password must contain at least 8 characters"
+    },
+    "verification": {
+      "title": "Email verification",
+      "description": "We've sent you an email with a confirmation link",
+      "submit": "Log in to account"
+    },
+    "tabs": {
+      "login": "Login",
+      "register": "Sign up"
+    },
+    "page": {
+      "title": "Authorization",
+      "description": "Enter your credentials to access your account"
+    }
+  },
+  "Posts": {
+    "create": {
+      "placeholder": "What are you thinking?",
+      "addImage": "Add image",
+      "submit": "Publish",
+      "preview": "Post preview"
+    },
+    "actions": {
+      "like": "Like",
+      "comment": "Comment",
+      "share": "Share",
+      "delete": "Delete",
+      "edit": "Edit"
+    },
+    "comments": {
+      "title": "Comments",
+      "placeholder": "Write a comment...",
+      "submit": "Send",
+      "noComments": "No comments yet"
+    },
+    "errors": {
+      "loadError": "Error loading posts",
+      "createError": "Error creating post",
+      "deleteError": "Error deleting post"
+    }
+  },
+  "Chat": {
+    "list": {
+      "title": "Messages",
+      "search": "Search chats",
+      "noChats": "No chats",
+      "unknownUser": "Unknown user",
+      "noMessages": "No messages",
+      "loadError": "Error loading chats"
+    },
+    "window": {
+      "typingPlaceholder": "Type a message...",
+      "send": "Send",
+      "online": "Online",
+      "offline": "Offline",
+      "typing": "typing...",
+      "loadError": "Error loading chat"
+    },
+    "status": {
+      "online": "Online",
+      "lastSeen": "last seen {{time}}"
+    }
+  },
+  "Forum": {
+    "board": {
+      "createThread": "Create thread",
+      "threads": "Threads",
+      "posts": "Posts",
+      "lastPost": "Last post",
+      "loadError": "Loading error"
+    },
+    "thread": {
+      "replies": "Replies",
+      "views": "Views",
+      "created": "Created",
+      "lastReply": "Last reply",
+      "anonymous": "Anonymous"
+    },
+    "createThread": {
+      "title": "Create thread",
+      "nameLabel": "Name",
+      "namePlaceholder": "Anon",
+      "nameDescription": "Leave empty for anonymity",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "Enter thread subject",
+      "contentLabel": "Content",
+      "tagsLabel": "Select tags",
+      "tagsPlaceholder": "Choose appropriate tags",
+      "fileLabel": "Upload file",
+      "submit": "Create thread",
+      "cancel": "Cancel",
+      "errorRequired": "Thread content is required",
+      "errorCreate": "Error creating thread"
+    },
+    "createReply": {
+      "title": "Reply",
+      "nameLabel": "Name",
+      "namePlaceholder": "Anonymous",
+      "nameDescription": "Leave empty for anonymity",
+      "contentLabel": "Reply",
+      "fileLabel": "Upload files",
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "errorRequired": "Reply content is required",
+      "errorCreate": "Error sending reply"
+    },
+    "createBoard": {
+      "title": "Create board",
+      "nameLabel": "Board name",
+      "titleLabel": "Title",
+      "descriptionLabel": "Description",
+      "maxFileSizeLabel": "Maximum file size",
+      "postsPerPageLabel": "Posts per page",
+      "threadsPerPageLabel": "Threads per page",
+      "bumpLimitLabel": "Bump limit",
+      "imageLimitLabel": "Image limit",
+      "submit": "Create",
+      "cancel": "Cancel",
+      "errorRequired": "Name and title are required",
+      "errorCreate": "Error creating board"
+    },
+    "category": {
+      "filterByTag": "Filter by tag",
+      "allThreads": "All threads",
+      "back": "Back"
+    },
+    "whatsNew": {
+      "lastReply": "Last",
+      "anonymous": "Anonymous"
+    },
+    "post": {
+      "imageAlt": "Post image"
+    }
+  },
+  "Profile": {
+    "followers": "Followers",
+    "following": "Following",
+    "posts": "Posts",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "loadError": "Error loading data"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "noData": "No data"
+  },
+  "CreatePost": {
+    "addPost": "Add post",
+    "CreatePostInput": "What are you thinking?",
+    "addImage": "Add image",
+    "previewPost": "Post preview",
+    "EmojiPicker": "Choose emoji"
   }
 }

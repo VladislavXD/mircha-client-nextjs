@@ -3,8 +3,8 @@
 import React from "react";
 import { Spinner } from "@heroui/react";
 import { useTheme } from "next-themes";
-import ForumHome from "@/app/components/forum/ForumHome";
-import MobileForumExtras from "@/app/components/forum/MobileForumExtras";
+import ForumHome from "@/shared/components/forum/ForumHome";
+import MobileForumExtras from "@/shared/components/forum/MobileForumExtras";
 
 const ForumPage = () => {
   // Фоновая загрузка перенесена внутрь ForumHome

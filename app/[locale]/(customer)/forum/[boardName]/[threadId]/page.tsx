@@ -3,8 +3,8 @@
 import React, { useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { 
-  useGetThreadQuery 
-} from '@/src/services/forum.service'
+  useThread 
+} from '@/src/features/forum'
 import { 
   Card, 
   CardBody, 
@@ -21,10 +21,10 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import CreateReplyModal from './components/CreateReplyModal'
-import ReplyToPostModal from '@/app/components/ReplyToPostModal'
-import PostContent from '@/app/components/PostContent'
-import type { Thread, Reply } from '@/src/types/types'
-import MobileForumExtras from '@/app/components/forum/MobileForumExtras'
+import ReplyToPostModal from '@/shared/components/ReplyToPostModal'
+import PostContent from '@/shared/components/PostContent'
+import type { Thread, Reply } from '@/src/features/forum'
+import MobileForumExtras from '@/shared/components/forum/MobileForumExtras'
 
 const ThreadPage = () => {
   const params = useParams()
@@ -38,7 +38,7 @@ const ThreadPage = () => {
     data: thread, 
     isLoading, 
     error 
-  } = useGetThreadQuery({ boardName, threadId })
+  } = useThread(boardName, threadId)
 
   // Создаем массив всех постов для передачи в PostContent для тултипов
   const allPosts = useMemo(() => {
@@ -142,10 +142,10 @@ const ThreadPage = () => {
       {/* Основной пост треда */}
       <div className="mb-4">
         <PostContent 
-          post={thread}
+          post={thread as any}
           isOP={true}
-          allPosts={allPosts}
-          onReplyToPost={handleReplyToPost}
+          allPosts={allPosts as any}
+          onReplyToPost={handleReplyToPost as any}
         />
       </div>
 
@@ -154,10 +154,10 @@ const ThreadPage = () => {
         {thread.replies?.map((reply) => (
           <PostContent 
             key={reply.id}
-            post={reply}
+            post={reply as any}
             isOP={false}
-            allPosts={allPosts}
-            onReplyToPost={handleReplyToPost}
+            allPosts={allPosts as any}
+            onReplyToPost={handleReplyToPost as any}
           />
         ))}
       </div>
@@ -210,8 +210,8 @@ const ThreadPage = () => {
         }}
         boardName={boardName}
         threadId={threadId}
-        thread={thread}
-        replyToPost={replyToPost?.post}
+        thread={thread as any}
+        replyToPost={replyToPost?.post as any}
         replyToPostId={replyToPost?.id}
       />
 

@@ -2,10 +2,11 @@
 
 import React, { useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
+// TODO: Migrate to React Query: Create useCategory, useThreadByCategoryAndSlug hooks
 import { 
   useGetCategoryQuery,
   useGetThreadByCategoryAndSlugQuery
-} from '@/src/services/forum.service'
+} from '@/src/services/forum.service.old'
 import { 
   Card, 
   CardBody, 
@@ -22,10 +23,10 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import CreateReplyModal from './components/CreateReplyModal'
-import PostContent from '@/app/components/PostContent'
+import PostContent from '@/shared/components/PostContent'
 import type { Thread, Reply } from '@/src/types/types'
-import TagChip from '@/app/components/TagChip'
-import MobileForumExtras from '@/app/components/forum/MobileForumExtras'
+import TagChip from '@/shared/components/TagChip'
+import MobileForumExtras from '@/shared/components/forum/MobileForumExtras'
 
 const CategoryThreadPage = () => {
   const params = useParams()
