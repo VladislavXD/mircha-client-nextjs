@@ -52,7 +52,7 @@ export function NewVerificationForm() {
 					<>
 						<div className='text-6xl'>✅</div>
 						<p className='text-lg font-semibold text-success'>{message}</p>
-						<Button color='primary' href='/auth/login' as='a' className='mt-2'>
+						<Button color='primary' href='/auth' as='a' className='mt-2'>
 							{t('submit')}
 						</Button>
 					</>
@@ -62,7 +62,7 @@ export function NewVerificationForm() {
 					<>
 						<div className='text-6xl'>❌</div>
 						<p className='text-lg font-semibold text-danger'>{message}</p>
-						<Button color='primary' href='/auth/login' as='a' className='mt-2'>
+						<Button color='primary' href='/auth' as='a' className='mt-2'>
 							Вернуться к входу
 						</Button>
 					</>

@@ -16,6 +16,7 @@ import {
   Chip
 } from '@heroui/react'
 // TODO: Migrate to React Query: Create useCreateBoard hook
+// @ts-ignore
 import { useCreateBoardMutation } from '@/src/services/forum.service.old'
 import { toast } from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
