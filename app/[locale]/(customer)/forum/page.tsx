@@ -20,9 +20,9 @@ const ForumPage = () => {
           className="font-bold text-inherit flex items-center gap-2"
         >
           <img
-            src={theme === "dark" ? "/darkLogo.svg" : "/lightLogo.svg"}
-            className="w-8 sm:w-10"
-            alt=""
+            src={theme === "dark" ? "/mirchan-logo-icon-light.svg" : "/mirchan-logo-icon-dark.svg"}
+            className="w-8 h-8 sm:w-10 sm:h-10"
+            alt="Mirchan Logo"
           />
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Mirchan - Forum</h1>
         </span>

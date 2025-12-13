@@ -1,22 +1,15 @@
 "use client";
 import { Badge, Skeleton, User } from "@heroui/react";
 import React, { useEffect, useState, useMemo } from "react";
-import { useAppSelector } from "@/src/hooks/reduxHooks";
 import { useGetUserChats } from "@/src/features/chat";
 import { useCurrentUser } from "@/src/features/user";
 
 import Link from "next/link";
-import { IoHomeSharp, IoSearchOutline } from "react-icons/io5";
-import { AiFillMessage, AiOutlineMessage } from "react-icons/ai";
-import { CiSearch } from "react-icons/ci";
-import { IoMdNotificationsOutline } from "react-icons/io";
-import { IoIosNotifications } from "react-icons/io";
-import { socketService } from "@/src/services/socketService";
+
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 
-import { MdForum, MdOutlineForum } from "react-icons/md";
-import { House, MessageCircleDashed, MessagesSquare, Search } from "lucide-react";
+import { House, MessageCircleDashed, Search } from "lucide-react";
 import { FaUserSecret } from "react-icons/fa";
 
 const useScrollDirection = () => {
@@ -53,20 +46,6 @@ const BottomNav = () => {
     return chats.reduce((sum: number, chat: any) => sum + (chat.unreadCount || 0), 0);
   }, [chats]);
 
-  useEffect(() => {
-    if (current?.id) {
-      if (!socketService.connected) {
-        socketService.connect().catch(console.error);
-      }
-      const handleNewMessage = () => {
-        refetch();
-      };
-      socketService.onNewMessage(handleNewMessage);
-      return () => {
-        socketService.off("new_message", handleNewMessage);
-      };
-    }
-  }, [current?.id, refetch]);
 
   const avatarUrl = current?.avatarUrl;
   const id = current?.id;

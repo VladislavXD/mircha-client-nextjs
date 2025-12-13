@@ -13,7 +13,7 @@ import { ViewsProvider } from "@/shared/components/providers/ViewsProvider";
 import ReCapchaProvider from "./ReCapchaProvider";
 import { persistor, store } from "@/src/store/store";
 import { QueryProvider } from "./QueryProvider";
-import SocketConnectionManager from '@/lib/SocketConnectionManager';
+import SocketConnectionManager from '@/src/features/socket/SocketConnectionManager';
 
 
 export interface ProvidersProps {
@@ -28,11 +28,11 @@ export function Providers({ children, themeProps }: ProvidersProps) {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <SocketConnectionManager />
-            <ReCapchaProvider>
+
               <NextThemesProvider {...themeProps}>
                 <ViewsProvider>{children}</ViewsProvider>
               </NextThemesProvider>
-            </ReCapchaProvider>
+
           </PersistGate>
         </Provider>
       </HeroUIProvider>

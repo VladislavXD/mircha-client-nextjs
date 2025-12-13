@@ -6,7 +6,7 @@ import { OnlineBadge } from '@/src/features/chat/components';
 import { useRouter } from 'next/navigation';
 import { Card, Button, Spinner } from '@heroui/react';
 import { MessageCircle, Users } from 'lucide-react';
-import { socketService } from '../../../../src/services/socketService';
+import { socketService } from '../../../../src/features/socket/socketService';
 import { formatChatTime, formatOnlineStatus } from '../../../utils/formatChatTime';
 import type { Chat } from '@/src/features/chat/types';
 import { useAppSelector } from '@/src/hooks/reduxHooks';

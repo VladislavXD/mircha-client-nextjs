@@ -4,7 +4,7 @@ import Input from "@/shared/components/ui/Input/Input";
 import { addToast, Button, InputOtp, Link } from "@heroui/react";
 import ErrorMessage from "@/shared/components/ui/ErrorMessage";
 
-import { useLogin } from "@/src/hooks/auth";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema, TypeLoginSchema } from "../schemes";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -128,9 +128,8 @@ const Login = ({ setSelected, setIsShowFactor, isShowTwoFactor }: Props) => {
             {t('forgotPassword')}
           </Link>
         </div>
-        {/* @ts-ignore */}
         <ReCAPTCHA
-          sitekey={process.env.RECAPTCHA_SITE_KEY as string}
+          sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
           onChange={setRecaptchaValue}
           theme={theme === "dark" ? "dark" : "light"}
         />
