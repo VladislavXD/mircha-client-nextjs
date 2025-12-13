@@ -1,22 +1,22 @@
 "use client"
 import React from "react"
-import { useRouter, useParams } from "next/navigation"
-import { useGetPostByIdQuery } from "@/src/services/post/post.service"
-import Card from "@/app/components/ui/post/Card"
-import GoBack from "@/app/components/ui/GoBack"
-import { createComment } from "@/src/services/post/comments.service"
+import { useParams } from "next/navigation"
+import Card from "@/shared/components/ui/post/Card"
+import GoBack from "@/shared/components/ui/GoBack"
 import { Spinner } from "@heroui/react"
-import CreateComment from "@/app/components/ui/post/createComment"
+import CreateComment from "@/shared/components/ui/post/createComment"
+import { usePost } from "@/src/features/post"
 
 const CurrentPost = () => {
-	const router = useRouter()
-	// const { id: postId } = router.query as { id: string }
-
 	const { id: postId } = useParams<{ id: string }>()
-	const { data } = useGetPostByIdQuery(postId ?? "")
+	const { data, isLoading } = usePost(postId)
 
-	if (!data) {
-		return <><Spinner className="flex justify-c	enter h-full"/></>
+	if (isLoading) {
+		return <Spinner className="flex justify-center h-full" />
+	}
+
+ 	if (!data) {
+		return <div className="text-center">Пост не найден</div>
 	}
 
 	const {
@@ -32,6 +32,7 @@ const CurrentPost = () => {
 		imageUrl,
 		views,
 	} = data
+	
 	return (
 		<>
 			<GoBack />
@@ -54,20 +55,21 @@ const CurrentPost = () => {
 				<CreateComment />
 			</div>
 			<div className="mt-10">
-				{data.comments
-					? data.comments.map(comment => (
+				{comments && comments.length > 0
+					? comments.map(comment => (
 							<Card
 								cardFor="comment"
 								key={comment.id}
 								avatarUrl={comment.user.avatarUrl ?? ""}
 								content={comment.content}
+								emojiUrls={comment.emojiUrls || []}
 								name={comment.user.name ?? ""}
 								authorId={comment.user.id ?? ""}
 								commentId={comment.id}
 								id={id}
 							/>
 						))
-					: null}
+					: <div className="text-center text-default-500">Комментариев пока нет</div>}
 			</div>
 		</>
 	)

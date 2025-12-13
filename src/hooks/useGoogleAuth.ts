@@ -1,7 +1,7 @@
 "use client"
 
 import { useAppDispatch } from '@/src/hooks/reduxHooks'
-import { setToken, setUser } from '@/src/store/user/user.slice'
+import { setToken } from '@/src/store/user/user.slice'
 import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
@@ -34,8 +34,7 @@ export function useGoogleAuth() {
           const { user, token } = await response.json()
 
           // Сохраняем токен и пользователя в Redux
-          dispatch(setToken(token))
-          dispatch(setUser(user))
+          dispatch(setToken({ token, user }))
 
           // Сохраняем токен в localStorage
           localStorage.setItem('token', token)

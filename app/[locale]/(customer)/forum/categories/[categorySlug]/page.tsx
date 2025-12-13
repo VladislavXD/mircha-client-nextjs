@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
+// TODO: Migrate to React Query: Create useCategory, useCategoryThreads, useTags hooks
 import { 
   useGetCategoryQuery, 
   useGetCategoryThreadsQuery,
   useGetTagsQuery
-} from '@/src/services/forum.service'
+} from '@/src/services/forum.service.old'
 import { 
   Card, 
   CardBody, 
@@ -23,9 +24,9 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import CreateThreadModal from './components/CreateThreadModal'
-import MediaThumbnail from '@/app/components/MediaThumbnail'
-import TagChip from '@/app/components/TagChip'
-import MobileForumExtras from '@/app/components/forum/MobileForumExtras'
+import MediaThumbnail from '@/shared/components/MediaThumbnail'
+import TagChip from '@/shared/components/TagChip'
+import MobileForumExtras from '@/shared/components/forum/MobileForumExtras'
 
 const CategoryPage = () => {
   const params = useParams()

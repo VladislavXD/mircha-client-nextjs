@@ -1,21 +1,21 @@
 "use client"
 import React, { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { useAppSelector } from "@/src/hooks/reduxHooks"
-import {
-  useLazyGetOrCreateChatQuery,
-  useMarkMessagesAsReadMutation,
-} from "@/src/services/caht.service"
+import { useGetOrCreateChat, useMarkMessagesAsRead } from "@/src/features/chat"
+import { useOnlineStatus } from "@/src/features/chat/hooks/useOnlineStatus"
+import { OnlineBadge } from "@/src/features/chat/components"
+import type { Message } from "@/src/features/chat/types"
 import { socketService } from "@/src/services/socketService"
-import { Card, Input, Button, User, Spinner, Badge } from "@heroui/react"
+import { Card, Input, Button, Spinner } from "@heroui/react"
 import { Send, ArrowLeft, Phone, Video } from "lucide-react"
-import type { Message } from "@/src/services/caht.service"
+import { useProfile } from "@/src/features/profile"
 
 export const ChatWindow: React.FC = () => {
   const { userId } = useParams<{ userId: string }>()
   const router = useRouter()
-  const currentUser = useAppSelector(state => state.user.current)
-  const token = useAppSelector(state => state.user.token)
+  const { user: currentUser } = useProfile()
+  // Токен больше не нужен - используем сессионную аутентификацию
+  // const token = getAuthToken()
 
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
@@ -23,54 +23,37 @@ export const ChatWindow: React.FC = () => {
   const [typingUsers, setTypingUsers] = useState<
     { userId: string; userName: string }[]
   >([])
-  const [isOnline, setIsOnline] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [getOrCreateChat, { data: chatData, isLoading }] =
-    useLazyGetOrCreateChatQuery()
-  const [markAsRead] = useMarkMessagesAsReadMutation()
+  const { data: chatData, isLoading } = useGetOrCreateChat(userId, { enabled: !!userId })
+  const { mutate: markAsRead } = useMarkMessagesAsRead()
+  const { isOnline } = useOnlineStatus(chatData?.otherParticipant?.id)
 
-  // Получаем или создаем чат при загрузке компонента
+  // Присоединяемся к чату (Socket.IO подключается глобально через SocketConnectionManager)
   useEffect(() => {
-    if (userId) {
-      getOrCreateChat(userId)
-    }
-  }, [userId, getOrCreateChat])
-
-  // Подключаемся к Socket.IO и присоединяемся к чату
-  useEffect(() => {
-    if (token && !socketService.connected) {
-      socketService.connect(token).catch(console.error)
-    }
-
     if (chatData?.id) {
       socketService.joinChat(chatData.id)
       setMessages(chatData.messages || [])
-      setIsOnline(chatData.isOnline)
 
       const unreadMessageIds =
         chatData.messages
-          ?.filter(msg => !msg.isRead && msg.senderId !== currentUser?.id)
-          .map(msg => msg.id) || []
+          ?.filter((msg: Message) => !msg.isRead && msg.senderId !== currentUser?.id)
+          .map((msg: Message) => msg.id) || []
 
       if (unreadMessageIds.length > 0) {
         markAsRead(chatData.id)
       }
     }
-  }, [token, chatData, currentUser?.id, markAsRead])
+  }, [chatData, currentUser?.id, markAsRead])
 
   // Обработчики Socket.IO событий
   useEffect(() => {
     const handleNewMessage = (message: Message) => {
       if (message.chatId === chatData?.id) {
         setMessages(prev => [...prev, message])
-        if (message.senderId !== currentUser?.id) {
-          setTimeout(() => {
-            socketService.markAsRead([message.id])
-          }, 1000)
-        }
+        // Убираем автоматическое markAsRead - теперь используем массовое прочтение при открытии чата
       }
     }
 
@@ -100,7 +83,23 @@ export const ChatWindow: React.FC = () => {
       chatId: string
     }) => {
       if (data.chatId === chatData?.id && data.userId === chatData?.otherParticipant?.id) {
-        setIsOnline(data.isOnline)
+        // Статус автоматически обновляется через хук useOnlineStatus
+      }
+    }
+
+    const handleMessagesRead = (data: {
+      chatId: string
+      readerId: string
+      messageCount: number
+      timestamp: string
+    }) => {
+      if (data.chatId === chatData?.id && data.readerId !== currentUser?.id) {
+        // Обновляем статус прочтения для сообщений от текущего пользователя
+        setMessages(prev => prev.map(msg => 
+          msg.senderId === currentUser?.id && !msg.isRead 
+            ? { ...msg, isRead: true } 
+            : msg
+        ))
       }
     }
 
@@ -108,14 +107,47 @@ export const ChatWindow: React.FC = () => {
     socketService.onTypingStart(handleTypingStart)
     socketService.onTypingStop(handleTypingStop)
     socketService.onUserStatusChange(handleUserStatusChange)
+    socketService.onMessagesRead(handleMessagesRead)
 
     return () => {
       socketService.off("new_message", handleNewMessage)
       socketService.off("user_typing_start", handleTypingStart)
       socketService.off("user_typing_stop", handleTypingStop)
       socketService.off("user_status_change", handleUserStatusChange)
+      socketService.off("messages_read", handleMessagesRead)
     }
   }, [chatData?.id, chatData?.otherParticipant?.id, currentUser?.id])
+
+  // Эффект для отметки сообщений как прочитанных при фокусе окна
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      if (chatData?.id && currentUser?.id) {
+        // Отмечаем все непрочитанные сообщения как прочитанные
+        const hasUnreadMessages = messages.some(msg => 
+          !msg.isRead && msg.senderId !== currentUser.id
+        )
+        if (hasUnreadMessages) {
+          markAsRead(chatData.id)
+        }
+      }
+    }
+
+    window.addEventListener('focus', handleWindowFocus)
+    
+    // Также отмечаем при монтировании, если окно уже в фокусе
+    if (document.hasFocus() && chatData?.id && currentUser?.id) {
+      const hasUnreadMessages = messages.some(msg => 
+        !msg.isRead && msg.senderId !== currentUser.id
+      )
+      if (hasUnreadMessages) {
+        markAsRead(chatData.id)
+      }
+    }
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus)
+    }
+  }, [chatData?.id, currentUser?.id, messages, markAsRead])
 
   // Автопрокрутка к последним сообщениям
   useEffect(() => {
@@ -206,23 +238,13 @@ export const ChatWindow: React.FC = () => {
 
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <Badge
-                  content=""
-                  color={isOnline ? "success" : "default"}
-                  variant={isOnline ? "solid" : "flat"}
-                  size="sm"
-                  isInvisible={!isOnline}
-                  placement="bottom-right"
-                >
-                  <User
-                    name={otherUser?.name || "Неизвестный пользователь"}
-                    description={isOnline ? "В сети" : "Не в сети"}
-                    avatarProps={{
-                      src: otherUser?.avatarUrl || undefined,
-                      size: "md",
-                    }}
-                  />
-                </Badge>
+                <OnlineBadge
+                  name={otherUser?.name || "Неизвестный пользователь"}
+                  description={isOnline ? "В сети" : "Не в сети"}
+                  avatarUrl={otherUser?.avatarUrl || undefined}
+                  isOnline={isOnline}
+                  size="md"
+                />
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 import { useAppDispatch } from '@/src/hooks/reduxHooks'
-import { logout as logoutAction } from '@/src/store/user/user.slice'
+import { logoutAction } from '@/src/store/user/user.slice'
 import { useRouter } from 'next/navigation'
 
 export function useLogout() {
