@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAppDispatch } from '@/src/hooks/reduxHooks';
-import { socketService } from '@/src/services/socketService';
+import { socketService } from '@/src/features/socket/socketService';
 import { useProfile } from '@/src/features/profile/hooks/useProfile';
 import { setMultipleStatuses, setUserStatus, clearStatuses } from '@/src/store/onlineStatus/onlineStatus.slice';
 

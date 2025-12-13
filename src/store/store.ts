@@ -8,7 +8,7 @@ import {
 	REHYDRATE,
 	persistStore
 } from 'redux-persist'
-import { userSlice } from './user/user.slice'
+// import { userSlice } from './user/user.slice'
 import onlineStatusReducer from './onlineStatus/onlineStatus.slice'
 
 // import { filtersSlice } from './filters/filters.slice'
@@ -23,7 +23,7 @@ import onlineStatusReducer from './onlineStatus/onlineStatus.slice'
 const isClient = typeof window !== 'undefined'
 
 const combinedReducers = combineReducers({
-	user: userSlice.reducer,
+	// user: userSlice.reducer,
 	onlineStatus: onlineStatusReducer,
 	// filters: filtersSlice.reducer
 })

@@ -42,7 +42,7 @@ export function NewPasswordForm() {
 			heading={t('title')}
 			description={t('description')}
 			backButtonLabel={t('../resetPassword.backToLogin')}
-			backButtonHref='/auth/login'
+			backButtonHref='/auth'
 		>
 			<form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
 				{/* Password */}
@@ -70,7 +70,7 @@ export function NewPasswordForm() {
 					aria-disabled={isLoadingNew}
 				>
 					<ReCAPTCHA
-						sitekey={process.env.GOOGLE_RECAPTCHA_SITE_KEY as string}
+						sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
 						onChange={setRecaptchaValue}
 						onExpired={() => setRecaptchaValue(null)}
 						theme={theme === 'light' ? 'light' : 'dark'}

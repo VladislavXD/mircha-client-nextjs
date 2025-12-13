@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { addToast, Button, Link } from "@heroui/react";
 import ErrorMessage from "../../../../shared/components/ui/ErrorMessage";
 
-import { useRegister } from "@/src/hooks/auth";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useTheme } from "next-themes";
 import { useRegisterMutation } from "../hooks";
@@ -93,7 +92,7 @@ const Register = ({ setSelected }: Props) => {
         required="Обязательное поле"
       />
       <ReCAPTCHA
-        sitekey={process.env.RECAPTCHA_SITE_KEY as string}
+        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
         onChange={setRecaptchaValue}
         theme={theme === "dark" ? "dark" : "light"}
       />

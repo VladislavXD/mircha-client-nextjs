@@ -13,6 +13,7 @@ import {
   Chip
 } from '@heroui/react'
 // TODO: Migrate to React Query: Create useCreateReplyInCategory hook
+// @ts-ignore
 import { useCreateReplyInCategoryMutation } from '@/src/services/forum.service.old'
 import { toast } from 'react-hot-toast'
 import type { Thread } from '@/src/types/types'
