@@ -1,16 +1,20 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export default function SettingsPage() {
 	const router = useRouter()
+	const pathname = usePathname()
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
 
 	useEffect(() => {
 		// На десктопе автоматически переходим к профилю
 		const checkAndRedirect = () => {
+			const prefix = locale ? `/${locale}` : ''
 			if (window.innerWidth >= 768) { // md breakpoint
-				router.push('/dashboard/settings/profile')
+				router.push(`${prefix}/dashboard/settings/profile`)
 			}
 		}
 

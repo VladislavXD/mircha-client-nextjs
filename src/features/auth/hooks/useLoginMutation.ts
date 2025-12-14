@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import type { Dispatch, SetStateAction } from 'react'
 // import { toast } from 'sonner'
 
@@ -16,6 +16,9 @@ export function useLoginMutation(
 	setIsShowFactor: Dispatch<SetStateAction<boolean>>
 ) {
 	const router = useRouter()
+	const pathname = usePathname()
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
 
 	const { mutate: login, isPending: isLoadingLogin } = useMutation({
 
@@ -37,7 +40,8 @@ export function useLoginMutation(
 					color: 'success'
 				})
 				router.refresh()
-				router.push('/dashboard/settings')
+				const prefix = locale ? `/${locale}` : ''
+				router.push(`${prefix}/dashboard/settings`)
 			}
 		},
 		onError(error) {
