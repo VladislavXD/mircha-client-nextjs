@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 
 import { authService } from '../../auth/services'
@@ -12,13 +12,17 @@ import { addToast } from '@heroui/react'
  */
 export function useLogoutMutation() {
 	const router = useRouter()
+	const pathname = usePathname()
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
 	const queryClient = useQueryClient()
 	const { mutate: logout, isPending: isLoadingLogout } = useMutation({
 		mutationKey: ['logout'],
 		mutationFn: () => authService.logout(),
 		onSuccess() {
 
-			router.push('/auth')
+			const prefix = locale ? `/${locale}` : ''
+			router.push(`${prefix}/auth`)
 			queryClient.clear()
 			addToast({
 				title: 'Вы успешно вышли из системы',

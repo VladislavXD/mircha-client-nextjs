@@ -11,10 +11,13 @@ import FestiveBanner from "../shared/components/layout/Seasonal/FestiveBanner";
 import { useState, useEffect } from "react";
 
 
+
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [snowEnabled, setSnowEnabled] = useState(true);
-  
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
+
   // Читаем настройку снега из localStorage при монтировании
   useEffect(() => {
     const saved = localStorage.getItem("snowfall-enabled");
@@ -35,7 +38,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   
   // Убираем сложную логику проверки - middleware уже все сделал
   const isAuthPage = pathname?.startsWith('/auth');
-  const hideRightSidebar = pathname?.includes('/dashboard/settings');
+	const prefix = locale ? `/${locale}` : ''
+
+  const hideRightSidebar = pathname?.includes(`${prefix}/dashboard/settings`);
   
   return (
     <>
