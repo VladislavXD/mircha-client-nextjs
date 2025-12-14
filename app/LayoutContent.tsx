@@ -40,7 +40,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const isAuthPage = pathname?.startsWith('/auth');
 	const prefix = locale ? `/${locale}` : ''
 
-  const hideRightSidebar = pathname?.includes(`${prefix}/dashboard/settings`);
+  const hideRightSidebar = pathname?.includes(`${prefix}/dashboard/settings`);  ``
   
   return (
     <>
