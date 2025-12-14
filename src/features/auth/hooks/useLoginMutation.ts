@@ -39,9 +39,8 @@ export function useLoginMutation(
 					title: 'Успешный вход',
 					color: 'success'
 				})
-				router.refresh()
 				const prefix = locale ? `/${locale}` : ''
-				router.push(`${prefix}/dashboard/settings`)
+				router.replace(`${prefix}/dashboard/settings`)
 			}
 		},
 		onError(error) {
