@@ -15,7 +15,7 @@ export default function SettingsPage() {
 			const prefix = locale ? `/${locale}` : ''
 			if (window.innerWidth >= 768) { // md breakpoint
 				router.push(`${prefix}/dashboard/settings/profile`)
-			}
+			}2
 		}
 
 		checkAndRedirect()
