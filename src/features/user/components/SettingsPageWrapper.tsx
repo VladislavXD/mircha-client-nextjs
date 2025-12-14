@@ -2,7 +2,7 @@
 
 import { Button } from '@heroui/react'
 import { ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
 
 interface SettingsPageWrapperProps {
@@ -12,7 +12,11 @@ interface SettingsPageWrapperProps {
 
 export function SettingsPageWrapper({ title, children }: SettingsPageWrapperProps) {
 	const router = useRouter()
+const pathname = usePathname()
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
 
+	const prefix = locale ? `/${locale}` : ''
 	return (
 		<div className="flex flex-col gap-4">
 			{/* Мобильная кнопка "Назад" */}
@@ -20,7 +24,7 @@ export function SettingsPageWrapper({ title, children }: SettingsPageWrapperProp
 				<Button
 					variant="light"
 					startContent={<ArrowLeft className="w-4 h-4" />}
-					onPress={() => router.push('/dashboard/settings')}
+					onPress={() => router.push(`${prefix}/dashboard/settings`)}
 					className="mb-2"
 				>
 					Назад к настройкам

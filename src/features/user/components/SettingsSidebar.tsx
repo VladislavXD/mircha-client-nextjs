@@ -20,40 +20,43 @@ interface SettingsSidebarProps {
 export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("Settings");
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
 
+	const prefix = locale ? `/${locale}` : ''
   const settingsNavItems: SettingsNavItem[] = [
     {
-      href: "/dashboard/settings/profile",
+      href: `${prefix}/dashboard/settings/profile`,
       labelKey: "sidebar.profile",
       icon: <User className="w-5 h-5" />,
       descKey: "sidebar.profileDesc",
     },
     {
-      href: "/dashboard/settings/security",
+      href: `${prefix}/dashboard/settings/security`,
       labelKey: "sidebar.security",
       icon: <Shield className="w-5 h-5" />,
       descKey: "sidebar.securityDesc",
     },
     {
-      href: "/dashboard/settings/privacy",
+      href: `${prefix}/dashboard/settings/privacy`,
       labelKey: "sidebar.privacy",
       icon: <Lock className="w-5 h-5" />,
       descKey: "sidebar.privacyDesc",
     },
     {
-      href: "/dashboard/settings/appearance",
+      href: `${prefix}/dashboard/settings/appearance`,
       labelKey: "sidebar.appearance",
       icon: <Palette className="w-5 h-5" />,
       descKey: "sidebar.appearanceDesc",
     },
     {
-      href: "/dashboard/settings/notifications",
+      href: `${prefix}/dashboard/settings/notifications`,
       labelKey: "sidebar.notifications",
       icon: <Bell className="w-5 h-5" />,
       descKey: "sidebar.notificationsDesc",
     },
     {
-      href: "/dashboard/settings/language",
+      href: `${prefix}/dashboard/settings/language`,
       labelKey: "sidebar.language",
       icon: <Globe className="w-5 h-5" />,
       descKey: "sidebar.languageDesc",
