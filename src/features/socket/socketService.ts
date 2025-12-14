@@ -39,6 +39,9 @@ class SocketService {
       // Аутентификация происходит через session cookie (httpOnly)
       // Токен не обязателен - основная аутентификация через Redis сессии
       this.socket = io(this.SOCKET_URL, {
+        auth: {
+          token: token || 'cookie-session' // Маркер для серверного middleware
+        },
         withCredentials: true, // ВАЖНО: Отправляем cookies (включая httpOnly session)
         transports: ['websocket', 'polling'],
         
