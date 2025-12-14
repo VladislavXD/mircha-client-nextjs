@@ -28,17 +28,16 @@ export function useLoginMutation(
 			recaptcha: string
 		}) => authService.login(values, recaptcha),
 		onSuccess(data: any) {
-			console.log('[useLoginMutation] onSuccess', data)
 			if (data.message) {
 				// toastMessageHandler(data)
 				setIsShowFactor(true)
 			} else {
-					addToast({
-						title: 'Успешный вход',
-						color: 'success'
-					})
-					console.log('[useLoginMutation] navigating to /dashboard/settings')
-					router.push('/dashboard/settings')
+				addToast({
+					title: 'Успешный вход',
+					color: 'success'
+				})
+				router.refresh()
+				router.push('/dashboard/settings')
 			}
 		},
 		onError(error) {
