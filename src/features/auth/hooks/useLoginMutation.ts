@@ -40,7 +40,14 @@ export function useLoginMutation(
 					color: 'success'
 				})
 				const prefix = locale ? `/${locale}` : ''
-				router.replace(`${prefix}/dashboard/settings`)
+				// router.replace(`${prefix}/dashboard/settings`)
+				window.location.href = `${prefix}/dashboard/settings`
+				// router.refresh()
+				// window.location.reload()
+				// toastMessageHandler({
+				// 	type: 'success',
+				// 	text: 'Успешный вход'
+				//
 			}
 		},
 		onError(error) {
