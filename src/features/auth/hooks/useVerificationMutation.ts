@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 // import { toast } from 'sonner'
 
 import { verificationService } from '../services'
@@ -10,6 +10,9 @@ import { addToast } from '@heroui/react'
  */
 export function useVerificationMutation() {
 	const router = useRouter()
+	const pathname = usePathname()
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
 
 	const { mutate: verification } = useMutation({
 		mutationKey: ['new verification'],
@@ -20,10 +23,12 @@ export function useVerificationMutation() {
 				title: 'Почта успешно подтверждена',
 				color: 'success',
 			})
-			router.push('/dashboard/settings')
+			const prefix = locale ? `/${locale}` : ''
+			router.push(`${prefix}/dashboard/settings`)
 		},
 		onError() {
-			router.push('/auth')
+			const prefix = locale ? `/${locale}` : ''
+			router.push(`${prefix}/auth`)
 		}
 	})
 

@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "next-auth/react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CiSettings } from "react-icons/ci";
 import { useTheme } from "next-themes";
 import { LocaleSwitcherSelect } from "../selects/localeSwitcherSelect";
@@ -52,7 +52,11 @@ const MenuDropdown = () => {
   }
 
   const { avatarUrl, name, email, id } = user;
-
+  const pathname = usePathname()
+    const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+    const locale = localeMatch?.[1]
+  
+    const prefix = locale ? `/${locale}` : ''
   return (
     <>
       <Dropdown
@@ -107,7 +111,7 @@ const MenuDropdown = () => {
             <Link href={`/user/${id}`}>{t("profile")}</Link>
           </DropdownItem>
           <DropdownItem key="settings">
-            <Link href={`/dashboard/settings`}>{t("settings")}</Link>
+            <Link href={`${prefix}/dashboard/settings`}>{t("settings")}</Link>
           </DropdownItem>
           <DropdownItem onClick={onOpen} key="help_and_feedback">
             {t("feedback")}

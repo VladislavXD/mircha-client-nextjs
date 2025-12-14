@@ -21,6 +21,7 @@ import { useUserProfile } from '../hooks/useUserProfile'
 import { ProfileInfo } from './ProfileInfo'
 import { ProfileStatus } from './ProfileStatus'
 import StatusModal from './modals/Status.Modals'
+import { usePathname } from 'next/navigation'
 
 interface ProfileHeaderProps {
 	userId: string
@@ -76,8 +77,11 @@ export function ProfileHeader({
 	if (!data) {
 		return <div>Загрузка профиля...</div>
 	}
+	const pathname = usePathname()
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
 
-
+	const prefix = locale ? `/${locale}` : ''
 	return (
 		<>
 			<div
@@ -110,7 +114,7 @@ export function ProfileHeader({
 							<Button
 								size="sm"
 								as={Link}
-								href="/dashboard/settings/profile"
+								href={`${prefix}/dashboard/settings/profile`}
 								variant="flat"
 								className="bg-white/20 backdrop-blur-sm text-white border-white/30"
 								endContent={<CiEdit />}
