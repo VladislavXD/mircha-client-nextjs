@@ -65,6 +65,23 @@ export async function middleware(request: NextRequest) {
 
   // 2) Статус авторизации
   const session = request.cookies.get('session')?.value // HTTP-only session (новый вариант)
+  // Доп. лог для диагностики: показываем raw Cookie header и сам session value
+  try {
+    const rawCookies = request.headers.get('cookie')
+    console.log(`[Middleware] Raw Cookie header: ${rawCookies}`)
+    console.log(`[Middleware] session cookie value: ${session}`)
+  } catch (e) {
+    // edge runtime может ограничивать доступ к заголовкам — игнорируем ошибки логирования
+  }
+
+  // Если это RSC / prefetch запрос (Next.js делает запросы с ?_rsc=... или header rsc: 1),
+  // не делаем редиректы на /auth — это предотвращает редирект при предварительной загрузке маршрута
+  // и даёт клиентской навигации завершиться корректно (cookie может появиться при следующем full navigation).
+  const isRsc = request.nextUrl.search.includes('_rsc') || request.headers.get('rsc') === '1'
+  if (isRsc) {
+    console.log('[Middleware] Detected RSC/prefetch request — skipping auth redirect')
+    return intlMiddleware(request)
+  }
   const nextAuthToken = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET }) // next-auth
   const regularToken = request.cookies.get('token')?.value // fallback token из js-cookie
   const hasAuth = !!(session || nextAuthToken || regularToken)
