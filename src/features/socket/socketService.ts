@@ -5,12 +5,13 @@ class SocketService {
   private isConnected = false;
   private eventListeners: { [event: string]: ((...args: any[]) => void)[] } = {};
 
-  private SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002' ;
+  private SOCKET_URL = 'https://wss.mirchan.site' ; // process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002' ;
 
   connect(token?: string): Promise<void> {
     return new Promise((resolve, reject) => {
       console.log('🔌 [SocketService] connect() called');
-      console.log('   Target URL:', this.SOCKET_URL);
+      console.log('   NEXT_PUBLIC_SOCKET_URL env:', process.env.NEXT_PUBLIC_SOCKET_URL);
+      console.log('   Using SOCKET_URL:', this.SOCKET_URL);
       console.log('   Token provided:', !!token);
       console.log('   Token value:', token?.substring(0, 20) + '...');
       console.log('   Already connected:', this.isConnected);
