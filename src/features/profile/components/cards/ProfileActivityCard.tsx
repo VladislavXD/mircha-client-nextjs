@@ -14,7 +14,7 @@ export const ProfileActivityCard: React.FC = () => {
 
   const { data } = useUserProfile(id);
 
-  console.log(data);
+  console.log("ProfileActivityCard data:", data);
   return (
     <Card className="p-4">
       <h3 className="font-semibold mb-3">Активность</h3>
