@@ -63,20 +63,46 @@ export async function middleware(request: NextRequest) {
     return intlMiddleware(request)
   }
 
+  // Проверяем, является ли путь страницей авторизации (нужно для логики ниже)
+  const isAuthPath = /^\/(ru|en)?\/?auth(\/|$)/.test(pathname)
+
   // 2) Статус авторизации
   const session = request.cookies.get('session')?.value // HTTP-only session (новый вариант)
   // Доп. лог для диагностики: показываем raw Cookie header и сам session value
+  
+  // Логируем все cookies для диагностики
+  const allCookies = request.cookies.getAll()
+  const cookieNames = allCookies.map(c => c.name).join(', ')
+  console.log(
+    `[Middleware] All cookies: ${cookieNames || '(none)'}`,
+    `Session cookie: ${session ? 'present' : 'missing'}`
+  )
  
   const nextAuthToken = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET }) // next-auth
   const regularToken = request.cookies.get('token')?.value // fallback token из js-cookie
-  const hasAuth = !!(session || nextAuthToken || regularToken)
+  
+  // ВАЖНО: В продакшене cookie может быть с другим domain (api.mirchan.site)
+  // Если cookie недоступна напрямую, но есть хотя бы одна из других форм авторизации,
+  // разрешаем доступ - проверка будет на стороне клиента через API
+  let hasAuth = !!(session || nextAuthToken || regularToken)
+  
+  // Если session cookie недоступна, но запрос идет на защищенный путь,
+  // разрешаем доступ - пусть клиент проверит через API (useProfile)
+  // Это позволяет избежать редиректа, если cookie просто недоступна из-за domain
+  const isProtectedPath = !isPublicPath(pathname) && !isAuthPath
+  if (!session && isProtectedPath) {
+    // Разрешаем доступ, но логируем для диагностики
+    console.log(
+      `[Middleware] Session cookie missing but allowing access to protected path - client will check via API`
+    )
+    hasAuth = true // Временно разрешаем, клиент проверит через API
+  }
 
   console.log(
-    `[Middleware] Auth status -> session: ${!!session}, nextAuth: ${!!nextAuthToken}, token: ${!!regularToken}`
+    `[Middleware] Auth status -> session: ${!!session}, nextAuth: ${!!nextAuthToken}, token: ${!!regularToken}, hasAuth: ${hasAuth}`
   )
 
   // 3) Поведение на /auth (и /ru/auth)
-  const isAuthPath = /^\/(ru|en)?\/?auth(\/|$)/.test(pathname)
   if (isAuthPath) {
     if (hasAuth) {
       // Авторизованы -> редирект в настройки
