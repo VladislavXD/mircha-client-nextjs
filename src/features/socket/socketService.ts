@@ -5,15 +5,13 @@ class SocketService {
   private isConnected = false;
   private eventListeners: { [event: string]: ((...args: any[]) => void)[] } = {};
 
-  private SOCKET_URL = 'https://wss.mirchan.site' ; // process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002' ;
+  private SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002';
 
-  connect(token?: string): Promise<void> {
+  connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       console.log('🔌 [SocketService] connect() called');
       console.log('   NEXT_PUBLIC_SOCKET_URL env:', process.env.NEXT_PUBLIC_SOCKET_URL);
       console.log('   Using SOCKET_URL:', this.SOCKET_URL);
-      console.log('   Token provided:', !!token);
-      console.log('   Token value:', token?.substring(0, 20) + '...');
       console.log('   Already connected:', this.isConnected);
       console.log('   Socket instance exists:', !!this.socket);
       console.log('   Socket.connected:', this.socket?.connected);
@@ -34,16 +32,14 @@ class SocketService {
         this.isConnected = false;
       }
 
-      console.log('🔄 Creating new Socket.IO connection...');
+      console.log('🔄 Creating new Socket.IO connection....');
       
       // Создаем подключение к Socket.IO серверу (отдельный микросервис)
       // Аутентификация происходит через session cookie (httpOnly)
       // Токен не обязателен - основная аутентификация через Redis сессии
       this.socket = io(this.SOCKET_URL, {
-        auth: {
-          token: token || 'cookie-session' // Маркер для серверного middleware
-        },
-        withCredentials: true, // ВАЖНО: Отправляем cookies (включая httpOnly session)
+        // no JWT auth — we rely on httpOnly session cookies (withCredentials)
+        withCredentials: true,
         transports: ['websocket', 'polling'],
         
         // Auto-reconnection настройки
@@ -52,6 +48,7 @@ class SocketService {
         reconnectionDelayMax: 5000, // Максимальная задержка 5 сек
         reconnectionAttempts: 10, // 10 попыток переподключения
         timeout: 20000 // Таймаут подключения 20 сек
+        
       });
       
       console.log('📡 Socket.IO client created, waiting for connection...');
@@ -233,10 +230,10 @@ class SocketService {
   }
 
   // Метод для полной очистки и переподключения при смене пользователя
-  reconnect(newToken: string): Promise<void> {
-    console.log('Reconnecting with new token...')
-    this.disconnect()
-    return this.connect(newToken)
+  reconnect(): Promise<void> {
+    console.log('Reconnecting...');
+    this.disconnect();
+    return this.connect();
   }
 
   // Проверка текущего соединения
