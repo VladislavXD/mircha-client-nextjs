@@ -10,6 +10,7 @@ import type { User } from "../types";
 import PostCard from "./PostCard";
 import CreatePost from "./CreatePost";
 import CardSkeleton from "@/shared/components/ui/post/Card/Skeleton";
+import Notice from "@/shared/components/ui/Notice";
 
 /**
  * PostList - основной компонент для отображения ленты постов
@@ -74,7 +75,7 @@ const PostList = () => {
   return (
     <div className="space-y-5">
       {currentUser && <CreatePost />}
-      
+      <Notice/>
       {posts.map((post) => (
         <PostCard key={post.id} post={post} cardFor="post"  />
       ))}
