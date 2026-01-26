@@ -3,7 +3,7 @@
     "CreatePost": {
       "addPost": "Добавить",
       "CreatePostInput": "О чем думаете?",
-      "addImage": "Добавить фото",
+      "addImage": "Добавить медиа",
       "previewPost": "Превью поста",
       "EmojiPicker": "Выберите эмодзи"
     },

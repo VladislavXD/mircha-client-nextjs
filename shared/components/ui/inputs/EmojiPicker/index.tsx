@@ -3,6 +3,7 @@ import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@
 import { MdOutlineEmojiEmotions } from 'react-icons/md';
 import { emojiDataList } from '@/src/constants/emoji';
 import { useTranslations } from 'next-intl';
+import { IoMdHappy } from 'react-icons/io';
 
 
 interface EmojiPickerProps {
@@ -26,15 +27,15 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, disabled = fal
       placement="top-start"
     >
       <DropdownTrigger>
-        <Button
-          isIconOnly
-          variant="flat"
-          disabled={disabled}
-          className="min-w-12 h-12 bg-gradient-to-br from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 border border-primary/20 hover:border-primary/30 transition-all duration-200"
-          aria-label="Выбрать эмодзи"
-        >
-          <MdOutlineEmojiEmotions size={20} className="text-primary" />
-        </Button>
+        <button
+                          type="button"
+                          
+                          disabled={disabled}
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-default-100 hover:bg-default-200 text-default-700 text-sm transition`}
+                        >
+                          <IoMdHappy size={18} />
+                        </button>
+        
       </DropdownTrigger>
       <DropdownMenu 
         aria-label="Выбор эмодзи"

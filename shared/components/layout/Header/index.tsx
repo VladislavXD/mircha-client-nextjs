@@ -10,7 +10,7 @@ import {
 
 } from "@heroui/react";
 import MenuDropdown from "../../ui/DropdownMenu";
-import { ThemeSwitch } from "@/shared/Providers/theme-switch";
+import { ThemeSwitch } from "@/src/Providers/theme-switch";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
@@ -25,15 +25,10 @@ import SnowToggle from "../Seasonal/SnowToggle";
 const Header = () => {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
-  const { user} = useProfile();
-  console.log('user in header:', user);
-  // Redux state (только для проверки isAuthenticated)
-
   
-  // React Query для получения данных текущего пользователя (только если авторизован)
-
-
-  const {isLoading, isAuthenticated} = useProfile()
+  // React Query для получения данных текущего пользователя
+  const { user, isLoading, isAuthenticated } = useProfile();
+  console.log('user in header:', user);
   
   const handleSnowToggle = (enabled: boolean) => {
     // Диспатчим custom event для обновления снега в LayoutContent

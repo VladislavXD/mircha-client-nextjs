@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   parseEmojiText,
@@ -7,6 +7,7 @@ import {
 import { useUserProfile } from "@/src/features/profile";
 import SmartTooltip from "../SmartTooltip";
 import { formatDate } from "date-fns";
+import { Spoiler } from "spoiled";
 
 /**
  * Компонент для рендеринга текста с emoji
@@ -67,6 +68,7 @@ export const EmojiText: React.FC<EmojiTextProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-500 hover:underline break-all"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       {urls[i]}
                     </a>
@@ -89,6 +91,67 @@ export const EmojiText: React.FC<EmojiTextProps> = ({
               decoding="async"
               draggable={false}
             />
+          );
+        }
+
+        if (segment.type === "spoiler") {
+          return <SpoilerSegment key={`seg-${index}`} segment={segment} />;
+        }
+
+        // HTML форматирование
+        if (segment.type === "bold") {
+          return (
+            <strong key={`seg-${index}`}>
+              {segment.children?.map((child, idx) => (
+                <SegmentRenderer key={`bold-${idx}`} segment={child} />
+              ))}
+            </strong>
+          );
+        }
+
+        if (segment.type === "italic") {
+          return (
+            <em key={`seg-${index}`}>
+              {segment.children?.map((child, idx) => (
+                <SegmentRenderer key={`italic-${idx}`} segment={child} />
+              ))}
+            </em>
+          );
+        }
+
+        if (segment.type === "underline") {
+          return (
+            <u key={`seg-${index}`}>
+              {segment.children?.map((child, idx) => (
+                <SegmentRenderer key={`underline-${idx}`} segment={child} />
+              ))}
+            </u>
+          );
+        }
+
+        if (segment.type === "strikethrough") {
+          return (
+            <s key={`seg-${index}`}>
+              {segment.children?.map((child, idx) => (
+                <SegmentRenderer key={`strike-${idx}`} segment={child} />
+              ))}
+            </s>
+          );
+        }
+
+        if (segment.type === "highlight") {
+          return (
+            <mark 
+              key={`seg-${index}`}
+              style={{ 
+                backgroundColor: 'rgba(255, 235, 59, 0.3)',
+                color: 'inherit'
+              }}
+            >
+              {segment.children?.map((child, idx) => (
+                <SegmentRenderer key={`highlight-${idx}`} segment={child} />
+              ))}
+            </mark>
           );
         }
 
@@ -207,6 +270,7 @@ export const EmojiText: React.FC<EmojiTextProps> = ({
                 key={`seg-${index}`}
                 href={`/user/${segment.mentionId}`}
                 className="text-primary hover:underline inline"
+                onClick={(e) => e.stopPropagation()}
               >
                 @{segment.mentionName || "user"}
               </Link>
@@ -216,5 +280,110 @@ export const EmojiText: React.FC<EmojiTextProps> = ({
         return <span key={`seg-${index}`}>{segment.content}</span>;
       })}
     </div>
+  );
+};
+
+/**
+ * SegmentRenderer: рекурсивный рендерер для вложенных сегментов
+ */
+const SegmentRenderer: React.FC<{ segment: EmojiTextSegment }> = ({ segment }) => {
+  if (segment.type === "text") {
+    return <>{segment.content}</>;
+  }
+  
+  if (segment.type === "emoji" && segment.emojiUrl) {
+    return (
+      <img
+        src={segment.emojiUrl}
+        alt="emoji"
+        className="inline-block w-5 h-5 mx-0.5 align-text-bottom"
+        style={{ verticalAlign: "text-bottom" }}
+      />
+    );
+  }
+  
+  if (segment.type === "mention") {
+    return (
+      <Link href={`/user/${segment.mentionId}`} className="text-primary hover:underline">
+        @{segment.mentionName || "user"}
+      </Link>
+    );
+  }
+  
+  if (segment.type === "spoiler") {
+    return <SpoilerSegment segment={segment} />;
+  }
+  
+  if (segment.type === "bold") {
+    return (
+      <strong>
+        {segment.children?.map((child, idx) => (
+          <SegmentRenderer key={`bold-${idx}`} segment={child} />
+        ))}
+      </strong>
+    );
+  }
+  
+  if (segment.type === "italic") {
+    return (
+      <em>
+        {segment.children?.map((child, idx) => (
+          <SegmentRenderer key={`italic-${idx}`} segment={child} />
+        ))}
+      </em>
+    );
+  }
+  
+  if (segment.type === "underline") {
+    return (
+      <u>
+        {segment.children?.map((child, idx) => (
+          <SegmentRenderer key={`underline-${idx}`} segment={child} />
+        ))}
+      </u>
+    );
+  }
+  
+  if (segment.type === "strikethrough") {
+    return (
+      <s>
+        {segment.children?.map((child, idx) => (
+          <SegmentRenderer key={`strike-${idx}`} segment={child} />
+        ))}
+      </s>
+    );
+  }
+  
+  if (segment.type === "highlight") {
+    return (
+      <mark 
+        style={{ 
+          backgroundColor: 'rgba(255, 235, 59, 0.3)',
+          color: 'inherit'
+        }}
+      >
+        {segment.children?.map((child, idx) => (
+          <SegmentRenderer key={`highlight-${idx}`} segment={child} />
+        ))}
+      </mark>
+    );
+  }
+  
+  return null;
+};
+
+/**
+ * SpoilerSegment: рендерит спойлер используя библиотеку spoiled
+ * Раскрывается по клику
+ */
+const SpoilerSegment: React.FC<{ segment: EmojiTextSegment }> = ({ segment }) => {
+  return (
+    <span onClick={(e) => e.stopPropagation()}>
+      <Spoiler revealOn="click" className="cursor-pointer">
+        {segment.children?.map((child, idx) => (
+          <SegmentRenderer key={`spoiler-child-${idx}`} segment={child} />
+        ))}
+      </Spoiler>
+    </span>
   );
 };

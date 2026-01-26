@@ -16,27 +16,16 @@ type CreatePostContext = {
 }
 
 export function useCreatePost(
-	options?: Omit<UseMutationOptions<Post, Error, CreatePostDto, CreatePostContext>, 'mutationFn'>
+	options?: Omit<UseMutationOptions<Post, Error, FormData, CreatePostContext>, 'mutationFn'>
 ) {
 	const queryClient = useQueryClient()
 
-	return useMutation<Post, Error, CreatePostDto, CreatePostContext>({
-		mutationFn: async (data: CreatePostDto) => {
-			const formData = new FormData()
-			formData.append('content', data.content)
-			
-			if (data.image) {
-				formData.append('image', data.image)
-			}
-			
-			if (data.emojiUrls && data.emojiUrls.length > 0) {
-				formData.append('emojiUrls', JSON.stringify(data.emojiUrls))
-			}
-
+	return useMutation<Post, Error, FormData, CreatePostContext>({
+		mutationFn: async (formData: FormData) => {
 			return postService.createPost(formData)
 		},
 
-		onMutate: async (newPostData) => {
+		onMutate: async (formData: FormData) => {
 			// Отменяем исходящие запросы
 			await queryClient.cancelQueries({ queryKey: postKeys.lists() })
 
@@ -46,39 +35,17 @@ export function useCreatePost(
 			// Получаем текущего пользователя из кэша
 			const currentUser = queryClient.getQueryData<User>(['profile'])
 
-			// Создаём временный пост
-			if (currentUser) {
-				const tempPost: Post = {
-					id: `temp-${Date.now()}`,
-					content: newPostData.content,
-					authorId: currentUser.id,
-					imageUrl: newPostData.image ? URL.createObjectURL(newPostData.image) : undefined,
-					emojiUrls: newPostData.emojiUrls || [],
-					likeByUser: false,
-					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
-					views: [],
-					author: currentUser,
-					likes: [],
-					comments: []
-				}
-
-				// Оптимистично добавляем пост
-				queryClient.setQueryData<Post[]>(postKeys.lists(), (old) => {
-					return old ? [tempPost, ...old] : [tempPost]
-				})
-			}
+			// Создаём временный пост (без оптимистичного обновления для упрощения)
+			// Оптимистичное обновление будет добавлено после успешного ответа
 
 			return { previousPosts }
 		},
 
 		onSuccess: (newPost) => {
-			// Заменяем временный пост на реальный
+			// Добавляем новый пост в начало списка
 			queryClient.setQueryData<Post[]>(postKeys.lists(), (old) => {
 				if (!old) return [newPost]
-				return old.map(post => 
-					post.id.startsWith('temp-') ? newPost : post
-				)
+				return [newPost, ...old]
 			})
 
 			addToast({
@@ -127,12 +94,8 @@ export function useUpdatePost(
 				formData.append('content', data.content)
 			}
 			
-			if (data.image) {
-				formData.append('image', data.image)
-			}
-			
-			if (data.emojiUrls) {
-				formData.append('emojiUrls', JSON.stringify(data.emojiUrls))
+			if (data.contentSpoiler !== undefined) {
+				formData.append('contentSpoiler', String(data.contentSpoiler))
 			}
 
 			return postService.updatePost(id, formData)

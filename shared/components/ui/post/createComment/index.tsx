@@ -57,7 +57,7 @@ const CreateComment = (props: Props) => {
             />
 
             <div className='flex items-center justify-between'>
-                {(selectedEmojis.length > 0 || currentText) && (
+                {/* {(selectedEmojis.length > 0 || currentText) && (
                     <div className='flex-1 mb-3 p-3 rounded-xl bg-gradient-to-br from-default-50 to-default-100 border border-default-200 shadow-sm'>
                         <EmojiText
                             key={currentText}
@@ -66,7 +66,7 @@ const CreateComment = (props: Props) => {
                             className='text-default-700 leading-relaxed'
                         />
                     </div>
-                )}
+                )} */}
 
                 <div className='flex items-center gap-3 ml-auto'>
                     <Button

@@ -1,38 +1,45 @@
-import type { User, Post as GlobalPost, Like, Comment } from '@/src/types/types'
-
 /**
- * Экспортируем глобальный тип Post из общих типов
+ * Централизованный экспорт типов для фичи постов
+ * 
+ * @module features/post/types
  */
-export type { GlobalPost as Post, User, Like, Comment }
+
+// Медиа типы
+export type {
+  MediaFile,
+  MediaFileDto,
+  MediaPreviewData,
+  MediaLimits,
+} from './media.types'
+
+export {
+  MediaType,
+  DEFAULT_MEDIA_LIMITS,
+  MediaUtils,
+} from './media.types'
+
+// Пост типы
+export type {
+  Post,
+  PostPreview,
+  PostDetailed,
+  Like,
+  Comment,
+  CreatePostDto,
+  UpdatePostDto,
+  CreateCommentDto,
+  TempPostParams,
+  AddViewResponse,
+  PostFilters,
+  PaginationParams,
+  PaginatedPostsResponse,
+} from './post.types'
+
+// Для обратной совместимости - экспортируем User
+export type { User } from '@/src/types/types'
 
 /**
- * DTO для создания поста
- */
-export interface CreatePostDto {
-	content: string
-	image?: File
-	emojiUrls?: string[]
-}
-
-/**
- * DTO для обновления поста
- */
-export interface UpdatePostDto {
-	content?: string
-	image?: File
-	emojiUrls?: string[]
-}
-
-/**
- * Ответ при добавлении просмотра
- */
-export interface AddViewResponse {
-	message: string
-	viewsCount: number
-}
-
-/**
- * Ответ при батчевом добавлении просмотров
+ * DTO для добавления просмотров батчем
  */
 export interface AddViewsBatchResponse {
 	message: string
@@ -40,21 +47,4 @@ export interface AddViewsBatchResponse {
 	postIds: string[]
 }
 
-/**
- * Параметры для создания временного поста (оптимистичное обновление)
- */
-export interface TempPostParams {
-	content: string
-	imageUrl?: string
-	emojiUrls?: string[]
-	currentUser: User
-}
-
-
-export interface CreateCommentDto {
-	userId?: string
-	postId: string
-	content: string
-	emojiUrls?: string[]
-}
 

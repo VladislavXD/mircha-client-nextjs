@@ -105,12 +105,12 @@ const AdminDashboard: React.FC = () => {
   ]
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto ">
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold  mb-2">
           Панель администратора
         </h1>
-        <p className="text-sm sm:text-base text-gray-600">
+        <p className="text-sm sm:text-base ">
           Добро пожаловать в административную панель. Здесь вы можете управлять всеми аспектами форума.
         </p>
       </div>
@@ -187,11 +187,11 @@ const AdminDashboard: React.FC = () => {
                   </div>
                   
                   <div className="space-y-3 mb-6">
-                    <h3 className="text-3xl font-bold text-gray-900">
+                    <h3 className="text-3xl font-bold ">
                       {typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
                     </h3>
-                    <p className="text-base font-medium text-gray-700">{card.title}</p>
-                    <p className="text-sm text-gray-500">{card.subtitle}</p>
+                    <p className="text-base font-medium ">{card.title}</p>
+                    <p className="text-sm ">{card.subtitle}</p>
                   </div>
 
                   <Divider className="my-4" />
@@ -199,8 +199,8 @@ const AdminDashboard: React.FC = () => {
                   <div className="space-y-3">
                     {card.details.map((detail, idx) => (
                       <div key={idx} className="flex justify-between text-sm">
-                        <span className="text-gray-600">{detail.label}:</span>
-                        <span className="font-semibold text-gray-900">
+                        <span className="">{detail.label}:</span>
+                        <span className="font-semibold ">
                           {typeof detail.value === 'number' ? detail.value.toLocaleString() : detail.value}
                         </span>
                       </div>
@@ -263,21 +263,21 @@ const AdminDashboard: React.FC = () => {
           <CardBody className="pt-0">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-gray-600">Новых тредов сегодня</span>
+                <span className="text-xs sm:text-sm ">Новых тредов сегодня</span>
                 <Chip color="success" variant="flat" size="sm">
                   {stats.threads.today}
                 </Chip>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-gray-600">Новых ответов сегодня</span>
+                <span className="text-xs sm:text-sm ">Новых ответов сегодня</span>
                 <Chip color="primary" variant="flat" size="sm">
                   {stats.replies.today}
                 </Chip>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-gray-600">Активных бордов</span>
+                <span className="text-xs sm:text-sm ">Активных бордов</span>
                 <Chip color="secondary" variant="flat" size="sm">
                   {stats.boards.active}
                 </Chip>
@@ -286,7 +286,7 @@ const AdminDashboard: React.FC = () => {
               <Divider />
               
               <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-gray-600">Общий размер медиа</span>
+                <span className="text-xs sm:text-sm ">Общий размер медиа</span>
                 <span className="text-xs sm:text-sm font-medium">
                   {formatFileSize(stats.media.totalSize)}
                 </span>

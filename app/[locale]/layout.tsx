@@ -1,10 +1,10 @@
 import "@/src/assets/styles/globals.css";
 import clsx from "clsx";
-import { fontSans } from "@/src/config/fonts";
+import { fontSans, fontSerif } from "@/src/config/fonts";
 import type { Metadata, Viewport } from "next";
 
 import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
-import ClientProviders from "@/shared/Providers/ClientProviders";
+import ClientProviders from "@/src/Providers/ClientProviders";
 import { getMessages } from "next-intl/server";
 import { Locale, routing } from "@/src/i18n/routing";
 import { notFound } from "next/navigation";
@@ -92,7 +92,8 @@ export default async function RootLayout({
       <body
         className={clsx(
           "min-h-screen text-foreground bg-background font-sans antialiased",
-          fontSans.variable
+          fontSans.variable,
+          fontSerif.variable
         )}
       >
         <NextIntlClientProvider messages={messages} locale={locale}>
