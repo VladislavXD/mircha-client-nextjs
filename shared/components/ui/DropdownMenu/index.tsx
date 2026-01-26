@@ -9,6 +9,7 @@ import {
   User,
   Button,
   useDisclosure,
+  Badge,
 } from "@heroui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "next-auth/react";
@@ -23,6 +24,7 @@ import FeedBackModal from "../Modals/FeedBack.modal";
 import { useProfile } from "@/src/features/profile/hooks";
 import { useLogoutMutation } from "@/src/features/user/hooks";
 import { Snowflake, Moon, Sun } from "lucide-react";
+import { useOnlineStatus } from "@/src/features/chat";
 
 const MenuDropdown = () => {
   const dispatch = useDispatch();
@@ -35,6 +37,10 @@ const MenuDropdown = () => {
   const { user, isLoading, isAuthenticated } = useProfile();
   const { logout, isLoadingLogout } = useLogoutMutation();
   
+  // ✅ ВАЖНО: Все хуки должны вызываться до любого раннего return
+  const userId = user?.id;
+  const { isOnline } = useOnlineStatus(userId || "");
+  
   const handleSnowToggle = () => {
     const newValue = !snowEnabled;
     setSnowEnabled(newValue);
@@ -46,17 +52,18 @@ const MenuDropdown = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
   
-  // Все хуки вызваны, теперь можно делать раннее возвращение
+  // Теперь можно делать раннее возвращение
   if (!user) {
     return null;
   }
 
   const { avatarUrl, name, email, id } = user;
   const pathname = usePathname()
-    const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
-    const locale = localeMatch?.[1]
+  const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+  const locale = localeMatch?.[1]
+
+  const prefix = locale ? `/${locale}` : ''
   
-    const prefix = locale ? `/${locale}` : ''
   return (
     <>
       <Dropdown
@@ -68,13 +75,21 @@ const MenuDropdown = () => {
           <div
             className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer ${theme === "dark" ? "bg-black" : "bg-white"}`}
           >
+           
             <CiSettings className={`flex sm:hidden size-8 ${theme}`} />
+            {/* @ts-ignore */}
+            <Badge color={isOnline ? "success" : "default"} placement="" shape="circle" content="" className="mt-1 hidden md:block" >
+              <></>
+            </Badge> 
+         
             <User
               avatarProps={{ isBordered: true, src: avatarUrl }}
               className="transition-transform md:text-xs hidden sm:flex"
               description={`@${email}`}
               name={`${name}`}
             />
+           
+
           </div>
         </DropdownTrigger>
         <DropdownMenu aria-label="User Actions" variant="flat">

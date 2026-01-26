@@ -37,6 +37,7 @@ import DeletePost from "../PostModals/DeletePost";
 import { useThrottle } from "@/src/hooks/useAntiSpam";
 import { Heart } from 'lucide-react';
 import { postKeys } from '@/src/features/post/hooks/usePostQueries';
+import { useOnlineStatus } from "@/src/features/chat";
 
 
 
@@ -263,6 +264,8 @@ const Card = ({
     };
   }, [id, viewSent, cardFor]);
 
+  const { isOnline } = useOnlineStatus(authorId);
+  
   return (
     <NextCard className="mb-5">
       <CardHeader className="justify-between  items-center bg-transparent">
@@ -279,6 +282,7 @@ const Card = ({
             followersCount={followersCount}
             followingCount={followingCount}
             isFollowing={isFollowing}
+            isOnline={isOnline}
             onFollowToggle={onFollowToggle}
             className="text-small font-semibold leading-none text-default-600"
             avatarUrl={avatarUrl}

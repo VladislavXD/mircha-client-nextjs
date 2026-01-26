@@ -56,7 +56,6 @@ export function useLikePost(
 				userId: currentUser.id,
 				postId: postId,
 				user: currentUser,
-				post: {} as Post, // Will be filled by server
 			}
 
 			// Optimistically update getAllPosts cache

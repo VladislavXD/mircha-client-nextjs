@@ -10,7 +10,8 @@ import type { User } from "../types";
 import PostCard from "./PostCard";
 import CreatePost from "./CreatePost";
 import CardSkeleton from "@/shared/components/ui/post/Card/Skeleton";
-import Notice from "@/shared/components/ui/Notice";
+import Notice from "../../notice/components/Notice";
+
 
 /**
  * PostList - основной компонент для отображения ленты постов
@@ -30,8 +31,8 @@ const PostList = () => {
   
   const { data: posts, isLoading, isError, error } = usePosts();
 
-  console.log(posts);
 
+  console.log("PostList render:", { isLoading, isError, posts });
   if (isLoading) {
     return (
       <div className="space-y-5">
@@ -71,14 +72,13 @@ const PostList = () => {
       </div>
     );
   }
-  console.log(posts);
   return (
     <div className="space-y-5">
-      {currentUser && <CreatePost />}
+      {currentUser && <span className=""><CreatePost /></span>}
       <Notice/>
       {posts.map((post) => (
         <PostCard key={post.id} post={post} cardFor="post"  />
-      ))}
+      ))} 
     </div>
   );
 };

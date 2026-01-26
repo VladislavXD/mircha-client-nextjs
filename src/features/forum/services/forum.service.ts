@@ -12,6 +12,7 @@ import type {
   ForumStats,
   BoardThreadsResponse,
   LatestPost,
+  LatestThreadsResponse,
   CreateBoardDto,
   UpdateBoardDto,
   CreateThreadDto,
@@ -166,6 +167,88 @@ export const forumService = {
   },
 
   /**
+   * Получить треды категории с пагинацией и фильтрацией
+   */
+  async getCategoryThreads(
+    slug: string,
+    page: number = 1,
+    limit: number = 10,
+    tagSlug?: string,
+  ): Promise<{
+    category: Category;
+    threads: Thread[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (tagSlug) params.set('tag', tagSlug);
+
+    return api.get<any>(
+      `forum/categories/${slug}/threads?${params.toString()}`,
+    );
+  },
+
+  /**
+   * Создать тред в категории
+   */
+  async createThreadInCategory(
+    slug: string,
+    data: CreateThreadDto,
+    files?: File[],
+  ): Promise<Thread> {
+    const formData = new FormData();
+    formData.append('subject', data.subject);
+    formData.append('content', data.content);
+    if (data.authorName) formData.append('authorName', data.authorName);
+    if (data.isPinned) formData.append('isPinned', String(data.isPinned));
+    if (data.tagIds) {
+      data.tagIds.forEach((tagId) => formData.append('tagIds[]', tagId));
+    }
+
+    if (files) {
+      files.forEach((file) => formData.append('images', file));
+    }
+
+    return api.post<Thread>(
+      `forum/categories/${slug}/threads`,
+      formData,
+    );
+  },
+
+  /**
+   * Получить тред категории по slug
+   */
+  async getThreadByCategoryAndSlug(
+    categorySlug: string,
+    threadSlug: string,
+  ): Promise<Thread> {
+    return api.get<Thread>(
+      `forum/categories/${categorySlug}/threads/${threadSlug}`,
+    );
+  },
+
+  /**
+   * Создать ответ в треде категории
+   */
+  async createReplyInCategory(
+    categorySlug: string,
+    threadId: string,
+    data: FormData,
+  ): Promise<Reply> {
+    return api.post<Reply>(
+      `forum/categories/${categorySlug}/threads/${threadId}/replies`,
+      data,
+    );
+  },
+
+  /**
    * Создать категорию
    */
   async createCategory(data: FormData | CreateCategoryDto): Promise<Category> {
@@ -210,5 +293,24 @@ export const forumService = {
    */
   async getLatestPosts(limit: number = 10): Promise<LatestPost[]> {
     return api.get<LatestPost[]>(`forum/posts/latest?limit=${limit}`);
+  },
+
+  /**
+   * Получить последние треды с пагинацией
+   */
+  async getLatestThreads(
+    page: number = 1,
+    limit: number = 20,
+    nsfw: string = '0',
+  ): Promise<LatestThreadsResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      nsfw,
+    });
+
+    return api.get<LatestThreadsResponse>(
+      `forum/threads/latest?${params.toString()}`,
+    );
   },
 };
