@@ -113,6 +113,9 @@ export interface Category {
   color?: string;
   description?: string;
   group?: string;
+  parentId?: string;
+  parent?: Category;
+  children?: Category[];
   _count?: {
     threads: number;
   };
@@ -199,5 +202,41 @@ export interface LatestPost {
       name: string;
       title: string;
     };
+  };
+}
+
+export interface LatestThread {
+  id: string;
+  shortId: string;
+  slug?: string;
+  subject?: string;
+  content: string;
+  thumbnailUrl?: string | null;
+  imageUrl?: string | null;
+  createdAt: string;
+  lastBumpAt: string;
+  lastReplyAt?: string | null;
+  lastReplyAuthorName?: string | null;
+  replyCount: number;
+  board?: {
+    name: string;
+    title: string;
+  };
+  category?: {
+    name: string;
+    slug: string;
+  };
+  tags: Tag[];
+  isPinned: boolean;
+  isLocked: boolean;
+}
+
+export interface LatestThreadsResponse {
+  items: LatestThread[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
   };
 }

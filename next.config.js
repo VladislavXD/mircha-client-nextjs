@@ -45,6 +45,8 @@ const nextConfig = {
       },
     },
   },
+
+  transpilePackages: ['spoiled'],
 };
 
 

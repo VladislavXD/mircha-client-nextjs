@@ -38,6 +38,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   
   // Убираем сложную логику проверки - middleware уже все сделал
   const isAuthPage = pathname?.startsWith('/auth');
+  const isAdminPage = pathname?.includes('/admin');
 	const prefix = locale ? `/${locale}` : ''
 
   const hideRightSidebar = pathname?.includes(`${prefix}/dashboard/settings`);  ``
@@ -50,8 +51,11 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       {/* Новогодний снег на всём сайте */}
       <Snowfall enabled={snowEnabled} density={50} />
 
-      {/* Если страница auth - рендерим без Layout */}
-      {isAuthPage ? (
+      {/* Если админ-панель - рендерим без Layout (у неё свой layout) */}
+      {isAdminPage ? (
+        children
+      ) : /* Если страница auth - рендерим без Layout */
+      isAuthPage ? (
         <div className="relative flex flex-col h-screen">
           <main className="container mx-auto max-w-7xl px-6 flex-grow">
             {children}
@@ -62,7 +66,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         <div className="relative flex flex-col h-screen mb-0">
           {/* Основной контент без отступа от header */}
           <div className="flex flex-1 overflow-hidden">
-            <div className="container mx-auto max-w-7xl px-6 flex flex-1 overflow-hidden flex-col">
+            <div className="container mx-auto max-w-7xl flex flex-1 overflow-hidden flex-col">
               {/* Header с границей снизу, только над контентом */}
               <div className="bg-background border-b  border-zinc-700">
                 <Header />
@@ -79,7 +83,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
                 
                 {/* Основной контент с прокруткой без видимого скроллбара */}
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                  <div className="flex-1 p-4 overflow-y-auto scrollbar-hide mb-8">
+                  <div className="flex-1  overflow-y-auto scrollbar-hide mb-8">
                     <AuthGuard>{children}</AuthGuard>
                   </div>
                 </div>

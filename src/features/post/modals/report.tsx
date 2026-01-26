@@ -31,10 +31,15 @@ const ReportPostModal: React.FC<ReportPostModalProps> = ({
   const targetId = post?.id || postId || "";
   const targetTitle = post?.content || postContent || "";
   
+  // Преобразуем content в строку, если это объект
+  const contentString = typeof targetTitle === 'string' 
+    ? targetTitle 
+    : JSON.stringify(targetTitle);
+  
   const displayTitle =
-    targetTitle.length > 100
-      ? `${targetTitle.slice(0, 100)}...`
-      : targetTitle;
+    contentString.length > 100
+      ? `${contentString.slice(0, 100)}...`
+      : contentString;
 
   return (
     <ReportModal

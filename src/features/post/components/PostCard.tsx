@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Heart, Eye } from "lucide-react";
-import { FaRegComment } from "react-icons/fa";
+import { MessageCircle } from 'lucide-react';
 
 import { useDeletePost } from "../hooks/usePostMutations";
 import { useLikePost, useUnlikePost } from "../like/hooks";
@@ -23,7 +23,6 @@ import type { Post, User } from "../types";
 
 import UserComponent from "@/shared/components/ui/User";
 import { formatToClientDate } from "@/app/utils/formatToClientDate";
-import Typography from "@/shared/components/ui/typography";
 import MetaInfo from "@/shared/components/ui/MetaInfo";
 import PostDropdown from "@/shared/components/ui/post/PostDropdown/PostDropdown";
 import { EmojiText } from "@/shared/components/ui/EmojiText";
@@ -31,6 +30,9 @@ import EditPostModal from "@/shared/components/ui/post/PostModals/EditPost";
 import DeletePost from "@/shared/components/ui/post/PostModals/DeletePost";
 import { useThrottle } from "@/src/hooks/useAntiSpam";
 import ReportPostModal from "../modals/report";
+import { useOnlineStatus } from "../../chat";
+import PostMediaSlider, { type PostMedia } from "./PostMediaSlider";
+import { timeAgo } from "@/src/utils/timeAgo";
 
 type Props = {
   post: Post;
@@ -66,7 +68,6 @@ const PostCard = ({
     id = "",
     author,
     content,
-    imageUrl,
     emojiUrls = [],
     createdAt,
     likes = [],
@@ -77,7 +78,41 @@ const PostCard = ({
     views = [],
     viewsCount: serverViewsCount,
   } = post;
-  console.log('likedByUser:', likeByUser);
+
+  // Backend может использовать image или imageUrl
+  const imageUrl = (post as any)?.image ?? (post as any)?.imageUrl;
+  const safeContent = typeof content === "string" ? content : "";
+  
+  // Обработка медиа: если есть массив media, используем его, иначе создаём из одиночного image
+  const postMedia: PostMedia[] = React.useMemo(() => {
+    const mediaArray = (post as any)?.media;
+    if (Array.isArray(mediaArray) && mediaArray.length > 0) {
+      return mediaArray.map((m: any) => {
+        // Определяем тип: бэкенд возвращает "IMAGE", "VIDEO", "GIF"
+        let mediaType: "image" | "video" = "image";
+        if (m.type) {
+          const typeUpper = String(m.type).toUpperCase();
+          mediaType = typeUpper === "VIDEO" ? "video" : "image";
+        } else if (m.mimeType) {
+          mediaType = m.mimeType.startsWith("video/") ? "video" : "image";
+        }
+        
+        return {
+          url: m.url || m,
+          type: mediaType,
+          spoiler: m.spoiler || false
+        };
+      });
+    }
+    if (imageUrl) {
+      return [{
+        url: imageUrl,
+        type: 'image' as const,
+        spoiler: false
+      }];
+    }
+    return [];
+  }, [post, imageUrl]);
 
   const {
     id: authorId = "",
@@ -245,10 +280,45 @@ const PostCard = ({
     ? followers.some((f) => f.followerId === currentUser.id)
     : false;
 
+
+    const { isOnline } = useOnlineStatus(authorId);
+    
+  // Обработчик клика на карточку для перехода на страницу поста
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Игнорируем клики по интерактивным элементам
+    const target = e.target as HTMLElement;
+    
+    // Проверяем, что клик не по ссылке, кнопке или их потомкам
+    if (
+      target.closest('a') || 
+      target.closest('button') || 
+      target.closest('[role="button"]') ||
+      target.closest('.swiper-button-next') ||
+      target.closest('.swiper-button-prev') ||
+      target.getAttribute('data-no-redirect') === 'true'
+    ) {
+      return;
+    }
+    
+    // Переходим на страницу поста
+    router.push(`/posts/${id}`);
+  };
+    
   return (
-    <NextCard className="mb-5">
+    <NextCard className="mb-0 cursor-pointer
+     hover:shadow-lg 
+     transition-all
+     rounded-none 
+     pt-3 
+     shadow-none   
+     border-t-1 
+     border-default-200 
+     hover:bg-[#070c0d]
+     
+       bg-black
+      " onClick={handleCardClick}>
       <CardHeader className="justify-between items-center bg-transparent">
-        <Link href={`/user/${authorId}`}>
+        <Link href={`/user/${authorId}`} onClick={(e) => e.stopPropagation()} className="flex items-start gap-2 ">
           <UserComponent
             userId={authorId}
             usernameFrameUrl={usernameFrameUrl}
@@ -261,52 +331,57 @@ const PostCard = ({
             followersCount={followersCount}
             followingCount={followingCount}
             isFollowing={isFollowing}
+            isOnline={isOnline}
             onFollowToggle={onFollowToggle}
             className="text-small font-semibold leading-none text-default-600"
             avatarUrl={avatarUrl}
             description={createdAt && formatToClientDate(createdAt)}
           />
+          <time dateTime={createdAt} className="text-white/70 text-xs drop-shadow-md pt-1">
+            {timeAgo(createdAt || "")}
+          </time>
         </Link>
 
-        <PostDropdown
-          isLoading={isDeleteLoading}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-					onReport={onReportOpen}
-          authorId={authorId}
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <PostDropdown
+            isLoading={isDeleteLoading}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
+            onReport={onReportOpen}
+            authorId={authorId}
+          />
+        </div>
       </CardHeader>
 
-      <CardBody className="px-3 py-2 mb-5">
-        <div ref={inViewRef}>
-          <EmojiText text={content} emojiUrls={emojiUrls} />
+      <CardBody className="px-3 py-2 mb-5" >
 
-          {imageUrl && (
-            <div className="mt-3 overflow-hidden">
-              <Image
-                isBlurred
-                src={imageUrl}
-                alt="Изображение поста"
-                className="max-w-full h-auto rounded-lg object-cover"
-                style={{ maxHeight: "400px" }}
-              />
+        <div ref={inViewRef}>
+        
+          <EmojiText 
+            text={safeContent} 
+            emojiUrls={emojiUrls} 
+            className="font-serif md:text-[17px] text-[12px] leading-relaxed tracking-wide"
+          />
+
+          {/* Новый слайдер медиа */}
+          {postMedia.length > 0 && (
+            <div className="mt-3" >
+              <PostMediaSlider media={postMedia} />
             </div>
           )}
+
         </div>
+
       </CardBody>
 
-      <div className="text-small text-default-400 pl-3 flex items-center gap-1">
+      {/* <div className="text-small text-default-400 pl-3 flex items-center gap-1">
         <Eye size={16} />
         {viewsCount > 1000 ? `${(viewsCount / 1000).toFixed(1)}k` : viewsCount}{" "}
-        {viewsCount === 1
-          ? "просмотр"
-          : viewsCount < 5
-          ? "просмотра"
-          : "просмотров"}
-      </div>
+       
+      </div> */}
 
       {cardFor !== "comment" && (
-        <CardFooter className="gap-3">
+        <CardFooter className="gap-3" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-5 items-center">
             <div
               onClick={handleLikeWithThrottle}
@@ -328,9 +403,10 @@ const PostCard = ({
                 Icon={Heart}
               />
             </div>
+            
 
-            <Link href={`/posts/${id}`}>
-              <MetaInfo count={commentsCount} Icon={FaRegComment} />
+            <Link href={`/posts/${id}`} onClick={(e) => e.stopPropagation()}>
+              <MetaInfo count={commentsCount} Icon={MessageCircle} />
             </Link>
           </div>
           
@@ -354,7 +430,7 @@ const PostCard = ({
         isOpen={isEditOpen}
         onClose={onEditClose}
         postId={id}
-        initialContent={content}
+        initialContent={safeContent}
         initialEmojiUrls={emojiUrls}
         onUpdated={() => {
           // React Query will auto-refetch on close
