@@ -33,6 +33,7 @@ import {
   useDeleteBoard,
 } from "../hooks/useAdmin";
 import AdminCreateBoardModal from '@/shared/components/admin/AdminCreateBoardModal';
+import AdminCreateNoticeModal from '@/shared/components/admin/AdminCreateNoticeModal';
 import type { AdminBoard, CreateBoardDto, UpdateBoardDto } from "../types/admin.types";
 
 interface BoardManagementProps {
@@ -51,6 +52,7 @@ export default function BoardManagement({ className }: BoardManagementProps) {
   const updateBoard = useUpdateBoard();
   const deleteBoard = useDeleteBoard();
   const { isOpen: isCreateOpen, onOpen: onCreateOpen, onClose: onCreateClose } = useDisclosure();
+  const { isOpen: isNoticeOpen, onOpen: onNoticeOpen, onClose: onNoticeClose } = useDisclosure();
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -106,6 +108,9 @@ export default function BoardManagement({ className }: BoardManagementProps) {
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button size="sm" color="primary" onPress={onCreateOpen}>
               Создать борду
+            </Button>
+            <Button size="sm" color="secondary" onPress={onNoticeOpen}>
+              Создать уведомление
             </Button>
           </div>
         </CardHeader>
@@ -218,6 +223,15 @@ export default function BoardManagement({ className }: BoardManagementProps) {
         onSuccess={() => {
           onCreateClose();
           refetch();
+        }}
+      />
+
+      {/* Создание уведомления */}
+      <AdminCreateNoticeModal
+        isOpen={isNoticeOpen}
+        onClose={onNoticeClose}
+        onSuccess={() => {
+          onNoticeClose();
         }}
       />
 

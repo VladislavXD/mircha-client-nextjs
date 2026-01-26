@@ -22,6 +22,6 @@ export type {
 } from './types'
 
 // Components
-export { default as CreatePost } from './components/CreatePost'
+// ВРЕМЕННО ОТКЛЮЧЕНО: export { default as CreatePost } from './components/CreatePost'
 export { default as PostCard } from './components/PostCard'
 export { default as PostList } from './components/PostList'

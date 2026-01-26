@@ -34,6 +34,8 @@ export const forumKeys = {
   tags: () => [...forumKeys.all, 'tags'] as const,
   stats: () => [...forumKeys.all, 'stats'] as const,
   latestPosts: (limit: number) => [...forumKeys.all, 'latest', limit] as const,
+  latestThreads: (page: number, limit: number, nsfw: string) =>
+    [...forumKeys.all, 'latestThreads', { page, limit, nsfw }] as const,
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -230,6 +232,91 @@ export function useCategoryBySlug(
 }
 
 /**
+ * Получение тредов категории с пагинацией и фильтром по тегу
+ */
+export function useCategoryThreads(
+  slug: string,
+  page: number = 1,
+  limit: number = 10,
+  tagSlug?: string,
+  options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery({
+    queryKey: [...forumKeys.category(slug), 'threads', { page, limit, tag: tagSlug }],
+    queryFn: () => forumService.getCategoryThreads(slug, page, limit, tagSlug),
+    enabled: !!slug,
+    staleTime: 1 * 60 * 1000, // 1 минута
+    ...options,
+  });
+}
+
+/**
+ * Создание треда в категории
+ */
+export function useCreateThreadInCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      slug,
+      data,
+      files,
+    }: {
+      slug: string;
+      data: CreateThreadDto;
+      files?: File[];
+    }) => forumService.createThreadInCategory(slug, data, files),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...forumKeys.category(variables.slug), 'threads'],
+      });
+    },
+  });
+}
+
+/**
+ * Получение треда категории по slug
+ */
+export function useThreadByCategoryAndSlug(
+  categorySlug: string,
+  threadSlug: string,
+  options?: Omit<UseQueryOptions<Thread>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery<Thread>({
+    queryKey: [...forumKeys.category(categorySlug), 'thread', threadSlug],
+    queryFn: () => forumService.getThreadByCategoryAndSlug(categorySlug, threadSlug),
+    enabled: !!categorySlug && !!threadSlug,
+    staleTime: 1 * 60 * 1000,
+    ...options,
+  });
+}
+
+/**
+ * Создание ответа в треде категории
+ */
+export function useCreateReplyInCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      categorySlug,
+      threadId,
+      formData,
+    }: {
+      categorySlug: string;
+      threadId: string;
+      formData: FormData;
+    }) => forumService.createReplyInCategory(categorySlug, threadId, formData),
+    onSuccess: (_, variables) => {
+      // Инвалидируем кэш треда чтобы обновить список ответов
+      queryClient.invalidateQueries({
+        queryKey: [...forumKeys.category(variables.categorySlug), 'thread'],
+      });
+    },
+  });
+}
+
+/**
  * Создание категории
  */
 export function useCreateCategory() {
@@ -304,6 +391,23 @@ export function useLatestPosts(
     queryKey: forumKeys.latestPosts(limit),
     queryFn: () => forumService.getLatestPosts(limit),
     staleTime: 2 * 60 * 1000,
+    ...options,
+  });
+}
+
+/**
+ * Получение последних тредов с пагинацией
+ */
+export function useLatestThreads(
+  page: number = 1,
+  limit: number = 20,
+  nsfw: string = '0',
+  options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>,
+) {
+  return useQuery({
+    queryKey: forumKeys.latestThreads(page, limit, nsfw),
+    queryFn: () => forumService.getLatestThreads(page, limit, nsfw),
+    staleTime: 2 * 60 * 1000, // 2 минуты
     ...options,
   });
 }

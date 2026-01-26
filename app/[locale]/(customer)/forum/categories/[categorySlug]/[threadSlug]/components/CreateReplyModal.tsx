@@ -12,11 +12,9 @@ import {
   Input,
   Chip
 } from '@heroui/react'
-// TODO: Migrate to React Query: Create useCreateReplyInCategory hook
-// @ts-ignore
-import { useCreateReplyInCategoryMutation } from '@/src/services/forum.service.old'
+import { useCreateReplyInCategory } from '@/src/features/forum/hooks/useForum'
 import { toast } from 'react-hot-toast'
-import type { Thread } from '@/src/types/types'
+import type { Thread } from '@/src/features/forum/types/forum.types'
 import { useTranslations } from 'next-intl'
 
 interface CreateReplyModalProps {
@@ -35,7 +33,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
   thread 
 }) => {
   const t = useTranslations('Forum.createReply')
-  const [createReply, { isLoading }] = useCreateReplyInCategoryMutation()
+  const { mutateAsync: createReply, isPending: isLoading } = useCreateReplyInCategory()
   
   const [formData, setFormData] = useState({
     content: '',
@@ -65,7 +63,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
         categorySlug, 
         threadId,
         formData: formDataToSend 
-      }).unwrap()
+      })
       
       toast.success('Ответ отправлен!')
       onClose()
@@ -75,7 +73,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
       })
       setSelectedFiles([])
     } catch (error: any) {
-      toast.error(error?.data?.error || t('errorCreate'))
+      toast.error(error?.message || t('errorCreate'))
     }
   }
 

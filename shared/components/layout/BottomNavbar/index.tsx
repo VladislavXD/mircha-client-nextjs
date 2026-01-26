@@ -1,7 +1,7 @@
 "use client";
-import { Badge, Skeleton, User } from "@heroui/react";
+import { Badge, Skeleton, Avatar } from "@heroui/react";
 import React, { useEffect, useState, useMemo } from "react";
-import { useGetUserChats } from "@/src/features/chat";
+import { useGetUserChats, useOnlineStatus } from "@/src/features/chat";
 import { useCurrentUser } from "@/src/features/user";
 
 import Link from "next/link";
@@ -9,8 +9,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 
-import { House, MessageCircleDashed, Search } from "lucide-react";
-import { FaUserSecret } from "react-icons/fa";
+import { Home, MessageCircle, Search, UserCircle, Theater } from "lucide-react";
 
 const useScrollDirection = () => {
   const [scrollDirection, setScrollDirection] = useState("up");
@@ -28,6 +27,7 @@ const useScrollDirection = () => {
 
   return scrollDirection;
 };
+
 
 const BottomNav = () => {
   const scrollDirection = useScrollDirection();
@@ -73,83 +73,125 @@ const BottomNav = () => {
     }
   };
 
+   const { isOnline } = useOnlineStatus(id);
+
   return (
     <>
+      {/* Island-style floating navbar */}
       <div
-        className={`fixed bottom-0 w-full py-3 z-10 bg-zinc-100 dark:bg-zinc-950 border-t dark:border-zinc-800 border-zinc-200 shadow-lg sm:hidden ${navClass}`}
+        className={`fixed bottom-0 left-0 right-0 z-10 px-4 pb-4 sm:hidden ${navClass}`}
       >
-        <div className="flex flex-row justify-around items-center bg-transparent w-full">
-          {/* Home */}
-          <Link href="/" className="flex items-center relative">
-            <House
-              size={28}
-              stroke={getIconColor(isActivePage("/"))}
-              strokeWidth={2}
-              fill="none"
-              className="transition-colors ease-out"
-            />
-          </Link>
-
-          {/* Search */}
-          <Link href="/search" className="flex items-center">
-            <Search
-              size={28}
-              stroke={getIconColor(isActivePage("/search"))}
-              strokeWidth={2}
-              fill="none"
-              className="transition-colors ease-out"
-            />
-          </Link>
-
-          {/* Forum */}
-          <Link href="/forum" className="flex items-center">
-            <FaUserSecret
-              className="size-7 transition-colors ease-out"
-              style={{
-                color: getIconColor(isActivePage("/forum"))
-              }}
-            />
-          </Link>
-
-          {/* Chat */}
-          <Link
-            href="/chat"
-            className="flex items-center transition-all ease-out relative"
-          >
-            <Badge
-              content={totalUnreadCount}
-              color="danger"
-              size="sm"
-              isInvisible={totalUnreadCount === 0}
-              placement="top-right"
+        <div className="mx-auto max-w-md backdrop-blur-lg bg-zinc-100/90 dark:bg-zinc-900/90 rounded-3xl shadow-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+          <div className="flex justify-around items-center py-3 px-2">
+            {/* Home */}
+            <Link 
+              href="/" 
+              className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 ${
+                isActivePage("/") 
+                  ? "bg-zinc-900 dark:bg-zinc-100" 
+                  : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+              }`}
             >
-              <MessageCircleDashed
-                size={28}
-                stroke={getIconColor(isActivePage("/chat"))}
-                strokeWidth={2}
+              <Home
+                size={24}
+                stroke={isActivePage("/") ? (theme === "dark" ? "#000000" : "#ffffff") : getIconColor(false)}
+                strokeWidth={1.5}
                 fill="none"
                 className="transition-colors ease-out"
               />
-            </Badge>
-          </Link>
+            </Link>
 
-          {/* Profile */}
-          { isLoading 
-          ? (<Skeleton className="flex rounded-full w-10 h-10" />) 
-          : 
-          current && (
-            <Link href={`/user/${id}`} className="flex items-center">
-              <User
-                avatarProps={{
-                  src: `${avatarUrl}`,
-                  isBordered: true,
-                  size: "sm",
-                }}
-                className="transition-transform md:text-xs"
-                name=""
+            {/* Search */}
+            <Link 
+              href="/search" 
+              className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 ${
+                isActivePage("/search") 
+                  ? "bg-zinc-900 dark:bg-zinc-100" 
+                  : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+              }`}
+            >
+              <Search
+                size={24}
+                stroke={isActivePage("/search") ? (theme === "dark" ? "#000000" : "#ffffff") : getIconColor(false)}
+                strokeWidth={1.5}
+                fill="none"
+                className="transition-colors ease-out"
               />
             </Link>
-          )}
+
+            {/* Forum */}
+            <Link 
+              href="/forum" 
+              className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 ${
+                isActivePage("/forum") 
+                  ? "bg-zinc-900 dark:bg-zinc-100" 
+                  : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+              }`}
+            >
+              <Theater
+                size={24}
+                stroke={isActivePage("/forum") ? (theme === "dark" ? "#000000" : "#ffffff") : getIconColor(false)}
+                strokeWidth={1.5}
+                fill="none"
+                className="transition-colors ease-out"
+              />
+            </Link>
+
+            {/* Chat */}
+            <Link
+              href="/chat"
+              className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+                isActivePage("/chat") 
+                  ? "bg-zinc-900 dark:bg-zinc-100" 
+                  : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+              }`}
+            >
+              <Badge
+                content={totalUnreadCount}
+                color="danger"
+                size="sm"
+                isInvisible={totalUnreadCount === 0}
+                placement="top-right"
+              >
+                <MessageCircle
+                  size={24}
+                  stroke={isActivePage("/chat") ? (theme === "dark" ? "#000000" : "#ffffff") : getIconColor(false)}
+                  strokeWidth={1.5}
+                  fill="none"
+                  className="transition-colors ease-out"
+                />
+              </Badge>
+            </Link>
+
+            {/* Profile */}
+            { isLoading 
+            ? (
+              <div className="flex items-center justify-center w-12 h-12">
+                <Skeleton className="rounded-full w-9 h-9" />
+              </div>
+            ) 
+            : 
+            current && (
+              <Link 
+                href={`/user/${id}`} 
+                className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 ${
+                  isActivePage(`/user/${id}`) 
+                    ? "bg-zinc-900 dark:bg-zinc-100" 
+                    : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                }`}
+              >
+                <Avatar
+                  src={avatarUrl}
+                  size="sm"
+                  isBordered={isActivePage(`/user/${id}`)}
+                  className="w-9 h-9"
+                  classNames={{
+                    base: isActivePage(`/user/${id}`) ? "ring-2 ring-white dark:ring-black" : ""
+                  }}
+                />
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </>

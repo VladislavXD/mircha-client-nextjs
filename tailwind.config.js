@@ -14,11 +14,26 @@ const config = {
       fontFamily: {
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],
+        serif: ["var(--font-serif)"],
       },
     },
   },
   darkMode: "class",
-  plugins: [heroui(), heroTheme()],
+  plugins: [
+    heroui(), 
+    heroTheme(),
+    function({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-hide': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none'
+          }
+        }
+      })
+    }
+  ],
 }
 
 module.exports = config;
