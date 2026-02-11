@@ -126,8 +126,7 @@ const Card = ({
   } = useDisclosure();
   // const [editValue, setEditValue] = useState(content);
   const router = useRouter();
-  const currentUser = useSelector(selectCurrent);
-  const dispatch = useDispatch()
+  
 
 
 
