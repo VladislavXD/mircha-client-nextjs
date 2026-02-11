@@ -1,73 +1,57 @@
 "use client"
 import React from "react"
-import { useRouter, useParams } from "next/navigation"
-import { useGetPostByIdQuery } from "@/src/services/post/post.service"
-import Card from "@/app/components/ui/post/Card"
-import GoBack from "@/app/components/ui/GoBack"
-import { createComment } from "@/src/services/post/comments.service"
+import { useParams } from "next/navigation"
+import PostCard from "@/src/features/post/components/PostCard"
+import GoBack from "@/shared/components/ui/GoBack"
 import { Spinner } from "@heroui/react"
-import CreateComment from "@/app/components/ui/post/createComment"
+import CreateComment from "@/shared/components/ui/post/createComment"
+import { usePost } from "@/src/features/post"
 
 const CurrentPost = () => {
-	const router = useRouter()
-	// const { id: postId } = router.query as { id: string }
-
 	const { id: postId } = useParams<{ id: string }>()
-	const { data } = useGetPostByIdQuery(postId ?? "")
+	const { data, isLoading } = usePost(postId)
 
-	if (!data) {
-		return <><Spinner className="flex justify-c	enter h-full"/></>
+	if (isLoading) {
+		return <Spinner className="flex justify-center h-full" />
 	}
 
-	const {
-		content,
-		id,
-		authorId,
-		comments,
-		likes,
-		author,
-		likeByUser,
-		createdAt,
-		emojiUrls,
-		imageUrl,
-		views,
-	} = data
+ 	if (!data) {
+		return <div className="text-center">Пост не найден</div>
+	}
+	
 	return (
 		<>
 			<GoBack />
-			<Card
+			<PostCard
+				post={data}
 				cardFor="current-post"
-				avatarUrl={author.avatarUrl ?? ""}
-				content={content}
-				name={author.name ?? ""}
-				likesCount={likes.length}
-				commentsCount={comments.length}
-				authorId={authorId}
-				id={id}
-				likeByUser={likeByUser}
-				createdAt={createdAt}
-				emojiUrls={emojiUrls}
-				imageUrl={imageUrl}
-				views={views?.length || 0}
 			/>
 			<div className="mt-10">
 				<CreateComment />
 			</div>
 			<div className="mt-10">
-				{data.comments
+				{data.comments && data.comments.length > 0
 					? data.comments.map(comment => (
-							<Card
-								cardFor="comment"
+							<PostCard
 								key={comment.id}
-								avatarUrl={comment.user.avatarUrl ?? ""}
-								content={comment.content}
-								name={comment.user.name ?? ""}
-								authorId={comment.user.id ?? ""}
+								post={{
+									...comment,
+									emojiUrls: comment.emojiUrls || [],
+									updatedAt: comment.updatedAt || comment.createdAt,
+									author: comment.user,
+									authorId: comment.user.id,
+									likes: [],
+									comments: [],
+									views: [],
+									likeByUser: false,
+									contentSpoiler: false,
+									media: [],
+								}}
+								cardFor="comment"
 								commentId={comment.id}
-								id={id}
 							/>
 						))
-					: null}
+					: <div className="text-center text-default-500">Комментариев пока нет</div>}
 			</div>
 		</>
 	)

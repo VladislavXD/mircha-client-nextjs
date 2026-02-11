@@ -24,7 +24,11 @@ export type User = {
     comments: Comment[]
     isFollow?: boolean
     followersCount?: number
-    
+    _count?: {
+      post: number
+      followers: number
+      following: number
+    }
   }
 
   // Forum types
@@ -156,10 +160,13 @@ export type User = {
     authorId: string
     likes: Like[]
     comments: Comment[]
+    likesCount?: number // Оптимизация: счетчик вместо likes.length
+    commentsCount?: number // Оптимизация: счетчик вместо comments.length
     likeByUser: boolean
     createdAt: string
     updatedAt: string
     views: string[]
+    viewsCount?: number // Актуальный счетчик из Redis или БД
   }
   
   export type Like = {
@@ -173,6 +180,7 @@ export type User = {
   export type Comment = {
     id: string
     content: string
+    emojiUrls?: string[]
     user: User
     userId: string
     post: Post

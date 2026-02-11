@@ -12,9 +12,10 @@ import {
   Textarea,
   Chip
 } from '@heroui/react'
-import { useCreateThreadMutation } from '@/src/services/forum.service'
+import { useCreateThread } from '@/src/features/forum'
 import { toast } from 'react-hot-toast'
-import type { Board } from '@/src/types/types'
+import type { Board } from '@/src/features/forum'
+import { useTranslations } from 'next-intl'
 
 interface CreateThreadModalProps {
   isOpen: boolean
@@ -29,7 +30,8 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
   boardName, 
   board 
 }) => {
-  const [createThread, { isLoading }] = useCreateThreadMutation()
+  const t = useTranslations('Forum.createThread')
+  const createThread = useCreateThread()
   
   const [formData, setFormData] = useState({
     subject: '',
@@ -42,7 +44,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
     e.preventDefault()
     
     if (!formData.content.trim()) {
-      toast.error('Содержание треда обязательно')
+      toast.error(t('errorRequired'))
       return
     }
 
@@ -52,19 +54,15 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
     }
 
     try {
-      const formDataToSend = new FormData()
-      formDataToSend.append('subject', formData.subject)
-      formDataToSend.append('content', formData.content)
-      formDataToSend.append('authorName', formData.authorName || 'Аноним')
-      
-      selectedFiles.forEach(file => {
-        formDataToSend.append('images', file)
-      })
-
-      await createThread({ 
+      await createThread.mutateAsync({ 
         boardName, 
-        formData: formDataToSend 
-      }).unwrap()
+        data: {
+          subject: formData.subject,
+          content: formData.content,
+          authorName: formData.authorName || 'Аноним'
+        },
+        files: selectedFiles
+      })
       
       toast.success('Тред создан успешно!')
       onClose()
@@ -75,7 +73,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
       })
       setSelectedFiles([])
     } catch (error: any) {
-      toast.error(error?.data?.error || 'Ошибка создания треда')
+      toast.error(error?.response?.data?.message || t('errorCreate'))
     }
   }
 
@@ -123,7 +121,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold">Создать тред в /{boardName}/</h2>
+            <h2 className="text-xl font-bold">{t('title')} /{boardName}/</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Создайте новую тему для обсуждения
             </p>
@@ -132,18 +130,18 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
           <ModalBody className="gap-4">
             {/* Имя автора */}
             <Input
-              label="Имя"
-              placeholder="Анон"
+              label={t('nameLabel')}
+              placeholder={t('namePlaceholder')}
               value={formData.authorName}
               onChange={(e) => setFormData(prev => ({ ...prev, authorName: e.target.value }))}
               variant="bordered"
-              description="Оставьте пустым для анонимности"
+              description={t('nameDescription')}
             />
 
             {/* Тема треда */}
             <Input
-              label="Тема"
-              placeholder="Введите тему треда (необязательно)"
+              label={t('subjectLabel')}
+              placeholder={t('subjectPlaceholder')}
               value={formData.subject}
               onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
               variant="bordered"
@@ -151,7 +149,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 
             {/* Содержание */}
             <Textarea
-              label="Содержание"
+              label={t('contentLabel')}
               placeholder="Введите содержание треда..."
               value={formData.content}
               onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
@@ -163,7 +161,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 
             {/* Загрузка файла */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Изображения/Видео</label>
+              <label className="text-sm font-medium">{t('fileLabel')}</label>
               <input
                 type="file"
                 multiple
@@ -274,16 +272,16 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
               color="danger" 
               variant="light" 
               onPress={onClose}
-              disabled={isLoading}
+              disabled={createThread.isPending}
             >
-              Отмена
+              {t('cancel')}
             </Button>
             <Button 
               color="primary" 
               type="submit"
-              isLoading={isLoading}
+              isLoading={createThread.isPending}
             >
-              Создать тред
+              {t('submit')}
             </Button>
           </ModalFooter>
         </form>

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 		title: 'О проекте | Mirchan',
 		description:
 			'Mirchan — анонимная социальная сеть для свободного самовыражения: посты, персонализация профиля, лента и чаты, анонимные форумы и многое другое.',
-		images: [{ url: '/images/mirchanLogo.jpg', width: 1200, height: 630, alt: 'Mirchan' }],
+		images: [{ url: '/images/mirchanLogo.png', width: 1200, height: 630, alt: 'Mirchan' }],
 		locale: 'ru_RU',
 	},
 	twitter: {
@@ -28,28 +28,25 @@ export const metadata: Metadata = {
 		title: 'О проекте | Mirchan',
 		description:
 			'Mirchan — анонимная социальная сеть для свободного самовыражения: посты, персонализация профиля, лента и чаты, анонимные форумы и многое другое.',
-		images: ['/images/mirchanLogo.jpg'],
+		images: ['/images/mirchanLogo.png'],
 	},	
 	icons: {
-		icon: [
-			 { url: "/favicon.ico" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-      {
-        url: "/android-chrome-192x192.png",
-        sizes: "192x192",
-        type: "image/png",
-      },
-      {
-        url: "/android-chrome-512x512.png",
-        sizes: "512x512",
-        type: "image/png",
-      },
-		],
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: ["/favicon.ico"],
+    other: [
+      { rel: "manifest", url: "/site.webmanifest" },
+    ],
+  },
+	appleWebApp: {
+    title: "Mirchan",
+    statusBarStyle: "default",
+  },
 
-	},
 	description: 'Mirchan — анонимная социальная сеть для свободного самовыражения: посты, персонализация профиля, лента и чаты, анонимные форумы и многое другое.',
 	
 }

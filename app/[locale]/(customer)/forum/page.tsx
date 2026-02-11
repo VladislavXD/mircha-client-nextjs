@@ -3,8 +3,8 @@
 import React from "react";
 import { Spinner } from "@heroui/react";
 import { useTheme } from "next-themes";
-import ForumHome from "@/app/components/forum/ForumHome";
-import MobileForumExtras from "@/app/components/forum/MobileForumExtras";
+import ForumHome from "@/shared/components/forum/ForumHome";
+import MobileForumExtras from "@/shared/components/forum/MobileForumExtras";
 
 const ForumPage = () => {
   // Фоновая загрузка перенесена внутрь ForumHome
@@ -20,9 +20,9 @@ const ForumPage = () => {
           className="font-bold text-inherit flex items-center gap-2"
         >
           <img
-            src={theme === "dark" ? "/darkLogo.svg" : "/lightLogo.svg"}
-            className="w-8 sm:w-10"
-            alt=""
+            src={theme === "dark" ? "/mirchan-logo-icon-light.svg" : "/mirchan-logo-icon-dark.svg"}
+            className="w-8 h-8 sm:w-10 sm:h-10"
+            alt="Mirchan Logo"
           />
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Mirchan - Forum</h1>
         </span>

@@ -1,14 +1,15 @@
 export interface EmojiTextSegment {
-  type: 'text' | 'emoji' | 'mention';
+  type: 'text' | 'emoji' | 'mention' | 'spoiler' | 'bold' | 'italic' | 'underline' | 'strikethrough' | 'highlight';
   content: string;
   emojiUrl?: string;
   mentionId?: string;
   mentionName?: string;
+  children?: EmojiTextSegment[]; // для spoiler и форматирования
 }
 
 /**
- * Парсит текст с маркерами emoji и возвращает массив сегментов
- * @param text - Текст с маркерами [emoji:0], [emoji:1] и т.д.
+ * Парсит текст с маркерами emoji, mention, spoiler и HTML форматированием
+ * @param text - Текст с маркерами [emoji:0], [mention:id|name], [spoiler]...[/spoiler], <b>, <i>, <u>, <s>, <mark>
  * @param emojiUrls - Массив URL emoji
  * @returns Массив сегментов для рендеринга
  */
@@ -16,67 +17,196 @@ export const parseEmojiText = (text: string, emojiUrls: string[] = []): EmojiTex
   if (!text) return [];
   
   const segments: EmojiTextSegment[] = [];
-  const emojiRegex = /\[emoji:(\d+)\]/g;
-  const mentionRegex = /\[mention:([^|\]]+)\|([^\]]+)\]/g; // [mention:<id>|<name>]
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
+  let i = 0;
 
-  while ((match = emojiRegex.exec(text)) !== null) {
-    const beforeMatch = text.slice(lastIndex, match.index);
-    const emojiIndex = parseInt(match[1], 10);
-    const emojiUrl = emojiUrls[emojiIndex];
+  while (i < text.length) {
+    // mention
+    if (text.slice(i, i + 9) === "[mention:") {
+      const end = text.indexOf("]", i);
+      if (end !== -1) {
+        const content = text.slice(i + 9, end);
+        const [id, name] = content.split("|");
+        if (id && name) {
+          segments.push({
+            type: 'mention',
+            content: text.slice(i, end + 1),
+            mentionId: id,
+            mentionName: name,
+          });
+          i = end + 1;
+          continue;
+        }
+      }
+    }
 
-    // Добавляем текст перед emoji (если есть)
-    if (beforeMatch) {
+    // emoji
+    if (text.slice(i, i + 7) === "[emoji:") {
+      const end = text.indexOf("]", i);
+      if (end !== -1) {
+        const indexStr = text.slice(i + 7, end);
+        const index = parseInt(indexStr, 10);
+        const url = emojiUrls[index];
+        if (Number.isFinite(index)) {
+          segments.push({
+            type: 'emoji',
+            content: text.slice(i, end + 1),
+            emojiUrl: url,
+          });
+          i = end + 1;
+          continue;
+        }
+      }
+    }
+
+    // spoiler
+    if (text.slice(i, i + 9) === "[spoiler]") {
+      const close = "[/spoiler]";
+      const closeIndex = text.indexOf(close, i + 9);
+      if (closeIndex !== -1) {
+        const inner = text.slice(i + 9, closeIndex);
+        // Рекурсивно парсим содержимое спойлера
+        const children = parseEmojiText(inner, emojiUrls);
+        segments.push({
+          type: 'spoiler',
+          content: inner,
+          children,
+        });
+        i = closeIndex + close.length;
+        continue;
+      }
+    }
+
+    // HTML форматирование: <b>, <i>, <u>, <s>, <mark>
+    if (text[i] === '<') {
+      const closeTag = text.indexOf('>', i);
+      if (closeTag !== -1) {
+        const tagContent = text.slice(i, closeTag + 1);
+        
+        // Bold
+        if (tagContent === '<b>' || tagContent === '<strong>') {
+          const closeIndex = text.indexOf('</b>', i);
+          const closeIndex2 = text.indexOf('</strong>', i);
+          const actualClose = closeIndex !== -1 && (closeIndex2 === -1 || closeIndex < closeIndex2) 
+            ? closeIndex 
+            : closeIndex2;
+          
+          if (actualClose !== -1) {
+            const inner = text.slice(closeTag + 1, actualClose);
+            const children = parseEmojiText(inner, emojiUrls);
+            segments.push({
+              type: 'bold',
+              content: inner,
+              children,
+            });
+            i = actualClose + (text[actualClose + 2] === 'b' ? 4 : 9); // </b> or </strong>
+            continue;
+          }
+        }
+        
+        // Italic
+        if (tagContent === '<i>' || tagContent === '<em>') {
+          const closeIndex = text.indexOf('</i>', i);
+          const closeIndex2 = text.indexOf('</em>', i);
+          const actualClose = closeIndex !== -1 && (closeIndex2 === -1 || closeIndex < closeIndex2) 
+            ? closeIndex 
+            : closeIndex2;
+          
+          if (actualClose !== -1) {
+            const inner = text.slice(closeTag + 1, actualClose);
+            const children = parseEmojiText(inner, emojiUrls);
+            segments.push({
+              type: 'italic',
+              content: inner,
+              children,
+            });
+            i = actualClose + (text[actualClose + 2] === 'i' ? 4 : 5); // </i> or </em>
+            continue;
+          }
+        }
+        
+        // Underline
+        if (tagContent === '<u>') {
+          const closeIndex = text.indexOf('</u>', i);
+          if (closeIndex !== -1) {
+            const inner = text.slice(closeTag + 1, closeIndex);
+            const children = parseEmojiText(inner, emojiUrls);
+            segments.push({
+              type: 'underline',
+              content: inner,
+              children,
+            });
+            i = closeIndex + 4; // </u>
+            continue;
+          }
+        }
+        
+        // Strikethrough
+        if (tagContent === '<s>' || tagContent === '<strike>' || tagContent === '<del>') {
+          const closeIndex = text.indexOf('</s>', i);
+          const closeIndex2 = text.indexOf('</strike>', i);
+          const closeIndex3 = text.indexOf('</del>', i);
+          const actualClose = [closeIndex, closeIndex2, closeIndex3]
+            .filter(idx => idx !== -1)
+            .sort((a, b) => a - b)[0];
+          
+          if (actualClose !== undefined && actualClose !== -1) {
+            const inner = text.slice(closeTag + 1, actualClose);
+            const children = parseEmojiText(inner, emojiUrls);
+            segments.push({
+              type: 'strikethrough',
+              content: inner,
+              children,
+            });
+            // Определяем длину закрывающего тега
+            let closeLength = 4; // </s>
+            if (text.slice(actualClose, actualClose + 9) === '</strike>') closeLength = 9;
+            if (text.slice(actualClose, actualClose + 6) === '</del>') closeLength = 6;
+            i = actualClose + closeLength;
+            continue;
+          }
+        }
+        
+        // Highlight
+        if (tagContent === '<mark>') {
+          const closeIndex = text.indexOf('</mark>', i);
+          if (closeIndex !== -1) {
+            const inner = text.slice(closeTag + 1, closeIndex);
+            const children = parseEmojiText(inner, emojiUrls);
+            segments.push({
+              type: 'highlight',
+              content: inner,
+              children,
+            });
+            i = closeIndex + 7; // </mark>
+            continue;
+          }
+        }
+      }
+    }
+
+    // plain text chunk
+    const nextTokenPos = (() => {
+      const a = text.indexOf("[mention:", i);
+      const b = text.indexOf("[emoji:", i);
+      const c = text.indexOf("[spoiler]", i);
+      const d = text.indexOf("<b>", i);
+      const e = text.indexOf("<i>", i);
+      const f = text.indexOf("<u>", i);
+      const g = text.indexOf("<s>", i);
+      const h = text.indexOf("<mark>", i);
+      const candidates = [a, b, c, d, e, f, g, h].filter((x) => x !== -1);
+      return candidates.length ? Math.min(...candidates) : -1;
+    })();
+
+    const chunk = nextTokenPos === -1 ? text.slice(i) : text.slice(i, nextTokenPos);
+    if (chunk) {
       segments.push({
         type: 'text',
-        content: beforeMatch
+        content: chunk,
       });
     }
-
-    // Добавляем emoji (если URL существует)
-    if (emojiUrl) {
-      segments.push({
-        type: 'emoji',
-        content: match[0], // оригинальный маркер для fallback
-        emojiUrl
-      });
-    } else {
-      // Если URL не найден, оставляем как текст
-      segments.push({
-        type: 'text',
-        content: match[0]
-      });
-    }
-
-    lastIndex = match.index + match[0].length;
+    i = nextTokenPos === -1 ? text.length : nextTokenPos;
   }
 
-  // Теперь обрабатываем упоминания внутри уже получившихся сегментов текста
-  // Для простоты пройдёмся по копии и разобьём текстовые сегменты по mentionRegex
-  const finalSegments: EmojiTextSegment[] = [];
-  for (const seg of segments.length ? segments : [{ type: 'text', content: text } as EmojiTextSegment]) {
-    if (seg.type !== 'text') {
-      finalSegments.push(seg);
-      continue;
-    }
-    const s = seg.content;
-    let idx = 0;
-    let m: RegExpExecArray | null;
-    while ((m = mentionRegex.exec(s)) !== null) {
-      const before = s.slice(idx, m.index);
-      if (before) finalSegments.push({ type: 'text', content: before });
-      finalSegments.push({
-        type: 'mention',
-        content: m[0],
-        mentionId: m[1],
-        mentionName: m[2]
-      });
-      idx = m.index + m[0].length;
-    }
-    const rest = s.slice(idx);
-    if (rest) finalSegments.push({ type: 'text', content: rest });
-  }
-
-  return finalSegments;
+  return segments;
 };
