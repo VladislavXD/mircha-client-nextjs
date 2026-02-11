@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query'
+import { useMutation, useQueryClient, UseMutationOptions, InfiniteData } from '@tanstack/react-query'
 import { postService } from '../services/post.service'
 import { postKeys } from './usePostQueries'
-import type { Post, CreatePostDto, UpdatePostDto, User } from '../types'
+import type { Post, PostsResponse, CreatePostDto, UpdatePostDto, User } from '../types'
 import toast from 'react-hot-toast'
 import { addToast } from '@heroui/react'
 
@@ -12,7 +12,7 @@ import { addToast } from '@heroui/react'
  * @returns Мутация создания поста
  */
 type CreatePostContext = {
-	previousPosts?: Post[]
+	previousPosts?: InfiniteData<PostsResponse, unknown>
 }
 
 export function useCreatePost(
@@ -29,8 +29,8 @@ export function useCreatePost(
 			// Отменяем исходящие запросы
 			await queryClient.cancelQueries({ queryKey: postKeys.lists() })
 
-			// Сохраняем предыдущее состояние
-			const previousPosts = queryClient.getQueryData<Post[]>(postKeys.lists())
+			// Сохраняем предыдущее состояние (теперь это InfiniteData<PostsResponse>)
+			const previousPosts = queryClient.getQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists())
 
 			// Получаем текущего пользователя из кэша
 			const currentUser = queryClient.getQueryData<User>(['profile'])
@@ -42,10 +42,32 @@ export function useCreatePost(
 		},
 
 		onSuccess: (newPost) => {
-			// Добавляем новый пост в начало списка
-			queryClient.setQueryData<Post[]>(postKeys.lists(), (old) => {
-				if (!old) return [newPost]
-				return [newPost, ...old]
+			// Добавляем новый пост в начало первой страницы
+			queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
+				if (!old) {
+					// Если данных нет, создаём новую структуру
+					return {
+						pages: [{
+							items: [newPost],
+							nextCursor: null,
+							hasMore: false
+						}],
+						pageParams: [undefined]
+					}
+				}
+				
+				// Добавляем новый пост в начало первой страницы
+				const firstPage = old.pages[0]
+				return {
+					...old,
+					pages: [
+						{
+							...firstPage,
+							items: [newPost, ...firstPage.items]
+						},
+						...old.pages.slice(1)
+					]
+				}
 			})
 
 			addToast({
@@ -102,12 +124,29 @@ export function useUpdatePost(
 		},
 
 		onSuccess: (updatedPost) => {
-			// Обновляем пост в списке
-			queryClient.setQueryData<Post[]>(postKeys.lists(), (old) => {
-				if (!old) return [updatedPost]
-				return old.map(post => 
-					post.id === updatedPost.id ? updatedPost : post
-				)
+			// Обновляем пост во всех страницах
+			queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
+				if (!old) {
+					return {
+						pages: [{
+							items: [updatedPost],
+							nextCursor: null,
+							hasMore: false
+						}],
+						pageParams: [undefined]
+					}
+				}
+				
+				// Обновляем пост на той странице, где он находится
+				return {
+					...old,
+					pages: old.pages.map(page => ({
+						...page,
+						items: page.items.map(post => 
+							post.id === updatedPost.id ? updatedPost : post
+						)
+					}))
+				}
 			})
 
 			// Обновляем в детальном кэше
@@ -133,7 +172,7 @@ export function useUpdatePost(
 }
 
 type DeletePostContext = {
-	previousPosts?: Post[]
+	previousPosts?: InfiniteData<PostsResponse, unknown>
 	deletedPost?: Post
 }
 
@@ -156,15 +195,31 @@ export function useDeletePost(
 			await queryClient.cancelQueries({ queryKey: postKeys.lists() })
 
 			// Сохраняем предыдущее состояние
-			const previousPosts = queryClient.getQueryData<Post[]>(postKeys.lists())
+			const previousPosts = queryClient.getQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists())
 
 			// Сохраняем удаляемый пост для возможного восстановления
-			const deletedPost = previousPosts?.find(post => post.id === postId)
+			const deletedPost = previousPosts?.pages.flatMap(page => page.items).find(post => post.id === postId)
 
-			// Оптимистично удаляем пост
-			queryClient.setQueryData<Post[]>(postKeys.lists(), (old) => {
-				if (!old) return []
-				return old.filter(post => post.id !== postId)
+			// Оптимистично удаляем пост из всех страниц
+			queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
+				if (!old) {
+					return {
+						pages: [{
+							items: [],
+							nextCursor: null,
+							hasMore: false
+						}],
+						pageParams: [undefined]
+					}
+				}
+				
+				return {
+					...old,
+					pages: old.pages.map(page => ({
+						...page,
+						items: page.items.filter(post => post.id !== postId)
+					}))
+				}
 			})
 
 			return { previousPosts, deletedPost }

@@ -13,7 +13,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Eye, Repeat2 } from "lucide-react";
 import { MessageCircle } from 'lucide-react';
 
 import { useDeletePost } from "../hooks/usePostMutations";
@@ -31,8 +31,10 @@ import DeletePost from "@/shared/components/ui/post/PostModals/DeletePost";
 import { useThrottle } from "@/src/hooks/useAntiSpam";
 import ReportPostModal from "../modals/report";
 import { useOnlineStatus } from "../../chat";
-import PostMediaSlider, { type PostMedia } from "./PostMediaSlider";
+import PostMediaSlider, { type PostMedia } from "./PostMediaSlider/index";
 import { timeAgo } from "@/src/utils/timeAgo";
+import { RepostButton } from "./RepostButton";
+import { CommentsModal } from "./comments";
 
 type Props = {
   post: Post;
@@ -77,6 +79,8 @@ const PostCard = ({
     likeByUser = false,
     views = [],
     viewsCount: serverViewsCount,
+    repostCount = 0,
+    repostedByUser = false,
   } = post;
 
   // Backend может использовать image или imageUrl
@@ -155,6 +159,12 @@ const PostCard = ({
     isOpen: isReportOpen,
     onOpen: onReportOpen,
     onClose: onReportClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isCommentsOpen,
+    onOpen: onCommentsOpen,
+    onClose: onCommentsClose,
   } = useDisclosure();
 
   // Refs
@@ -317,8 +327,8 @@ const PostCard = ({
      
        bg-black
       " onClick={handleCardClick}>
-      <CardHeader className="justify-between items-center bg-transparent">
-        <Link href={`/user/${authorId}`} onClick={(e) => e.stopPropagation()} className="flex items-start gap-2 ">
+      <CardHeader className="justify-between items-center bg-transparent px-3 sm:px-6">
+        <Link href={`/user/${authorId}`} onClick={(e) => e.stopPropagation()} className="flex items-start gap-2 flex-1 min-w-0">
           <UserComponent
             userId={authorId}
             usernameFrameUrl={usernameFrameUrl}
@@ -337,7 +347,7 @@ const PostCard = ({
             avatarUrl={avatarUrl}
             description={createdAt && formatToClientDate(createdAt)}
           />
-          <time dateTime={createdAt} className="text-white/70 text-xs drop-shadow-md pt-1">
+          <time dateTime={createdAt} className="text-white/70 text-xs drop-shadow-md pt-1 shrink-0">
             {timeAgo(createdAt || "")}
           </time>
         </Link>
@@ -353,19 +363,19 @@ const PostCard = ({
         </div>
       </CardHeader>
 
-      <CardBody className="px-3 py-2 mb-5" >
+      <CardBody className="px-3 py-2 mb-3 sm:mb-5" >
 
         <div ref={inViewRef}>
         
           <EmojiText 
             text={safeContent} 
             emojiUrls={emojiUrls} 
-            className="font-serif md:text-[17px] text-[12px] leading-relaxed tracking-wide"
+            className="font-serif text-[15px] sm:text-[17px] md:text-[17px] leading-relaxed tracking-wide break-words"
           />
 
           {/* Новый слайдер медиа */}
           {postMedia.length > 0 && (
-            <div className="mt-3" >
+            <div className="mt-3 -mx-3 sm:mx-0 sm:rounded-lg overflow-hidden" >
               <PostMediaSlider media={postMedia} />
             </div>
           )}
@@ -381,8 +391,9 @@ const PostCard = ({
       </div> */}
 
       {cardFor !== "comment" && (
-        <CardFooter className="gap-3" onClick={(e) => e.stopPropagation()}>
-          <div className="flex gap-5 items-center">
+        <CardFooter className="gap-3 px-3 sm:px-6 py-3" onClick={(e) => e.stopPropagation()}>
+          <div className="flex gap-4 sm:gap-5 items-center flex-wrap">
+            {/* Like button */}
             <div
               onClick={handleLikeWithThrottle}
               className={`cursor-pointer transition-opacity ${
@@ -403,11 +414,26 @@ const PostCard = ({
                 Icon={Heart}
               />
             </div>
-            
 
-            <Link href={`/posts/${id}`} onClick={(e) => e.stopPropagation()}>
+            {/* Comments count */}
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                onCommentsOpen();
+              }}
+              className="cursor-pointer"
+            >
               <MetaInfo count={commentsCount} Icon={MessageCircle} />
-            </Link>
+            </div>
+
+            {/* repost button */}
+              {/* <MetaInfo count={0} Icon={Repeat2 } /> */}
+              <RepostButton
+                postId={id}
+                repostedByUser={repostedByUser}
+                repostCount={repostCount}
+                post={post}
+              />
           </div>
           
           {error && (
@@ -443,6 +469,13 @@ const PostCard = ({
 				onClose={onReportClose}
 				post={post}
 			/>
+
+      {/* Comments modal */}
+      <CommentsModal
+        isOpen={isCommentsOpen}
+        onClose={onCommentsClose}
+        post={post}
+      />
     </NextCard>
   );
 };

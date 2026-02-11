@@ -20,7 +20,6 @@ import Image from "next/image";
 
 import { ProfileHeaderSkeleton, useProfile } from "@/src/features/profile";
 import Cookies from "js-cookie";
-import SnowToggle from "../Seasonal/SnowToggle";
 
 const Header = () => {
   const [mounted, setMounted] = useState(false);
@@ -29,27 +28,22 @@ const Header = () => {
   // React Query для получения данных текущего пользователя
   const { user, isLoading, isAuthenticated } = useProfile();
   console.log('user in header:', user);
-  
-  const handleSnowToggle = (enabled: boolean) => {
-    // Диспатчим custom event для обновления снега в LayoutContent
-    window.dispatchEvent(new CustomEvent('snowfall-toggle', { detail: enabled }));
-  };
 
   return (
-    <Navbar className="max-w-screen-xl mx-auto w-full header-with-snow">
+    <Navbar className="max-w-screen-xl mx-auto w-full">
       <NavbarBrand className="">
         <Link
           href="/"
           className="font-bold text-inherit flex items-center gap-1 sm:gap-2"
         >
           {/* Зимние иконки - адаптивные размеры */}
-          <Image
+          {/* <Image
             src='/winterIcons/mirchanTree.png'
             alt="Mirchan Tree"
             width={30}
             height={30}
 
-          />
+          /> */}
           <Image
             src={
                theme === "dark" ? "/mirchan-logo-light.svg" : "/mirchan-logo-dark.svg"
@@ -60,21 +54,21 @@ const Header = () => {
             alt="Mirchan Logo"
             priority 
           />
-          <Image
+          {/* <Image
             src='/winterIcons/santa.png'
             alt="Santa"
             width={45}
             height={45}
 
-          />
+          /> */}
         </Link>
       </NavbarBrand>
 
       <NavbarContent justify="end" className="gap-2">
         {/* Кнопки только на десктопе (md и выше) */}
-        <NavbarItem className="hidden md:flex">
+        {/* <NavbarItem className="hidden md:flex">
           <SnowToggle onToggle={handleSnowToggle} />
-        </NavbarItem>
+        </NavbarItem> */}
         
         <NavbarItem className="hidden md:flex">
           <ThemeSwitch />

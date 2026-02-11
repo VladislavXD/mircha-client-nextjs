@@ -1,6 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
 import { LikeService } from '../services/like.service'
 import { postKeys } from '../../hooks/usePostQueries'
+import type { PostsResponse } from '../../types'
 
 const likeService = new LikeService()
 // Локальная защита от дабл-кликов: отслеживаем посты с активной мутацией
@@ -8,7 +9,7 @@ const inFlightLikes = new Set<string>()
 
 /**
  * Хук для постановки лайка на пост с optimistic update
- * ОПТИМИЗИРОВАНО: Работает со счетчиками вместо массивов
+ * ОПТИМИЗИРОВАНО: Работает с InfiniteData структурой
  */
 export function useLikePost() {
 	const queryClient = useQueryClient()
@@ -26,10 +27,8 @@ export function useLikePost() {
 			await queryClient.cancelQueries({ queryKey: postKeys.lists() })
 
 			const previousPost = queryClient.getQueryData<any>(postKeys.detail(postId))
-			const previousPosts = queryClient.getQueryData<any[]>(postKeys.lists())
+			const previousPosts = queryClient.getQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists())
 			const currentUser = queryClient.getQueryData<any>(['profile'])
-
-
 
 			if (previousPost) {
 				queryClient.setQueryData(postKeys.detail(postId), (old: any) => {
@@ -54,22 +53,29 @@ export function useLikePost() {
 			}
 
 			if (previousPosts) {
-				queryClient.setQueryData(postKeys.lists(), (old: any[] = []) =>
-					old.map(post => {
-						if (post.id === postId) {
-							const updated = {
-								...post,
-								likeByUser: true,
-								// Инкрементируем счетчик
-								likesCount: post.likesCount !== undefined ? post.likesCount + 1 : (post.likes?.length || 0) + 1,
-								// Массив может быть пустым в оптимизированной версии
-								likes: post.likes || []
-							}
-							return updated
-						}
-						return post
-					})
-				)
+				queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
+					if (!old) return old
+					
+					return {
+						...old,
+						pages: old.pages.map(page => ({
+							...page,
+							items: page.items.map(post => {
+								if (post.id === postId) {
+									return {
+										...post,
+										likeByUser: true,
+										// Инкрементируем счетчик
+										likesCount: post.likesCount !== undefined ? post.likesCount + 1 : (post.likes?.length || 0) + 1,
+										// Массив может быть пустым в оптимизированной версии
+										likes: post.likes || []
+									}
+								}
+								return post
+							})
+						}))
+					}
+				})
 			}
 
 			return { postId, previousPost, previousPosts }
@@ -95,7 +101,7 @@ export function useLikePost() {
 
 /**
  * Хук для снятия лайка с поста с optimistic update
- * ОПТИМИЗИРОВАНО: Работает со счетчиками вместо массивов
+ * ОПТИМИЗИРОВАНО: Работает с InfiniteData структурой
  */
 export function useUnlikePost() {
 	const queryClient = useQueryClient()
@@ -113,7 +119,7 @@ export function useUnlikePost() {
 			await queryClient.cancelQueries({ queryKey: postKeys.lists() })
 
 			const previousPost = queryClient.getQueryData<any>(postKeys.detail(postId))
-			const previousPosts = queryClient.getQueryData<any[]>(postKeys.lists())
+			const previousPosts = queryClient.getQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists())
 			const currentUser = queryClient.getQueryData<any>(['profile'])
 
 			if (previousPost) {
@@ -133,24 +139,31 @@ export function useUnlikePost() {
 			}
 
 			if (previousPosts) {
-				queryClient.setQueryData(postKeys.lists(), (old: any[] = []) =>
-					old.map(post => {
-						if (post.id === postId) {
-							const updated = {
-								...post,
-								likeByUser: false,
-								// Декрементируем счетчик
-								likesCount: post.likesCount !== undefined 
-									? Math.max(0, post.likesCount - 1)
-									: Math.max(0, (post.likes?.length || 0) - 1),
-								// Массив может быть пустым в оптимизированной версии
-								likes: post.likes || []
-							}
-							return updated
-						}
-						return post
-					})
-				)
+				queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
+					if (!old) return old
+					
+					return {
+						...old,
+						pages: old.pages.map(page => ({
+							...page,
+							items: page.items.map(post => {
+								if (post.id === postId) {
+									return {
+										...post,
+										likeByUser: false,
+										// Декрементируем счетчик
+										likesCount: post.likesCount !== undefined 
+											? Math.max(0, post.likesCount - 1)
+											: Math.max(0, (post.likes?.length || 0) - 1),
+										// Массив может быть пустым в оптимизированной версии
+										likes: post.likes || []
+									}
+								}
+								return post
+							})
+						}))
+					}
+				})
 			}
 
 			return { postId, previousPost, previousPosts }

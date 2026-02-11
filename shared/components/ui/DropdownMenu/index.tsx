@@ -23,7 +23,7 @@ import { useTranslations } from "next-intl";
 import FeedBackModal from "../Modals/FeedBack.modal";
 import { useProfile } from "@/src/features/profile/hooks";
 import { useLogoutMutation } from "@/src/features/user/hooks";
-import { Snowflake, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useOnlineStatus } from "@/src/features/chat";
 
 const MenuDropdown = () => {
@@ -32,7 +32,6 @@ const MenuDropdown = () => {
   const { theme, setTheme } = useTheme();
   const t = useTranslations("HomePage.navbar.dropdownMenu");
   const { onOpen, isOpen, onOpenChange, onClose } = useDisclosure();
-  const [snowEnabled, setSnowEnabled] = useState(true);
 
   const { user, isLoading, isAuthenticated } = useProfile();
   const { logout, isLoadingLogout } = useLogoutMutation();
@@ -40,13 +39,6 @@ const MenuDropdown = () => {
   // ✅ ВАЖНО: Все хуки должны вызываться до любого раннего return
   const userId = user?.id;
   const { isOnline } = useOnlineStatus(userId || "");
-  
-  const handleSnowToggle = () => {
-    const newValue = !snowEnabled;
-    setSnowEnabled(newValue);
-    localStorage.setItem("snowfall-enabled", String(newValue));
-    window.dispatchEvent(new CustomEvent('snowfall-toggle', { detail: newValue }));
-  };
   
   const handleThemeToggle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -99,18 +91,6 @@ const MenuDropdown = () => {
           </DropdownItem>
           
           {/* Мобильные настройки - только на маленьких экранах */}
-          <DropdownItem 
-            key="snow_toggle" 
-            className="md:hidden"
-            onClick={handleSnowToggle}
-            startContent={<Snowflake size={18} className={snowEnabled ? "text-blue-400" : "text-gray-400"} />}
-          >
-            <span className="flex items-center justify-between w-full">
-              <span>snow</span>
-              <span className="text-xs opacity-70">{snowEnabled ? "On" : "Off"}</span>
-            </span>
-          </DropdownItem>
-          
           <DropdownItem 
             key="theme_toggle" 
             className="md:hidden"

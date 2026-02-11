@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import GoBack from "@/shared/components/ui/GoBack";
 import { 
   ProfileHeader, 
-  ProfileAboutCard, 
   ProfileActivityCard, 
   ProfileSkeleton,
   useUserProfile 
@@ -44,7 +43,7 @@ const UserProfile = () => {
   return (
     <>
       <GoBack />
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-0 sm:px-4">
         {/* ✅ Передаём флаги для скрытия кнопок редактирования */}
         <ProfileHeader 
           userId={id} 
@@ -52,13 +51,8 @@ const UserProfile = () => {
           isOwnProfile={isOwnProfile}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          <div className="md:col-span-1">
-            <ProfileAboutCard data={user} />
-          </div>
-          <div className="md:col-span-2">
-            <ProfileActivityCard />
-          </div>
+        <div className="mt-4 sm:mt-6 px-3 sm:px-0">
+          <ProfileActivityCard />
         </div>
       </div>
     </>

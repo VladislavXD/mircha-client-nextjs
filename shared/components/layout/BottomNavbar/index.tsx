@@ -15,14 +15,30 @@ const useScrollDirection = () => {
   const [scrollDirection, setScrollDirection] = useState("up");
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
+    let lastScrollY = 0;
+    
     const handleScroll = () => {
-      setScrollDirection(window.scrollY > lastScrollY ? "down" : "up");
-      lastScrollY = window.scrollY;
+      // Ищем контейнер с overflow-y-auto
+      const scrollContainer = document.querySelector('.overflow-y-auto.scrollbar-hide');
+      if (!scrollContainer) return;
+      
+      const currentScrollY = scrollContainer.scrollTop;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setScrollDirection("down");
+      } else {
+        setScrollDirection("up");
+      }
+      
+      lastScrollY = currentScrollY;
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Находим контейнер и добавляем слушатель
+    const scrollContainer = document.querySelector('.overflow-y-auto.scrollbar-hide');
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", handleScroll);
+      return () => scrollContainer.removeEventListener("scroll", handleScroll);
+    }
   }, []);
 
   return scrollDirection;
@@ -31,8 +47,8 @@ const useScrollDirection = () => {
 
 const BottomNav = () => {
   const scrollDirection = useScrollDirection();
-  const navClass = scrollDirection === "up" ? "" : "opacity-25 duration-500";
-
+  const navClass = scrollDirection === "up" ? "opacity-100" : "opacity-25";
+  console.log(window.scrollY);
   const pathname = usePathname();
   const { theme } = useTheme();
   
@@ -79,9 +95,9 @@ const BottomNav = () => {
     <>
       {/* Island-style floating navbar */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-10 px-4 pb-4 sm:hidden ${navClass}`}
+        className={`fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 sm:hidden transition-opacity duration-700 ${navClass}`}
       >
-        <div className="mx-auto max-w-md backdrop-blur-lg bg-zinc-100/90 dark:bg-zinc-900/90 rounded-3xl shadow-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+        <div className="mx-auto max-w-md backdrop-blur-lg bg-zinc-100/70 dark:bg-zinc-900/70 rounded-3xl shadow-2xl border border-zinc-200/50 dark:border-zinc-800/50">
           <div className="flex justify-around items-center py-3 px-2">
             {/* Home */}
             <Link 
