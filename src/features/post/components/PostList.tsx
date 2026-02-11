@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Spinner } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -11,6 +11,8 @@ import PostCard from "./PostCard";
 import CreatePost from "./CreatePost";
 import CardSkeleton from "@/shared/components/ui/post/Card/Skeleton";
 import Notice from "../../notice/components/Notice";
+import { useInView } from "react-intersection-observer";
+
 
 
 /**
@@ -25,14 +27,19 @@ import Notice from "../../notice/components/Notice";
  */
 const PostList = () => {
   const queryClient = useQueryClient();
+  const {ref, inView} = useInView()
   // Инициализируем запрос профиля на главной, чтобы состояние авторизации было доступно
   useProfile();
   const currentUser = queryClient.getQueryData<User>(["profile"]);
   
-  const { data: posts, isLoading, isError, error } = usePosts();
+  const { data: posts, isLoading, isError, error, hasNextPage, isFetchingNextPage, fetchNextPage } = usePosts();
 
-
-  console.log("PostList render:", { isLoading, isError, posts });
+  console.log(posts?.pages);
+  useEffect(()=> {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView])
   if (isLoading) {
     return (
       <div className="space-y-5">
@@ -57,7 +64,7 @@ const PostList = () => {
     );
   }
 
-  if (!posts || posts.length === 0) {
+  if (!posts || posts.pages.length === 0) {
     return (
       <div className="space-y-5">
         {currentUser && <CreatePost />}
@@ -76,9 +83,20 @@ const PostList = () => {
     <div className="space-y-5">
       {currentUser && <span className=""><CreatePost /></span>}
       <Notice/>
-      {posts.map((post) => (
+      {posts.pages.map((page) => (
+        page.items.map((post) => (
         <PostCard key={post.id} post={post} cardFor="post"  />
-      ))} 
+      )))
+      )}
+
+      {
+        hasNextPage && (
+           <div className="flex justify-center py-4">
+            <Spinner size="md" ref={ref} />
+
+        </div>
+        )
+      }
     </div>
   );
 };

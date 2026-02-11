@@ -54,7 +54,22 @@ export interface Post {
   commentsCount?: number
   viewsCount?: number
   likeByUser?: boolean
+  
+  // Поля для репостов
+  repostCount?: number
+  repostedByUser?: boolean
+  repostData?: {
+    id: string
+    repostComment?: string
+    createdAt: string
+  }
 }
+
+export type PostsResponse = {
+  items: Post[];
+  nextCursor: string | null;
+  hasMore: boolean;
+};
 
 /**
  * Упрощенная версия поста (для списков)
@@ -132,6 +147,7 @@ export interface CreateCommentDto {
   postId: string
   content: string
   emojiUrls?: string[]
+  replyToId?: string // Для создания ответов на комментарии
 }
 
 /**

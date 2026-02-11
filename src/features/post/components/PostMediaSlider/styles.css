@@ -1,0 +1,114 @@
+/* Кастомная pagination (точки) в стиле Reddit */
+.swiper-pagination-custom {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet-active {
+  background: rgba(255, 255, 255, 1);
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* Скрываем стандартные кнопки Swiper */
+.swiper-button-prev,
+.swiper-button-next {
+  display: none;
+}
+
+/* Анимация появления кнопок */
+.swiper-button-prev-custom,
+.swiper-button-next-custom {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+/* Fullscreen изображение - анимация появления */
+.fixed.inset-0.z-50 {
+  animation: fadeInFullscreen 0.2s ease;
+}
+
+@keyframes fadeInFullscreen {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Основное изображение в fullscreen - плавное появление */
+.fixed.inset-0.z-50 img.relative {
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Адаптивное отображение медиа на мобильных */
+@media (max-width: 767px) {
+  /* На мобильных все изображения используют cover для заполнения */
+  .post-media-swiper img {
+    object-fit: cover !important;
+  }
+}
+
+/* Fullscreen viewer pagination */
+.fullscreen-pagination {
+  display: flex !important;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-pagination .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  margin: 0 !important;
+}
+
+.fullscreen-pagination .swiper-pagination-bullet-active {
+  background: rgba(255, 255, 255, 1);
+  width: 24px;
+  border-radius: 4px;
+}

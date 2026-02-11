@@ -131,32 +131,82 @@ const CreatePost = () => {
     
     if (!editor) return;
 
-    const token = `[mention:${user.id}|${name || "user"}]`;
+    // Получаем текущую позицию курсора и текст
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+
+    const range = sel.getRangeAt(0);
+    const textContent = editor.textContent || "";
     
-    // Получаем текущий текст
-    const currentText = editor.textContent || "";
-    const mentionQuery = mention;
-    const lastAtIndex = currentText.lastIndexOf(`@${mentionQuery}`);
-    
-    if (lastAtIndex !== -1) {
-      const before = currentText.slice(0, lastAtIndex);
-      const after = currentText.slice(lastAtIndex + mentionQuery.length + 1);
-      const newContent = `${before}${token}${after}`;
+    // Находим позицию последнего @
+    const lastAtIndex = textContent.lastIndexOf(`@${mention}`);
+    if (lastAtIndex === -1) return;
+
+    // Создаём mention элемент
+    const mentionSpan = document.createElement("span");
+    mentionSpan.className = "inline-block px-2 py-0.5 mx-0.5 rounded-full bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors cursor-pointer";
+    mentionSpan.contentEditable = "false";
+    mentionSpan.setAttribute("data-mention-id", user.id);
+    mentionSpan.textContent = `@${name || "user"}`;
+
+    // Находим текстовый узел с @mention
+    let targetNode: Text | null = null;
+    let nodeOffset = 0;
+    let currentOffset = 0;
+
+    const findTextNode = (node: Node): boolean => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || "";
+        if (currentOffset + text.length > lastAtIndex) {
+          targetNode = node as Text;
+          nodeOffset = lastAtIndex - currentOffset;
+          return true;
+        }
+        currentOffset += text.length;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        for (const child of Array.from(node.childNodes)) {
+          if (findTextNode(child)) return true;
+        }
+      }
+      return false;
+    };
+
+    findTextNode(editor);
+
+    if (targetNode) {
+      // Разделяем текстовый узел и вставляем mention
+      const mentionLength = mention.length + 1; // +1 для @
+      const textLength = (targetNode as Text).length;
       
-      setPostContent(newContent);
+      // Создаём новый range для удаления @mention
+      const deleteRange = document.createRange();
+      deleteRange.setStart(targetNode as Text, nodeOffset);
+      deleteRange.setEnd(targetNode as Text, Math.min(nodeOffset + mentionLength, textLength));
+      deleteRange.deleteContents();
+
+      // Вставляем mention элемент
+      deleteRange.insertNode(mentionSpan);
+      
+      // Добавляем пробел после mention
+      const spaceNode = document.createTextNode(" ");
+      deleteRange.setStartAfter(mentionSpan);
+      deleteRange.insertNode(spaceNode);
+
+      // Перемещаем курсор после пробела
+      deleteRange.setStartAfter(spaceNode);
+      deleteRange.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(deleteRange);
     }
     
     resetMention();
 
+    // Сериализуем обновлённый DOM
     setTimeout(() => {
-      editor.focus();
-      const range = document.createRange();
-      const sel = window.getSelection();
-      if (sel && editor.lastChild) {
-        range.setStartAfter(editor.lastChild);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
+      if (editor) {
+        const serialized = serializeDOM(editor.childNodes as unknown as NodeListOf<ChildNode>);
+        setPostContent(serialized);
+        editor.focus();
       }
     }, 0);
   };

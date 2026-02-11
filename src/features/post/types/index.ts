@@ -23,6 +23,7 @@ export type {
   Post,
   PostPreview,
   PostDetailed,
+  PostsResponse,
   Like,
   Comment,
   CreatePostDto,

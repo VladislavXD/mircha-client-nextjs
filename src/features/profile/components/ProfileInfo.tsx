@@ -57,9 +57,9 @@ export function ProfileInfo({
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6">
 			{/* Верхняя часть: имя и кнопки */}
-			<div className="flex flex-col sm:flex-row gap-4 items-start justify-between">
+			<div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start justify-between">
 				{/* Имя пользователя */}
-				<div className="flex-1 w-full">
+				<div className="flex-1 w-full text-center sm:text-left">
 					<div className="relative inline-block mb-2">
 						{data.usernameFrameUrl && data.usernameFrameUrl !== 'none' && (
 							<div
@@ -134,13 +134,13 @@ export function ProfileInfo({
 
 			{/* Bio */}
 			{data.bio && (
-				<p className="text-default-600 text-sm sm:text-base max-w-2xl leading-relaxed">
+				<p className="text-default-600 text-sm sm:text-base max-w-2xl leading-relaxed text-center sm:text-left">
 					{data.bio}
 				</p>
 			)}
 
 			{/* Метаинформация */}
-			<div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-default-500">
+			<div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-default-500 justify-center sm:justify-start">
 				{data.dateOfBirth && (
 					<div className="flex items-center gap-1.5 sm:gap-2">
 						<span>🎂</span>
@@ -160,7 +160,7 @@ export function ProfileInfo({
 			</div>
 
 			{/* Статистика подписок */}
-			<div className="flex flex-wrap gap-4 sm:gap-6">
+			<div className="flex flex-wrap gap-4 sm:gap-6 justify-center sm:justify-start">
 				<Link href={`/following/${data.id}`} className="group">
 					<div className="flex items-center gap-1 group-hover:text-primary transition-colors">
 						<span className="font-bold text-base sm:text-lg">{stats.followingCount}</span>
