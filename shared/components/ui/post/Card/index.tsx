@@ -126,6 +126,8 @@ const Card = ({
   } = useDisclosure();
   // const [editValue, setEditValue] = useState(content);
   const router = useRouter();
+  
+
 
 
   const handleDelete = async () => {
@@ -196,6 +198,7 @@ const Card = ({
         }
       });
     }
+    // Функция завершается мгновенно, UI уже обновлён!
   };
 
   // ===== АНТИ-СПАМ ЗАЩИТА ДЛЯ ЛАЙКОВ =====

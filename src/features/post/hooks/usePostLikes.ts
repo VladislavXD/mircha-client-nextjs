@@ -1,12 +1,12 @@
-import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query'
+import { useMutation, useQueryClient, UseMutationOptions, InfiniteData } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 
 import { likeService } from '../services/like.service'
 import { postKeys } from './usePostQueries'
-import type { Post, User, Like } from '../types'
+import type { Post, PostsResponse, User, Like } from '../types'
 
 type LikeContext = {
-	previousAllPosts?: Post[]
+	previousAllPosts?: InfiniteData<PostsResponse, unknown>
 	previousPost?: Post
 }
 
@@ -40,7 +40,7 @@ export function useLikePost(
 			await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) })
 
 			// Snapshot previous values
-			const previousAllPosts = queryClient.getQueryData<Post[]>(postKeys.lists())
+			const previousAllPosts = queryClient.getQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists())
 			const previousPost = queryClient.getQueryData<Post>(postKeys.detail(postId))
 
 			// Get current user
@@ -58,19 +58,26 @@ export function useLikePost(
 				user: currentUser,
 			}
 
-			// Optimistically update getAllPosts cache
-			queryClient.setQueryData<Post[]>(postKeys.lists(), (old) => {
+			// Optimistically update getAllPosts cache (infinite query)
+			queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
 				if (!old) return old
-				return old.map((post) => {
-					if (post.id === postId) {
-						return {
-							...post,
-							likeByUser: true,
-							likes: [...post.likes, optimisticLike],
-						}
-					}
-					return post
-				})
+				
+				return {
+					...old,
+					pages: old.pages.map(page => ({
+						...page,
+						items: page.items.map((post) => {
+							if (post.id === postId) {
+								return {
+									...post,
+									likeByUser: true,
+									likes: [...post.likes, optimisticLike],
+								}
+							}
+							return post
+						})
+					}))
+				}
 			})
 
 			// Optimistically update getPostById cache
@@ -100,19 +107,26 @@ export function useLikePost(
 
 		onSuccess: (newLike, postId) => {
 			// Replace temp like with real like from server
-			queryClient.setQueryData<Post[]>(postKeys.lists(), (old) => {
+			queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
 				if (!old) return old
-				return old.map((post) => {
-					if (post.id === postId) {
-						return {
-							...post,
-							likes: post.likes.map((like) =>
-								like.id.startsWith('temp-') ? newLike : like
-							),
-						}
-					}
-					return post
-				})
+				
+				return {
+					...old,
+					pages: old.pages.map(page => ({
+						...page,
+						items: page.items.map((post) => {
+							if (post.id === postId) {
+								return {
+									...post,
+									likes: post.likes.map((like) =>
+										like.id.startsWith('temp-') ? newLike : like
+									),
+								}
+							}
+							return post
+						})
+					}))
+				}
 			})
 
 			queryClient.setQueryData<Post>(postKeys.detail(postId), (old) => {
@@ -162,7 +176,7 @@ export function useUnlikePost(
 			await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) })
 
 			// Snapshot previous values
-			const previousAllPosts = queryClient.getQueryData<Post[]>(postKeys.lists())
+			const previousAllPosts = queryClient.getQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists())
 			const previousPost = queryClient.getQueryData<Post>(postKeys.detail(postId))
 
 			// Get current user
@@ -172,19 +186,26 @@ export function useUnlikePost(
 				return { previousAllPosts, previousPost }
 			}
 
-			// Optimistically update getAllPosts cache
-			queryClient.setQueryData<Post[]>(postKeys.lists(), (old) => {
+			// Optimistically update getAllPosts cache (infinite query)
+			queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
 				if (!old) return old
-				return old.map((post) => {
-					if (post.id === postId) {
-						return {
-							...post,
-							likeByUser: false,
-							likes: post.likes.filter((like) => like.userId !== currentUser.id),
-						}
-					}
-					return post
-				})
+				
+				return {
+					...old,
+					pages: old.pages.map(page => ({
+						...page,
+						items: page.items.map((post) => {
+							if (post.id === postId) {
+								return {
+									...post,
+									likeByUser: false,
+									likes: post.likes.filter((like) => like.userId !== currentUser.id),
+								}
+							}
+							return post
+						})
+					}))
+				}
 			})
 
 			// Optimistically update getPostById cache

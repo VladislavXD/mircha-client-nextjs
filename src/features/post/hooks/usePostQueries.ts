@@ -1,6 +1,7 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery, UseQueryOptions, UseInfiniteQueryOptions } from '@tanstack/react-query'
 import { postService } from '../services/post.service'
 import type { Post } from '../types'
+import { PostsResponse } from '../types/post.types'
 
 /**
  * Ключи для React Query кэша постов.
@@ -15,22 +16,33 @@ export const postKeys = {
 }
 
 /**
- * Хук для получения всех постов.
+ * Хук для получения всех постов с бесконечной прокруткой.
  * 
  * @param options - Опции React Query
- * @returns Данные всех постов, загрузка, ошибка
+ * @returns Данные постов с пагинацией, загрузка, ошибка
  */
 export function usePosts(
-	options?: Omit<UseQueryOptions<Post[], Error>, 'queryKey' | 'queryFn'>
+	options?: Omit<
+		UseInfiniteQueryOptions<PostsResponse, Error>,
+		'queryKey' | 'queryFn' | 'initialPageParam' | 'getNextPageParam' | 'select'
+	>
 ) {
-	return useQuery<Post[], Error>({
-		queryKey: postKeys.lists(),
-		queryFn: () => postService.getPosts(),
-		staleTime: 30 * 1000, // 30 секунд
-		gcTime: 5 * 60 * 1000, // 5 минут (cacheTime в v5 называется gcTime)
-		refetchOnWindowFocus: true,
-		...options
-	})
+	return useInfiniteQuery<PostsResponse, Error>({
+        queryKey: postKeys.lists(),
+        queryFn: ({ pageParam }) => {
+            const cursor = typeof pageParam === 'string' ? pageParam : undefined;
+            return postService.getPosts({ limit: 15, cursor });
+        },
+        initialPageParam: undefined,
+        getNextPageParam: (lastPage) => {
+            // Используем nextCursor из ответа API
+            return lastPage.hasMore ? lastPage.nextCursor : undefined;
+        },
+        staleTime: 30 * 1000, // 30 секунд
+        gcTime: 5 * 60 * 1000, // 5 минут
+        refetchOnWindowFocus: true,
+        ...options
+    })	
 }
 
 /**
