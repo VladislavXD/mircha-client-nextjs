@@ -1,0 +1,66 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter, usePathname } from 'next/navigation'
+import type { Dispatch, SetStateAction } from 'react'
+// import { toast } from 'sonner'
+
+// import { toastMessageHandler } from '@/shared/utils'
+
+import type { TypeLoginSchema } from '../schemes'
+import { authService } from '../services'
+import { addToast } from '@heroui/react'
+
+/**
+ * Хук для выполнения мутации входа пользователя.
+ */
+export function useLoginMutation(
+	setIsShowFactor: Dispatch<SetStateAction<boolean>>
+) {
+	const router = useRouter()
+	const pathname = usePathname()
+	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+	const locale = localeMatch?.[1]
+
+	const { mutate: login, isPending: isLoadingLogin } = useMutation({
+
+		mutationKey: ['login user'],
+		mutationFn: ({
+			values,
+			recaptcha
+		}: {
+			values: TypeLoginSchema
+			recaptcha: string
+		}) => authService.login(values, recaptcha),
+		onSuccess(data: any) {
+			if (data.message) {
+				// toastMessageHandler(data)
+				setIsShowFactor(true)
+			} else {
+				addToast({
+					title: 'Успешный вход',
+					color: 'success'
+				})
+				const prefix = locale ? `/${locale}` : ''
+				router.push(`${prefix}/dashboard/settings`)
+				// router.replace(`${prefix}/dashboard/settings`)
+				// window.location.href = `${prefix}/dashboard/settings`
+				// router.refresh()
+				// window.location.reload()
+				// toastMessageHandler({
+				// 	type: 'success',
+				// 	text: 'Успешный вход'
+				//
+			}
+		},
+		
+		onError(error) {
+			console.log('Login error:', error)
+			addToast({
+				title: 'Ошибка входа в систему',
+				description: (error as Error).message,
+				color: 'danger'
+			})
+		}
+	})
+
+	return { login, isLoadingLogin }
+}

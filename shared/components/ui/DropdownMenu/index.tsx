@@ -1,0 +1,140 @@
+"use client";
+import React, { useState } from "react";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Avatar,
+  User,
+  Button,
+  useDisclosure,
+  Badge,
+} from "@heroui/react";
+import { useDispatch, useSelector } from "react-redux";
+import { signOut } from "next-auth/react";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { CiSettings } from "react-icons/ci";
+import { useTheme } from "next-themes";
+import { LocaleSwitcherSelect } from "../selects/localeSwitcherSelect";
+import { useTranslations } from "next-intl";
+import FeedBackModal from "../Modals/FeedBack.modal";
+import { useProfile } from "@/src/features/profile/hooks";
+import { useLogoutMutation } from "@/src/features/user/hooks";
+import { Moon, Sun } from "lucide-react";
+import { useOnlineStatus } from "@/src/features/chat";
+
+const MenuDropdown = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const t = useTranslations("HomePage.navbar.dropdownMenu");
+  const { onOpen, isOpen, onOpenChange, onClose } = useDisclosure();
+
+  const { user, isLoading, isAuthenticated } = useProfile();
+  const { logout, isLoadingLogout } = useLogoutMutation();
+  
+  // ✅ ВАЖНО: Все хуки должны вызываться до любого раннего return
+  const userId = user?.id;
+  const { isOnline } = useOnlineStatus(userId || "");
+  
+  const handleThemeToggle = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+  
+  // Теперь можно делать раннее возвращение
+  if (!user) {
+    return null;
+  }
+
+  const { avatarUrl, name, email, id } = user;
+  const pathname = usePathname()
+  const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
+  const locale = localeMatch?.[1]
+
+  const prefix = locale ? `/${locale}` : ''
+  
+  return (
+    <>
+      <Dropdown
+        placement="bottom-start"
+        className={`bottom-start  ${theme === "dark" ? "text-white" : "text-black"}  ${theme}`}
+        
+      >
+        <DropdownTrigger>
+          <div
+            className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer ${theme === "dark" ? "bg-black" : "bg-white"}`}
+          >
+           
+            <CiSettings className={`flex sm:hidden size-8 ${theme}`} />
+            {/* @ts-ignore */}
+            <Badge color={isOnline ? "success" : "default"} placement="" shape="circle" content="" className="mt-1 hidden md:block" >
+              <></>
+            </Badge> 
+         
+            <User
+              avatarProps={{ isBordered: true, src: avatarUrl }}
+              className="transition-transform md:text-xs hidden sm:flex"
+              description={`@${email}`}
+              name={`${name}`}
+            />
+           
+
+          </div>
+        </DropdownTrigger>
+        <DropdownMenu aria-label="User Actions" variant="flat">
+          <DropdownItem key={id} className="h-14 gap-2">
+            <p className="font-bold">{t("registered")}</p>
+            <p className="font-bold">@{email}</p>
+          </DropdownItem>
+          
+          {/* Мобильные настройки - только на маленьких экранах */}
+          <DropdownItem 
+            key="theme_toggle" 
+            className="md:hidden"
+            onClick={handleThemeToggle}
+            startContent={theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          >
+            <span className="flex items-center justify-between w-full">
+              <span>{theme === "dark" ? "Light Theme" : "Dark Theme"}</span>
+            </span>
+          </DropdownItem>
+          
+          <DropdownItem key="profile" className="hidden sm:block">
+            <Link href={`/user/${id}`}>{t("profile")}</Link>
+          </DropdownItem>
+          <DropdownItem key="settings">
+            <Link href={`${prefix}/dashboard/settings`}>{t("settings")}</Link>
+          </DropdownItem>
+          <DropdownItem onClick={onOpen} key="help_and_feedback">
+            {t("feedback")}
+          </DropdownItem>
+          <DropdownItem key="language" isReadOnly>
+            <LocaleSwitcherSelect />
+          </DropdownItem>
+          <DropdownItem key="about">
+            <Link href={`/about`}>{t("about")}</Link>
+          </DropdownItem>
+          <DropdownItem
+            key="logout "
+            onClick={() => logout()}
+            aria-disabled={isLoadingLogout}
+            className="text-danger-400 flex"
+            color="danger"
+          >
+            {<p>{t("logout")}</p>}
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+      <FeedBackModal
+        isOpen={isOpen}
+        onClosse={onClose}
+        onOpenChange={onOpenChange}
+      />
+    </>
+  );
+};
+
+export default MenuDropdown;

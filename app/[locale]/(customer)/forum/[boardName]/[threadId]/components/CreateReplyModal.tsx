@@ -12,9 +12,10 @@ import {
   Input,
   Chip
 } from '@heroui/react'
-import { useCreateReplyMutation } from '@/src/services/forum.service'
+import { useCreateReply } from '@/src/features/forum'
 import { toast } from 'react-hot-toast'
-import type { Thread } from '@/src/types/types'
+import type { Thread } from '@/src/features/forum'
+import { useTranslations } from 'next-intl'
 
 interface CreateReplyModalProps {
   isOpen: boolean
@@ -31,7 +32,8 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
   threadId, 
   thread 
 }) => {
-  const [createReply, { isLoading }] = useCreateReplyMutation()
+  const t = useTranslations('Forum.createReply')
+  const createReply = useCreateReply()
   
   const [formData, setFormData] = useState({
     content: '',
@@ -43,25 +45,20 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
     e.preventDefault()
     
     if (!formData.content.trim()) {
-      toast.error('Содержание ответа обязательно')
+      toast.error(t('errorRequired'))
       return
     }
 
     try {
-      const formDataToSend = new FormData()
-      formDataToSend.append('content', formData.content)
-      formDataToSend.append('authorName', formData.authorName || 'Аноним')
-      
-      // Добавляем все выбранные файлы
-      selectedFiles.forEach((file) => {
-        formDataToSend.append('images', file)
-      })
-
-      await createReply({ 
+      await createReply.mutateAsync({ 
         boardName, 
         threadId,
-        formData: formDataToSend 
-      }).unwrap()
+        data: {
+          content: formData.content,
+          authorName: formData.authorName || 'Аноним'
+        },
+        files: selectedFiles
+      })
       
       toast.success('Ответ отправлен!')
       onClose()
@@ -71,7 +68,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
       })
       setSelectedFiles([])
     } catch (error: any) {
-      toast.error(error?.data?.error || 'Ошибка отправки ответа')
+      toast.error(error?.response?.data?.message || t('errorCreate'))
     }
   }
 
@@ -89,16 +86,10 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
     const validFiles: File[] = []
 
     for (const file of files) {
-      // Проверка размера файла
-      if (file.size > (thread.board?.maxFileSize || 5242880)) {
-        toast.error(`Файл "${file.name}" слишком большой. Максимальный размер: ${Math.round((thread.board?.maxFileSize || 5242880) / 1024 / 1024)}MB`)
-        continue
-      }
-
-      // Проверка типа файла
-      const fileExt = file.name.split('.').pop()?.toLowerCase()
-      if (fileExt && thread.board?.allowedFileTypes && !thread.board.allowedFileTypes.includes(fileExt)) {
-        toast.error(`Тип файла "${file.name}" не поддерживается. Разрешённые типы: ${thread.board.allowedFileTypes.join(', ')}`)
+      // Проверка размера файла (используем дефолтное значение)
+      const maxFileSize = 5242880 // 5MB default
+      if (file.size > maxFileSize) {
+        toast.error(`Файл "${file.name}" слишком большой. Максимальный размер: ${Math.round(maxFileSize / 1024 / 1024)}MB`)
         continue
       }
 
@@ -128,7 +119,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold">Ответить в тред</h2>
+            <h2 className="text-xl font-bold">{t('title')}</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {thread.subject || `Тред #${thread.id}`}
             </p>
@@ -137,17 +128,17 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
           <ModalBody className="gap-4">
             {/* Имя автора */}
             <Input
-              label="Имя"
-              placeholder="Аноним"
+              label={t('nameLabel')}
+              placeholder={t('namePlaceholder')}
               value={formData.authorName}
               onChange={(e) => setFormData(prev => ({ ...prev, authorName: e.target.value }))}
               variant="bordered"
-              description="Оставьте пустым для Анонимимности"
+              description={t('nameDescription')}
             />
 
             {/* Содержание */}
             <Textarea
-              label="Ответ"
+              label={t('contentLabel')}
               placeholder="Введите ваш ответ..."
               value={formData.content}
               onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
@@ -160,12 +151,12 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
             {/* Загрузка файлов */}
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                Изображения/Видео {selectedFiles.length > 0 && `(${selectedFiles.length}/5)`}
+                {t('fileLabel')} {selectedFiles.length > 0 && `(${selectedFiles.length}/5)`}
               </label>
               <input
                 type="file"
                 multiple
-                accept={thread.board?.allowedFileTypes?.map(type => `.${type}`).join(',')}
+                accept="image/*,video/*"
                 onChange={handleFileChange}
                 className="block w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4
@@ -253,16 +244,9 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
 
               {/* Информация о лимитах */}
               <div className="text-xs text-gray-500 space-y-1">
-                <p>Максимальный размер файла: {Math.round((thread.board?.maxFileSize || 5242880) / 1024 / 1024)}MB</p>
+                <p>Максимальный размер файла: 5MB</p>
                 <p>Максимум файлов: 5</p>
-                <div className="flex flex-wrap gap-1">
-                  <span>Поддерживаемые форматы:</span>
-                  {thread.board?.allowedFileTypes?.map(type => (
-                    <Chip key={type} size="sm" variant="flat" color="default">
-                      {type.toUpperCase()}
-                    </Chip>
-                  ))}
-                </div>
+                <p>Поддерживаемые форматы: JPG, PNG, GIF, WEBP, MP4, WEBM</p>
               </div>
             </div>
           </ModalBody>
@@ -272,16 +256,16 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
               color="danger" 
               variant="light" 
               onPress={onClose}
-              disabled={isLoading}
+              disabled={createReply.isPending}
             >
-              Отмена
+              {t('cancel')}
             </Button>
             <Button 
               color="primary" 
               type="submit"
-              isLoading={isLoading}
+              isLoading={createReply.isPending}
             >
-              Отправить ответ
+              {t('submit')}
             </Button>
           </ModalFooter>
         </form>
@@ -291,3 +275,4 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
 }
 
 export default CreateReplyModal
+

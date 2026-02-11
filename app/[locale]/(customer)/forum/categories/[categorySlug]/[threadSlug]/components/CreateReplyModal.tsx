@@ -12,9 +12,10 @@ import {
   Input,
   Chip
 } from '@heroui/react'
-import { useCreateReplyInCategoryMutation } from '@/src/services/forum.service'
+import { useCreateReplyInCategory } from '@/src/features/forum/hooks/useForum'
 import { toast } from 'react-hot-toast'
-import type { Thread } from '@/src/types/types'
+import type { Thread } from '@/src/features/forum/types/forum.types'
+import { useTranslations } from 'next-intl'
 
 interface CreateReplyModalProps {
   isOpen: boolean
@@ -31,7 +32,8 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
   threadId, 
   thread 
 }) => {
-  const [createReply, { isLoading }] = useCreateReplyInCategoryMutation()
+  const t = useTranslations('Forum.createReply')
+  const { mutateAsync: createReply, isPending: isLoading } = useCreateReplyInCategory()
   
   const [formData, setFormData] = useState({
     content: '',
@@ -43,7 +45,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
     e.preventDefault()
     
     if (!formData.content.trim()) {
-      toast.error('Содержание ответа обязательно')
+      toast.error(t('errorRequired'))
       return
     }
 
@@ -61,7 +63,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
         categorySlug, 
         threadId,
         formData: formDataToSend 
-      }).unwrap()
+      })
       
       toast.success('Ответ отправлен!')
       onClose()
@@ -71,7 +73,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
       })
       setSelectedFiles([])
     } catch (error: any) {
-      toast.error(error?.data?.error || 'Ошибка отправки ответа')
+      toast.error(error?.message || t('errorCreate'))
     }
   }
 
@@ -129,7 +131,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold">Ответить в тред</h2>
+            <h2 className="text-xl font-bold">{t('title')}</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {thread.subject || `Тред #${thread.id}`}
             </p>
@@ -138,17 +140,17 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
           <ModalBody className="gap-4">
             {/* Имя автора */}
             <Input
-              label="Имя"
-              placeholder="Аноним"
+              label={t('nameLabel')}
+              placeholder={t('namePlaceholder')}
               value={formData.authorName}
               onChange={(e) => setFormData(prev => ({ ...prev, authorName: e.target.value }))}
               variant="bordered"
-              description="Оставьте пустым для анонимности"
+              description={t('nameDescription')}
             />
 
             {/* Содержание */}
             <Textarea
-              label="Ответ"
+              label={t('contentLabel')}
               placeholder="Введите ваш ответ..."
               value={formData.content}
               onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
@@ -160,7 +162,7 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
 
             {/* Загрузка файлов */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Изображения/Видео</label>
+              <label className="text-sm font-medium">{t('fileLabel')}</label>
               <input
                 type="file"
                 multiple
@@ -273,14 +275,14 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
               onPress={onClose}
               disabled={isLoading}
             >
-              Отмена
+              {t('cancel')}
             </Button>
             <Button 
               color="primary" 
               type="submit"
               isLoading={isLoading}
             >
-              Отправить ответ
+              {t('submit')}
             </Button>
           </ModalFooter>
         </form>

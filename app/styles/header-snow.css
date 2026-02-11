@@ -1,0 +1,57 @@
+/**
+ * Снег внизу Header с помощью псевдоэлемента
+ * Адаптивный для мобильных и десктопа
+ */
+
+.header-with-snow {
+  position: relative;
+  overflow: visible;
+}
+
+.header-with-snow::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: -5px; /* Меньше выход на мобильных */
+  right: -5px;
+  width: calc(100% + 10px);
+  height: 40px; /* Меньше высота на мобильных */
+  background-image: url('/winterIcons/mirchanSnow.png');
+  background-size: cover;
+  background-position: bottom center;
+  background-repeat: repeat-x;
+  opacity: 0.9; /* Немного прозрачнее на мобильных */
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 0 0 40% 40% / 0 0 80% 80%;
+  box-shadow: 0 2px 6px rgba(147, 197, 253, 0.2);
+}
+
+/* Десктопные улучшения */
+@media (min-width: 768px) {
+  .header-with-snow::after {
+    left: -10px;
+    right: -10px;
+    width: calc(100% + 20px);
+    height: 52px;
+    opacity: 0.95;
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+    box-shadow: 0 2px 8px rgba(147, 197, 253, 0.3);
+  }
+}
+
+/* Тёмная тема */
+@media (prefers-color-scheme: dark) {
+  .header-with-snow::after {
+    opacity: 0.8;
+    filter: brightness(0.9);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+  }
+  
+  @media (min-width: 768px) {
+    .header-with-snow::after {
+      opacity: 0.85;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+  }
+}

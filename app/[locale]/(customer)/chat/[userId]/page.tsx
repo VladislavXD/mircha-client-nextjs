@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 // import { NO_INDEX_PAGE } from '../../constants/seo.constants'
 import { ChatWindow } from './ChatWindow'
-import Container from '@/app/components/layout/container'
+import Container from '@/shared/components/layout/container'
 
 
 export const metadata: Metadata = {
