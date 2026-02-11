@@ -6,35 +6,13 @@ import Navbar from "../shared/components/layout/Navbar";
 import AuthGuard from "./[locale]/AuthGuard";
 import BottomNav from "../shared/components/layout/BottomNavbar";
 import RightSideBar from "../shared/components/layout/RightSideBar";
-import Snowfall from "../shared/components/layout/Seasonal/Snowfall";
-import FestiveBanner from "../shared/components/layout/Seasonal/FestiveBanner";
-import { useState, useEffect } from "react";
 
 
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [snowEnabled, setSnowEnabled] = useState(true);
 	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
 	const locale = localeMatch?.[1]
-
-  // Читаем настройку снега из localStorage при монтировании
-  useEffect(() => {
-    const saved = localStorage.getItem("snowfall-enabled");
-    if (saved !== null) {
-      setSnowEnabled(saved === "true");
-    }
-    
-    // Слушаем событие переключения снега из Header
-    const handleToggle = (e: CustomEvent<boolean>) => {
-      setSnowEnabled(e.detail);
-    };
-    
-    window.addEventListener('snowfall-toggle', handleToggle as EventListener);
-    return () => {
-      window.removeEventListener('snowfall-toggle', handleToggle as EventListener);
-    };
-  }, []);
   
   // Убираем сложную логику проверки - middleware уже все сделал
   const isAuthPage = pathname?.startsWith('/auth');
@@ -46,10 +24,10 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   return (
     <>
       {/* Праздничная гирлянда */}
-      <FestiveBanner />
+      {/* <FestiveBanner />
       
       {/* Новогодний снег на всём сайте */}
-      <Snowfall enabled={snowEnabled} density={50} />
+      {/* <Snowfall enabled={snowEnabled} density={50} />  */}
 
       {/* Если админ-панель - рендерим без Layout (у неё свой layout) */}
       {isAdminPage ? (
@@ -83,7 +61,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
                 
                 {/* Основной контент с прокруткой без видимого скроллбара */}
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                  <div className="flex-1  overflow-y-auto scrollbar-hide mb-8">
+                  <div className="flex-1 overflow-y-auto scrollbar-hide pb-24 md:pb-8">
                     <AuthGuard>{children}</AuthGuard>
                   </div>
                 </div>

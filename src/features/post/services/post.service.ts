@@ -1,5 +1,6 @@
 import { api } from '@/src/api'
 import type { Post, AddViewResponse, AddViewsBatchResponse } from '../types/index'
+import { PostsResponse } from '../types/post.types';
 
 /**
  * API сервис для работы с постами.
@@ -22,8 +23,8 @@ class PostService {
 	 * 
 	 * @returns Массив постов с флагом likeByUser
 	 */
-	async getPosts(): Promise<Post[]> {
-		return api.get<Post[]>('posts')
+	async getPosts({ limit, cursor }: { limit?: number; cursor?: string }): Promise<PostsResponse> {
+		return api.get<PostsResponse>('posts', { params: { limit, cursor } })
 	}
 
 	/**
