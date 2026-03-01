@@ -19,7 +19,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const isAdminPage = pathname?.includes('/admin');
 	const prefix = locale ? `/${locale}` : ''
 
-  const hideRightSidebar = pathname?.includes(`${prefix}/dashboard/settings`);  ``
+  const hideRightSidebar = pathname?.includes(`${prefix}/dashboard/settings`) || pathname?.includes(`${prefix}/chat`)
   
   return (
     <>

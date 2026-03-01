@@ -2,12 +2,13 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, Card, CardBody, CardHeader, Divider, Switch } from '@heroui/react'
+import { Button, Card, CardBody, CardHeader, Divider, Switch, useDisclosure } from '@heroui/react'
 import { useProfile } from '@/src/features/profile/hooks'
 import { useUpdateProfileMutation } from '../hooks'
 import { z } from 'zod'
 import { Shield, Key, Smartphone } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { ChangePasswordModal } from './ChangePasswordModal'
 
 const securitySchema = z.object({
 	isTwoFactorEnabled: z.boolean()
@@ -19,6 +20,7 @@ export function SecuritySettings() {
 	const { user, isLoading } = useProfile()
 	const { update, isLoadingUpdate } = useUpdateProfileMutation()
 	const t = useTranslations('Settings.security')
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
 	const form = useForm<SecurityFormData>({
 		resolver: zodResolver(securitySchema),
@@ -72,6 +74,7 @@ export function SecuritySettings() {
 							size="sm"
 							variant="flat"
 							color="primary"
+							onPress={onOpen}
 						>
 							{t('changePassword')}
 						</Button>
@@ -135,6 +138,9 @@ export function SecuritySettings() {
 						</Button>
 					</div>
 				</form>
+
+				{/* Модалка смены пароля */}
+				<ChangePasswordModal isOpen={isOpen} onClose={onClose} />
 			</CardBody>
 		</Card>
 	)
