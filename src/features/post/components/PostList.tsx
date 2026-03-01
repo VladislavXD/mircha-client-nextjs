@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Spinner } from "@heroui/react";
+import { Chip, Spinner, Tab, Tabs } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { usePosts } from "../hooks/usePostQueries";
@@ -83,6 +83,41 @@ const PostList = () => {
     <div className="space-y-5">
       {currentUser && <span className=""><CreatePost /></span>}
       <Notice/>
+      
+      {/* Убираем отступ снизу у табов */}
+      <div className="mb-0">
+        <Tabs
+          aria-label="Options"
+          classNames={{
+            tabList: "gap-0 w-full mb-0 relative rounded-2xl p-0 border-b border-t  border-divider",
+            cursor: "w-full bg-[#22d3ee]",
+            tab: "flex-1 px-0 h-12",
+            tabContent: "group-data-[selected=true]:text-[#06b6d4] w-full text-center",
+            panel: "mb-0 w-full",
+            base: "w-full",
+          }}
+          color="primary"
+          variant="underlined"
+        > 
+          <Tab
+            key="recommended"
+            title={
+              <div className="flex items-center justify-center w-full">
+                <span>Рекомендуемые</span>
+              </div>
+            }
+          />
+          <Tab
+            key="following"
+            title={
+              <div className="flex items-center justify-center w-full">
+                <span>Подписки</span>
+              </div>
+            }
+          />
+        </Tabs>
+      </div>
+
       {posts.pages.map((page) => (
         page.items.map((post) => (
         <PostCard key={post.id} post={post} cardFor="post"  />
@@ -93,7 +128,6 @@ const PostList = () => {
         hasNextPage && (
            <div className="flex justify-center py-4">
             <Spinner size="md" ref={ref} />
-
         </div>
         )
       }
