@@ -61,8 +61,18 @@ class UserService {
 		return response
 	}
 
-
-
+	/**
+	 * Изменяет пароль текущего пользователя.
+	 *
+	 * @param {Object} body - Данные для смены пароля.
+	 * @param {string} body.currentPassword - Текущий пароль.
+	 * @param {string} body.newPassword - Новый пароль.
+	 * @returns {Promise<{ message: string }>} - Сообщение об успешной смене пароля.
+	 */
+	public async changePassword(body: { currentPassword: string; newPassword: string }) {
+		const response = await api.post<{ message: string }>('users/change-password', body)
+		return response
+	}
 }
 
 export const userService = new UserService()
