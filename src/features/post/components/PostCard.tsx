@@ -35,6 +35,7 @@ import PostMediaSlider, { type PostMedia } from "./PostMediaSlider/index";
 import { timeAgo } from "@/src/utils/timeAgo";
 import { RepostButton } from "./RepostButton";
 import { CommentsModal } from "./comments";
+import { getEditedText } from "../utils/editedText.utils";
 
 type Props = {
   post: Post;
@@ -391,7 +392,7 @@ const PostCard = ({
       </div> */}
 
       {cardFor !== "comment" && (
-        <CardFooter className="gap-3 px-3 sm:px-6 py-3" onClick={(e) => e.stopPropagation()}>
+        <CardFooter className="gap-3 px-3 sm:px-6 py-3 flex justify-between" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-4 sm:gap-5 items-center flex-wrap">
             {/* Like button */}
             <div
@@ -435,7 +436,9 @@ const PostCard = ({
                 post={post}
               />
           </div>
-          
+          <div className="text-xs text-default-500">
+            {getEditedText({isEdited: post.isEdited, updatedAt: post.updatedAt})}
+          </div>
           {error && (
             <p className="text-red-500 text-small mt-2">{error}</p>
           )}

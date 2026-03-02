@@ -192,8 +192,16 @@ const EditPostModal: React.FC<EditPostModalProps> = ({
   const handleSave = useCallback(async () => {
     if (!postId) return;
     setError("");
+    
+    // Валидация: контент или эмодзи должны быть
+    if (!content.trim() && emojis.length === 0) {
+      setError("Пост не может быть пустым");
+      return;
+    }
+    
     try {
       const { newText, newEmojiUrls } = normalizeEmojis(content, emojis);
+      
       mutate({id: postId, data: {content: newText, emojiUrls: newEmojiUrls}})
       
       if (onUpdated) await onUpdated();
