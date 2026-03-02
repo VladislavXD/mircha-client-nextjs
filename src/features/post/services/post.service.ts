@@ -51,10 +51,10 @@ class PostService {
 	 * Обновление поста.
 	 * 
 	 * @param id - ID поста
-	 * @param data - FormData с полями: content, image (опционально), emojiUrls
+	 * @param data - Данные для обновления (content, contentSpoiler, emojiUrls)
 	 * @returns Обновлённый пост
 	 */
-	async updatePost(id: string, data: FormData): Promise<Post> {
+	async updatePost(id: string, data: { content?: string; contentSpoiler?: boolean; emojiUrls?: string[] }): Promise<Post> {
 		return api.patch<Post>(`posts/${id}`, data)
 	}
 

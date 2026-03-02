@@ -10,9 +10,13 @@ import { addToast } from '@heroui/react'
  * 
  * @param options - Опции мутации
  * @returns Мутация создания поста
- */
+*/
 type CreatePostContext = {
 	previousPosts?: InfiniteData<PostsResponse, unknown>
+}
+type DeletePostContext = {
+	previousPosts?: InfiniteData<PostsResponse, unknown>
+	deletedPost?: Post
 }
 
 export function useCreatePost(
@@ -89,7 +93,7 @@ export function useCreatePost(
 			})
 			console.error('Create post error:', error)
 		},
-
+		
 		...options
 	})
 }
@@ -110,48 +114,39 @@ export function useUpdatePost(
 
 	return useMutation<Post, Error, { id: string; data: UpdatePostDto }>({
 		mutationFn: async ({ id, data }) => {
-			const formData = new FormData()
-			
-			if (data.content !== undefined) {
-				formData.append('content', data.content)
-			}
-			
-			if (data.contentSpoiler !== undefined) {
-				formData.append('contentSpoiler', String(data.contentSpoiler))
-			}
-
-			return postService.updatePost(id, formData)
+			// Отправляем JSON вместо FormData
+			return postService.updatePost(id, data)
 		},
 
-		onSuccess: (updatedPost) => {
-			// Обновляем пост во всех страницах
-			queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
-				if (!old) {
-					return {
-						pages: [{
-							items: [updatedPost],
-							nextCursor: null,
-							hasMore: false
-						}],
-						pageParams: [undefined]
-					}
-				}
-				
-				// Обновляем пост на той странице, где он находится
-				return {
-					...old,
-					pages: old.pages.map(page => ({
-						...page,
-						items: page.items.map(post => 
-							post.id === updatedPost.id ? updatedPost : post
-						)
-					}))
-				}
-			})
+		onSuccess: (updatedPost) => {	
+			// Обновляем пост во всех страницах infinite query
+            queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
+                if (!old) {
+                    return {
+                        pages: [{
+                            items: [updatedPost],
+                            nextCursor: null,
+                            hasMore: false
+                        }],
+                        pageParams: [undefined]
+                    }
+                }
+                
+                // Обновляем пост на всех страницах где он встречается
+                return {
+                    ...old,
+                    pages: old.pages.map(page => ({
+                        ...page,
+                        items: page.items.map(post => 
+                            post.id === updatedPost.id ? updatedPost : post
+                        )
+                    }))
+                }
+            })
 
-			// Обновляем в детальном кэше
-			queryClient.invalidateQueries({ queryKey: postKeys.lists() })
-			
+            // Обновляем детальный кэш поста (если он есть)
+            queryClient.setQueryData(postKeys.detail(updatedPost.id), updatedPost)
+
 			addToast({
 				title: 'Пост обновлён!',
 				color: 'success',
@@ -171,10 +166,6 @@ export function useUpdatePost(
 	})
 }
 
-type DeletePostContext = {
-	previousPosts?: InfiniteData<PostsResponse, unknown>
-	deletedPost?: Post
-}
 
 /**
  * Хук для удаления поста с оптимистичным обновлением.

@@ -48,6 +48,7 @@ export interface Post {
   views: string[]
   createdAt: string
   updatedAt: string
+  isEdited: boolean
   
   // Вычисляемые поля
   likesCount?: number
