@@ -34,7 +34,6 @@ const PostList = () => {
   
   const { data: posts, isLoading, isError, error, hasNextPage, isFetchingNextPage, fetchNextPage } = usePosts();
 
-  console.log(posts?.pages);
   useEffect(()=> {
     if (inView && hasNextPage) {
       fetchNextPage();
