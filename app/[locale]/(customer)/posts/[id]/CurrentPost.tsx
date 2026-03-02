@@ -46,6 +46,7 @@ const CurrentPost = () => {
 									likeByUser: false,
 									contentSpoiler: false,
 									media: [],
+									isEdited: comment.updatedAt !== comment.createdAt,
 								}}
 								cardFor="comment"
 								commentId={comment.id}
