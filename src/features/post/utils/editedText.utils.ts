@@ -6,9 +6,8 @@ export const getEditedText = ({isEdited, updatedAt}: {isEdited: boolean, updated
 
 	 const timeAgo = formatDistanceToNow(new Date(updatedAt), {
 		addSuffix: true,
-		locale: ru
+		locale: ru,
 	 })
 
-	 return `Отредактировано ${timeAgo}`
-
+	 return `изменено: ${timeAgo}`
 }
