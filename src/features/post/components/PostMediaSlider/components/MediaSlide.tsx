@@ -138,7 +138,7 @@ export const MediaSlide: React.FC<Props> = ({
   };
 
   return (
-    <div className="relative w-full h-[500px] sm:h-[400px] md:h-[450px] bg-black flex items-center justify-center">
+    <div className="relative w-full h-[400px] sm:h-[400px] md:h-[500px] bg-black flex items-center justify-center">
       {isSpoilerHidden ? renderSpoiler() : renderContent()}
     </div>
   );

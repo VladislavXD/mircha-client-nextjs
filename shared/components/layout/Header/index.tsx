@@ -14,20 +14,16 @@ import { ThemeSwitch } from "@/src/Providers/theme-switch";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
-import { useAppSelector } from "@/src/hooks/reduxHooks";
 
 import Image from "next/image";
 
 import { ProfileHeaderSkeleton, useProfile } from "@/src/features/profile";
-import Cookies from "js-cookie";
+
 
 const Header = () => {
-  const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
-  
   // React Query для получения данных текущего пользователя
   const { user, isLoading, isAuthenticated } = useProfile();
-  console.log('user in header:', user);
 
   return (
     <Navbar className="max-w-screen-xl mx-auto w-full">
@@ -73,7 +69,7 @@ const Header = () => {
         <NavbarItem className="hidden md:flex">
           <ThemeSwitch />
         </NavbarItem>
-
+                                
         <NavbarItem>
 
           {isLoading ? (
