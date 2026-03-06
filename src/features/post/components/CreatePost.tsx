@@ -258,7 +258,7 @@ const CreatePost = () => {
     <form className="flex-grow p-3" onSubmit={onSubmit}>
       <div className="mb-5 relative " ref={containerRef}>
         {/* contentEditable editor */}
-        <div className="relative min-h-[120px] max-h-[400px] overflow-y-auto overflow-x-hidden rounded-xl border-2 transition-all duration-200 bg-gradient-to-br from-default-50 to-default-100/50 border-default-200 hover:border-default-300">
+        <div className="group relative min-h-[120px] max-h-[400px] overflow-y-auto overflow-x-hidden rounded-xl border-1.5 transition-all duration-200 bg-gradient-to-br from-default-50 to-default-100/50 border-default-200 hover:border-default-300">
           <div
             ref={editorRef}
             contentEditable={!isLoading}
@@ -278,7 +278,9 @@ const CreatePost = () => {
             role="textbox"
             aria-multiline="true"
           />
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary opacity-40" />
+          <div className="absolute top-0 left-0 w-full h-px overflow-hidden opacity-20 group-focus-within:opacity-100 transition-opacity duration-500">
+            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/70 to-transparent animate-shimmer" />
+          </div>
         </div>
 
         {/* Spoiler button (shows on selection) */}
