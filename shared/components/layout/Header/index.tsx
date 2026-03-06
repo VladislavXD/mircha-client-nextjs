@@ -69,7 +69,7 @@ const Header = () => {
         <NavbarItem className="hidden md:flex">
           <ThemeSwitch />
         </NavbarItem>
-
+                                
         <NavbarItem>
 
           {isLoading ? (
