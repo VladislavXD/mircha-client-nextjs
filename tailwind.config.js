@@ -16,6 +16,15 @@ const config = {
         mono: ["var(--font-mono)"],
         serif: ["var(--font-serif)"],
       },
+      keyframes: {
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
+        },
+      },
+      animation: {
+        shimmer: 'shimmer 2.5s linear infinite',
+      },
     },
   },
   darkMode: "class",
