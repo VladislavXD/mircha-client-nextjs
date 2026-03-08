@@ -16,6 +16,7 @@ import { PostPreview } from "./PostPreview";
 import type { Post } from "../../types";
 import { useCreateComment, useCreateReply, useDeleteComment } from "../../comment/hooks/useComment";
 import { usePostComments } from "../../comment/hooks/usePostComments";
+import { useLikeComment, useUnlikeComment } from "../../like/hooks";
 
 interface CommentsModalProps {
   isOpen: boolean;
@@ -35,6 +36,8 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
   const { mutate: createComment, isPending: isCreating } = useCreateComment();
   const { mutate: createReply } = useCreateReply();
   const { mutate: deleteComment } = useDeleteComment();
+  const { mutate: likeComment } = useLikeComment(post.id);
+  const { mutate: unlikeComment } = useUnlikeComment(post.id);
   
   // Загрузка комментариев
   const { data: commentsData, isLoading: isLoadingComments } = usePostComments(
@@ -64,9 +67,12 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
     });
   };
 
-  const handleLikeComment = (commentId: string) => {
-    console.log("Like comment:", commentId);
-    // TODO: Подключить мутацию лайка комментария (если есть)
+  const handleLikeComment = (commentId: string, isLiked: boolean) => {
+    if (isLiked) {
+      unlikeComment(commentId);
+    } else {
+      likeComment(commentId);
+    }
   };
 
   const handleDeleteComment = (commentId: string) => {

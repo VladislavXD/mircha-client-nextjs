@@ -113,10 +113,16 @@ export function useDeleteComment() {
 			const previousComments = queryClient.getQueryData<any>(['comments', 'post', postId])
 			const previousPost = queryClient.getQueryData<any>(postKeys.detail(postId))
 
+			// Рекурсивно удаляет комментарий на любом уровне вложенности
+			const removeFromTree = (comments: any[], id: string): any[] =>
+				comments
+					.filter((c: any) => c.id !== id)
+					.map((c: any) => ({ ...c, replies: removeFromTree(c.replies || [], id) }))
+
 			// Обновляем кеш комментариев
 			if (previousComments) {
 				queryClient.setQueryData(['comments', 'post', postId], (old: any[]) => {
-					return (old || []).filter((c: any) => c.id !== commentId)
+					return removeFromTree(old || [], commentId)
 				})
 			}
 
@@ -125,7 +131,7 @@ export function useDeleteComment() {
 				queryClient.setQueryData(postKeys.detail(postId), (old: any) => {
 					return {
 						...old,
-						comments: (old?.comments || []).filter((c: any) => c.id !== commentId),
+						comments: removeFromTree(old?.comments || [], commentId),
 						// Декрементируем счетчик комментариев
 						commentsCount: old.commentsCount !== undefined 
 							? Math.max(0, old.commentsCount - 1)
