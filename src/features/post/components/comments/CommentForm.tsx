@@ -55,11 +55,13 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   };
 
   return (
-    <div className={`${
-      compact 
-        ? 'bg-default-100 dark:bg-default-50/10 border border-default-200 dark:border-default-100/20 rounded-lg p-2 sm:p-3 shadow-sm' 
-        : 'bg-background border-t border-divider p-3 sm:p-4'
-    }`}>
+    <div
+      className={`${
+        compact
+          ? "bg-default-100 dark:bg-default-50/10 border border-default-200 dark:border-default-100/20 rounded-lg p-2 sm:p-3 shadow-sm"
+          : "bg-background border-t border-divider p-3 sm:p-4"
+      }`}
+    >
       {/* Reply Indicator */}
       {replyingTo && !compact && (
         <div className="flex items-center gap-2 mb-2 px-2 py-1 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
@@ -98,13 +100,18 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             maxLength={maxLength}
             classNames={{
               input: "text-xs sm:text-sm",
-              inputWrapper: "bg-default-100 group-data-[focus=true]:bg-default-100",
+              inputWrapper:
+                "bg-default-100 group-data-[focus=true]:bg-default-100",
             }}
           />
           <div className="flex justify-between items-center mt-1 sm:mt-2">
-            <span className="text-[10px] sm:text-xs text-default-400">
-              {content.length}/{maxLength}
-            </span>
+
+              {!compact && (
+                <div className="text-[10px] sm:text-xs text-default-400 mt-1 sm:mt-2 text-center hidden sm:block">
+                  Ctrl + Enter для отправки
+                </div>
+              )}
+
             <div className="flex gap-1 sm:gap-2">
               {compact && onCancelReply && (
                 <Button
@@ -123,7 +130,11 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                 isDisabled={!content.trim() || isSubmitting}
                 isLoading={isSubmitting}
                 onClick={handleSubmit}
-                endContent={!isSubmitting && <Send size={12} className="sm:w-3.5 sm:h-3.5" />}
+                endContent={
+                  !isSubmitting && (
+                    <Send size={12} className="sm:w-3.5 sm:h-3.5" />
+                  )
+                }
                 className="text-xs sm:text-sm"
               >
                 {replyingTo ? "Ответить" : "Отправить"}
@@ -134,11 +145,6 @@ export const CommentForm: React.FC<CommentFormProps> = ({
       </div>
 
       {/* Keyboard Hint */}
-      {!compact && (
-        <div className="text-[10px] sm:text-xs text-default-400 mt-1 sm:mt-2 text-center hidden sm:block">
-          Ctrl + Enter для отправки
-        </div>
-      )}
     </div>
   );
 };

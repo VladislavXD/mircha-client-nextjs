@@ -215,7 +215,7 @@ const User = ({
       >
         <div className="relative inline-block items-start">
           {/* Шапка Санты над аватаром */}
-          <Image
+          {/* <Image
             src="/winterIcons/santahat.png" 
             alt="Santa hat decoration"
             width={60}
@@ -223,7 +223,7 @@ const User = ({
             className="absolute -top-6 -left-3 z-50 pointer-events-none select-none"
             priority={false}
             unoptimized
-          />
+          /> */}
           
           <Badge color={isOnline ? "success" : "default"} placement="bottom-right" shape="circle" content="" className="mb-1 ">
 <></>
