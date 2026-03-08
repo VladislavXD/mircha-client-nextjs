@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery, UseQueryOptions, UseInfiniteQueryOptions } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions } from '@tanstack/react-query'
 import { postService } from '../services/post.service'
 import type { Post } from '../types'
 import { PostsResponse } from '../types/post.types'
@@ -54,14 +54,21 @@ export function usePosts(
  */
 export function usePost(
 	id: string,
-	options?: Omit<UseQueryOptions<Post, Error>, 'queryKey' | 'queryFn'>
+	options?: Omit<UseQueryOptions<Post, Error>, 'queryKey' | 'queryFn' | 'initialData'>
 ) {
+	const queryClient = useQueryClient()
+
 	return useQuery<Post, Error>({
 		queryKey: postKeys.detail(id),
 		queryFn: () => postService.getPostById(id),
 		enabled: !!id,
-		staleTime: 60 * 1000, // 1 минута
-		gcTime: 10 * 60 * 1000, // 10 минут
+		staleTime: 60 * 1000,
+		gcTime: 10 * 60 * 1000,
+		initialData: () => {
+			// Ищем пост в кеше бесконечных страниц
+			const pages = queryClient.getQueryData<{ pages: PostsResponse[] }>(postKeys.lists())
+			return pages?.pages.flatMap(p => p.items).find(p => p.id === id)
+		},
 		...options
 	})
 }
