@@ -185,3 +185,105 @@ export function useUnlikePost() {
 		}
 	})
 }
+
+// Локальная защита от дабл-кликов для комментариев
+const inFlightCommentLikes = new Set<string>()
+
+/**
+ * Инвалидируем все варианты сортировки комментариев
+ */
+function invalidateCommentQueries(queryClient: ReturnType<typeof useQueryClient>, postId: string) {
+	queryClient.invalidateQueries({ queryKey: ['comments', 'post', postId] })
+}
+
+/**
+ * Рекурсивно обновляет лайк в комментарии или его ответах
+ */
+function updateCommentOrReply(comments: any[], commentId: string, liked: boolean): any[] {
+	return comments.map((c) => {
+		if (c.id === commentId) {
+			return {
+				...c,
+				likedByUser: liked,
+				likeCount: Math.max(0, (c.likeCount ?? 0) + (liked ? 1 : -1)),
+			}
+		}
+		if (c.replies?.length) {
+			return { ...c, replies: updateCommentOrReply(c.replies, commentId, liked) }
+		}
+		return c
+	})
+}
+
+/**
+ * Оптимистичное обновление лайка в кэше комментариев
+ */
+function updateCommentLikeInCache(
+	queryClient: ReturnType<typeof useQueryClient>,
+	postId: string,
+	commentId: string,
+	liked: boolean
+) {
+	const suffixes = [['new'], ['old'], ['popular'], []] as const
+	suffixes.forEach((suffix) => {
+		const key = ['comments', 'post', postId, ...suffix]
+		queryClient.setQueryData<any[]>(key, (old) => {
+			if (!old) return old
+			return updateCommentOrReply(old, commentId, liked)
+		})
+	})
+}
+
+/**
+ * Хук для постановки лайка на комментарий с optimistic update
+ */
+export function useLikeComment(postId: string) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationKey: ['like', 'comment', 'create'],
+		mutationFn: async (commentId: string) => {
+			if (inFlightCommentLikes.has(commentId)) return Promise.resolve(undefined as any)
+			inFlightCommentLikes.add(commentId)
+			return likeService.likeComment(commentId)
+		},
+		onMutate: async (commentId: string) => {
+			updateCommentLikeInCache(queryClient, postId, commentId, true)
+			return { commentId }
+		},
+		onError: (_err, commentId) => {
+			updateCommentLikeInCache(queryClient, postId, commentId, false)
+		},
+		onSettled: (_data, _err, commentId) => {
+			inFlightCommentLikes.delete(commentId)
+			invalidateCommentQueries(queryClient, postId)
+		},
+	})
+}
+
+/**
+ * Хук для снятия лайка с комментария с optimistic update
+ */
+export function useUnlikeComment(postId: string) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationKey: ['like', 'comment', 'delete'],
+		mutationFn: async (commentId: string) => {
+			if (inFlightCommentLikes.has(commentId)) return Promise.resolve(undefined as any)
+			inFlightCommentLikes.add(commentId)
+			return likeService.unlikeComment(commentId)
+		},
+		onMutate: async (commentId: string) => {
+			updateCommentLikeInCache(queryClient, postId, commentId, false)
+			return { commentId }
+		},
+		onError: (_err, commentId) => {
+			updateCommentLikeInCache(queryClient, postId, commentId, true)
+		},
+		onSettled: (_data, _err, commentId) => {
+			inFlightCommentLikes.delete(commentId)
+			invalidateCommentQueries(queryClient, postId)
+		},
+	})
+}

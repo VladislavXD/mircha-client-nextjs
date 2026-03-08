@@ -1,1 +1,1 @@
-export { useLikePost, useUnlikePost } from './useLike'
+export { useLikePost, useUnlikePost, useLikeComment, useUnlikeComment } from './useLike'

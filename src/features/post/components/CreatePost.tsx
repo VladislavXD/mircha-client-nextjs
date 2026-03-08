@@ -32,11 +32,11 @@ const CreatePost = () => {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const currentUser = queryClient.getQueryData<User>(["profile"]);
-  
+
   const { mutate: createPost, isPending: isLoading } = useCreatePost();
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { handleSubmit } = useForm<FormData>();
@@ -50,12 +50,7 @@ const CreatePost = () => {
     clearMedia,
   } = useMediaUpload();
 
-  const {
-    mention,
-    showHit,
-    detectMention,
-    resetMention,
-  } = useMentions();
+  const { mention, showHit, detectMention, resetMention } = useMentions();
 
   const {
     postContent,
@@ -66,16 +61,15 @@ const CreatePost = () => {
     serializeDOM,
   } = useContentEditor(selectedEmojis);
 
-  const {
-    activeFormats,
-    applyFormat,
-    handleKeyDown,
-  } = useTextFormatting(editorRef);
+  const { activeFormats, applyFormat, handleKeyDown } =
+    useTextFormatting(editorRef);
 
   // Callback для обновления контента после применения спойлера
   const handleSpoilerApplied = useCallback(() => {
     if (editorRef.current) {
-      const next = serializeDOM(editorRef.current.childNodes as unknown as NodeListOf<ChildNode>);
+      const next = serializeDOM(
+        editorRef.current.childNodes as unknown as NodeListOf<ChildNode>,
+      );
       setPostContent(next);
     }
   }, [editorRef, serializeDOM, setPostContent]);
@@ -92,13 +86,13 @@ const CreatePost = () => {
   // Обработчик выбора эмодзи
   const handleEmojiSelect = (emojiUrl: string) => {
     setSelectedEmojis((prev) => [...prev, emojiUrl]);
-    
+
     const editor = editorRef.current;
     if (!editor) return;
 
     const emojiIndex = selectedEmojis.length;
     const token = `[emoji:${emojiIndex}]`;
-    
+
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
       const range = sel.getRangeAt(0);
@@ -110,9 +104,9 @@ const CreatePost = () => {
       sel.removeAllRanges();
       sel.addRange(range);
     }
-    
+
     // Trigger input event for serialization
-    editor.dispatchEvent(new Event('input', { bubbles: true }));
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
   };
 
   // Обработка ввода с обнаружением упоминаний
@@ -128,7 +122,7 @@ const CreatePost = () => {
   const handleSelectMention = (user: { id: string; name?: string | null }) => {
     const editor = editorRef.current;
     const name = (user.name || "").trim();
-    
+
     if (!editor) return;
 
     // Получаем текущую позицию курсора и текст
@@ -137,14 +131,15 @@ const CreatePost = () => {
 
     const range = sel.getRangeAt(0);
     const textContent = editor.textContent || "";
-    
+
     // Находим позицию последнего @
     const lastAtIndex = textContent.lastIndexOf(`@${mention}`);
     if (lastAtIndex === -1) return;
 
     // Создаём mention элемент
     const mentionSpan = document.createElement("span");
-    mentionSpan.className = "inline-block px-2 py-0.5 mx-0.5 rounded-full bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors cursor-pointer";
+    mentionSpan.className =
+      "inline-block px-2 py-0.5 mx-0.5 rounded-full bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors cursor-pointer";
     mentionSpan.contentEditable = "false";
     mentionSpan.setAttribute("data-mention-id", user.id);
     mentionSpan.textContent = `@${name || "user"}`;
@@ -177,16 +172,19 @@ const CreatePost = () => {
       // Разделяем текстовый узел и вставляем mention
       const mentionLength = mention.length + 1; // +1 для @
       const textLength = (targetNode as Text).length;
-      
+
       // Создаём новый range для удаления @mention
       const deleteRange = document.createRange();
       deleteRange.setStart(targetNode as Text, nodeOffset);
-      deleteRange.setEnd(targetNode as Text, Math.min(nodeOffset + mentionLength, textLength));
+      deleteRange.setEnd(
+        targetNode as Text,
+        Math.min(nodeOffset + mentionLength, textLength),
+      );
       deleteRange.deleteContents();
 
       // Вставляем mention элемент
       deleteRange.insertNode(mentionSpan);
-      
+
       // Добавляем пробел после mention
       const spaceNode = document.createTextNode(" ");
       deleteRange.setStartAfter(mentionSpan);
@@ -198,13 +196,15 @@ const CreatePost = () => {
       sel.removeAllRanges();
       sel.addRange(deleteRange);
     }
-    
+
     resetMention();
 
     // Сериализуем обновлённый DOM
     setTimeout(() => {
       if (editor) {
-        const serialized = serializeDOM(editor.childNodes as unknown as NodeListOf<ChildNode>);
+        const serialized = serializeDOM(
+          editor.childNodes as unknown as NodeListOf<ChildNode>,
+        );
         setPostContent(serialized);
         editor.focus();
       }
@@ -224,18 +224,18 @@ const CreatePost = () => {
 
     const formData = new FormData();
     formData.append("content", postContent);
-    
+
     // NestJS ожидает массив файлов с именем 'media'
     mediaFiles.forEach((mediaFile) => {
       formData.append("media", mediaFile.file);
     });
-    
+
     // Отправляем информацию о spoiler для каждого медиа файла
     if (mediaFiles.length > 0) {
       const spoilerData = mediaFiles.map((m) => m.spoiler || false);
       formData.append("mediaSpoilers", JSON.stringify(spoilerData));
     }
-    
+
     if (selectedEmojis?.length) {
       formData.append("emojiUrls", JSON.stringify(selectedEmojis));
     }
@@ -288,8 +288,8 @@ const CreatePost = () => {
           <div
             ref={spoilerButtonRef}
             className="absolute z-[10000]"
-            style={{ 
-              top: `${spoilerBtnPos.top}px`, 
+            style={{
+              top: `${spoilerBtnPos.top}px`,
               left: `${spoilerBtnPos.left}px`,
             }}
           >
@@ -312,7 +312,7 @@ const CreatePost = () => {
           </div>
         )}
       </div>
-      
+
       {showHit && (
         <Mention
           showHit={showHit}
@@ -322,33 +322,35 @@ const CreatePost = () => {
       )}
 
       {/* Media Preview Slider */}
-      <MediaPreviewSlider 
-        media={mediaFiles} 
-        onRemove={handleRemoveMedia} 
+      <MediaPreviewSlider
+        media={mediaFiles}
+        onRemove={handleRemoveMedia}
         onToggleSpoiler={handleToggleSpoiler}
-        disabled={isLoading} 
+        disabled={isLoading}
       />
 
       {/* Toolbar: Formatting, Media Upload, Emoji Picker */}
-      <PostEditorToolbar
-        activeFormats={activeFormats}
-        isLoading={isLoading}
-        mediaFiles={mediaFiles}
-        maxMedia={MAX_MEDIA}
-        onFormat={applyFormat}
-        onMediaSelect={handleMediaSelect}
-        onEmojiSelect={handleEmojiSelect}
-      />
+      <div className="flex justify-between">
+        <PostEditorToolbar
+          activeFormats={activeFormats}
+          isLoading={isLoading}
+          mediaFiles={mediaFiles}
+          maxMedia={MAX_MEDIA}
+          onFormat={applyFormat}
+          onMediaSelect={handleMediaSelect}
+          onEmojiSelect={handleEmojiSelect}
+        />
 
-      <Button
-        color="success"
-        isLoading={isLoading}
-        className="flex-end relative rounded-full hover:-translate-y-1 px-12 shadow-xl after:content-[''] after:absolute after:rounded-full after:inset-0 after:bg-background/40 after:z-[-1] after:transition after:!duration-500 hover:after:scale-150 hover:after:opacity-0 transition-transform"
-        endContent={<IoMdCreate />}
-        type="submit"
-      >
-        {t("CreatePost.addPost")}
-      </Button>
+        <Button
+          color="success"
+          isLoading={isLoading}
+          className="flex-end relative rounded-full hover:-translate-y-1 px-12 shadow-xl after:content-[''] after:absolute after:rounded-full after:inset-0 after:bg-background/40 after:z-[-1] after:transition after:!duration-500 hover:after:scale-150 hover:after:opacity-0 transition-transform"
+          endContent={<IoMdCreate />}
+          type="submit"
+        >
+          {t("CreatePost.addPost")}
+        </Button>
+      </div>
 
       {/* Локальные стили спойлера */}
       <style jsx>{`

@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Heart, Eye, Repeat2 } from "lucide-react";
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle } from "lucide-react";
 
 import { useDeletePost } from "../hooks/usePostMutations";
 import { useLikePost, useUnlikePost } from "../like/hooks";
@@ -46,7 +46,7 @@ type Props = {
 
 /**
  * PostCard - компонент для отображения поста
- * 
+ *
  * Features:
  * - Optimistic like/unlike with React Query
  * - View tracking with Intersection Observer
@@ -87,7 +87,7 @@ const PostCard = ({
   // Backend может использовать image или imageUrl
   const imageUrl = (post as any)?.image ?? (post as any)?.imageUrl;
   const safeContent = typeof content === "string" ? content : "";
-  
+
   // Обработка медиа: если есть массив media, используем его, иначе создаём из одиночного image
   const postMedia: PostMedia[] = React.useMemo(() => {
     const mediaArray = (post as any)?.media;
@@ -101,20 +101,22 @@ const PostCard = ({
         } else if (m.mimeType) {
           mediaType = m.mimeType.startsWith("video/") ? "video" : "image";
         }
-        
+
         return {
           url: m.url || m,
           type: mediaType,
-          spoiler: m.spoiler || false
+          spoiler: m.spoiler || false,
         };
       });
     }
     if (imageUrl) {
-      return [{
-        url: imageUrl,
-        type: 'image' as const,
-        spoiler: false
-      }];
+      return [
+        {
+          url: imageUrl,
+          type: "image" as const,
+          spoiler: false,
+        },
+      ];
     }
     return [];
   }, [post, imageUrl]);
@@ -149,7 +151,7 @@ const PostCard = ({
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
   } = useDisclosure();
-  
+
   const {
     isOpen: isEditOpen,
     onOpen: onEditOpen,
@@ -200,10 +202,8 @@ const PostCard = ({
   };
 
   // Anti-spam throttling для лайков
-  const { throttledCallback: handleLikeWithThrottle, isThrottled } = useThrottle(
-    handleLike,
-    2000
-  );
+  const { throttledCallback: handleLikeWithThrottle, isThrottled } =
+    useThrottle(handleLike, 2000);
 
   const handleDeleteClick = () => {
     onDeleteOpen();
@@ -267,7 +267,7 @@ const PostCard = ({
       {
         threshold: 0.5, // 50% поста должно быть видно
         rootMargin: "0px 0px -100px 0px",
-      }
+      },
     );
 
     observer.observe(el);
@@ -291,32 +291,37 @@ const PostCard = ({
     ? followers.some((f) => f.followerId === currentUser.id)
     : false;
 
+  const { isOnline } = useOnlineStatus(authorId);
 
-    const { isOnline } = useOnlineStatus(authorId);
-    
   // Обработчик клика на карточку для перехода на страницу поста
   const handleCardClick = (e: React.MouseEvent) => {
-    // Игнорируем клики по интерактивным элементам
     const target = e.target as HTMLElement;
-    
-    // Проверяем, что клик не по ссылке, кнопке или их потомкам
     if (
-      target.closest('a') || 
-      target.closest('button') || 
+      target.closest("a") ||
+      target.closest("button") ||
       target.closest('[role="button"]') ||
-      target.closest('.swiper-button-next') ||
-      target.closest('.swiper-button-prev') ||
-      target.getAttribute('data-no-redirect') === 'true'
+      target.closest(".swiper-button-next") ||
+      target.closest(".swiper-button-prev") ||
+      target.closest(".swiper-pagination")
     ) {
       return;
     }
-    
-    // Переходим на страницу поста
-    router.push(`/posts/${id}`);
+    if (cardFor !== "current-post") {
+      router.push(`/posts/${id}`);
+    }
   };
-    
+
+  // Средняя кнопка — открыть в новой вкладке
+  const handleCardAuxClick = (e: React.MouseEvent) => {
+    if (e.button === 1 && cardFor !== "current-post") {
+      e.preventDefault();
+      window.open(`/posts/${id}`, "_blank");
+    }
+  };
+
   return (
-    <NextCard className="mb-0 cursor-pointer
+    <NextCard
+      className="mb-0 relative cursor-pointer
      hover:shadow-lg 
      transition-all
      rounded-none 
@@ -327,9 +332,16 @@ const PostCard = ({
      hover:bg-[#070c0d]
      
        bg-black
-      " onClick={handleCardClick}>
+      "
+      onClick={handleCardClick}
+      onAuxClick={handleCardAuxClick}
+    >
       <CardHeader className="justify-between items-center bg-transparent px-3 sm:px-6">
-        <Link href={`/user/${authorId}`} onClick={(e) => e.stopPropagation()} className="flex items-start gap-2 flex-1 min-w-0">
+        <Link
+          href={`/user/${authorId}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-start gap-2 flex-1 min-w-0"
+        >
           <UserComponent
             userId={authorId}
             usernameFrameUrl={usernameFrameUrl}
@@ -348,7 +360,10 @@ const PostCard = ({
             avatarUrl={avatarUrl}
             description={createdAt && formatToClientDate(createdAt)}
           />
-          <time dateTime={createdAt} className="text-white/70 text-xs drop-shadow-md pt-1 shrink-0">
+          <time
+            dateTime={createdAt}
+            className="text-white/70 text-xs drop-shadow-md pt-1 shrink-0"
+          >
             {timeAgo(createdAt || "")}
           </time>
         </Link>
@@ -364,48 +379,48 @@ const PostCard = ({
         </div>
       </CardHeader>
 
-      <CardBody className="px-3 py-2 mb-3 sm:mb-5" >
-
-        <div ref={inViewRef}>
-        
-          <EmojiText 
-            text={safeContent} 
-            emojiUrls={emojiUrls} 
+      <CardBody
+        className="px-3 py-2 mb-3 sm:mb-5"
+      >
+        <div
+          ref={inViewRef}
+          className="cursor-pointer"
+          onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
+        >
+          <EmojiText
+            text={safeContent}
+            emojiUrls={emojiUrls}
             className="font-serif text-[15px] sm:text-[17px] md:text-[17px] leading-relaxed tracking-wide break-words"
           />
-
-          {/* Новый слайдер медиа */}
-          {postMedia.length > 0 && (
-            <div className="mt-3 -mx-3 sm:mx-0 sm:rounded-lg overflow-hidden" >
-              <PostMediaSlider media={postMedia} />
-            </div>
-          )}
-
         </div>
 
+        {/* Новый слайдер медиа */}
+        {postMedia.length > 0 && (
+          <div
+            className="mt-3 -mx-3 sm:mx-0 sm:rounded-lg overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <PostMediaSlider media={postMedia} />
+          </div>
+        )}
       </CardBody>
 
-      {/* <div className="text-small text-default-400 pl-3 flex items-center gap-1">
-        <Eye size={16} />
-        {viewsCount > 1000 ? `${(viewsCount / 1000).toFixed(1)}k` : viewsCount}{" "}
-       
-      </div> */}
-
       {cardFor !== "comment" && (
-        <CardFooter className="gap-3 px-3 sm:px-6 py-3 flex justify-between" onClick={(e) => e.stopPropagation()}>
-          <div className="flex gap-4 sm:gap-5 items-center flex-wrap">
+        <CardFooter
+          className="gap-3 px-3 sm:px-6 py-3 flex justify-between w-full cursor-pointer"
+          onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
+        >
+          <div className="flex gap-4 sm:gap-5 items-center flex-wrap ">
             {/* Like button */}
             <div
-              onClick={handleLikeWithThrottle}
+              onClick={(e) => { e.stopPropagation(); handleLikeWithThrottle(); }}
               className={`cursor-pointer transition-opacity ${
                 isThrottled || isLikeLoading || isUnlikeLoading
                   ? "opacity-50"
                   : "opacity-100"
               }`}
               title={
-                isThrottled
-                  ? "Подождите немного перед следующим лайком"
-                  : ""
+                isThrottled ? "Подождите немного перед следующим лайком" : ""
               }
             >
               <MetaInfo
@@ -416,8 +431,8 @@ const PostCard = ({
               />
             </div>
 
-            {/* Comments count */}
-            <div 
+            {/* Comments count — клик открывает модалку, не переходит на пост */}
+            <div
               onClick={(e) => {
                 e.stopPropagation();
                 onCommentsOpen();
@@ -428,20 +443,32 @@ const PostCard = ({
             </div>
 
             {/* repost button */}
-              {/* <MetaInfo count={0} Icon={Repeat2 } /> */}
-              <RepostButton
-                postId={id}
-                repostedByUser={repostedByUser}
-                repostCount={repostCount}
-                post={post}
-              />
+            {/* <MetaInfo count={0} Icon={Repeat2 } /> */}
+            <RepostButton
+              postId={id}
+              repostedByUser={repostedByUser}
+              repostCount={repostCount}
+              post={post}
+            />
           </div>
+          {/* Views count */}
+
+
           <div className="text-xs text-default-500">
-            {getEditedText({isEdited: post.isEdited, updatedAt: post.updatedAt})}
+            {getEditedText({
+              isEdited: post.isEdited,
+              updatedAt: post.updatedAt,
+            })}
           </div>
-          {error && (
-            <p className="text-red-500 text-small mt-2">{error}</p>
-          )}
+            {
+              cardFor === "current-post" && <div className="text-small text-default-400 pl-3 flex items-center gap-1">
+              <Eye size={16} />
+              {2000 > 1000
+                ? `${(3284 / 1000).toFixed(1)}k`
+                : viewsCount}{" "}
+            </div>
+            }
+          {error && <p className="text-red-500 text-small mt-2">{error}</p>}
         </CardFooter>
       )}
 
@@ -467,11 +494,11 @@ const PostCard = ({
         }}
       />
 
-			<ReportPostModal
-				isOpen={isReportOpen}
-				onClose={onReportClose}
-				post={post}
-			/>
+      <ReportPostModal
+        isOpen={isReportOpen}
+        onClose={onReportClose}
+        post={post}
+      />
 
       {/* Comments modal */}
       <CommentsModal

@@ -25,7 +25,7 @@ interface CommentItemProps {
   likedByUser?: boolean;
   replies?: CommentItemProps[];
   onReply?: (commentId: string, content: string) => void;
-  onLike?: (commentId: string) => void;
+  onLike?: (commentId: string, likedByUser: boolean) => void;
   onDelete?: (commentId: string) => void;
   currentUser?: {
     id?: string;
@@ -53,6 +53,9 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   const [showReplies, setShowReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const maxDepth = 4; // Максимальная глубина вложенности
+
+
+
 
   const handleReplySubmit = (replyContent: string) => {
     if (onReply) {
@@ -126,7 +129,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Like Button */}
             <button
-              onClick={() => onLike?.(id)}
+              onClick={() => onLike?.(id, likedByUser)}
               className="flex items-center gap-1 text-[10px] sm:text-xs text-default-500 hover:text-danger transition-colors"
             >
               <Heart
