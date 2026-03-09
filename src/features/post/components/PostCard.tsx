@@ -2,18 +2,13 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import {
-  Button,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Card as NextCard,
   useDisclosure,
-  Image,
 } from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Heart, Eye, Repeat2 } from "lucide-react";
+import { Heart, Eye } from "lucide-react";
 import { MessageCircle } from "lucide-react";
 
 import { useDeletePost } from "../hooks/usePostMutations";
@@ -22,7 +17,6 @@ import { useAddView } from "../hooks/usePostViews";
 import type { Post, User } from "../types";
 
 import UserComponent from "@/shared/components/ui/User";
-import { formatToClientDate } from "@/app/utils/formatToClientDate";
 import MetaInfo from "@/shared/components/ui/MetaInfo";
 import PostDropdown from "@/shared/components/ui/post/PostDropdown/PostDropdown";
 import { EmojiText } from "@/shared/components/ui/EmojiText";
@@ -321,156 +315,157 @@ const PostCard = ({
 
   return (
     <NextCard
-      className="mb-0 relative cursor-pointer
-     hover:shadow-lg 
-     transition-all
-     rounded-none 
-     pt-3 
-     shadow-none   
-     border-t-1 
-     border-default-200 
-     hover:bg-[#070c0d]
-     
-       bg-black
-      "
+      className="mb-0 relative cursor-pointer transition-all rounded-none shadow-none border-t-1 border-default-200 hover:bg-[#070c0d] bg-black"
       onClick={handleCardClick}
       onAuxClick={handleCardAuxClick}
     >
-      <CardHeader className="justify-between items-center bg-transparent px-3 sm:px-6">
-        <Link
-          href={`/user/${authorId}`}
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-start gap-2 flex-1 min-w-0"
-        >
-          <UserComponent
-            userId={authorId}
-            usernameFrameUrl={usernameFrameUrl}
-            avatarFrameUrl={avatarFrameUrl}
-            backgroundUrl={backgroundUrl}
-            dateOfBirth={dateOfBirth}
-            name={name}
-            bio={bio}
-            createdAt={authorCreatedAt}
-            followersCount={followersCount}
-            followingCount={followingCount}
-            isFollowing={isFollowing}
-            isOnline={isOnline}
-            onFollowToggle={onFollowToggle}
-            className="text-small font-semibold leading-none text-default-600"
-            avatarUrl={avatarUrl}
-            description={createdAt && formatToClientDate(createdAt)}
-          />
-          <time
-            dateTime={createdAt}
-            className="text-white/70 text-xs drop-shadow-md pt-1 shrink-0"
-          >
-            {timeAgo(createdAt || "")}
-          </time>
-        </Link>
+      <div className="flex gap-3 px-3 sm:px-4 pt-3 pb-1">
 
-        <div onClick={(e) => e.stopPropagation()}>
-          <PostDropdown
-            isLoading={isDeleteLoading}
-            onEdit={handleEditClick}
-            onDelete={handleDeleteClick}
-            onReport={onReportOpen}
-            authorId={authorId}
-          />
-        </div>
-      </CardHeader>
-
-      <CardBody
-        className="px-3 py-2 mb-3 sm:mb-5"
-      >
-        <div
-          ref={inViewRef}
-          className="cursor-pointer"
-          onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
-        >
-          <EmojiText
-            text={safeContent}
-            emojiUrls={emojiUrls}
-            className="font-serif text-[15px] sm:text-[17px] md:text-[17px] leading-relaxed tracking-wide break-words"
-          />
-        </div>
-
-        {/* Новый слайдер медиа */}
-        {postMedia.length > 0 && (
+        {/* LEFT: Аватар */}
+        <div className="flex flex-col items-center shrink-0">
           <div
-            className="mt-3 -mx-3 sm:mx-0 sm:rounded-lg overflow-hidden"
             onClick={(e) => e.stopPropagation()}
+            className="transition-transform duration-150 active:scale-90"
           >
-            <PostMediaSlider media={postMedia} />
-          </div>
-        )}
-      </CardBody>
-
-      {cardFor !== "comment" && (
-        <CardFooter
-          className="gap-3 px-3 sm:px-6 py-3 flex justify-between w-full cursor-pointer"
-          onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
-        >
-          <div className="flex gap-4 sm:gap-5 items-center flex-wrap ">
-            {/* Like button */}
-            <div
-              onClick={(e) => { e.stopPropagation(); handleLikeWithThrottle(); }}
-              className={`cursor-pointer transition-opacity ${
-                isThrottled || isLikeLoading || isUnlikeLoading
-                  ? "opacity-50"
-                  : "opacity-100"
-              }`}
-              title={
-                isThrottled ? "Подождите немного перед следующим лайком" : ""
-              }
-            >
-              <MetaInfo
-                {...(likeByUser ? { fill: "#d91002", color: "#d91002" } : {})}
-                count={likesCount}
-                type="heart"
-                Icon={Heart}
-              />
-            </div>
-
-            {/* Comments count — клик открывает модалку, не переходит на пост */}
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                onCommentsOpen();
-              }}
-              className="cursor-pointer"
-            >
-              <MetaInfo count={commentsCount} Icon={MessageCircle} />
-            </div>
-
-            {/* repost button */}
-            {/* <MetaInfo count={0} Icon={Repeat2 } /> */}
-            <RepostButton
-              postId={id}
-              repostedByUser={repostedByUser}
-              repostCount={repostCount}
-              post={post}
+            <UserComponent
+              variant="avatar-only"
+              userId={authorId}
+              avatarUrl={avatarUrl}
+              avatarFrameUrl={avatarFrameUrl}
+              usernameFrameUrl={usernameFrameUrl}
+              backgroundUrl={backgroundUrl}
+              name={name}
+              bio={bio}
+              createdAt={authorCreatedAt}
+              followersCount={followersCount}
+              followingCount={followingCount}
+              isFollowing={isFollowing}
+              isOnline={isOnline}
+              onFollowToggle={onFollowToggle}
+              showFollowBadge
+              currentUserId={currentUser?.id}
+              avatarClassName="!w-8 !h-8 sm:!w-10 sm:!h-10"
             />
           </div>
-          {/* Views count */}
+          {/* Вертикальная линия потока */}
+          <div className="w-px flex-1 bg-default-200/30 mt-2 rounded-full min-h-[16px]" />
+        </div>
 
+        {/* RIGHT: Контент */}
+        <div className="flex-1 min-w-0 pb-3">
 
-          <div className="text-xs text-default-500">
-            {getEditedText({
-              isEdited: post.isEdited,
-              updatedAt: post.updatedAt,
-            })}
-          </div>
-            {
-              cardFor === "current-post" && <div className="text-small text-default-400 pl-3 flex items-center gap-1">
-              <Eye size={16} />
-              {2000 > 1000
-                ? `${(3284 / 1000).toFixed(1)}k`
-                : viewsCount}{" "}
+          {/* Имя + время + дропдаун */}
+          <div className="flex items-center justify-between mb-1">
+            <Link
+              href={`/user/${authorId}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1.5 min-w-0 flex-1"
+            >
+              <UserComponent
+                variant="name-only"
+                userId={authorId}
+                avatarUrl={avatarUrl}
+                avatarFrameUrl={avatarFrameUrl}
+                usernameFrameUrl={usernameFrameUrl}
+                backgroundUrl={backgroundUrl}
+                name={name}
+                bio={bio}
+                createdAt={authorCreatedAt}
+                followersCount={followersCount}
+                followingCount={followingCount}
+                isFollowing={isFollowing}
+                isOnline={isOnline}
+                onFollowToggle={onFollowToggle}
+                nameClassName="text-xs sm:text-sm text-white"
+              />
+              <time dateTime={createdAt} className="text-white/50 text-[9px] sm:text-xs shrink-0">
+                {timeAgo(createdAt || "")}
+              </time>
+            </Link>
+            <div onClick={(e) => e.stopPropagation()} className="shrink-0 ml-1">
+              <PostDropdown
+                isLoading={isDeleteLoading}
+                onEdit={handleEditClick}
+                onDelete={handleDeleteClick}
+                onReport={onReportOpen}
+                authorId={authorId}
+              />
             </div>
-            }
-          {error && <p className="text-red-500 text-small mt-2">{error}</p>}
-        </CardFooter>
-      )}
+          </div>
+
+          {/* Текст поста */}
+          <div
+            ref={inViewRef}
+            className="cursor-pointer"
+            onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
+          >
+            <EmojiText
+              text={safeContent}
+              emojiUrls={emojiUrls}
+              className="font-serif text-[13px] sm:text-[15px] md:text-[16px] leading-relaxed tracking-wide break-words"
+            />
+          </div>
+
+          {/* Медиа */}
+          {postMedia.length > 0 && (
+            <div
+              className="mt-2 rounded-xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PostMediaSlider media={postMedia} />
+            </div>
+          )}
+
+          {/* Действия */}
+          {cardFor !== "comment" && (
+            <div
+              className="flex items-center justify-between mt-1"
+              onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
+            >
+              <div className="flex items-center -ml-1.5">
+                <div
+                  onClick={(e) => { e.stopPropagation(); handleLikeWithThrottle(); }}
+                  className={`cursor-pointer transition-opacity ${
+                    isThrottled || isLikeLoading || isUnlikeLoading ? "opacity-50" : "opacity-100"
+                  }`}
+                  title={isThrottled ? "Подождите немного перед следующим лайком" : ""}
+                >
+                  <MetaInfo
+                    {...(likeByUser ? { fill: "#d91002", color: "#d91002" } : {})}
+                    count={likesCount}
+                    type="heart"
+                    Icon={Heart}
+                  />
+                </div>
+                <div onClick={(e) => { e.stopPropagation(); onCommentsOpen(); }} className="cursor-pointer">
+                  <MetaInfo count={commentsCount} Icon={MessageCircle} />
+                </div>
+                <RepostButton
+                  postId={id}
+                  repostedByUser={repostedByUser}
+                  repostCount={repostCount}
+                  post={post}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                {getEditedText({ isEdited: post.isEdited, updatedAt: post.updatedAt }) && (
+                  <p className="text-[9px] text-default-500">
+                    {getEditedText({ isEdited: post.isEdited, updatedAt: post.updatedAt })}
+                  </p>
+                )}
+                {cardFor === "current-post" && (
+                  <div className="text-xs text-default-400 flex items-center gap-1">
+                    <Eye size={13} />
+                    {viewsCount > 1000 ? `${(viewsCount / 1000).toFixed(1)}k` : viewsCount}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+        </div>
+      </div>
 
       {/* Delete confirmation modal */}
       <DeletePost

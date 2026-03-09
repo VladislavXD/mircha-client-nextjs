@@ -330,7 +330,7 @@ const CreatePost = () => {
       />
 
       {/* Toolbar: Formatting, Media Upload, Emoji Picker */}
-      <div className="flex justify-between">
+      <div className="flex flex-col lg:flex-row  justify-between">
         <PostEditorToolbar
           activeFormats={activeFormats}
           isLoading={isLoading}
@@ -344,7 +344,7 @@ const CreatePost = () => {
         <Button
           color="success"
           isLoading={isLoading}
-          className="flex-end relative rounded-full hover:-translate-y-1 px-12 shadow-xl after:content-[''] after:absolute after:rounded-full after:inset-0 after:bg-background/40 after:z-[-1] after:transition after:!duration-500 hover:after:scale-150 hover:after:opacity-0 transition-transform"
+          className="flex-end relative rounded-full hover:-translate-y-1 px-12 shadow-xl after:content-[''] after:absolute after:rounded-full after:inset-0 after:bg-background/40 after:z-[-1] after:transition after:!duration-500 hover:after:scale-150 hover:after:opacity-0 transition-transform w-max md:w-auto self-start"
           endContent={<IoMdCreate />}
           type="submit"
         >
