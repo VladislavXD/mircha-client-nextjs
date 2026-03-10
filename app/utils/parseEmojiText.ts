@@ -185,6 +185,9 @@ export const parseEmojiText = (text: string, emojiUrls: string[] = []): EmojiTex
     }
 
     // plain text chunk
+    // NOTE: if the "special token" at position i failed to parse (e.g. unclosed tag),
+    // nextTokenPos will equal i → chunk would be "", i wouldn't advance → infinite loop.
+    // Guard: always advance by at least 1 character.
     const nextTokenPos = (() => {
       const a = text.indexOf("[mention:", i);
       const b = text.indexOf("[emoji:", i);
@@ -194,7 +197,7 @@ export const parseEmojiText = (text: string, emojiUrls: string[] = []): EmojiTex
       const f = text.indexOf("<u>", i);
       const g = text.indexOf("<s>", i);
       const h = text.indexOf("<mark>", i);
-      const candidates = [a, b, c, d, e, f, g, h].filter((x) => x !== -1);
+      const candidates = [a, b, c, d, e, f, g, h].filter((x) => x !== -1 && x > i);
       return candidates.length ? Math.min(...candidates) : -1;
     })();
 
@@ -204,9 +207,15 @@ export const parseEmojiText = (text: string, emojiUrls: string[] = []): EmojiTex
         type: 'text',
         content: chunk,
       });
+    } else {
+      // Failsafe: token at position i failed to parse but nextTokenPos === i.
+      // Push the current character as plain text to guarantee progress.
+      segments.push({ type: 'text', content: text[i] });
     }
-    i = nextTokenPos === -1 ? text.length : nextTokenPos;
+    i = nextTokenPos === -1 ? text.length : nextTokenPos > i ? nextTokenPos : i + 1;
   }
 
   return segments;
 };
+
+
