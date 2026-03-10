@@ -16,15 +16,15 @@ import ErrorMessage from "../../ErrorMessage";
 import Mention from "../../inputs/Mention";
 import { useUpdatePost } from "@/src/features/post";
 
-// ===== Utils =====
-const EMOJI_MARKER_REGEX = /\[emoji:(\d+)\]/g;
+// NOTE: avoid module-level /g regex reuse with .exec() – always create fresh per call
+const EMOJI_MARKER_REGEX = () => /\[emoji:(\d+)\]/g;
 
 function normalizeEmojis(text: string, emojis: string[]) {
   const used: number[] = [];
 
   let m: RegExpExecArray | null;
-
-  while ((m = EMOJI_MARKER_REGEX.exec(text)) !== null) {
+  const re = EMOJI_MARKER_REGEX();
+  while ((m = re.exec(text)) !== null) {
     const idx = Number(m[1]);
     if (!Number.isNaN(idx) && emojis[idx] !== undefined && !used.includes(idx))
       used.push(idx);
@@ -33,7 +33,7 @@ function normalizeEmojis(text: string, emojis: string[]) {
   const map = new Map<number, number>();
   used.forEach((oldIdx, i) => map.set(oldIdx, i));
 
-  const newText = text.replace(EMOJI_MARKER_REGEX, (_, p1: string) => {
+  const newText = text.replace(EMOJI_MARKER_REGEX(), (_, p1: string) => {
     const oldIdx = Number(p1);
     const newIdx = map.get(oldIdx);
     return newIdx === undefined ? "" : `[emoji:${newIdx}]`;
@@ -47,7 +47,7 @@ function removeEmojiFromText(text: string, removedIndex: number) {
   // Удаляем первый маркер [emoji:removedIndex]
   let updated = text.replace(new RegExp(`\\[emoji:${removedIndex}\\]`), "");
   // Сдвигаем все > removedIndex на -1
-  updated = updated.replace(EMOJI_MARKER_REGEX, (match, p1) => {
+  updated = updated.replace(EMOJI_MARKER_REGEX(), (match, p1) => {
     const k = Number(p1);
     return k > removedIndex ? `[emoji:${k - 1}]` : match;
   });
@@ -140,7 +140,6 @@ const EditPostModal: React.FC<EditPostModalProps> = ({
 
 
   const [mention, setMention] = useState<string>("");
-  const [postValue, setPostValue] = useState<string>("");
   const [showHit, setShowHit] = useState<boolean>(false);
   const [atStartIndex, setAtStartIndex] = useState<number | null>(null);
 

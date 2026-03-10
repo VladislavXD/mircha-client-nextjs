@@ -8,6 +8,7 @@ import ClientProviders from "@/src/Providers/ClientProviders";
 import { getMessages } from "next-intl/server";
 import { Locale, routing } from "@/src/i18n/routing";
 import { notFound } from "next/navigation";
+import VisitorTracker from "@/app/api/checkClient/VisitorTracker";
 
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
 // const siteUrl = "https://mirchan.site/ru";
@@ -97,6 +98,7 @@ export default async function RootLayout({
         )}
       >
         <NextIntlClientProvider messages={messages} locale={locale}>
+          <VisitorTracker />
           <ClientProviders>{children}</ClientProviders>
         </NextIntlClientProvider>
       </body>

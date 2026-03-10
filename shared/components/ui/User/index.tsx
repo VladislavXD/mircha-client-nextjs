@@ -65,6 +65,7 @@ const User = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+
   const formatDate = (date: Date | undefined) => {
     if (!date) return "";
     return new Date(date).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });

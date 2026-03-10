@@ -3,6 +3,7 @@ import Posts from "../HomePage";
 
 
 
+
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
 const siteUrl = "https://mirchan.site/ru";
 const ogImage = "/images/mirchanLogo.png";
@@ -62,6 +63,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: "#000000",
 };
+
+
+
 
 export default function Home() {
   return ( <>
