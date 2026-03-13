@@ -38,6 +38,7 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
   repostCount = 0,
   showCount = true,
   post,
+  
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [comment, setComment] = useState('')
@@ -81,8 +82,12 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
   return (
     <>
       <button
+
         data-repost-button
-        onClick={handleRepost}
+        onClick={e=> {
+          e.stopPropagation() // Предотвращаем всплытие, чтобы не открывать пост
+          handleRepost()
+        }}
         onClickCapture={handleQuickRepost}
         disabled={isPending}
         className={`
@@ -97,7 +102,7 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
         <Repeat 
           size={24}
           className={`
-            w-6 h-6 stroke-1 transition-colors
+            w-5 h-5 sm:w-5 sm:h-6 stroke-1 transition-colors
             ${repostedByUser ? 'text-green-500' : 'text-default-600'}
           `}
         />

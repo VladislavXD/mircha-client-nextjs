@@ -43,6 +43,8 @@ function sortComments(comments: CommentData[], sortKey: SortKey): CommentData[] 
 }
 
 const CurrentPost = () => {
+
+
   const { id: postId } = useParams<{ id: string }>();
   const { data: post, isLoading } = usePost(postId);
   const queryClient = useQueryClient();
@@ -75,6 +77,9 @@ const CurrentPost = () => {
     }
   };
 
+
+  
+
   return (
     <div className="flex flex-col">
       <GoBack />
@@ -100,6 +105,8 @@ const CurrentPost = () => {
         <Select
           className="max-w-[160px]"
           placeholder="Сортировать по"
+          variant="flat"
+          size="sm"
           defaultSelectedKeys={["newest"]}
           disallowEmptySelection
           isRequired
