@@ -2,7 +2,7 @@ import React from 'react'
 import { IconType } from 'react-icons';
 
 type Props = {
-    count: number;
+    count?: number;
     Icon: IconType
     type?: 'heart' | 'comment' | 'sidebar' | 'profile'
 }
@@ -19,14 +19,14 @@ const MetaInfo = ({
         <Icon
           className={`
             text-default-600
-            w-5 h-5
-            sm:w-6 sm:h-6
+            w-4 h-4
+            sm:w-5 sm:h-5
             stroke-1
           `}
           {...props}
         />
       </div>
-      {count > 0 && (
+      {count !== undefined && count > 0 && (
         <p className={`font-normal text-default-600 text-xs sm:text-sm ${type === 'heart' ? 'text-red-500' : ''}`}>{count}</p>
       )}
     </div>

@@ -8,7 +8,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Eye, Forward } from "lucide-react";
 import { MessageCircle } from "lucide-react";
 
 import { useDeletePost } from "../hooks/usePostMutations";
@@ -30,6 +30,7 @@ import { timeAgo } from "@/src/utils/timeAgo";
 import { RepostButton } from "./RepostButton";
 import { CommentsModal } from "./comments";
 import { getEditedText } from "../utils/editedText.utils";
+import ShareDropdown from "./shareDropdown";
 
 type Props = {
   post: Post;
@@ -422,7 +423,7 @@ const PostCard = ({
               className="flex items-center justify-between mt-1"
               onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
             >
-              <div className="flex items-center -ml-1.5">
+              <div className="flex items-center -ml-1.5 gap-2">
                 <div
                   onClick={(e) => { e.stopPropagation(); handleLikeWithThrottle(); }}
                   className={`cursor-pointer transition-opacity ${
@@ -445,8 +446,14 @@ const PostCard = ({
                   repostedByUser={repostedByUser}
                   repostCount={repostCount}
                   post={post}
+                  
                 />
+
+               
+                  <ShareDropdown linkToCopy={`https://mirchan.site/posts/${id}`} />
+
               </div>
+              {/* Просмотры */}
               <div className="flex items-center gap-2">
                 {getEditedText({ isEdited: post.isEdited, updatedAt: post.updatedAt }) && (
                   <p className="text-[9px] text-default-500">
