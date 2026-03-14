@@ -14,36 +14,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const post = await postService.getPostById(postId);
     const contentStr = typeof post.content === "string" ? post.content : "";
     const plainText = contentStr.replace(/<[^>]*>?/gm, "").trim();
-    const description = plainText.length > 150 ? `${plainText.substring(0, 150)}...` : plainText;
-
+    const description =
+      plainText.length > 150 ? `${plainText.substring(0, 150)}...` : plainText;
 
     const authorName = post.author?.name || "пользователя";
     const pageTitle = `Пост от ${authorName} | Mirchan`;
 
-		
-    let images;
-    if (post.media?.length) {
-      let rawUrl = post.media[0].url;
+    const isVideo = post.media?.[0]?.type.includes("VIDEO")
 
-      if (
-        rawUrl.includes("res.cloudinary.com") &&
-        rawUrl.includes("/video/upload/") &&
-        rawUrl.endsWith(".mp4")
-      ) {
-        rawUrl = rawUrl
-          .replace("/video/upload/", "/video/upload/so_1,f_jpg/")
-          .replace(".mp4", ".jpg");
-      }
-
-      images = [
-        {
-          url: rawUrl,
-          width: 1200,
-          height: 630,
+    if (isVideo) {
+      return {
+        title: pageTitle,
+        description,
+        openGraph: {
+          title: pageTitle,
+          description,
+          type: "article",
+          url: `${siteUrl}/posts/${postId}`,
+          videos: post.media?.map((m) => ({
+            url: m.url,
+            type: m.type,
+          })),
         },
-      ];
+        twitter: {
+          card: "summary_large_image",
+          title: pageTitle,
+          description,
+          images: post.media?.map((m) => ({
+            url: m.url,
+            width: m.width,
+            height: m.height,
+            type: m.type,
+          })),
+        },
+      };
     }
-
     return {
       title: pageTitle,
       description,
@@ -52,13 +57,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         type: "article",
         url: `${siteUrl}/posts/${postId}`,
-        images,
+        
+        images: post?.media?.map(m=> ({
+          url: m.url,
+          width: m.width,
+          height: m.height,
+          type: m.type
+        }))
       },
       twitter: {
         card: "summary_large_image",
         title: pageTitle,
         description,
-        images,
+        images: post.media?.map((m) => ({
+            url: m.url,
+            width: m.width,
+            height: m.height,
+            type: m.type,
+          })),
       },
     };
   } catch (error) {
