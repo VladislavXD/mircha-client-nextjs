@@ -28,7 +28,7 @@ const VideoPlayerItem = ({ src, isSingle }: { src: string; isSingle: boolean }) 
   }, [inView]);
 
   return (
-    <div className="relative w-auto h-full flex justify-center group" ref={ref}>
+    <div className={`relative flex justify-center group ${isSingle ? "w-fit max-w-full h-auto" : "w-auto h-full"}`} ref={ref}>
       <video
         ref={videoRef}
         src={src}
@@ -41,7 +41,7 @@ const VideoPlayerItem = ({ src, isSingle }: { src: string; isSingle: boolean }) 
             videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause();
           }
         }}
-        className={`${isSingle ? "w-full h-auto max-h-[45vh] sm:max-h-[55vh] object-cover" : "w-auto h-full object-contain min-w-[140px]"} cursor-pointer rounded-[16px]`}
+        className={`${isSingle ? "w-auto max-w-full h-auto max-h-[45vh] sm:max-h-[55vh] object-contain" : "w-auto h-full object-contain min-w-[140px]"} cursor-pointer rounded-[16px]`}
         preload="metadata"
       />
       <button 
@@ -91,16 +91,16 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
   const renderSpoiler = (item: PostMedia, index: number, isSingle: boolean) => (
     <button 
       type="button"
-      className={`${isSingle ? "w-full min-h-[200px] h-auto aspect-square sm:aspect-[4/3] max-h-[55vh]" : "w-full h-full"} relative flex items-center justify-center bg-neutral-200 dark:bg-neutral-800 overflow-hidden cursor-pointer group active:scale-[0.98] active:opacity-90 transition-all duration-200`}
+      className={`${isSingle ? "w-fit max-w-full min-w-[200px] h-auto max-h-[55vh]" : "w-full h-full"} relative flex items-center justify-center bg-neutral-200 dark:bg-neutral-800 overflow-hidden cursor-pointer group active:scale-[0.98] active:opacity-90 transition-all duration-200`}
       onClick={(e) => {
          e.stopPropagation();
          handleReveal(index);
       }}
     >
       {item.type === "image" ? (
-         <img src={item.url} alt="" className={`${isSingle ? "w-full h-auto max-h-[55vh]" : "w-full h-full"} object-cover blur-[30px] opacity-80 group-hover:opacity-100 transition-opacity`} />
+         <img src={item.url} alt="" className={`${isSingle ? "w-auto max-w-full h-auto max-h-[55vh]" : "w-full h-full"} object-contain blur-[30px] opacity-80 group-hover:opacity-100 transition-opacity`} />
       ) : (
-         <video src={item.url} muted className={`${isSingle ? "w-full h-auto max-h-[55vh]" : "w-full h-full"} object-cover blur-[30px] opacity-80 group-hover:opacity-100 transition-opacity`} />
+         <video src={item.url} muted className={`${isSingle ? "w-auto max-w-full h-auto max-h-[55vh]" : "w-full h-full"} object-contain blur-[30px] opacity-80 group-hover:opacity-100 transition-opacity`} />
       )}
       <div className="absolute z-10 px-4 py-2.5 bg-black/60 backdrop-blur-md rounded-xl text-sm font-medium text-white shadow-lg transition-transform group-hover:scale-105">
         Нажмите чтобы показать
@@ -110,7 +110,7 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
 
   const renderMedia = (item: PostMedia, index: number) => {
     const isSingle = !hasMultiple;
-    const containerClasses = `relative flex items-center justify-center overflow-hidden rounded-[16px] border border-neutral-200 dark:border-neutral-800/80 bg-neutral-100 dark:bg-neutral-900/50 ${isSingle ? "w-full h-auto line-height-0 max-h-[45vh] sm:max-h-[55vh]" : "w-auto h-full"}`;
+    const containerClasses = `relative flex items-center justify-center overflow-hidden rounded-[16px] border border-neutral-200 dark:border-neutral-800/80 bg-neutral-100 dark:bg-neutral-900/50 ${isSingle ? "w-fit max-w-full h-auto line-height-0 max-h-[45vh] sm:max-h-[55vh]" : "w-auto h-full"}`;
 
     if (item.spoiler && !revealed.has(index)) {
       return (
@@ -133,7 +133,7 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
           <img 
             src={item.url} 
             alt={`Media ${index + 1}`} 
-            className={`${isSingle ? "w-full h-auto max-h-[45vh] sm:max-h-[55vh] object-cover" : "w-auto h-full object-contain min-w-[140px]"} rounded-[16px]`}
+            className={`${isSingle ? "w-auto max-w-full h-auto max-h-[45vh] sm:max-h-[55vh] object-contain block" : "w-auto h-full object-contain min-w-[140px]"} rounded-[16px]`}
             loading={index <= 1 ? "eager" : "lazy"} 
           />
         </button>
