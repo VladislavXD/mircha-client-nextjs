@@ -20,10 +20,10 @@ interface SettingsSidebarProps {
 export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("Settings");
-	const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/)
-	const locale = localeMatch?.[1]
+  const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/);
+  const locale = localeMatch?.[1];
 
-	const prefix = locale ? `/${locale}` : ''
+  const prefix = locale ? `/${locale}` : "";
   const settingsNavItems: SettingsNavItem[] = [
     {
       href: `${prefix}/dashboard/settings/profile`,
@@ -66,6 +66,7 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
   // Определяем активный путь (убираем locale prefix)
   const isActive = (href: string) => {
     const cleanPathname = pathname.replace(/^\/(ru|en)/, "");
+
     return cleanPathname === href || cleanPathname.startsWith(href + "/");
   };
 
@@ -79,13 +80,12 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
             const active = isActive(item.href);
 
             return (
-              
-                <Card
-                  key={item.href}
-                  className={active ? "border-primary" : "border-default-200"}
-                >
-                  <CardBody
-                    className={`
+              <Card
+                key={item.href}
+                className={active ? "border-primary" : "border-default-200"}
+              >
+                <CardBody
+                  className={`
 								p-0
 								${
                   active
@@ -93,11 +93,10 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
                     : "border-default-200 hover:border-default-300 hover:bg-default-50"
                 }
 							`}
-                  >
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`
+                >
+                  <Link
+                    key={item.href}
+                    className={`
 									flex items-center gap-4 p-4 rounded-xl
 									transition-all duration-150
 									border-2
@@ -107,26 +106,26 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
                       : "border-default-200 hover:border-default-300 hover:bg-default-50"
                   }
 								`}
+                    href={item.href}
+                  >
+                    <div
+                      className={`${active ? "text-primary" : "text-default-600"}`}
                     >
+                      {item.icon}
+                    </div>
+                    <div className="flex-1">
                       <div
-                        className={`${active ? "text-primary" : "text-default-600"}`}
+                        className={`text-base font-semibold ${active ? "text-primary" : "text-default-900"}`}
                       >
-                        {item.icon}
+                        {t(item.labelKey)}
                       </div>
-                      <div className="flex-1">
-                        <div
-                          className={`text-base font-semibold ${active ? "text-primary" : "text-default-900"}`}
-                        >
-                          {t(item.labelKey)}
-                        </div>
-                        <div className="text-sm text-default-500 mt-1">
-                          {t(item.descKey)}
-                        </div>
+                      <div className="text-sm text-default-500 mt-1">
+                        {t(item.descKey)}
                       </div>
-                    </Link>
-                  </CardBody>
-                </Card>
-              
+                    </div>
+                  </Link>
+                </CardBody>
+              </Card>
             );
           })}
         </nav>
@@ -146,7 +145,6 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
             return (
               <Link
                 key={item.href}
-                href={item.href}
                 className={`
 									flex items-start gap-3 px-3 py-3 rounded-lg
 									transition-colors duration-150
@@ -156,6 +154,7 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
                       : "hover:bg-default-100 text-default-700"
                   }
 								`}
+                href={item.href}
               >
                 <div
                   className={`mt-0.5 ${active ? "text-primary" : "text-default-500"}`}

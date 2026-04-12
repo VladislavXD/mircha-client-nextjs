@@ -1,9 +1,11 @@
 "use client";
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useInView } from 'react-intersection-observer';
-import { Volume2, VolumeX } from 'lucide-react';
-import { BlurredBackground } from './BlurredBackground';
-import { useVideoState } from '../hooks/useVideoState';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useInView } from "react-intersection-observer";
+import { Volume2, VolumeX } from "lucide-react";
+
+import { useVideoState } from "../hooks/useVideoState";
+
+import { BlurredBackground } from "./BlurredBackground";
 
 type Props = {
   src: string;
@@ -13,18 +15,18 @@ type Props = {
   onLoadedMetadata?: (ratio: number) => void;
 };
 
-export const VideoPlayer: React.FC<Props> = ({ 
-  src, 
-  isSpoilerRevealed, 
-  videoRef: externalRef, 
-  aspectRatio, 
-  onLoadedMetadata 
+export const VideoPlayer: React.FC<Props> = ({
+  src,
+  isSpoilerRevealed,
+  videoRef: externalRef,
+  aspectRatio,
+  onLoadedMetadata,
 }) => {
   const internalRef = useRef<HTMLVideoElement>(null);
   const activeRef = externalRef || internalRef;
   const containerRef = useRef<HTMLDivElement>(null);
   const { getVideoState, setVideoMuted } = useVideoState();
-  
+
   const [isMuted, setIsMuted] = useState(() => getVideoState(src).isMuted);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -34,12 +36,16 @@ export const VideoPlayer: React.FC<Props> = ({
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
   const { ref: inViewRef, inView } = useInView({ threshold: 0.5 });
 
-  const setRefs = useCallback((element: HTMLVideoElement | null) => {
-    if (activeRef.current !== element) {
-      (activeRef as React.MutableRefObject<HTMLVideoElement | null>).current = element;
-    }
-    inViewRef(element);
-  }, [activeRef, inViewRef]);
+  const setRefs = useCallback(
+    (element: HTMLVideoElement | null) => {
+      if (activeRef.current !== element) {
+        (activeRef as React.MutableRefObject<HTMLVideoElement | null>).current =
+          element;
+      }
+      inViewRef(element);
+    },
+    [activeRef, inViewRef],
+  );
 
   // Автоплей при появлении в viewport
   useEffect(() => {
@@ -61,25 +67,36 @@ export const VideoPlayer: React.FC<Props> = ({
         (document as any).mozFullScreenElement ||
         (document as any).msFullscreenElement
       );
+
       setIsFullscreen(isNowFullscreen);
     };
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("msfullscreenchange", handleFullscreenChange);
 
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange,
+      );
+      document.removeEventListener(
+        "mozfullscreenchange",
+        handleFullscreenChange,
+      );
+      document.removeEventListener(
+        "msfullscreenchange",
+        handleFullscreenChange,
+      );
     };
   }, []);
 
   // Обновление состояния воспроизведения
   useEffect(() => {
     const video = activeRef.current;
+
     if (!video) return;
 
     const handlePlay = () => setIsPlaying(true);
@@ -89,20 +106,21 @@ export const VideoPlayer: React.FC<Props> = ({
       setDuration(video.duration);
       if (onLoadedMetadata && video.videoWidth && video.videoHeight) {
         const ratio = video.videoWidth / video.videoHeight;
+
         onLoadedMetadata(ratio);
       }
     };
 
-    video.addEventListener('play', handlePlay);
-    video.addEventListener('pause', handlePause);
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
 
     return () => {
-      video.removeEventListener('play', handlePlay);
-      video.removeEventListener('pause', handlePause);
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
   }, [activeRef, onLoadedMetadata]);
 
@@ -121,6 +139,7 @@ export const VideoPlayer: React.FC<Props> = ({
     };
 
     resetTimeout();
+
     return () => {
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
@@ -132,6 +151,7 @@ export const VideoPlayer: React.FC<Props> = ({
     e.stopPropagation();
     if (activeRef.current) {
       const newMuted = !isMuted;
+
       activeRef.current.muted = newMuted;
       setIsMuted(newMuted);
       setVideoMuted(src, newMuted);
@@ -152,6 +172,7 @@ export const VideoPlayer: React.FC<Props> = ({
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (activeRef.current) {
       const time = parseFloat(e.target.value);
+
       activeRef.current.currentTime = time;
       setCurrentTime(time);
     }
@@ -173,7 +194,7 @@ export const VideoPlayer: React.FC<Props> = ({
           await (containerRef.current as any).msRequestFullscreen();
         }
       } catch (err) {
-        console.error('Ошибка входа в полноэкранный режим:', err);
+        console.error("Ошибка входа в полноэкранный режим:", err);
       }
     } else {
       togglePlayPause(e);
@@ -193,13 +214,14 @@ export const VideoPlayer: React.FC<Props> = ({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={`relative ${isFullscreen ? 'w-full h-full bg-black' : 'w-full h-full'} flex items-center justify-center`}
+      className={`relative ${isFullscreen ? "w-full h-full bg-black" : "w-full h-full"} flex items-center justify-center`}
       onClick={handleVideoClick}
       onMouseMove={handleMouseMove}
     >
@@ -208,60 +230,72 @@ export const VideoPlayer: React.FC<Props> = ({
       {/* Основное видео */}
       <video
         ref={setRefs}
-        src={src}
-        className="relative z-10 max-w-full max-h-full object-contain cursor-pointer"
-        preload="metadata"
-        muted={isMuted}
         loop
         playsInline
+        className="relative z-10 max-w-full max-h-full object-contain cursor-pointer"
+        muted={isMuted}
+        preload="metadata"
+        src={src}
       />
-      
+
       {/* Кнопка звука в preview */}
       {isSpoilerRevealed && !isFullscreen && (
         <button
-          onClick={toggleMute}
-          className="absolute top-2 right-2 z-20 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm transition-colors"
           aria-label={isMuted ? "Включить звук" : "Выключить звук"}
+          className="absolute top-2 right-2 z-20 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm transition-colors"
+          onClick={toggleMute}
         >
-          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          {isMuted ? (
+            <VolumeX className="w-5 h-5" />
+          ) : (
+            <Volume2 className="w-5 h-5" />
+          )}
         </button>
       )}
 
       {/* Кастомные контролы в fullscreen */}
       {isFullscreen && (
-        <div 
+        <div
           className={`absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 transition-opacity duration-300 ${
-            showControls ? 'opacity-100' : 'opacity-0'
+            showControls ? "opacity-100" : "opacity-0"
           }`}
         >
           {/* Прогресс бар */}
           <input
-            type="range"
-            min="0"
-            max={duration || 0}
-            value={currentTime}
-            onChange={handleSeek}
             className="w-full h-1 mb-4 appearance-none bg-white/30 rounded-full cursor-pointer 
                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white 
                      [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full 
                      [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
+            max={duration || 0}
+            min="0"
+            type="range"
+            value={currentTime}
+            onChange={handleSeek}
           />
 
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button
-                onClick={togglePlayPause}
-                className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
                 aria-label={isPlaying ? "Пауза" : "Воспроизвести"}
+                className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
+                onClick={togglePlayPause}
               >
                 {isPlaying ? (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                  <svg
+                    className="w-6 h-6"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                   </svg>
                 ) : (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
+                  <svg
+                    className="w-6 h-6"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
                   </svg>
                 )}
               </button>
@@ -272,11 +306,15 @@ export const VideoPlayer: React.FC<Props> = ({
             </div>
 
             <button
-              onClick={toggleMute}
-              className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
               aria-label={isMuted ? "Включить звук" : "Выключить звук"}
+              className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
+              onClick={toggleMute}
             >
-              {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+              {isMuted ? (
+                <VolumeX className="w-6 h-6" />
+              ) : (
+                <Volume2 className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>

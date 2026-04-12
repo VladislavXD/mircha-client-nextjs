@@ -48,8 +48,8 @@
 //   MdInsertDriveFile,
 //   MdDownload,
 // } from 'react-icons/md'
-// import { 
-//   useGetAdminMediaQuery, 
+// import {
+//   useGetAdminMediaQuery,
 //   useDeleteAdminMediaMutation,
 //   type AdminMediaFile,
 //   type MediaFilter,
@@ -66,12 +66,12 @@
 //     page: 1,
 //     limit: 10,
 //   })
-  
+
 //   // Состояние UI
 //   const [searchTerm, setSearchTerm] = useState('')
 //   const [selectedMedia, setSelectedMedia] = useState<AdminMediaFile | null>(null)
 //   const [isFiltersVisible, setIsFiltersVisible] = useState(false)
-  
+
 //   // Модалки
 //   const { isOpen: isViewOpen, onOpen: onViewOpen, onClose: onViewClose } = useDisclosure()
 //   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure()
@@ -212,7 +212,7 @@
 //                       label="Тип файла"
 //                       placeholder="Все типы"
 //                       selectedKeys={filters.type ? [filters.type] : []}
-//                       onSelectionChange={(keys) => 
+//                       onSelectionChange={(keys) =>
 //                         handleFilterChange('type', Array.from(keys)[0] || undefined)
 //                       }
 //                     >
@@ -351,7 +351,7 @@
 //                               <MdVisibility />
 //                             </Button>
 //                           </Tooltip>
-                          
+
 //                           <Tooltip content="Скачать">
 //                             <Button
 //                               size="sm"
@@ -362,7 +362,7 @@
 //                               <MdDownload />
 //                             </Button>
 //                           </Tooltip>
-                          
+
 //                           <Dropdown>
 //                             <DropdownTrigger>
 //                               <Button
@@ -505,7 +505,7 @@
 //                         </CardBody>
 //                       </Card>
 //                     )}
-                    
+
 //                     {selectedMedia.reply && (
 //                       <Card>
 //                         <CardBody className="py-2">

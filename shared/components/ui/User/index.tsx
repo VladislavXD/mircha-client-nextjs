@@ -1,7 +1,11 @@
-import { Avatar, Badge, User as NextUser } from "@heroui/react";
 import React, { useState } from "react";
-import SmartTooltip from "../SmartTooltip";
-import { useOnlineStatus } from "@/src/features/chat";
+
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserProfileModal } from "@/src/features/user/components";
 
 type Props = {
@@ -60,15 +64,22 @@ const User = ({
 }: Props) => {
   const truncateText = (text: string, maxLength: number = 80) => {
     if (text.length <= maxLength) return text;
+
     return text.substring(0, maxLength) + "...";
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const canFollow =
+    showFollowBadge && !!onFollowToggle && currentUserId !== userId;
 
   const formatDate = (date: Date | undefined) => {
     if (!date) return "";
-    return new Date(date).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    return new Date(date).toLocaleDateString("ru-RU", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   const tooltipDescription = bio || description || "Нет описания";
@@ -78,7 +89,13 @@ const User = ({
       {/* Обложка */}
       <div className="relative h-20 w-full">
         {backgroundUrl ? (
-          <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
             <source src={backgroundUrl} type="video/mp4" />
           </video>
         ) : (
@@ -91,14 +108,22 @@ const User = ({
       <div className="px-4 -mt-8 flex items-end justify-between">
         <div className="relative">
           {avatarFrameUrl && avatarFrameUrl.trim() !== "" && (
-            <div className="absolute inset-0 w-full h-full pointer-events-none select-none z-10" style={{ backgroundImage: `url(${avatarFrameUrl})`, backgroundSize: 'auto 250%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+            <div
+              className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+              style={{
+                backgroundImage: `url(${avatarFrameUrl})`,
+                backgroundSize: "auto 250%",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
+            />
           )}
-          <Avatar
-            isBordered
-            color={isOnline ? "success" : "default"}
-            src={avatarUrl || "/default-avatar.png"}
-            className="w-16 h-16 ring-2 ring-[#101010]"
-          />
+          <Avatar className="w-16 h-16 ring-2 ring-[#101010]">
+            <AvatarImage alt={name} src={avatarUrl || "/default-avatar.png"} />
+            <AvatarFallback>
+              {name?.charAt(0)?.toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
           {/* Онлайн-метка */}
           {isOnline && (
             <span className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[#101010] z-20" />
@@ -106,14 +131,18 @@ const User = ({
         </div>
 
         {/* Кнопка подписки — справа */}
-        {onFollowToggle && (
+        {canFollow && onFollowToggle && (
           <button
-            onClick={(e) => { e.stopPropagation(); e.preventDefault(); onFollowToggle(); }}
             className={`mb-1 px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
               isFollowing
                 ? "border-white/20 text-white/80 hover:border-red-500/60 hover:text-red-400 bg-white/5"
                 : "border-transparent bg-white text-black hover:bg-white/90"
             }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onFollowToggle();
+            }}
           >
             {isFollowing ? "Отписаться" : "Подписаться"}
           </button>
@@ -125,8 +154,18 @@ const User = ({
         <div className="flex items-center gap-2">
           {usernameFrameUrl && usernameFrameUrl.trim() !== "" ? (
             <div className="relative inline-block">
-              <div className="absolute inset-0 w-full h-full pointer-events-none select-none z-10" style={{ backgroundImage: `url(${usernameFrameUrl})`, backgroundRepeat: "repeat-x", backgroundSize: "auto 100%", backgroundPosition: "left center" }} />
-              <span className="relative z-0 px-1 text-white font-bold text-base">{name}</span>
+              <div
+                className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+                style={{
+                  backgroundImage: `url(${usernameFrameUrl})`,
+                  backgroundRepeat: "repeat-x",
+                  backgroundSize: "auto 100%",
+                  backgroundPosition: "left center",
+                }}
+              />
+              <span className="relative z-0 px-1 text-white font-bold text-base">
+                {name}
+              </span>
             </div>
           ) : (
             <span className="text-white font-bold text-base">{name}</span>
@@ -138,16 +177,30 @@ const User = ({
 
         {/* Био */}
         {tooltipDescription && tooltipDescription !== "Нет описания" && (
-          <p className="text-white/60 text-xs leading-relaxed mt-1">{truncateText(tooltipDescription, 90)}</p>
+          <p className="text-white/60 text-xs leading-relaxed mt-1">
+            {truncateText(tooltipDescription, 90)}
+          </p>
         )}
 
         {/* Дата регистрации */}
         {createdAt && (
           <div className="flex items-center gap-1 mt-1.5">
-            <svg className="w-3 h-3 text-white/30" fill="none" strokeWidth={2} viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <svg
+              className="w-3 h-3 text-white/30"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
-            <span className="text-white/30 text-[10px]">С нами с {formatDate(createdAt)}</span>
+            <span className="text-white/30 text-[10px]">
+              С нами с {formatDate(createdAt)}
+            </span>
           </div>
         )}
       </div>
@@ -158,11 +211,15 @@ const User = ({
       {/* Статистика */}
       <div className="px-4 pb-4 flex gap-5">
         <div>
-          <span className="text-white font-bold text-sm">{followersCount.toLocaleString()}</span>
+          <span className="text-white font-bold text-sm">
+            {followersCount.toLocaleString()}
+          </span>
           <span className="text-white/40 text-xs ml-1">подписчиков</span>
         </div>
         <div>
-          <span className="text-white font-bold text-sm">{followingCount.toLocaleString()}</span>
+          <span className="text-white font-bold text-sm">
+            {followingCount.toLocaleString()}
+          </span>
           <span className="text-white/40 text-xs ml-1">подписок</span>
         </div>
       </div>
@@ -170,59 +227,77 @@ const User = ({
   );
 
   // ====================== AVATAR-ONLY ======================
+
   if (variant === "avatar-only") {
-    const canFollow = showFollowBadge && !!onFollowToggle && currentUserId !== userId;
     return (
       <>
         <div
           className="relative inline-flex shrink-0 cursor-pointer"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsModalOpen(true); }}
+          role="button"
+          tabIndex={0}
           title={name || undefined}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsModalOpen(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }
+          }}
         >
-          <Badge
-            color={isOnline ? "success" : "default"}
-            placement="bottom-left"
-            shape="circle"
-            content=""
-            isInvisible={!isOnline}
-            className="border-2 border-black"
-          >
-            <Avatar
-              isBordered
-              src={avatarUrl || "/default-avatar.png"}
-              className={avatarClassName || "w-10 h-10"}
-            />
-          </Badge>
-          {canFollow && (
-            <button
-              onClick={(e) => { e.stopPropagation(); e.preventDefault(); onFollowToggle!(); }}
-              title={isFollowing ? 'Отписаться' : 'Подписаться'}
-              className={`absolute -bottom-1 -right-1 z-10 w-5 h-5 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold leading-none transition-colors ${
-                isFollowing ? 'bg-default-400 hover:bg-default-500 text-black' : 'bg-white hover:bg-gray-100 text-black'
-              }`}
-            >
-              +
-            </button>
-          )}
+          <div className="relative">
+            <Avatar className={`${avatarClassName || "w-10 h-10"} `}>
+              <AvatarImage
+                alt={name}
+                src={avatarUrl || "/default-avatar.png"}
+              />
+              <AvatarFallback>
+                {name?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* {isOnline && (
+              <span className="absolute bottom-0 right-0 block w-3 h-3 rounded-full bg-green-500 border-2 border-black" />
+            )} */}
+
+            {canFollow && !isFollowing && (
+              <button
+                className="absolute -bottom-[2px] -right-[2px] z-10 w-4 h-4 rounded-full border-[1.5px] border-[#101010] bg-white flex items-center justify-center text-[12px] font-bold text-black hover:bg-neutral-200 transition-colors"
+                title="Подписаться"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  onFollowToggle!();
+                }}
+              >
+                <span className="relative -top-[0.5px] leading-none">+</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <UserProfileModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          userId={userId}
-          name={name}
-          avatarUrl={avatarUrl}
-          description={description}
-          bio={bio}
-          backgroundUrl={backgroundUrl}
           avatarFrameUrl={avatarFrameUrl}
-          usernameFrameUrl={usernameFrameUrl}
+          avatarUrl={avatarUrl}
+          backgroundUrl={backgroundUrl}
+          bio={bio}
+          createdAt={createdAt}
+          currentUserId={currentUserId}
+          description={description}
           followersCount={followersCount}
           followingCount={followingCount}
           isFollowing={isFollowing}
           isOnline={isOnline}
-          createdAt={createdAt}
+          isOpen={isModalOpen}
+          name={name}
           status={status}
+          userId={userId}
+          usernameFrameUrl={usernameFrameUrl}
+          onClose={() => setIsModalOpen(false)}
           onFollowToggle={onFollowToggle}
         />
       </>
@@ -232,44 +307,115 @@ const User = ({
   // ====================== NAME-ONLY ======================
   if (variant === "name-only") {
     return (
-      <SmartTooltip content={tooltipContent} className="z-50" placement="top" showArrow>
-        <span className={`font-semibold truncate hover:underline cursor-pointer ${nameClassName || "text-sm text-white"}`}>
-          {usernameFrameUrl && usernameFrameUrl.trim() !== "" ? (
-            <span className="relative inline-block">
-              <span className="absolute inset-0 w-full h-full pointer-events-none select-none z-10" style={{ backgroundImage: `url(${usernameFrameUrl})`, backgroundRepeat: "repeat-x", backgroundSize: "auto 200%", backgroundPosition: "left center" }} />
-              <span className="relative z-0 px-1">{name}</span>
-            </span>
-          ) : name}
-        </span>
-      </SmartTooltip>
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <span
+            className={`font-semibold truncate hover:underline cursor-pointer ${nameClassName || "text-sm text-white"}`}
+          >
+            {usernameFrameUrl && usernameFrameUrl.trim() !== "" ? (
+              <span className="relative inline-block">
+                <span
+                  className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+                  style={{
+                    backgroundImage: `url(${usernameFrameUrl})`,
+                    backgroundRepeat: "repeat-x",
+                    backgroundSize: "auto 200%",
+                    backgroundPosition: "left center",
+                  }}
+                />
+                <span className="relative z-0 px-1">{name}</span>
+              </span>
+            ) : (
+              name
+            )}
+          </span>
+        </HoverCardTrigger>
+        <HoverCardContent
+          className="w-[300px] p-0 border-none bg-transparent shadow-none z-50"
+          side="top"
+        >
+          {tooltipContent}
+        </HoverCardContent>
+      </HoverCard>
     );
   }
 
   // ====================== DEFAULT ======================
+
   return (
-    <SmartTooltip content={tooltipContent} className="z-50" placement="top" showArrow>
-      <div className="relative inline-block items-start">
-        <Badge color={isOnline ? "success" : "default"} placement="bottom-right" shape="circle" content="" className="mb-1">
-          <></>
-        </Badge>
-        <NextUser
-          name={name}
-          className={className}
-          description={
-            description ? (
-              usernameFrameUrl && usernameFrameUrl.trim() !== "" ? (
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 w-full h-full pointer-events-none select-none z-10" style={{ backgroundImage: `url(${usernameFrameUrl})`, backgroundRepeat: "repeat-x", backgroundSize: "auto 200%", backgroundPosition: "left center" }} />
-                  <span className="relative z-0 px-1">{description}</span>
-                </div>
-              ) : description
-            ) : undefined
-          }
-          classNames={{ name: nameClassName || undefined, description: descriptionClassName || undefined }}
-          avatarProps={{ isBordered: true, src: avatarUrl || "/default-avatar.png", className: avatarClassName || undefined }}
-        />
-      </div>
-    </SmartTooltip>
+    <HoverCard>
+      <HoverCardTrigger asChild>
+        <div
+          className={`relative inline-flex items-center gap-3 cursor-pointer ${className}`}
+        >
+          <div className="relative">
+            <Avatar
+              className={`${avatarClassName || "w-10 h-10"} ${isOnline ? "ring-2 ring-green-500" : ""}`}
+            >
+              <AvatarImage
+                alt={name}
+                src={avatarUrl || "/default-avatar.png"}
+              />
+              <AvatarFallback>
+                {name?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            {isOnline && (
+              <span className="absolute bottom-0 right-0 block w-2.5 h-2.5 rounded-full bg-green-500 border border-[#101010]" />
+            )}
+            {canFollow && !isFollowing && (
+              <button
+                className="absolute -bottom-[2px] -right-[2px] z-10 w-4 h-4 rounded-full border-[1.5px] border-[#101010] bg-white flex items-center justify-center text-[12px] font-bold text-black hover:bg-neutral-200 transition-colors"
+                title="Подписаться"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  onFollowToggle();
+                }}
+              >
+                <span className="relative -top-[0.5px] leading-none">+</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-col">
+            <span
+              className={`font-medium ${nameClassName || "text-sm text-foreground"}`}
+            >
+              {name}
+            </span>
+            {description && (
+              <span
+                className={descriptionClassName || "text-xs text-default-500"}
+              >
+                {usernameFrameUrl && usernameFrameUrl.trim() !== "" ? (
+                  <div className="relative inline-block">
+                    <div
+                      className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+                      style={{
+                        backgroundImage: `url(${usernameFrameUrl})`,
+                        backgroundRepeat: "repeat-x",
+                        backgroundSize: "auto 200%",
+                        backgroundPosition: "left center",
+                      }}
+                    />
+                    <span className="relative z-0 px-1">{description}</span>
+                  </div>
+                ) : (
+                  description
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent
+        className="w-[300px] p-0 border-none bg-transparent shadow-none z-50"
+        side="top"
+      >
+        {tooltipContent}
+      </HoverCardContent>
+    </HoverCard>
   );
 };
 

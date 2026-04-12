@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BOT_TOKEN = 'REVOKED_TELEGRAM_BOT_TOKEN';
-const CHAT_ID = '6463185441';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const CHAT_ID = process.env.TELEGRAM_CHAT_ID_CHECKCLIENT;
 
 async function sendTelegramMessage(text: string) {
-	const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML' }),
-	});
-	if (!res.ok) {
-		const err = await res.json().catch(() => ({}));
-		console.error('Telegram error:', err);
-	}
+  if (!BOT_TOKEN || !CHAT_ID) {
+    return;
+  }
+
+  const res = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: "HTML" }),
+    },
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+
+    console.error("Telegram error:", err);
+  }
 }
 
 /**
@@ -22,40 +31,41 @@ async function sendTelegramMessage(text: string) {
  * Вызывается из клиентского компонента при монтировании страницы.
  */
 export async function GET(req: NextRequest) {
-	try {
-		const ip =
-			req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-			req.headers.get('x-real-ip') ||
-			'неизвестен';
-			
+  try {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "неизвестен";
 
-		const ua = req.headers.get('user-agent') || '';
-		let device = 'Desktop 🖥';
-		if (/Android/i.test(ua)) device = 'Android 📱';
-		else if (/iPhone|iPad|iPod/i.test(ua)) device = 'iOS 🍎';
-		else if (/Mobile/i.test(ua)) device = 'Mobile 📱';
-		else if (/Tablet/i.test(ua)) device = 'Tablet 📟';
+    const ua = req.headers.get("user-agent") || "";
+    let device = "Desktop 🖥";
 
-		const page = req.nextUrl.searchParams.get('page') || '/';
+    if (/Android/i.test(ua)) device = "Android 📱";
+    else if (/iPhone|iPad|iPod/i.test(ua)) device = "iOS 🍎";
+    else if (/Mobile/i.test(ua)) device = "Mobile 📱";
+    else if (/Tablet/i.test(ua)) device = "Tablet 📟";
 
-		const message =
-			`👤 <b>Новый пользователь</b>\n` +
-			`🌍 IP: <code>${ip}</code>\n` +
-			`📱 Device: ${device}\n` +
-			`📄 Page: ${page}\n\n` +
-			`<i>📅 ${new Date().toLocaleString('ru-RU', {
-				timeZone: 'Europe/Moscow',
-				dateStyle: 'short',
-				timeStyle: 'short',
-			})}</i>`;
+    const page = req.nextUrl.searchParams.get("page") || "/";
 
-		await sendTelegramMessage(message);
+    const message =
+      `👤 <b>Новый пользователь</b>\n` +
+      `🌍 IP: <code>${ip}</code>\n` +
+      `📱 Device: ${device}\n` +
+      `📄 Page: ${page}\n\n` +
+      `<i>📅 ${new Date().toLocaleString("ru-RU", {
+        timeZone: "Europe/Moscow",
+        dateStyle: "short",
+        timeStyle: "short",
+      })}</i>`;
 
-		return NextResponse.json({ ok: true });
-	} catch (error) {
-		console.error('checkClient error:', error);
-		return NextResponse.json({ ok: false }, { status: 500 });
-	}
+    await sendTelegramMessage(message);
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("checkClient error:", error);
+
+    return NextResponse.json({ ok: false }, { status: 500 });
+  }
 }
 
 /**

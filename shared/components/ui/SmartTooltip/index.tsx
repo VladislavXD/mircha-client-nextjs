@@ -47,8 +47,10 @@ const SmartTooltip: React.FC<SmartTooltipProps> = ({
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= mobileBreakpoint);
+
     check();
     window.addEventListener("resize", check);
+
     return () => window.removeEventListener("resize", check);
   }, [mobileBreakpoint]);
 
@@ -56,16 +58,20 @@ const SmartTooltip: React.FC<SmartTooltipProps> = ({
     if (!isMobile || !open) return;
     const handleClick = (e: MouseEvent) => {
       const target = e.target as Element | null;
+
       if (!target) return;
       // закроем, если клик вне триггера и вне контента тултипа
-      const isInTrigger = !!target.closest('[data-tooltip-trigger]');
-      const isInContent = !!target.closest('[data-tooltip-content]');
+      const isInTrigger = !!target.closest("[data-tooltip-trigger]");
+      const isInContent = !!target.closest("[data-tooltip-content]");
+
       if (!isInTrigger && !isInContent) {
         setOpen(false);
         onOpenChange?.(false);
       }
     };
+
     document.addEventListener("click", handleClick);
+
     return () => document.removeEventListener("click", handleClick);
   }, [isMobile, open, onOpenChange]);
 
@@ -74,24 +80,21 @@ const SmartTooltip: React.FC<SmartTooltipProps> = ({
     e.preventDefault();
     e.stopPropagation();
     const next = !open;
+
     setOpen(next);
     onOpenChange?.(next);
   };
 
   return (
     <Tooltip
-      isOpen={isMobile ? open : undefined}
-      content={
-        <div data-tooltip-content>
-          {content}
-        </div>
-      }
       className={className}
-      placement={placement}
-      showArrow={showArrow}
-      delay={isMobile ? 0 : delay}
       closeDelay={closeDelay}
+      content={<div data-tooltip-content>{content}</div>}
+      delay={isMobile ? 0 : delay}
+      isOpen={isMobile ? open : undefined}
+      placement={placement}
       shouldCloseOnBlur={!isMobile && shouldCloseOnBlur}
+      showArrow={showArrow}
       onOpenChange={(isOpen) => {
         if (isMobile) {
           setOpen(isOpen);
@@ -99,7 +102,12 @@ const SmartTooltip: React.FC<SmartTooltipProps> = ({
         onOpenChange?.(isOpen);
       }}
     >
-      <div ref={triggerRef} onClick={handleTriggerClick} data-tooltip-trigger className="inline-block">
+      <div
+        ref={triggerRef}
+        data-tooltip-trigger
+        className="inline-block"
+        onClick={handleTriggerClick}
+      >
         {children}
       </div>
     </Tooltip>

@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
-import type { VideoState } from '../types';
+import type { VideoState } from "../types";
+
+import { useCallback } from "react";
 
 // Глобальное хранилище состояний видео
 const videoStates = new Map<string, VideoState>();
@@ -9,18 +10,27 @@ export const useVideoState = () => {
     if (!videoStates.has(videoUrl)) {
       videoStates.set(videoUrl, { isMuted: true, currentTime: 0 });
     }
+
     return videoStates.get(videoUrl)!;
   }, []);
 
-  const setVideoMuted = useCallback((videoUrl: string, isMuted: boolean) => {
-    const state = getVideoState(videoUrl);
-    state.isMuted = isMuted;
-  }, [getVideoState]);
+  const setVideoMuted = useCallback(
+    (videoUrl: string, isMuted: boolean) => {
+      const state = getVideoState(videoUrl);
 
-  const setVideoTime = useCallback((videoUrl: string, currentTime: number) => {
-    const state = getVideoState(videoUrl);
-    state.currentTime = currentTime;
-  }, [getVideoState]);
+      state.isMuted = isMuted;
+    },
+    [getVideoState],
+  );
+
+  const setVideoTime = useCallback(
+    (videoUrl: string, currentTime: number) => {
+      const state = getVideoState(videoUrl);
+
+      state.currentTime = currentTime;
+    },
+    [getVideoState],
+  );
 
   return {
     getVideoState,

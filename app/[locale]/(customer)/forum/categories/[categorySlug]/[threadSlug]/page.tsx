@@ -1,64 +1,61 @@
-'use client'
+"use client";
 
-import React, { useState, useMemo } from 'react'
-import { useParams } from 'next/navigation'
-import { 
-  useCategoryBySlug,
-  useThreadByCategoryAndSlug
-} from '@/src/features/forum/hooks/useForum'
-import { 
-  Card, 
-  CardBody, 
-  CardHeader, 
-  Chip, 
-  Spinner, 
+import type { Thread, Reply } from "@/src/features/forum/types/forum.types";
+
+import React, { useState, useMemo } from "react";
+import { useParams } from "next/navigation";
+import {
+  Chip,
+  Spinner,
   Button,
   Breadcrumbs,
   BreadcrumbItem,
-  Avatar,
-  Divider
-} from '@heroui/react'
-import Link from 'next/link'
-import { formatDistanceToNow } from 'date-fns'
-import { ru } from 'date-fns/locale'
-import CreateReplyModal from './components/CreateReplyModal'
-import PostContent from '@/shared/components/PostContent'
-import type { Thread, Reply } from '@/src/features/forum/types/forum.types'
-import TagChip from '@/shared/components/TagChip'
-import MobileForumExtras from '@/shared/components/forum/MobileForumExtras'
+} from "@heroui/react";
+import Link from "next/link";
+
+import CreateReplyModal from "./components/CreateReplyModal";
+
+import {
+  useCategoryBySlug,
+  useThreadByCategoryAndSlug,
+} from "@/src/features/forum/hooks/useForum";
+import PostContent from "@/shared/components/PostContent";
+import TagChip from "@/shared/components/TagChip";
+import MobileForumExtras from "@/shared/components/forum/MobileForumExtras";
 
 const CategoryThreadPage = () => {
-  const params = useParams()
-  const categorySlug = params.categorySlug as string
-  const threadSlug = params.threadSlug as string
-  
-  const [showReplyModal, setShowReplyModal] = useState(false)
+  const params = useParams();
+  const categorySlug = params.categorySlug as string;
+  const threadSlug = params.threadSlug as string;
 
-  const { data: category } = useCategoryBySlug(categorySlug)
+  const [showReplyModal, setShowReplyModal] = useState(false);
 
-  const { 
-    data: thread, 
-    isLoading, 
-    error 
-  } = useThreadByCategoryAndSlug(categorySlug, threadSlug)
+  const { data: category } = useCategoryBySlug(categorySlug);
+
+  const {
+    data: thread,
+    isLoading,
+    error,
+  } = useThreadByCategoryAndSlug(categorySlug, threadSlug);
 
   // Создаем массив всех постов для передачи в PostContent для тултипов
   const allPosts = useMemo(() => {
-    if (!thread) return []
-    return [thread, ...(thread.replies || [])]
-  }, [thread])
+    if (!thread) return [];
+
+    return [thread, ...(thread.replies || [])];
+  }, [thread]);
 
   // Обработчик ответа на конкретный пост (пока просто открываем обычный ответ)
   const handleReplyToPost = (postId: string, post?: Thread | Reply) => {
-    setShowReplyModal(true)
-  }
+    setShowReplyModal(true);
+  };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="lg" />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -67,7 +64,7 @@ const CategoryThreadPage = () => {
         <h2 className="text-xl font-bold mb-2">Ошибка загрузки</h2>
         <p>Не удалось загрузить тред</p>
       </div>
-    )
+    );
   }
 
   if (!thread) {
@@ -76,12 +73,12 @@ const CategoryThreadPage = () => {
         <h2 className="text-xl font-bold mb-2">Тред не найден</h2>
         <p>Тред не существует или был удалён</p>
         <Link href={`/forum/categories/${categorySlug}`}>
-          <Button color="primary" className="mt-4">
+          <Button className="mt-4" color="primary">
             Вернуться к категории
           </Button>
         </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -95,10 +92,14 @@ const CategoryThreadPage = () => {
           <Link href="/forum/categories">Категории</Link>
         </BreadcrumbItem>
         <BreadcrumbItem>
-          <Link href={`/forum/categories/${categorySlug}`}>{category?.name || categorySlug}</Link>
+          <Link href={`/forum/categories/${categorySlug}`}>
+            {category?.name || categorySlug}
+          </Link>
         </BreadcrumbItem>
         <BreadcrumbItem>
-          <span className="hidden sm:inline">{thread.subject || `Тред #${thread.id}`}</span>
+          <span className="hidden sm:inline">
+            {thread.subject || `Тред #${thread.id}`}
+          </span>
           <span className="sm:hidden">#{thread.id}</span>
         </BreadcrumbItem>
       </Breadcrumbs>
@@ -111,12 +112,22 @@ const CategoryThreadPage = () => {
               {thread.subject || `Тред #${thread.id}`}
             </span>
             {thread.isPinned && (
-              <Chip color="warning" size="sm" variant="flat" className="text-xs">
+              <Chip
+                className="text-xs"
+                color="warning"
+                size="sm"
+                variant="flat"
+              >
                 Закреплён
               </Chip>
             )}
             {thread.isLocked && (
-              <Chip color="secondary" size="sm" variant="flat" className="text-xs">
+              <Chip
+                className="text-xs"
+                color="secondary"
+                size="sm"
+                variant="flat"
+              >
                 Заблокирован
               </Chip>
             )}
@@ -125,9 +136,18 @@ const CategoryThreadPage = () => {
           {/* Теги треда */}
           {thread.threadTags && thread.threadTags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
-                  {/* @ts-ignore */}
+              {/* @ts-ignore */}
               {thread.threadTags.map(({ tag }) => (
-                <TagChip key={tag.id} tag={{ id: tag.id, name: tag.name, slug: tag.slug, icon: tag.icon, color: tag.color }} />
+                <TagChip
+                  key={tag.id}
+                  tag={{
+                    id: tag.id,
+                    name: tag.name,
+                    slug: tag.slug,
+                    icon: tag.icon,
+                    color: tag.color,
+                  }}
+                />
               ))}
             </div>
           )}
@@ -138,14 +158,14 @@ const CategoryThreadPage = () => {
             <span>{thread.uniquePosters} постеров</span>
           </div>
         </div>
-        
+
         {!thread.isLocked && (
-          <Button 
-            color="primary" 
-            variant="flat"
-            size="sm"
-            onPress={() => setShowReplyModal(true)}
+          <Button
             className="self-start sm:self-auto"
+            color="primary"
+            size="sm"
+            variant="flat"
+            onPress={() => setShowReplyModal(true)}
           >
             Ответить
           </Button>
@@ -154,23 +174,23 @@ const CategoryThreadPage = () => {
 
       {/* Основной пост треда */}
       <div className="mb-4">
-        <PostContent 
-          post={thread as any}
-          isOP={true}
+        <PostContent
           allPosts={allPosts as any}
+          isOP={true}
+          post={thread as any}
           onReplyToPost={handleReplyToPost as any}
         />
       </div>
 
       {/* Ответы */}
       <div className="space-y-3 sm:space-y-4">
-                  {/* @ts-ignore */}
+        {/* @ts-ignore */}
         {thread.replies?.map((reply) => (
-          <PostContent 
+          <PostContent
             key={reply.id}
-            post={reply as any}
-            isOP={false}
             allPosts={allPosts as any}
+            isOP={false}
+            post={reply as any}
             onReplyToPost={handleReplyToPost as any}
           />
         ))}
@@ -182,7 +202,7 @@ const CategoryThreadPage = () => {
             Пока нет ответов в этом треде
           </p>
           {!thread.isLocked && (
-            <Button 
+            <Button
               color="primary"
               size="sm"
               onPress={() => setShowReplyModal(true)}
@@ -196,11 +216,11 @@ const CategoryThreadPage = () => {
       {/* Быстрый ответ */}
       {!thread.isLocked && (
         <div className="fixed bottom-4 right-2 sm:right-4 z-50">
-          <Button 
+          <Button
+            className="rounded-full shadow-lg text-sm sm:text-base"
             color="primary"
             size="md"
             onPress={() => setShowReplyModal(true)}
-            className="rounded-full shadow-lg text-sm sm:text-base"
           >
             <span className="hidden sm:inline">Ответить</span>
             <span className="sm:hidden">+</span>
@@ -208,18 +228,18 @@ const CategoryThreadPage = () => {
         </div>
       )}
 
-      <CreateReplyModal 
-        isOpen={showReplyModal}
-        onClose={() => setShowReplyModal(false)}
+      <CreateReplyModal
         categorySlug={categorySlug}
-        threadId={thread.id}
+        isOpen={showReplyModal}
         thread={thread}
+        threadId={thread.id}
+        onClose={() => setShowReplyModal(false)}
       />
 
       {/* Мобильные виджеты: внизу страницы */}
       <MobileForumExtras />
     </div>
-  )
-}
+  );
+};
 
-export default CategoryThreadPage
+export default CategoryThreadPage;

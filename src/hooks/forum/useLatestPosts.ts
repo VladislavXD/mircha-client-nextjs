@@ -5,7 +5,7 @@
 
 // /**
 //  * React Query хук для получения последних постов форума
-//  * 
+//  *
 //  * @example
 //  * const { data, isLoading } = useLatestPosts({ page: 1, limit: 8, nsfw: '0' })
 //  */

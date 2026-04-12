@@ -1,102 +1,126 @@
-import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
-import { LikeService } from '../services/like.service'
-import { postKeys } from '../../hooks/usePostQueries'
-import type { PostsResponse } from '../../types'
+import type { PostsResponse } from "../../types";
 
-const likeService = new LikeService()
+import {
+  useMutation,
+  useQueryClient,
+  InfiniteData,
+} from "@tanstack/react-query";
+
+import { LikeService } from "../services/like.service";
+import { postKeys } from "../../hooks/usePostQueries";
+
+const likeService = new LikeService();
 // Локальная защита от дабл-кликов: отслеживаем посты с активной мутацией
-const inFlightLikes = new Set<string>()
+const inFlightLikes = new Set<string>();
 
 /**
  * Хук для постановки лайка на пост с optimistic update
  * ОПТИМИЗИРОВАНО: Работает с InfiniteData структурой
  */
 export function useLikePost() {
-	const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationKey: ['like', 'create'],
-		mutationFn: async (postId: string) => {
-			// Если уже идет мутация для этого поста — игнорируем повтор
-			if (inFlightLikes.has(postId)) return Promise.resolve(undefined as any)
-			inFlightLikes.add(postId)
-			return likeService.likePost(postId)
-		},
-		onMutate: async (postId: string) => {
-			await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) })
-			await queryClient.cancelQueries({ queryKey: postKeys.lists() })
+  return useMutation({
+    mutationKey: ["like", "create"],
+    mutationFn: async (postId: string) => {
+      // Если уже идет мутация для этого поста — игнорируем повтор
+      if (inFlightLikes.has(postId)) return Promise.resolve(undefined as any);
+      inFlightLikes.add(postId);
 
-			const previousPost = queryClient.getQueryData<any>(postKeys.detail(postId))
-			const previousPosts = queryClient.getQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists())
-			const currentUser = queryClient.getQueryData<any>(['profile'])
+      return likeService.likePost(postId);
+    },
+    onMutate: async (postId: string) => {
+      await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) });
+      await queryClient.cancelQueries({ queryKey: postKeys.lists() });
 
-			if (previousPost) {
-				queryClient.setQueryData(postKeys.detail(postId), (old: any) => {
-					const updated = {
-						...old,
-						likeByUser: true,
-						// Если есть счетчик, инкрементируем его
-						likesCount: old.likesCount !== undefined ? old.likesCount + 1 : (old.likes?.length || 0) + 1,
-						// Добавляем временный лайк только если массив существует и не пустой
-						likes: old.likes ? [
-							...old.likes,
-							{
-								id: `temp-${Date.now()}`,
-								userId: currentUser?.id || 'me',
-								postId,
-								createdAt: new Date().toISOString()
-							}
-						] : []
-					}
-					return updated
-				})
-			}
+      const previousPost = queryClient.getQueryData<any>(
+        postKeys.detail(postId),
+      );
+      const previousPosts = queryClient.getQueryData<
+        InfiniteData<PostsResponse, unknown>
+      >(postKeys.lists());
+      const currentUser = queryClient.getQueryData<any>(["profile"]);
 
-			if (previousPosts) {
-				queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
-					if (!old) return old
-					
-					return {
-						...old,
-						pages: old.pages.map(page => ({
-							...page,
-							items: page.items.map(post => {
-								if (post.id === postId) {
-									return {
-										...post,
-										likeByUser: true,
-										// Инкрементируем счетчик
-										likesCount: post.likesCount !== undefined ? post.likesCount + 1 : (post.likes?.length || 0) + 1,
-										// Массив может быть пустым в оптимизированной версии
-										likes: post.likes || []
-									}
-								}
-								return post
-							})
-						}))
-					}
-				})
-			}
+      if (previousPost) {
+        queryClient.setQueryData(postKeys.detail(postId), (old: any) => {
+          const updated = {
+            ...old,
+            likeByUser: true,
+            // Если есть счетчик, инкрементируем его
+            likesCount:
+              old.likesCount !== undefined
+                ? old.likesCount + 1
+                : (old.likes?.length || 0) + 1,
+            // Добавляем временный лайк только если массив существует и не пустой
+            likes: old.likes
+              ? [
+                  ...old.likes,
+                  {
+                    id: `temp-${Date.now()}`,
+                    userId: currentUser?.id || "me",
+                    postId,
+                    createdAt: new Date().toISOString(),
+                  },
+                ]
+              : [],
+          };
 
-			return { postId, previousPost, previousPosts }
-		},
-		onError: (err, postId, context: any) => {
-			if (context?.previousPost) {
-				queryClient.setQueryData(postKeys.detail(postId), context.previousPost)
-			}
-			if (context?.previousPosts) {
-				queryClient.setQueryData(postKeys.lists(), context.previousPosts)
-			}
-		},
-		onSettled: (data, error, postId) => {
-			inFlightLikes.delete(postId)
-			queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) })
-			// Списки инвалидации только при успешном ответе
-			if (!error) {
-				queryClient.invalidateQueries({ queryKey: postKeys.lists() })
-			}
-		}
-	})
+          return updated;
+        });
+      }
+
+      if (previousPosts) {
+        queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(
+          postKeys.lists(),
+          (old) => {
+            if (!old) return old;
+
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                items: page.items.map((post) => {
+                  if (post.id === postId) {
+                    return {
+                      ...post,
+                      likeByUser: true,
+                      // Инкрементируем счетчик
+                      likesCount:
+                        post.likesCount !== undefined
+                          ? post.likesCount + 1
+                          : (post.likes?.length || 0) + 1,
+                      // Массив может быть пустым в оптимизированной версии
+                      likes: post.likes || [],
+                    };
+                  }
+
+                  return post;
+                }),
+              })),
+            };
+          },
+        );
+      }
+
+      return { postId, previousPost, previousPosts };
+    },
+    onError: (err, postId, context: any) => {
+      if (context?.previousPost) {
+        queryClient.setQueryData(postKeys.detail(postId), context.previousPost);
+      }
+      if (context?.previousPosts) {
+        queryClient.setQueryData(postKeys.lists(), context.previousPosts);
+      }
+    },
+    onSettled: (data, error, postId) => {
+      inFlightLikes.delete(postId);
+      queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
+      // Списки инвалидации только при успешном ответе
+      if (!error) {
+        queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      }
+    },
+  });
 }
 
 /**
@@ -104,186 +128,220 @@ export function useLikePost() {
  * ОПТИМИЗИРОВАНО: Работает с InfiniteData структурой
  */
 export function useUnlikePost() {
-	const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationKey: ['like', 'delete'],
-		mutationFn: async (postId: string) => {
-			// Защита от повторов
-			if (inFlightLikes.has(postId)) return Promise.resolve(undefined as any)
-			inFlightLikes.add(postId)
-			return likeService.unlikePost(postId)
-		},
-		onMutate: async (postId: string) => {
-			await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) })
-			await queryClient.cancelQueries({ queryKey: postKeys.lists() })
+  return useMutation({
+    mutationKey: ["like", "delete"],
+    mutationFn: async (postId: string) => {
+      // Защита от повторов
+      if (inFlightLikes.has(postId)) return Promise.resolve(undefined as any);
+      inFlightLikes.add(postId);
 
-			const previousPost = queryClient.getQueryData<any>(postKeys.detail(postId))
-			const previousPosts = queryClient.getQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists())
-			const currentUser = queryClient.getQueryData<any>(['profile'])
+      return likeService.unlikePost(postId);
+    },
+    onMutate: async (postId: string) => {
+      await queryClient.cancelQueries({ queryKey: postKeys.detail(postId) });
+      await queryClient.cancelQueries({ queryKey: postKeys.lists() });
 
-			if (previousPost) {
-				queryClient.setQueryData(postKeys.detail(postId), (old: any) => {
-					const updated = {
-						...old,
-						likeByUser: false,
-						// Декрементируем счетчик
-						likesCount: old.likesCount !== undefined 
-							? Math.max(0, old.likesCount - 1) // Не даем уйти в минус
-							: Math.max(0, (old.likes?.length || 0) - 1),
-						// Фильтруем массив только если он существует
-						likes: old.likes ? old.likes.filter((like: any) => like.userId !== currentUser?.id) : []
-					}
-					return updated
-				})
-			}
+      const previousPost = queryClient.getQueryData<any>(
+        postKeys.detail(postId),
+      );
+      const previousPosts = queryClient.getQueryData<
+        InfiniteData<PostsResponse, unknown>
+      >(postKeys.lists());
+      const currentUser = queryClient.getQueryData<any>(["profile"]);
 
-			if (previousPosts) {
-				queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(postKeys.lists(), (old) => {
-					if (!old) return old
-					
-					return {
-						...old,
-						pages: old.pages.map(page => ({
-							...page,
-							items: page.items.map(post => {
-								if (post.id === postId) {
-									return {
-										...post,
-										likeByUser: false,
-										// Декрементируем счетчик
-										likesCount: post.likesCount !== undefined 
-											? Math.max(0, post.likesCount - 1)
-											: Math.max(0, (post.likes?.length || 0) - 1),
-										// Массив может быть пустым в оптимизированной версии
-										likes: post.likes || []
-									}
-								}
-								return post
-							})
-						}))
-					}
-				})
-			}
+      if (previousPost) {
+        queryClient.setQueryData(postKeys.detail(postId), (old: any) => {
+          const updated = {
+            ...old,
+            likeByUser: false,
+            // Декрементируем счетчик
+            likesCount:
+              old.likesCount !== undefined
+                ? Math.max(0, old.likesCount - 1) // Не даем уйти в минус
+                : Math.max(0, (old.likes?.length || 0) - 1),
+            // Фильтруем массив только если он существует
+            likes: old.likes
+              ? old.likes.filter((like: any) => like.userId !== currentUser?.id)
+              : [],
+          };
 
-			return { postId, previousPost, previousPosts }
-		},
-		onError: (err, postId, context: any) => {
-			if (context?.previousPost) {
-				queryClient.setQueryData(postKeys.detail(postId), context.previousPost)
-			}
-			if (context?.previousPosts) {
-				queryClient.setQueryData(postKeys.lists(), context.previousPosts)
-			}
-		},
-		onSettled: (data, error, postId) => {
-			inFlightLikes.delete(postId)
-			queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) })
-			if (!error) {
-				queryClient.invalidateQueries({ queryKey: postKeys.lists() })
-			}
-		}
-	})
+          return updated;
+        });
+      }
+
+      if (previousPosts) {
+        queryClient.setQueryData<InfiniteData<PostsResponse, unknown>>(
+          postKeys.lists(),
+          (old) => {
+            if (!old) return old;
+
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                items: page.items.map((post) => {
+                  if (post.id === postId) {
+                    return {
+                      ...post,
+                      likeByUser: false,
+                      // Декрементируем счетчик
+                      likesCount:
+                        post.likesCount !== undefined
+                          ? Math.max(0, post.likesCount - 1)
+                          : Math.max(0, (post.likes?.length || 0) - 1),
+                      // Массив может быть пустым в оптимизированной версии
+                      likes: post.likes || [],
+                    };
+                  }
+
+                  return post;
+                }),
+              })),
+            };
+          },
+        );
+      }
+
+      return { postId, previousPost, previousPosts };
+    },
+    onError: (err, postId, context: any) => {
+      if (context?.previousPost) {
+        queryClient.setQueryData(postKeys.detail(postId), context.previousPost);
+      }
+      if (context?.previousPosts) {
+        queryClient.setQueryData(postKeys.lists(), context.previousPosts);
+      }
+    },
+    onSettled: (data, error, postId) => {
+      inFlightLikes.delete(postId);
+      queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
+      if (!error) {
+        queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      }
+    },
+  });
 }
 
 // Локальная защита от дабл-кликов для комментариев
-const inFlightCommentLikes = new Set<string>()
+const inFlightCommentLikes = new Set<string>();
 
 /**
  * Инвалидируем все варианты сортировки комментариев
  */
-function invalidateCommentQueries(queryClient: ReturnType<typeof useQueryClient>, postId: string) {
-	queryClient.invalidateQueries({ queryKey: ['comments', 'post', postId] })
+function invalidateCommentQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  postId: string,
+) {
+  queryClient.invalidateQueries({ queryKey: ["comments", "post", postId] });
 }
 
 /**
  * Рекурсивно обновляет лайк в комментарии или его ответах
  */
-function updateCommentOrReply(comments: any[], commentId: string, liked: boolean): any[] {
-	return comments.map((c) => {
-		if (c.id === commentId) {
-			return {
-				...c,
-				likedByUser: liked,
-				likeCount: Math.max(0, (c.likeCount ?? 0) + (liked ? 1 : -1)),
-			}
-		}
-		if (c.replies?.length) {
-			return { ...c, replies: updateCommentOrReply(c.replies, commentId, liked) }
-		}
-		return c
-	})
+function updateCommentOrReply(
+  comments: any[],
+  commentId: string,
+  liked: boolean,
+): any[] {
+  return comments.map((c) => {
+    if (c.id === commentId) {
+      return {
+        ...c,
+        likedByUser: liked,
+        likeCount: Math.max(0, (c.likeCount ?? 0) + (liked ? 1 : -1)),
+      };
+    }
+    if (c.replies?.length) {
+      return {
+        ...c,
+        replies: updateCommentOrReply(c.replies, commentId, liked),
+      };
+    }
+
+    return c;
+  });
 }
 
 /**
  * Оптимистичное обновление лайка в кэше комментариев
  */
 function updateCommentLikeInCache(
-	queryClient: ReturnType<typeof useQueryClient>,
-	postId: string,
-	commentId: string,
-	liked: boolean
+  queryClient: ReturnType<typeof useQueryClient>,
+  postId: string,
+  commentId: string,
+  liked: boolean,
 ) {
-	const suffixes = [['new'], ['old'], ['popular'], []] as const
-	suffixes.forEach((suffix) => {
-		const key = ['comments', 'post', postId, ...suffix]
-		queryClient.setQueryData<any[]>(key, (old) => {
-			if (!old) return old
-			return updateCommentOrReply(old, commentId, liked)
-		})
-	})
+  const suffixes = [["new"], ["old"], ["popular"], []] as const;
+
+  suffixes.forEach((suffix) => {
+    const key = ["comments", "post", postId, ...suffix];
+
+    queryClient.setQueryData<any[]>(key, (old) => {
+      if (!old) return old;
+
+      return updateCommentOrReply(old, commentId, liked);
+    });
+  });
 }
 
 /**
  * Хук для постановки лайка на комментарий с optimistic update
  */
 export function useLikeComment(postId: string) {
-	const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationKey: ['like', 'comment', 'create'],
-		mutationFn: async (commentId: string) => {
-			if (inFlightCommentLikes.has(commentId)) return Promise.resolve(undefined as any)
-			inFlightCommentLikes.add(commentId)
-			return likeService.likeComment(commentId)
-		},
-		onMutate: async (commentId: string) => {
-			updateCommentLikeInCache(queryClient, postId, commentId, true)
-			return { commentId }
-		},
-		onError: (_err, commentId) => {
-			updateCommentLikeInCache(queryClient, postId, commentId, false)
-		},
-		onSettled: (_data, _err, commentId) => {
-			inFlightCommentLikes.delete(commentId)
-			invalidateCommentQueries(queryClient, postId)
-		},
-	})
+  return useMutation({
+    mutationKey: ["like", "comment", "create"],
+    mutationFn: async (commentId: string) => {
+      if (inFlightCommentLikes.has(commentId))
+        return Promise.resolve(undefined as any);
+      inFlightCommentLikes.add(commentId);
+
+      return likeService.likeComment(commentId);
+    },
+    onMutate: async (commentId: string) => {
+      updateCommentLikeInCache(queryClient, postId, commentId, true);
+
+      return { commentId };
+    },
+    onError: (_err, commentId) => {
+      updateCommentLikeInCache(queryClient, postId, commentId, false);
+    },
+    onSettled: (_data, _err, commentId) => {
+      inFlightCommentLikes.delete(commentId);
+      invalidateCommentQueries(queryClient, postId);
+    },
+  });
 }
 
 /**
  * Хук для снятия лайка с комментария с optimistic update
  */
 export function useUnlikeComment(postId: string) {
-	const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationKey: ['like', 'comment', 'delete'],
-		mutationFn: async (commentId: string) => {
-			if (inFlightCommentLikes.has(commentId)) return Promise.resolve(undefined as any)
-			inFlightCommentLikes.add(commentId)
-			return likeService.unlikeComment(commentId)
-		},
-		onMutate: async (commentId: string) => {
-			updateCommentLikeInCache(queryClient, postId, commentId, false)
-			return { commentId }
-		},
-		onError: (_err, commentId) => {
-			updateCommentLikeInCache(queryClient, postId, commentId, true)
-		},
-		onSettled: (_data, _err, commentId) => {
-			inFlightCommentLikes.delete(commentId)
-			invalidateCommentQueries(queryClient, postId)
-		},
-	})
+  return useMutation({
+    mutationKey: ["like", "comment", "delete"],
+    mutationFn: async (commentId: string) => {
+      if (inFlightCommentLikes.has(commentId))
+        return Promise.resolve(undefined as any);
+      inFlightCommentLikes.add(commentId);
+
+      return likeService.unlikeComment(commentId);
+    },
+    onMutate: async (commentId: string) => {
+      updateCommentLikeInCache(queryClient, postId, commentId, false);
+
+      return { commentId };
+    },
+    onError: (_err, commentId) => {
+      updateCommentLikeInCache(queryClient, postId, commentId, true);
+    },
+    onSettled: (_data, _err, commentId) => {
+      inFlightCommentLikes.delete(commentId);
+      invalidateCommentQueries(queryClient, postId);
+    },
+  });
 }

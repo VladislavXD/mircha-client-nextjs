@@ -1,2 +1,2 @@
-export * from './hooks'
-export * from './services/like.service'
+export * from "./hooks";
+export * from "./services/like.service";

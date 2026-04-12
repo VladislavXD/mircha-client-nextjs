@@ -1,13 +1,16 @@
 "use client";
 
+import type { Post } from "../../types";
+
 import React from "react";
-import { Avatar, Card, CardBody } from "@heroui/react";
+import { Avatar } from "@heroui/react";
 import { Heart, MessageCircle, Repeat2, Eye } from "lucide-react";
 import Link from "next/link";
-import { EmojiText } from "@/shared/components/ui/EmojiText";
+
 import PostMediaSlider, { type PostMedia } from "../PostMediaSlider/index";
+
+import { EmojiText } from "@/shared/components/ui/EmojiText";
 import { timeAgo } from "@/src/utils/timeAgo";
-import type { Post } from "../../types";
 
 interface PostPreviewProps {
   post: Post;
@@ -28,23 +31,27 @@ export const PostPreview: React.FC<PostPreviewProps> = ({ post }) => {
   // Подготовка медиа
   const postMedia: PostMedia[] = React.useMemo(() => {
     const mediaArray = (post as any)?.media;
+
     if (Array.isArray(mediaArray) && mediaArray.length > 0) {
       return mediaArray.map((m: any) => {
         let mediaType: "image" | "video" = "image";
+
         if (m.type) {
           const typeUpper = String(m.type).toUpperCase();
+
           mediaType = typeUpper === "VIDEO" ? "video" : "image";
         } else if (m.mimeType) {
           mediaType = m.mimeType.startsWith("video/") ? "video" : "image";
         }
-        
+
         return {
           url: m.url || m,
           type: mediaType,
-          spoiler: m.spoiler || false
+          spoiler: m.spoiler || false,
         };
       });
     }
+
     return [];
   }, [post]);
 
@@ -69,29 +76,29 @@ export const PostPreview: React.FC<PostPreviewProps> = ({ post }) => {
           object-fit: contain;
         }
       `}</style>
-      
+
       {/* Author Info */}
       <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
         <Link href={`/profile/${author.id}`}>
           <Avatar
-            src={author.avatarUrl}
+            className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity w-8 h-8 sm:w-10 sm:h-10"
             name={author.name}
             size="sm"
-            className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity w-8 h-8 sm:w-10 sm:h-10"
+            src={author.avatarUrl}
           />
         </Link>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-            <Link 
-              href={`/profile/${author.id}`}
+            <Link
               className="font-semibold text-sm sm:text-base hover:underline truncate"
+              href={`/profile/${author.id}`}
             >
               {author.name}
             </Link>
-            <Link 
-              href={`/profile/${author.id}`}
+            <Link
               className="text-xs sm:text-sm text-default-400 hover:underline truncate"
+              href={`/profile/${author.id}`}
             >
               @{author.username}
             </Link>
@@ -105,16 +112,14 @@ export const PostPreview: React.FC<PostPreviewProps> = ({ post }) => {
       {/* Post Content */}
       {safeContent && (
         <div className="mb-3 sm:mb-4 text-xs sm:text-sm leading-relaxed break-words">
-          <EmojiText text={safeContent} emojiUrls={emojiUrls} />
+          <EmojiText emojiUrls={emojiUrls} text={safeContent} />
         </div>
       )}
 
       {/* Media */}
       {postMedia.length > 0 && (
         <div className="mb-3 sm:mb-4 rounded-lg sm:rounded-xl overflow-hidden comments-modal-media">
-          <PostMediaSlider 
-            media={postMedia}
-          />
+          <PostMediaSlider media={postMedia} />
         </div>
       )}
 
@@ -122,27 +127,34 @@ export const PostPreview: React.FC<PostPreviewProps> = ({ post }) => {
       <div className="flex items-center gap-3 sm:gap-6 pt-2 sm:pt-3 border-t border-divider flex-wrap">
         {/* Likes */}
         <div className="flex items-center gap-1 sm:gap-2 text-default-500">
-          <Heart size={16} className="text-danger sm:w-[18px] sm:h-[18px]" />
+          <Heart className="text-danger sm:w-[18px] sm:h-[18px]" size={16} />
           <span className="text-xs sm:text-sm font-medium">{likesCount}</span>
         </div>
 
         {/* Comments */}
         <div className="flex items-center gap-1 sm:gap-2 text-default-500">
-          <MessageCircle size={16} className="text-primary sm:w-[18px] sm:h-[18px]" />
-          <span className="text-xs sm:text-sm font-medium">{commentsCount}</span>
+          <MessageCircle
+            className="text-primary sm:w-[18px] sm:h-[18px]"
+            size={16}
+          />
+          <span className="text-xs sm:text-sm font-medium">
+            {commentsCount}
+          </span>
         </div>
 
         {/* Reposts */}
         <div className="flex items-center gap-1 sm:gap-2 text-default-500">
-          <Repeat2 size={16} className="text-success sm:w-[18px] sm:h-[18px]" />
+          <Repeat2 className="text-success sm:w-[18px] sm:h-[18px]" size={16} />
           <span className="text-xs sm:text-sm font-medium">{repostCount}</span>
         </div>
 
         {/* Views */}
         <div className="flex items-center gap-1 sm:gap-2 text-default-500">
-          <Eye size={16} className="sm:w-[18px] sm:h-[18px]" />
+          <Eye className="sm:w-[18px] sm:h-[18px]" size={16} />
           <span className="text-xs sm:text-sm font-medium">
-            {viewsCount > 1000 ? `${(viewsCount / 1000).toFixed(1)}k` : viewsCount}
+            {viewsCount > 1000
+              ? `${(viewsCount / 1000).toFixed(1)}k`
+              : viewsCount}
           </span>
         </div>
       </div>

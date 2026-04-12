@@ -29,20 +29,20 @@
 //   Select,
 //   SelectItem
 // } from '@heroui/react'
-// import { 
-//   MdSearch, 
-//   MdMoreVert, 
-//   MdEdit, 
-//   MdDelete, 
-//   MdPersonAdd, 
-//   MdLock, 
+// import {
+//   MdSearch,
+//   MdMoreVert,
+//   MdEdit,
+//   MdDelete,
+//   MdPersonAdd,
+//   MdLock,
 //   MdLockOpen,
-//   MdFilterList 
+//   MdFilterList
 // } from 'react-icons/md'
-// import { 
-//   useGetAdminUsersQuery, 
-//   useCreateAdminUserMutation, 
-//   useUpdateAdminUserMutation, 
+// import {
+//   useGetAdminUsersQuery,
+//   useCreateAdminUserMutation,
+//   useUpdateAdminUserMutation,
 //   useDeleteAdminUserMutation,
 //   type AdminUser,
 //   type UsersFilter,
@@ -50,11 +50,11 @@
 //   type UpdateUserRequest
 // } from '@/src/services/admin.service'
 // import { toast } from 'react-hot-toast'
-// import { 
-//   formatAdminDate, 
-//   getRoleColor, 
-//   getRoleText, 
-//   getStatusColor, 
+// import {
+//   formatAdminDate,
+//   getRoleColor,
+//   getRoleText,
+//   getStatusColor,
 //   getStatusText,
 //   validateEmail,
 //   validateUsername,
@@ -72,7 +72,7 @@
 //     role: '',
 //     isActive: ''
 //   })
-  
+
 //   // Состояние модальных окон
 //   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
 //   const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
@@ -84,7 +84,7 @@
 //     isActive: true
 //   })
 //   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  
+
 //   const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure()
 //   const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure()
 //   const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure()
@@ -113,10 +113,10 @@
 //   }
 
 //   const handleStatusFilterChange = (status: string) => {
-//     setFilters(prev => ({ 
-//       ...prev, 
+//     setFilters(prev => ({
+//       ...prev,
 //       isActive: status === 'all' ? '' : (status === 'active' ? 'true' : 'false'),
-//       page: 1 
+//       page: 1
 //     }))
 //   }
 
@@ -152,7 +152,7 @@
 //   // Обработчики CRUD операций
 //   const handleCreateUser = async () => {
 //     if (isCreating) return // Предотвращаем повторные запросы
-    
+
 //     const errors = validateForm(formData)
 //     setFormErrors(errors)
 
@@ -441,8 +441,8 @@
 //       </Card>
 
 //       {/* Модальное окно создания пользователя */}
-//       <Modal 
-//         isOpen={isCreateModalOpen} 
+//       <Modal
+//         isOpen={isCreateModalOpen}
 //         onClose={onCreateModalClose}
 //         size="2xl"
 //         scrollBehavior="inside"
@@ -492,15 +492,15 @@
 //             </div>
 //           </ModalBody>
 //           <ModalFooter className="flex flex-col sm:flex-row gap-3">
-//             <Button 
-//               variant="light" 
+//             <Button
+//               variant="light"
 //               onPress={onCreateModalClose}
 //               className="w-full sm:w-auto order-2 sm:order-1"
 //             >
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="primary" 
+//             <Button
+//               color="primary"
 //               onPress={handleCreateUser}
 //               isLoading={isCreating}
 //               className="w-full sm:w-auto order-1 sm:order-2"
@@ -512,8 +512,8 @@
 //       </Modal>
 
 //       {/* Модальное окно редактирования пользователя */}
-//       <Modal 
-//         isOpen={isEditModalOpen} 
+//       <Modal
+//         isOpen={isEditModalOpen}
 //         onClose={onEditModalClose}
 //         size="2xl"
 //         scrollBehavior="inside"
@@ -566,8 +566,8 @@
 //             <Button variant="light" onPress={onEditModalClose}>
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="primary" 
+//             <Button
+//               color="primary"
 //               onPress={handleUpdateUser}
 //               isLoading={isUpdating}
 //             >
@@ -594,8 +594,8 @@
 //             <Button variant="light" onPress={onDeleteModalClose}>
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="danger" 
+//             <Button
+//               color="danger"
 //               onPress={handleDeleteUser}
 //               isLoading={isDeleting}
 //             >

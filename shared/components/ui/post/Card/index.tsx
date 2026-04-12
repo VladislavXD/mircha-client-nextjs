@@ -1,45 +1,38 @@
 import React, { useState } from "react";
 import {
-  Button,
   CardBody,
   CardFooter,
   CardHeader,
   Card as NextCard,
-  Spinner,
   useDisclosure,
   Image,
-  Textarea,
 } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 // TODO: Migrate to React Query - useDeletePost already exists in features/post?
 
-
-import { useDeleteComment } from "@/src/features/post/comment/hooks/useComment";
-import { useLikePost, useUnlikePost } from "@/src/features/post/like";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-
-import User from "../../User";
-import { formatToClientDate } from "@/app/utils/formatToClientDate";
-import MetaInfo from "../../MetaInfo";
 import { FaRegComment } from "react-icons/fa";
 import { Eye } from "lucide-react";
-import ErrorMessage from "../../ErrorMessage";
-import { hasErrorField } from "@/app/utils/hasErrorField";
-import { useViewsManager } from "@/app/utils/viewsManager";
 import { useEffect, useRef } from "react";
+import { Heart } from "lucide-react";
+
+import User from "../../User";
+import MetaInfo from "../../MetaInfo";
+import ErrorMessage from "../../ErrorMessage";
 import PostDropdown from "../PostDropdown/PostDropdown";
 import { EmojiText } from "../../EmojiText";
 import EditPostModal from "../PostModals/EditPost";
 import DeletePost from "../PostModals/DeletePost";
 
+import { useViewsManager } from "@/app/utils/viewsManager";
+import { hasErrorField } from "@/app/utils/hasErrorField";
+import { formatToClientDate } from "@/app/utils/formatToClientDate";
 import { useThrottle } from "@/src/hooks/useAntiSpam";
-import { Heart } from 'lucide-react';
-import { postKeys } from '@/src/features/post/hooks/usePostQueries';
+import { useDeleteComment } from "@/src/features/post/comment/hooks/useComment";
+import { useLikePost, useUnlikePost } from "@/src/features/post/like";
+import { postKeys } from "@/src/features/post/hooks/usePostQueries";
 import { useOnlineStatus } from "@/src/features/chat";
-
-
 
 type Props = {
   avatarUrl: string;
@@ -98,14 +91,14 @@ const Card = ({
   isFollowing,
   onFollowToggle,
 }: Props) => {
-
   const { mutate: likePost, isPending: isLiking } = useLikePost();
   const { mutate: unlikePost, isPending: isUnliking } = useUnlikePost();
 
   const { addView: addViewToQueue } = useViewsManager();
   const queryClient = useQueryClient();
 
-  const { mutate: deleteComment, isPending: isDeleteCommentLoading } = useDeleteComment();
+  const { mutate: deleteComment, isPending: isDeleteCommentLoading } =
+    useDeleteComment();
 
   const [error, setError] = useState("");
 
@@ -126,9 +119,6 @@ const Card = ({
   } = useDisclosure();
   // const [editValue, setEditValue] = useState(content);
   const router = useRouter();
-  
-
-
 
   const handleDelete = async () => {
     try {
@@ -144,17 +134,23 @@ const Card = ({
           break;
         case "comment":
           // React Query хук - используем callback вместо unwrap
-          deleteComment({ id: commentId, postId: id }, {
-            onSuccess: () => {
-              // Инвалидируем кэш комментариев для текущего поста
-              queryClient.invalidateQueries({ queryKey: postKeys.detail(id) });
-              onDeleteClose();
+          deleteComment(
+            { id: commentId, postId: id },
+            {
+              onSuccess: () => {
+                // Инвалидируем кэш комментариев для текущего поста
+                queryClient.invalidateQueries({
+                  queryKey: postKeys.detail(id),
+                });
+                onDeleteClose();
+              },
+              onError: (err: any) => {
+                setError(err.message || "Ошибка при удалении комментария");
+                onDeleteClose();
+              },
             },
-            onError: (err: any) => {
-              setError(err.message || "Ошибка при удалении комментария");
-              onDeleteClose();
-            }
-          });
+          );
+
           return; // Выходим, т.к. callback обработает закрытие модалки
         default:
           throw new Error("Неверный аргумент cardFor");
@@ -162,7 +158,11 @@ const Card = ({
       onDeleteClose();
     } catch (err: any) {
       if (hasErrorField(err)) {
-        setError(typeof err.data.error === 'string' ? err.data.error : 'Ошибка при удалении');
+        setError(
+          typeof err.data.error === "string"
+            ? err.data.error
+            : "Ошибка при удалении",
+        );
       } else {
         setError(err.message || "Произошла ошибка");
       }
@@ -189,13 +189,13 @@ const Card = ({
       unlikePost(id, {
         onError: (err: any) => {
           setError(err?.message || "Ошибка при снятии лайка");
-        }
+        },
       });
     } else {
       likePost(id, {
         onError: (err: any) => {
           setError(err?.message || "Ошибка при постановке лайка");
-        }
+        },
       });
     }
     // Функция завершается мгновенно, UI уже обновлён!
@@ -203,11 +203,9 @@ const Card = ({
 
   // ===== АНТИ-СПАМ ЗАЩИТА ДЛЯ ЛАЙКОВ =====
   // Throttle с задержкой 2000мс - предотвращает спам кликов
-  const { throttledCallback: handleLikeWithThrottle, isThrottled } = useThrottle(
-    handleLike,
-    2000
-  );
-  
+  const { throttledCallback: handleLikeWithThrottle, isThrottled } =
+    useThrottle(handleLike, 2000);
+
   // Отправка просмотра через менеджер (батчинг)
   const handleView = ({ postId }: ViewProps) => {
     if (!postId || viewSent) return;
@@ -227,6 +225,7 @@ const Card = ({
     if (viewSent || !id || cardFor !== "post") return;
 
     const el = inViewRef.current;
+
     if (!el) return;
 
     let timeoutId: NodeJS.Timeout;
@@ -254,7 +253,7 @@ const Card = ({
       {
         threshold: 0.5, // 50% поста должно быть видно
         rootMargin: "0px 0px -100px 0px", // Учитываем нижнюю часть экрана
-      }
+      },
     );
 
     observer.observe(el);
@@ -268,54 +267,50 @@ const Card = ({
   }, [id, viewSent, cardFor]);
 
   const { isOnline } = useOnlineStatus(authorId);
-  
+
   return (
     <NextCard className="mb-5">
       <CardHeader className="justify-between  items-center bg-transparent">
         <Link href={`/user/${authorId}`}>
-        
           <User
-            usernameFrameUrl={usernameFrameUrl}
             avatarFrameUrl={avatarFrameUrl}
+            avatarUrl={avatarUrl}
             backgroundUrl={backgroundUrl}
-            dateOfBirth={dateOfBirth}
-            name={name}
             bio={bio}
+            className="text-small font-semibold leading-none text-default-600"
             createdAt={authorCreatedAt}
+            dateOfBirth={dateOfBirth}
+            description={createdAt && formatToClientDate(createdAt)}
             followersCount={followersCount}
             followingCount={followingCount}
             isFollowing={isFollowing}
             isOnline={isOnline}
+            name={name}
+            usernameFrameUrl={usernameFrameUrl}
             onFollowToggle={onFollowToggle}
-            className="text-small font-semibold leading-none text-default-600"
-            avatarUrl={avatarUrl}
-            description={createdAt && formatToClientDate(createdAt)}
           />
         </Link>
-        
 
         <PostDropdown
-          isLoading={
-            false
-          }
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
           authorId={authorId}
+          isLoading={false}
+          onDelete={handleDeleteClick}
+          onEdit={handleEditClick}
           onReport={onReportOpen}
         />
       </CardHeader>
       <CardBody className="px-3 py-2 mb-5">
         <div ref={inViewRef}>
-          <EmojiText text={content} emojiUrls={emojiUrls} />
+          <EmojiText emojiUrls={emojiUrls} text={content} />
 
           {/* Отображение изображения поста */}
           {imageUrl && (
             <div className="mt-3 overflow-hidden">
               <Image
                 isBlurred
-                src={imageUrl}
                 alt="Изображение поста"
                 className="max-w-full h-auto rounded-lg object-cover "
+                src={imageUrl}
                 style={{ maxHeight: "400px" }}
               />
             </div>
@@ -332,23 +327,27 @@ const Card = ({
       {cardFor !== "comment" && (
         <CardFooter className="gap-3">
           <div className="flex gap-5 items-center">
-            <div 
-              onClick={handleLikeWithThrottle} 
+            <div
               className={`cursor-pointer transition-opacity ${
-                isThrottled || isLiking || isUnliking ? 'opacity-50' : 'opacity-100'
+                isThrottled || isLiking || isUnliking
+                  ? "opacity-50"
+                  : "opacity-100"
               }`}
-              title={isThrottled ? 'Подождите немного перед следующим лайком' : ''}
+              title={
+                isThrottled ? "Подождите немного перед следующим лайком" : ""
+              }
+              onClick={handleLikeWithThrottle}
             >
               <MetaInfo
-                {...(likeByUser ? { fill: "#d91002", color: "#d91002",  } : {})}
+                {...(likeByUser ? { fill: "#d91002", color: "#d91002" } : {})}
+                Icon={likeByUser ? Heart : Heart}
                 count={likesCount}
                 type="heart"
-                Icon={likeByUser ? Heart : Heart}
               />
             </div>
-            
+
             <Link href={`/posts/${id}`}>
-              <MetaInfo count={commentsCount} Icon={FaRegComment} />
+              <MetaInfo Icon={FaRegComment} count={commentsCount} />
             </Link>
           </div>
           <ErrorMessage error={error} />
@@ -357,24 +356,24 @@ const Card = ({
 
       {/* Модальное окно подтверждения удаления вынесено в отдельный компонент */}
       <DeletePost
+        error={error}
         isOpen={isDeleteOpen}
+        loading={false}
         onClose={onDeleteClose}
         onDelete={handleDelete}
-        loading={false}
-        error={error}
       />
 
       {/* Модалка редактирования поста вынесена в отдельный компонент */}
       <EditPostModal
-        isOpen={isEditOpen}
-        onClose={onEditClose}
-        postId={id}
         initialContent={content}
         initialEmojiUrls={emojiUrls}
+        isOpen={isEditOpen}
+        postId={id}
+        onClose={onEditClose}
         onUpdated={() => {
           // Инвалидируем кэш постов после редактирования
-          queryClient.invalidateQueries({ queryKey: ['posts'] });
-          queryClient.invalidateQueries({ queryKey: ['post', id] });
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
+          queryClient.invalidateQueries({ queryKey: ["post", id] });
         }}
       />
     </NextCard>

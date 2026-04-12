@@ -1,13 +1,13 @@
 // types/react-google-recaptcha.d.ts
-declare module 'react-google-recaptcha' {
-  import * as React from 'react';
+declare module "react-google-recaptcha" {
+  import * as React from "react";
 
   interface ReCAPTCHAProps {
     sitekey: string;
     onChange?: (value: string | null) => void;
     onExpired?: () => void;
-    theme?: 'light' | 'dark';
-    size?: 'compact' | 'normal' | 'invisible';
+    theme?: "light" | "dark";
+    size?: "compact" | "normal" | "invisible";
     tabindex?: number;
   }
 

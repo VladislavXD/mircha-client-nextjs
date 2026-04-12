@@ -5,7 +5,7 @@
 
 // ============ Базовые типы ============
 
-export type UserRole = 'REGULAR' | 'ADMIN';
+export type UserRole = "REGULAR" | "ADMIN";
 
 export interface PaginationMeta {
   page: number;
@@ -160,23 +160,23 @@ export interface PaginationQueryParams {
   limit?: number;
   search?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface GetUsersQueryParams extends PaginationQueryParams {
-  role?: 'regular' | 'admin';
+  role?: "regular" | "admin";
 }
 
 // ============ DTO для создания/обновления ============
 
 export interface UpdateUserRoleDto {
-  role: 'regular' | 'admin';
+  role: "regular" | "admin";
 }
 
 export interface UpdateUserDto {
   username?: string;
   email?: string;
-  role?: 'regular' | 'admin';
+  role?: "regular" | "admin";
   isActive?: boolean;
   password?: string;
 }

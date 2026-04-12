@@ -77,7 +77,7 @@
 
 //     // Получить сообщения чата с пагинацией
 //     getChatMessages: builder.query<ChatMessagesResponse, { chatId: string; page?: number; limit?: number }>({
-//       query: ({ chatId, page = 1, limit = 50 }) => 
+//       query: ({ chatId, page = 1, limit = 50 }) =>
 //         `/chats/${chatId}/messages?page=${page}&limit=${limit}`,
 //       providesTags: (result, error, { chatId }) => [{ type: 'Message', id: chatId }],
 //     }),

@@ -1,12 +1,11 @@
-import { NewPasswordForm } from '@/src/features/auth/components'
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
-
+import { NewPasswordForm } from "@/src/features/auth/components";
 
 export const metadata: Metadata = {
-	title: 'Новый пароль'
-}
+  title: "Новый пароль",
+};
 
 export default function NewPasswordPage() {
-	return <NewPasswordForm />
+  return <NewPasswordForm />;
 }

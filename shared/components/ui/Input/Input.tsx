@@ -1,18 +1,20 @@
-import { Input as NextInput } from "@heroui/react"
-import React from "react"
-import { useController, Control } from "react-hook-form"
+import React from "react";
+import { useController, Control, FieldValues, Path } from "react-hook-form";
 
-type Props = {
-  name: string;
+import { Input as ShadcnInput } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+type Props<T extends FieldValues = any> = {
+  name: Path<T>;
   label: string;
   placeholder?: string;
   type?: string;
-  control: Control<any>;
+  control: Control<T>;
   required?: string;
   endContent?: JSX.Element;
-}
+};
 
-const Input = ({
+const Input = <T extends FieldValues = any>({
   name,
   label,
   placeholder,
@@ -20,10 +22,10 @@ const Input = ({
   control,
   required = "",
   endContent,
-}: Props) => {
+}: Props<T>) => {
   const {
     field,
-    fieldState: { invalid },
+    fieldState: { invalid, error },
     formState: { errors },
   } = useController({
     name,
@@ -31,21 +33,32 @@ const Input = ({
     rules: {
       required,
     },
-  })
-  return (
-    <NextInput
-      id={name}
-      label={label}
-      type={type}
-      placeholder={placeholder}
-      value={field.value}
-      name={field.name}
-      isInvalid={invalid}
-      onChange={field.onChange}
-      onBlur={field.onBlur}   
-      errorMessage={`${errors[name]?.message ?? ""}`}
-    />
-  )
-}
+  });
 
-export default Input
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={name}>{label}</Label>
+      <div className="relative">
+        <ShadcnInput
+          className={invalid ? "border-red-500" : ""}
+          disabled={false}
+          id={name}
+          name={field.name}
+          placeholder={placeholder}
+          type={type}
+          value={field.value || ""}
+          onBlur={field.onBlur}
+          onChange={field.onChange}
+        />
+        {endContent && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            {endContent}
+          </div>
+        )}
+      </div>
+      {error && <span className="text-xs text-red-500">{error.message}</span>}
+    </div>
+  );
+};
+
+export default Input;

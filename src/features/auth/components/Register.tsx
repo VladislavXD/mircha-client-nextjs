@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import Input from "../../../../shared/components/ui/Input/Input";
 import { useForm } from "react-hook-form";
-import { addToast, Button, Link } from "@heroui/react";
-import ErrorMessage from "../../../../shared/components/ui/ErrorMessage";
-
+import { toast } from "sonner";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useTheme } from "next-themes";
-import { useRegisterMutation } from "../hooks";
-import { RegisterSchema, TypeRegisterSchema } from "../schemes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+
+import { useRegisterMutation } from "../hooks";
+import { RegisterSchema, TypeRegisterSchema } from "../schemes";
+import ErrorMessage from "../../../../shared/components/ui/ErrorMessage";
+import Input from "../../../../shared/components/ui/Input/Input";
+
+import { Button } from "@/components/ui/button";
 
 type Register = {
   email: string;
@@ -24,7 +26,7 @@ type Props = {
 const Register = ({ setSelected }: Props) => {
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
   const { theme } = useTheme();
-  const t = useTranslations('Auth.register');
+  const t = useTranslations("Auth.register");
 
   const {
     handleSubmit,
@@ -35,27 +37,32 @@ const Register = ({ setSelected }: Props) => {
     mode: "onChange",
     reValidateMode: "onBlur",
     defaultValues: {
-      name: '',
-			email: '',
-			password: '',
-			passwordRepeat: ''
+      name: "",
+      email: "",
+      password: "",
+      passwordRepeat: "",
     },
   });
 
   const [error, setError] = useState("");
 
   // React Query mutation для регистрации
-  const {register, isLoadingRegister} = useRegisterMutation()
+  const { registerAsync, isLoadingRegister } = useRegisterMutation();
 
   const onSubmit = async (values: TypeRegisterSchema) => {
-    if(recaptchaValue){
-      register({values, recaptcha: recaptchaValue})
-      control._resetDefaultValues()
-    }else{
-      addToast({
-        title: "Пожалуйста, завершите проверку reCAPTCHA",
-        color: "danger",
-      })
+    if (recaptchaValue) {
+      toast.promise(registerAsync({ values, recaptcha: recaptchaValue }), {
+        loading: t("verifying"),
+        success: {
+          message: t("success"),
+          description: t("registerDescription"),
+        },
+        error: t("error"),
+      });
+
+      control._resetDefaultValues();
+    } else {
+      toast.error("Пожалуйста, завершите проверку reCAPTCHA");
     }
   };
 
@@ -63,59 +70,53 @@ const Register = ({ setSelected }: Props) => {
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
       <Input
         control={control}
+        label={t("name")}
         name="name"
-        label={t('name')}
+        required="Обязательное поле"
         type="text"
-        required="Обязательное поле"
       />
       <Input
         control={control}
+        label={t("email")}
         name="email"
-        label={t('email')}
+        required="Обязательное поле"
         type="email"
-        required="Обязательное поле"
       />
       <Input
         control={control}
+        label={t("password")}
         name="password"
-        label={t('password')}
-        type="password"
         placeholder="******"
         required="Обязательное поле"
+        type="password"
       />
       <Input
         control={control}
+        label={t("confirmPassword")}
         name="passwordRepeat"
-        label={t('confirmPassword')}
         placeholder="******"
-        type="password"
         required="Обязательное поле"
+        type="password"
       />
       <ReCAPTCHA
         sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
-        onChange={setRecaptchaValue}
         theme={theme === "dark" ? "dark" : "light"}
+        onChange={setRecaptchaValue}
       />
       <ErrorMessage error={error} />
-      <p className="text-center text-small">
-        {t('hasAccount')}{" "}
-        <Link
-          size="sm"
-          className="cursor-pointer"
-          onPress={() => setSelected("login")}
+      <p className="text-center text-sm">
+        {t("hasAccount")}{" "}
+        <button
+          className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+          type="button"
+          onClick={() => setSelected("login")}
         >
-          {t('login')}
-        </Link>
+          {t("login")}
+        </button>
       </p>
       <div className="flex gap-2 justify-end">
-        <Button
-          fullWidth
-          disabled={isLoadingRegister}
-          color="primary"
-          type="submit"
-          isLoading={isLoadingRegister}
-        >
-          {t('submit')}
+        <Button className="w-full" disabled={isLoadingRegister} type="submit">
+          {isLoadingRegister ? "Загрузка..." : t("submit")}
         </Button>
       </div>
     </form>

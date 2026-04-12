@@ -4,13 +4,13 @@
  */
 
 // Types
-export * from './types/admin.types';
+export * from "./types/admin.types";
 
 // Services
-export * from './services/admin.service';
+export * from "./services/admin.service";
 
 // Hooks
-export * from './hooks/useAdmin';
+export * from "./hooks/useAdmin";
 
 // Components
-export * from './components';
+export * from "./components";

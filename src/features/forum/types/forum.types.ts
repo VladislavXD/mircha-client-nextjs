@@ -33,7 +33,7 @@ export interface MediaFile {
   name?: string;
   width?: number;
   height?: number;
-  type: 'image' | 'video';
+  type: "image" | "video";
   createdAt: string;
 }
 

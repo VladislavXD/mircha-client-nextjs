@@ -1,26 +1,20 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { noticeService } from "../services"
-import { addToast } from "@heroui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { noticeService } from "../services";
 
 export function useDeleteNotice() {
-	const queryClient = useQueryClient()
-	const { mutate: deleteNotice, isPending} = useMutation({
-		mutationFn: (noticeId: string) => noticeService.deleteNotice(noticeId),
-		onSuccess: () => {
-			queryClient.invalidateQueries({queryKey: ['notices', 'active']})
-			addToast({
-				title: 'Уведомление успешно удалено',
-				color: 'success'
-			})
-		},
-		onError: (error) => {
-			addToast({
-				title: 'Ошибка при удалении уведомления',
-				description: (error as Error).message,
-				color: 'danger'
-			})
-		}
-	})
+  const queryClient = useQueryClient();
+  const { mutate: deleteNotice, isPending } = useMutation({
+    mutationFn: (noticeId: string) => noticeService.deleteNotice(noticeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices", "active"] });
+      toast.success("Уведомление успешно удалено");
+    },
+    onError: (error) => {
+      toast.error("Ошибка при удалении уведомления");
+    },
+  });
 
-	return { deleteNotice, isPending }
+  return { deleteNotice, isPending };
 }

@@ -23,6 +23,7 @@ export interface Message {
 
 export interface Chat {
   id: string;
+  type?: "DIRECT" | "GROUP" | "CHANNEL";
   participants: string[];
   lastMessageAt: string;
   createdAt: string;
@@ -31,6 +32,13 @@ export interface Chat {
   unreadCount?: number;
   isOnline?: boolean;
   lastMessage?: string; // Текст последнего сообщения
+
+  // Поля для групп и каналов
+  name?: string;
+  description?: string;
+  avatarUrl?: string;
+  isPrivate?: boolean;
+  admins?: string[];
 }
 
 export interface PaginationInfo {

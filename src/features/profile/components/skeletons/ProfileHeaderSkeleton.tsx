@@ -8,7 +8,7 @@ export default function ProfileHeaderSkeleton() {
       <Skeleton className="rounded-full">
         <div className="w-10 h-10 rounded-full bg-default-300" />
       </Skeleton>
-      
+
       {/* Name and Username Skeleton */}
       <div className="space-y-2">
         <Skeleton className="w-24 rounded-lg">

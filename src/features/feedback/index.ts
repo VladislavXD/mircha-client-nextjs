@@ -1,11 +1,11 @@
 // Components
-export { default as ReportModal } from './components/ReportModal'
+export { default as ReportModal } from "./components/ReportModal";
 
 // Hooks
-export * from './hooks/useFeedbackMutations'
+export * from "./hooks/useFeedbackMutations";
 
 // Services
-export { feedbackService } from './services/feedback.service'
+export { feedbackService } from "./services/feedback.service";
 
 // Types
-export * from './types'
+export * from "./types";

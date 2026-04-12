@@ -1,18 +1,14 @@
 "use client";
 
 import React from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalBody,
-  Avatar,
-} from "@heroui/react";
+import { Modal, ModalContent, ModalBody, Avatar } from "@heroui/react";
 import Link from "next/link";
 
 interface UserProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId?: string;
+  currentUserId?: string;
   name?: string;
   avatarUrl?: string;
   description?: string;
@@ -33,6 +29,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   isOpen,
   onClose,
   userId,
+  currentUserId,
   name = "",
   avatarUrl = "",
   description = "",
@@ -48,12 +45,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   status,
   onFollowToggle,
 }) => {
-	
   const profileHref = userId ? `/user/${userId}` : "#";
   const displayBio = bio || description || "";
 
   const formatDate = (date?: Date) => {
     if (!date) return "";
+
     return new Date(date).toLocaleDateString("ru-RU", {
       year: "numeric",
       month: "long",
@@ -62,15 +59,15 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      placement="center"
-      size="sm"
       classNames={{
         base: "bg-[#101010] border border-white/10 rounded-2xl shadow-2xl max-w-[340px] mx-auto",
         closeButton:
           "top-3 right-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors z-20",
       }}
+      isOpen={isOpen}
+      placement="center"
+      size="sm"
+      onClose={onClose}
     >
       <ModalContent>
         <ModalBody className="p-0 overflow-hidden rounded-2xl">
@@ -78,11 +75,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           <div className="relative h-[90px] w-full shrink-0">
             {backgroundUrl ? (
               <video
-                className="absolute inset-0 w-full h-full object-cover"
                 autoPlay
                 loop
                 muted
                 playsInline
+                className="absolute inset-0 w-full h-full object-cover"
               >
                 <source src={backgroundUrl} type="video/mp4" />
               </video>
@@ -95,7 +92,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {/* ── Avatar row ── */}
           <div className="px-5 -mt-9 flex items-end justify-between">
             {/* Avatar */}
-            <Link href={profileHref} onClick={onClose} className="relative z-10 shrink-0">
+            <Link
+              className="relative z-10 shrink-0"
+              href={profileHref}
+              onClick={onClose}
+            >
               <div className="relative">
                 {avatarFrameUrl && (
                   <div
@@ -110,9 +111,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 )}
                 <Avatar
                   isBordered
+                  className="w-[68px] h-[68px] ring-[3px] ring-[#101010] transition-opacity hover:opacity-90"
                   color={isOnline ? "success" : "default"}
                   src={avatarUrl || "/default-avatar.png"}
-                  className="w-[68px] h-[68px] ring-[3px] ring-[#101010] transition-opacity hover:opacity-90"
                 />
                 {isOnline && (
                   <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-[#101010] z-20" />
@@ -121,18 +122,23 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </Link>
 
             {/* Follow button — always reserve space if callback present */}
-            <button
-              onClick={(e) => { e.stopPropagation(); onFollowToggle?.(); }}
-              className={`mb-1 px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
-                !onFollowToggle
-                  ? "invisible pointer-events-none border-transparent bg-white text-black"
-                  : isFollowing
-                    ? "border-white/20 text-white/80 hover:border-red-500/60 hover:text-red-400 bg-white/5"
-                    : "border-transparent bg-white text-black hover:bg-white/90"
-              }`}
-            >
-              {isFollowing ? "Отписаться" : "Подписаться"}
-            </button>
+            {userId !== currentUserId && (
+              <button
+                className={`mb-1 px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
+                  !onFollowToggle
+                    ? "invisible pointer-events-none border-transparent bg-white text-black"
+                    : isFollowing
+                      ? "border-white/20 text-white/80 hover:border-red-500/60 hover:text-red-400 bg-white/5"
+                      : "border-transparent bg-white text-black hover:bg-white/90"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFollowToggle?.();
+                }}
+              >
+                {isFollowing ? "Отписаться" : "Подписаться"}
+              </button>
+            )}
           </div>
 
           {/* ── Status badge ── */}
@@ -148,9 +154,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {/* ── Name & username ── */}
           <div className="px-5 pt-2 pb-1">
             <Link
+              className="group inline-block"
               href={profileHref}
               onClick={onClose}
-              className="group inline-block"
             >
               {usernameFrameUrl ? (
                 <div className="relative inline-block">
@@ -193,14 +199,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <svg
                   className="w-3 h-3 text-white/30 shrink-0"
                   fill="none"
+                  stroke="currentColor"
                   strokeWidth={2}
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
                 >
                   <path
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
                 <span className="text-white/30 text-[11px]">
@@ -215,13 +221,21 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
           {/* ── Stats ── */}
           <div className="px-5 pb-5 flex gap-6">
-            <Link href={`${profileHref}?tab=followers`} onClick={onClose} className="group flex flex-col">
+            <Link
+              className="group flex flex-col"
+              href={`${profileHref}?tab=followers`}
+              onClick={onClose}
+            >
               <span className="text-white font-bold text-sm group-hover:underline">
                 {followersCount.toLocaleString()}
               </span>
               <span className="text-white/40 text-xs">подписчиков</span>
             </Link>
-            <Link href={`${profileHref}?tab=following`} onClick={onClose} className="group flex flex-col">
+            <Link
+              className="group flex flex-col"
+              href={`${profileHref}?tab=following`}
+              onClick={onClose}
+            >
               <span className="text-white font-bold text-sm group-hover:underline">
                 {followingCount.toLocaleString()}
               </span>

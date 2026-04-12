@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { postService } from "@/src/features/post/services/post.service";
+
 import CurrentPost from "./CurrentPost";
+
+import { postService } from "@/src/features/post/services/post.service";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -10,6 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const postId = resolvedParams.id;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mirchan.site";
+
   try {
     const post = await postService.getPostById(postId);
     const contentStr = typeof post.content === "string" ? post.content : "";
@@ -20,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const authorName = post.author?.name || "пользователя";
     const pageTitle = `Пост от ${authorName} | Mirchan`;
 
-    const isVideo = post.media?.[0]?.type.includes("VIDEO")
+    const isVideo = post.media?.[0]?.type.includes("VIDEO");
 
     if (isVideo) {
       return {
@@ -49,6 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
       };
     }
+
     return {
       title: pageTitle,
       description,
@@ -57,28 +61,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         type: "article",
         url: `${siteUrl}/posts/${postId}`,
-        
-        images: post?.media?.map(m=> ({
+
+        images: post?.media?.map((m) => ({
           url: m.url,
           width: m.width,
           height: m.height,
-          type: m.type
-        }))
+          type: m.type,
+        })),
       },
       twitter: {
         card: "summary_large_image",
         title: pageTitle,
         description,
         images: post.media?.map((m) => ({
-            url: m.url,
-            width: m.width,
-            height: m.height,
-            type: m.type,
-          })),
+          url: m.url,
+          width: m.width,
+          height: m.height,
+          type: m.type,
+        })),
       },
     };
   } catch (error) {
     console.error("Ошибка при генерации метаданных поста:", error);
+
     return {
       title: "Пост не найден | Mirchan",
       description: "Запрошенный пост не существует или был удален",

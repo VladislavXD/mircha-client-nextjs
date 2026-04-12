@@ -3,8 +3,6 @@
  * API клиент для административных функций
  */
 
-import { BASE_URL } from '@/src/constants/api.url';
-import Cookies from 'js-cookie';
 import type {
   AdminStats,
   AdminUsersResponse,
@@ -23,14 +21,16 @@ import type {
   UpdatedUserRoleResponse,
   ToggledUserStatusResponse,
   AdminBoard,
-} from '../types/admin.types';
+} from "../types/admin.types";
+
+import { BASE_URL } from "@/src/constants/api.url";
 
 /**
  * Получить заголовки для запросов (без токена, используем HTTP-only cookie session)
  */
 const getAuthHeaders = (): HeadersInit => {
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 };
 
@@ -39,9 +39,13 @@ const getAuthHeaders = (): HeadersInit => {
  */
 const handleApiError = async (response: Response) => {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Unknown error' }));
+    const error = await response
+      .json()
+      .catch(() => ({ message: "Unknown error" }));
+
     throw new Error(error.message || `HTTP error! status: ${response.status}`);
   }
+
   return response.json();
 };
 
@@ -50,17 +54,18 @@ const handleApiError = async (response: Response) => {
  */
 const buildQueryString = (params: Record<string, any>): string => {
   const queryParams = new URLSearchParams();
-  
+
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
+    if (value !== undefined && value !== null && value !== "") {
       // Для чисел отправляем как есть (не конвертируем в строку заранее)
       // URLSearchParams.append сам конвертирует, но важно не потерять тип
       queryParams.append(key, String(value));
     }
   });
-  
+
   const queryString = queryParams.toString();
-  return queryString ? `?${queryString}` : '';
+
+  return queryString ? `?${queryString}` : "";
 };
 
 // ============ СТАТИСТИКА ============
@@ -72,8 +77,9 @@ const buildQueryString = (params: Record<string, any>): string => {
 export const getStats = async (): Promise<AdminStats> => {
   const response = await fetch(`${BASE_URL}/admin/stats`, {
     headers: getAuthHeaders(),
-    credentials: 'include', // Отправляем HTTP-only cookie session
+    credentials: "include", // Отправляем HTTP-only cookie session
   });
+
   return handleApiError(response);
 };
 
@@ -83,12 +89,15 @@ export const getStats = async (): Promise<AdminStats> => {
  * Получить список пользователей с фильтрацией
  * GET /admin/users
  */
-export const getUsers = async (params: GetUsersQueryParams = {}): Promise<AdminUsersResponse> => {
+export const getUsers = async (
+  params: GetUsersQueryParams = {},
+): Promise<AdminUsersResponse> => {
   const queryString = buildQueryString(params);
   const response = await fetch(`${BASE_URL}/admin/users${queryString}`, {
     headers: getAuthHeaders(),
-    credentials: 'include', // Отправляем HTTP-only cookie session
+    credentials: "include", // Отправляем HTTP-only cookie session
   });
+
   return handleApiError(response);
 };
 
@@ -98,14 +107,15 @@ export const getUsers = async (params: GetUsersQueryParams = {}): Promise<AdminU
  */
 export const updateUser = async (
   userId: string,
-  data: UpdateUserDto
+  data: UpdateUserDto,
 ): Promise<UpdatedUserResponse> => {
   const response = await fetch(`${BASE_URL}/admin/users/${userId}`, {
-    method: 'PUT',
+    method: "PUT",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify(data),
   });
+
   return handleApiError(response);
 };
 
@@ -113,12 +123,15 @@ export const updateUser = async (
  * Удалить пользователя
  * DELETE /admin/users/:userId
  */
-export const deleteUser = async (userId: string): Promise<AdminActionResponse> => {
+export const deleteUser = async (
+  userId: string,
+): Promise<AdminActionResponse> => {
   const response = await fetch(`${BASE_URL}/admin/users/${userId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };
 
@@ -128,14 +141,15 @@ export const deleteUser = async (userId: string): Promise<AdminActionResponse> =
  */
 export const updateUserRole = async (
   userId: string,
-  data: UpdateUserRoleDto
+  data: UpdateUserRoleDto,
 ): Promise<UpdatedUserRoleResponse> => {
   const response = await fetch(`${BASE_URL}/admin/users/${userId}/role`, {
-    method: 'PUT',
+    method: "PUT",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify(data),
   });
+
   return handleApiError(response);
 };
 
@@ -143,12 +157,15 @@ export const updateUserRole = async (
  * Переключить статус активности пользователя
  * PATCH /admin/users/:userId/status
  */
-export const toggleUserStatus = async (userId: string): Promise<ToggledUserStatusResponse> => {
+export const toggleUserStatus = async (
+  userId: string,
+): Promise<ToggledUserStatusResponse> => {
   const response = await fetch(`${BASE_URL}/admin/users/${userId}/status`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };
 
@@ -158,12 +175,15 @@ export const toggleUserStatus = async (userId: string): Promise<ToggledUserStatu
  * Получить список досок
  * GET /admin/boards
  */
-export const getBoards = async (params: PaginationQueryParams = {}): Promise<AdminBoardsResponse> => {
+export const getBoards = async (
+  params: PaginationQueryParams = {},
+): Promise<AdminBoardsResponse> => {
   const queryString = buildQueryString(params);
   const response = await fetch(`${BASE_URL}/admin/boards${queryString}`, {
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };
 
@@ -171,13 +191,16 @@ export const getBoards = async (params: PaginationQueryParams = {}): Promise<Adm
  * Создать новую доску
  * POST /admin/boards
  */
-export const createBoard = async (data: CreateBoardDto): Promise<AdminBoard> => {
+export const createBoard = async (
+  data: CreateBoardDto,
+): Promise<AdminBoard> => {
   const response = await fetch(`${BASE_URL}/admin/boards`, {
-    method: 'POST',
+    method: "POST",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify(data),
   });
+
   return handleApiError(response);
 };
 
@@ -187,14 +210,15 @@ export const createBoard = async (data: CreateBoardDto): Promise<AdminBoard> => 
  */
 export const updateBoard = async (
   boardId: string,
-  data: UpdateBoardDto
+  data: UpdateBoardDto,
 ): Promise<AdminBoard> => {
   const response = await fetch(`${BASE_URL}/admin/boards/${boardId}`, {
-    method: 'PUT',
+    method: "PUT",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify(data),
   });
+
   return handleApiError(response);
 };
 
@@ -202,12 +226,15 @@ export const updateBoard = async (
  * Удалить доску
  * DELETE /admin/boards/:boardId
  */
-export const deleteBoard = async (boardId: string): Promise<AdminActionResponse> => {
+export const deleteBoard = async (
+  boardId: string,
+): Promise<AdminActionResponse> => {
   const response = await fetch(`${BASE_URL}/admin/boards/${boardId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };
 
@@ -217,12 +244,15 @@ export const deleteBoard = async (boardId: string): Promise<AdminActionResponse>
  * Получить список тредов
  * GET /admin/threads
  */
-export const getThreads = async (params: PaginationQueryParams = {}): Promise<AdminThreadsResponse> => {
+export const getThreads = async (
+  params: PaginationQueryParams = {},
+): Promise<AdminThreadsResponse> => {
   const queryString = buildQueryString(params);
   const response = await fetch(`${BASE_URL}/admin/threads${queryString}`, {
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };
 
@@ -230,12 +260,15 @@ export const getThreads = async (params: PaginationQueryParams = {}): Promise<Ad
  * Удалить тред
  * DELETE /admin/threads/:threadId
  */
-export const deleteThread = async (threadId: string): Promise<AdminActionResponse> => {
+export const deleteThread = async (
+  threadId: string,
+): Promise<AdminActionResponse> => {
   const response = await fetch(`${BASE_URL}/admin/threads/${threadId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };
 
@@ -245,12 +278,15 @@ export const deleteThread = async (threadId: string): Promise<AdminActionRespons
  * Получить список ответов
  * GET /admin/replies
  */
-export const getReplies = async (params: PaginationQueryParams = {}): Promise<AdminRepliesResponse> => {
+export const getReplies = async (
+  params: PaginationQueryParams = {},
+): Promise<AdminRepliesResponse> => {
   const queryString = buildQueryString(params);
   const response = await fetch(`${BASE_URL}/admin/replies${queryString}`, {
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };
 
@@ -258,12 +294,15 @@ export const getReplies = async (params: PaginationQueryParams = {}): Promise<Ad
  * Удалить ответ
  * DELETE /admin/replies/:replyId
  */
-export const deleteReply = async (replyId: string): Promise<AdminActionResponse> => {
+export const deleteReply = async (
+  replyId: string,
+): Promise<AdminActionResponse> => {
   const response = await fetch(`${BASE_URL}/admin/replies/${replyId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };
 
@@ -273,11 +312,14 @@ export const deleteReply = async (replyId: string): Promise<AdminActionResponse>
  * Получить список медиафайлов
  * GET /admin/media
  */
-export const getMediaFiles = async (params: PaginationQueryParams = {}): Promise<AdminMediaFilesResponse> => {
+export const getMediaFiles = async (
+  params: PaginationQueryParams = {},
+): Promise<AdminMediaFilesResponse> => {
   const queryString = buildQueryString(params);
   const response = await fetch(`${BASE_URL}/admin/media${queryString}`, {
     headers: getAuthHeaders(),
-    credentials: 'include',
+    credentials: "include",
   });
+
   return handleApiError(response);
 };

@@ -1,6 +1,14 @@
 import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Chip } from "@heroui/react";
-import { CheckCircle2, Circle, Clock, Zap, Map } from "lucide-react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Chip,
+} from "@heroui/react";
+import { CheckCircle2, Circle, Zap, Map } from "lucide-react";
 
 type UpdatesModalProps = {
   isOpen: boolean;
@@ -68,29 +76,63 @@ const phases: { status: PhaseStatus; phase: string; items: string[] }[] = [
   },
 ];
 
-const statusConfig: Record<PhaseStatus, { icon: any; color: string; dot: string; label: string; chip: string }> = {
-  done:    { icon: CheckCircle2, color: "text-success",  dot: "bg-success",  label: "Готово",       chip: "success"  },
-  active:  { icon: Zap,          color: "text-warning",  dot: "bg-warning",  label: "В разработке", chip: "warning"  },
-  planned: { icon: Circle,       color: "text-default-400", dot: "bg-default-300", label: "Запланировано", chip: "default" },
+const statusConfig: Record<
+  PhaseStatus,
+  { icon: any; color: string; dot: string; label: string; chip: string }
+> = {
+  done: {
+    icon: CheckCircle2,
+    color: "text-success",
+    dot: "bg-success",
+    label: "Готово",
+    chip: "success",
+  },
+  active: {
+    icon: Zap,
+    color: "text-warning",
+    dot: "bg-warning",
+    label: "В разработке",
+    chip: "warning",
+  },
+  planned: {
+    icon: Circle,
+    color: "text-default-400",
+    dot: "bg-default-300",
+    label: "Запланировано",
+    chip: "default",
+  },
 } as const satisfies Record<PhaseStatus, any>;
 
 export default function UpdatesModal({ isOpen, onClose }: UpdatesModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="2xl" scrollBehavior="inside"
+    <Modal
       classNames={{ base: "max-h-[90vh]", body: "py-4 px-4 sm:px-6" }}
+      isOpen={isOpen}
+      scrollBehavior="inside"
+      size="2xl"
+      onClose={onClose}
     >
       <ModalContent>
         {(onClose) => (
           <>
             <ModalHeader className="flex items-center gap-2 border-b border-divider pb-3">
-              <Map size={20} className="text-primary" />
+              <Map className="text-primary" size={20} />
               <span>Карта развития Mirchan</span>
-              <Chip size="sm" color="warning" variant="flat" className="ml-auto">В разработке</Chip>
+              <Chip
+                className="ml-auto"
+                color="warning"
+                size="sm"
+                variant="flat"
+              >
+                В разработке
+              </Chip>
             </ModalHeader>
 
             <ModalBody>
               <p className="text-sm text-default-500 mb-4">
-                Mirchan — анонимная социальная сеть. Ниже — дорожная карта проекта: что уже работает, что делается прямо сейчас и что будет дальше.
+                Mirchan — анонимная социальная сеть. Ниже — дорожная карта
+                проекта: что уже работает, что делается прямо сейчас и что будет
+                дальше.
               </p>
 
               <div className="relative">
@@ -101,23 +143,37 @@ export default function UpdatesModal({ isOpen, onClose }: UpdatesModalProps) {
                   {phases.map((phase) => {
                     const cfg = statusConfig[phase.status];
                     const Icon = cfg.icon;
+
                     return (
                       <div key={phase.phase} className="flex gap-4">
                         {/* Иконка-маркер */}
                         <div className="flex-shrink-0 w-6 flex flex-col items-center pt-0.5">
-                          <Icon size={22} className={cfg.color} />
+                          <Icon className={cfg.color} size={22} />
                         </div>
 
                         {/* Контент фазы */}
                         <div className="flex-1 pb-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold text-sm">{phase.phase}</span>
-                            <Chip size="sm" color={cfg.chip as any} variant="flat">{cfg.label}</Chip>
+                            <span className="font-semibold text-sm">
+                              {phase.phase}
+                            </span>
+                            <Chip
+                              color={cfg.chip as any}
+                              size="sm"
+                              variant="flat"
+                            >
+                              {cfg.label}
+                            </Chip>
                           </div>
                           <ul className="space-y-1">
                             {phase.items.map((item) => (
-                              <li key={item} className="flex items-start gap-2 text-sm text-default-600">
-                                <span className={`mt-[6px] w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                              <li
+                                key={item}
+                                className="flex items-start gap-2 text-sm text-default-600"
+                              >
+                                <span
+                                  className={`mt-[6px] w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`}
+                                />
                                 {item}
                               </li>
                             ))}
@@ -131,8 +187,12 @@ export default function UpdatesModal({ isOpen, onClose }: UpdatesModalProps) {
             </ModalBody>
 
             <ModalFooter className="border-t border-divider pt-3">
-              <span className="text-xs text-default-400 mr-auto">Обновляется по мере разработки</span>
-              <Button variant="flat" onPress={onClose}>Закрыть</Button>
+              <span className="text-xs text-default-400 mr-auto">
+                Обновляется по мере разработки
+              </span>
+              <Button variant="flat" onPress={onClose}>
+                Закрыть
+              </Button>
             </ModalFooter>
           </>
         )}
@@ -140,4 +200,3 @@ export default function UpdatesModal({ isOpen, onClose }: UpdatesModalProps) {
     </Modal>
   );
 }
-

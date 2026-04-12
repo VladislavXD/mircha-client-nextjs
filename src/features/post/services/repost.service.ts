@@ -1,35 +1,36 @@
-import { api } from '@/src/api'
-import type { Post } from '../types'
+import type { Post } from "../types";
+
+import { api } from "@/src/api";
 
 export interface CreateRepostDto {
-  postId: string
-  comment?: string
+  postId: string;
+  comment?: string;
 }
 
 export interface Repost {
-  id: string
-  userId: string
-  postId: string
-  repostComment?: string
-  createdAt: string
+  id: string;
+  userId: string;
+  postId: string;
+  repostComment?: string;
+  createdAt: string;
   user: {
-    id: string
-    username: string
-    name: string
-    avatarUrl?: string
-  }
-  post: Post
+    id: string;
+    username: string;
+    name: string;
+    avatarUrl?: string;
+  };
+  post: Post;
 }
 
 export interface RepostResponse {
-  items: Repost[]
-  nextCursor: string | null
-  hasMore: boolean
+  items: Repost[];
+  nextCursor: string | null;
+  hasMore: boolean;
 }
 
 /**
  * API сервис для работы с репостами.
- * 
+ *
  * Использует axios через базовый api сервис.
  */
 class RepostService {
@@ -40,7 +41,10 @@ class RepostService {
    * @returns Созданный репост
    */
   async createRepost(postId: string, comment?: string): Promise<Repost> {
-    return api.post<Repost>(`posts/${postId}/reposts`, comment ? { comment } : {})
+    return api.post<Repost>(
+      `posts/${postId}/reposts`,
+      comment ? { comment } : {},
+    );
   }
 
   /**
@@ -49,7 +53,7 @@ class RepostService {
    * @returns Сообщение об успешном удалении
    */
   async deleteRepost(postId: string): Promise<{ message: string }> {
-    return api.delete<{ message: string }>(`posts/${postId}/reposts`)
+    return api.delete<{ message: string }>(`posts/${postId}/reposts`);
   }
 
   /**
@@ -62,11 +66,11 @@ class RepostService {
   async getUserReposts(
     userId: string,
     limit = 20,
-    cursor?: string
+    cursor?: string,
   ): Promise<RepostResponse> {
     return api.get<RepostResponse>(`users/${userId}/reposts`, {
       params: { limit, cursor },
-    })
+    });
   }
 
   /**
@@ -75,15 +79,20 @@ class RepostService {
    * @param limit - Лимит результатов
    * @returns Массив пользователей с информацией о репосте
    */
-  async getPostReposters(postId: string, limit = 20): Promise<Array<{
-    id: string
-    username: string
-    name: string
-    avatarUrl?: string
-    repostedAt: string
-    repostComment?: string
-  }>> {
-    return api.get(`posts/${postId}/reposts`, { params: { limit } })
+  async getPostReposters(
+    postId: string,
+    limit = 20,
+  ): Promise<
+    Array<{
+      id: string;
+      username: string;
+      name: string;
+      avatarUrl?: string;
+      repostedAt: string;
+      repostComment?: string;
+    }>
+  > {
+    return api.get(`posts/${postId}/reposts`, { params: { limit } });
   }
 
   /**
@@ -92,9 +101,8 @@ class RepostService {
    * @returns Объект с флагом hasReposted
    */
   async checkRepost(postId: string): Promise<{ hasReposted: boolean }> {
-    return api.get<{ hasReposted: boolean }>(`posts/${postId}/reposts/check`)
+    return api.get<{ hasReposted: boolean }>(`posts/${postId}/reposts/check`);
   }
 }
 
-export const repostService = new RepostService()
-
+export const repostService = new RepostService();

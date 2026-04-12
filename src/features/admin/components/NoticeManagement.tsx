@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState } from "react";
 import {
@@ -19,13 +19,12 @@ import {
   Pagination,
   useDisclosure,
 } from "@heroui/react";
-import { toast } from "react-hot-toast";
-import { MdSearch, MdEdit, MdDelete, MdAdd } from "react-icons/md";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { noticeService } from "@/src/features/notice/services";
-import AdminCreateNoticeModal from '@/shared/components/admin/AdminCreateNoticeModal';
+import { MdSearch, MdDelete, MdAdd } from "react-icons/md";
+
 import { useDeleteNotice } from "../../notice/hooks/useDeleteNotice";
 import { useGetAllNotices } from "../../notice/hooks/useGetAllNotices";
+
+import AdminCreateNoticeModal from "@/shared/components/admin/AdminCreateNoticeModal";
 
 interface NoticeManagementProps {
   className?: string;
@@ -35,41 +34,52 @@ export default function NoticeManagement({ className }: NoticeManagementProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
 
-  const { isOpen: isCreateOpen, onOpen: onCreateOpen, onClose: onCreateClose } = useDisclosure();
+  const {
+    isOpen: isCreateOpen,
+    onOpen: onCreateOpen,
+    onClose: onCreateClose,
+  } = useDisclosure();
 
-  
   // Fetch all notices (admin endpoint)
-  const {error, isPending, notices, refetch} = useGetAllNotices()
+  const { error, isPending, notices, refetch } = useGetAllNotices();
 
   // Delete mutation
   const { deleteNotice, isPending: isDeleting } = useDeleteNotice();
-  
+
   const handleDelete = async (id: string) => {
     if (confirm("Вы уверены, что хотите удалить это уведомление?")) {
-      deleteNotice(id)
+      deleteNotice(id);
     }
   };
 
   // Filter notices by search
-  const filteredNotices = Array.isArray(notices) 
-    ? notices.filter((n: any) => 
-        n.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        n.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        n.type?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredNotices = Array.isArray(notices)
+    ? notices.filter(
+        (n: any) =>
+          n.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          n.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          n.type?.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : [];
 
   // Pagination
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredNotices.length / itemsPerPage);
-  const paginatedNotices = filteredNotices.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  const paginatedNotices = filteredNotices.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage,
+  );
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'info': return 'primary';
-      case 'warning': return 'warning';
-      case 'error': return 'danger';
-      default: return 'default';
+      case "info":
+        return "primary";
+      case "warning":
+        return "warning";
+      case "error":
+        return "danger";
+      default:
+        return "default";
     }
   };
 
@@ -78,11 +88,20 @@ export default function NoticeManagement({ className }: NoticeManagementProps) {
       <Card>
         <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg sm:text-xl font-semibold">Управление уведомлениями</h2>
-            <Chip size="sm" variant="flat">{filteredNotices.length}</Chip>
+            <h2 className="text-lg sm:text-xl font-semibold">
+              Управление уведомлениями
+            </h2>
+            <Chip size="sm" variant="flat">
+              {filteredNotices.length}
+            </Chip>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button size="sm" color="primary" onPress={onCreateOpen} startContent={<MdAdd />}>
+            <Button
+              color="primary"
+              size="sm"
+              startContent={<MdAdd />}
+              onPress={onCreateOpen}
+            >
               Создать уведомление
             </Button>
           </div>
@@ -92,16 +111,16 @@ export default function NoticeManagement({ className }: NoticeManagementProps) {
           <div className="space-y-4 mb-6">
             <div className="flex gap-4 items-center">
               <Input
+                isClearable
+                className="flex-1"
                 placeholder="Поиск по содержимому, заголовку или типу..."
+                size="sm"
+                startContent={<MdSearch />}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                   setPage(1);
                 }}
-                startContent={<MdSearch />}
-                className="flex-1"
-                isClearable
-                size="sm"
               />
             </div>
           </div>
@@ -109,7 +128,11 @@ export default function NoticeManagement({ className }: NoticeManagementProps) {
           {error ? (
             <div className="text-center py-8">
               <p className="text-danger">Ошибка загрузки уведомлений</p>
-              <Button color="primary" onPress={() => refetch()} className="mt-4">
+              <Button
+                className="mt-4"
+                color="primary"
+                onPress={() => refetch()}
+              >
                 Повторить
               </Button>
             </div>
@@ -122,7 +145,9 @@ export default function NoticeManagement({ className }: NoticeManagementProps) {
               <Table
                 aria-label="Таблица уведомлений"
                 className="min-h-[400px]"
-                classNames={{ wrapper: "shadow-none border border-divider overflow-x-auto" }}
+                classNames={{
+                  wrapper: "shadow-none border border-divider overflow-x-auto",
+                }}
               >
                 <TableHeader>
                   <TableColumn className="min-w-64">СОДЕРЖИМОЕ</TableColumn>
@@ -136,13 +161,15 @@ export default function NoticeManagement({ className }: NoticeManagementProps) {
                   {paginatedNotices.map((notice: any) => {
                     const isExpired = new Date(notice.expiredAt) < new Date();
                     const isActive = notice.active && !isExpired;
-                    
+
                     return (
                       <TableRow key={notice.id}>
                         <TableCell className="min-w-64">
                           <div className="max-w-md">
                             {notice.title && (
-                              <p className="font-medium text-sm mb-1">{notice.title}</p>
+                              <p className="font-medium text-sm mb-1">
+                                {notice.title}
+                              </p>
                             )}
                             <p className="text-xs text-default-500 line-clamp-2">
                               {notice.content}
@@ -150,50 +177,64 @@ export default function NoticeManagement({ className }: NoticeManagementProps) {
                           </div>
                         </TableCell>
                         <TableCell className="min-w-24">
-                          <Chip size="sm" color={getTypeColor(notice.type)} variant="flat">
+                          <Chip
+                            color={getTypeColor(notice.type)}
+                            size="sm"
+                            variant="flat"
+                          >
                             {notice.type}
                           </Chip>
                         </TableCell>
                         <TableCell className="min-w-32">
-                          <Chip 
-                            size="sm" 
-                            color={isActive ? "success" : "default"} 
+                          <Chip
+                            color={isActive ? "success" : "default"}
+                            size="sm"
                             variant="flat"
                           >
-                            {isActive ? "Активно" : isExpired ? "Истекло" : "Неактивно"}
+                            {isActive
+                              ? "Активно"
+                              : isExpired
+                                ? "Истекло"
+                                : "Неактивно"}
                           </Chip>
                         </TableCell>
                         <TableCell className="min-w-32">
                           <span className="text-xs">
-                            {new Date(notice.createdAt).toLocaleDateString('ru-RU', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                            {new Date(notice.createdAt).toLocaleDateString(
+                              "ru-RU",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
                           </span>
                         </TableCell>
                         <TableCell className="min-w-32">
                           <span className="text-xs">
-                            {new Date(notice.expiredAt).toLocaleDateString('ru-RU', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                            {new Date(notice.expiredAt).toLocaleDateString(
+                              "ru-RU",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
                           </span>
                         </TableCell>
                         <TableCell className="min-w-24">
                           <div className="flex items-center gap-1">
                             <Tooltip content="Удалить">
-                              <Button 
-                                size="sm" 
-                                variant="light" 
-                                color="danger" 
-                                onPress={() => handleDelete(notice.id)}
+                              <Button
+                                color="danger"
                                 isLoading={isDeleting}
+                                size="sm"
+                                variant="light"
+                                onPress={() => handleDelete(notice.id)}
                               >
                                 <MdDelete />
                               </Button>
@@ -209,11 +250,11 @@ export default function NoticeManagement({ className }: NoticeManagementProps) {
               {totalPages > 1 && (
                 <div className="flex justify-center mt-4">
                   <Pagination
-                    total={totalPages}
-                    page={page}
-                    onChange={setPage}
                     showControls
                     showShadow
+                    page={page}
+                    total={totalPages}
+                    onChange={setPage}
                   />
                 </div>
               )}

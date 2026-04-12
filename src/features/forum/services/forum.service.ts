@@ -2,7 +2,6 @@
  * Forum Service - API для работы с форумом через NestJS backend
  */
 
-import { api } from '@/src/api';
 import type {
   Board,
   Thread,
@@ -19,7 +18,9 @@ import type {
   CreateReplyDto,
   CreateCategoryDto,
   CreateTagDto,
-} from '../types/forum.types';
+} from "../types/forum.types";
+
+import { api } from "@/src/api";
 
 /**
  * Сервис для работы с форумом
@@ -33,7 +34,7 @@ export const forumService = {
    * Получить все борды
    */
   async getBoards(): Promise<Board[]> {
-    return api.get<Board[]>('forum/boards');
+    return api.get<Board[]>("forum/boards");
   },
 
   /**
@@ -52,7 +53,8 @@ export const forumService = {
     tagSlug?: string,
   ): Promise<BoardThreadsResponse> {
     const params = new URLSearchParams({ page: page.toString() });
-    if (tagSlug) params.set('tag', tagSlug);
+
+    if (tagSlug) params.set("tag", tagSlug);
 
     return api.get<BoardThreadsResponse>(
       `forum/boards/${boardName}/full?${params.toString()}`,
@@ -63,16 +65,13 @@ export const forumService = {
    * Создать новый борд
    */
   async createBoard(data: CreateBoardDto): Promise<Board> {
-    return api.post<Board>('forum/boards', data);
+    return api.post<Board>("forum/boards", data);
   },
 
   /**
    * Обновить борд
    */
-  async updateBoard(
-    boardName: string,
-    data: UpdateBoardDto,
-  ): Promise<Board> {
+  async updateBoard(boardName: string, data: UpdateBoardDto): Promise<Board> {
     return api.put<Board>(`forum/boards/${boardName}`, data);
   },
 
@@ -103,22 +102,20 @@ export const forumService = {
     files?: File[],
   ): Promise<Thread> {
     const formData = new FormData();
-    formData.append('subject', data.subject);
-    formData.append('content', data.content);
-    if (data.authorName) formData.append('authorName', data.authorName);
-    if (data.isPinned) formData.append('isPinned', String(data.isPinned));
+
+    formData.append("subject", data.subject);
+    formData.append("content", data.content);
+    if (data.authorName) formData.append("authorName", data.authorName);
+    if (data.isPinned) formData.append("isPinned", String(data.isPinned));
     if (data.tagIds) {
-      data.tagIds.forEach((tagId) => formData.append('tagIds[]', tagId));
+      data.tagIds.forEach((tagId) => formData.append("tagIds[]", tagId));
     }
 
     if (files) {
-      files.forEach((file) => formData.append('images', file));
+      files.forEach((file) => formData.append("images", file));
     }
 
-    return api.post<Thread>(
-      `forum/boards/${boardName}/threads`,
-      formData,
-    );
+    return api.post<Thread>(`forum/boards/${boardName}/threads`, formData);
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -135,11 +132,12 @@ export const forumService = {
     files?: File[],
   ): Promise<Reply> {
     const formData = new FormData();
-    formData.append('content', data.content);
-    if (data.authorName) formData.append('authorName', data.authorName);
+
+    formData.append("content", data.content);
+    if (data.authorName) formData.append("authorName", data.authorName);
 
     if (files) {
-      files.forEach((file) => formData.append('images', file));
+      files.forEach((file) => formData.append("images", file));
     }
 
     return api.post<Reply>(
@@ -156,7 +154,7 @@ export const forumService = {
    * Получить все категории
    */
   async getCategories(): Promise<Category[]> {
-    return api.get<Category[]>('forum/categories');
+    return api.get<Category[]>("forum/categories");
   },
 
   /**
@@ -188,7 +186,8 @@ export const forumService = {
       page: page.toString(),
       limit: limit.toString(),
     });
-    if (tagSlug) params.set('tag', tagSlug);
+
+    if (tagSlug) params.set("tag", tagSlug);
 
     return api.get<any>(
       `forum/categories/${slug}/threads?${params.toString()}`,
@@ -204,22 +203,20 @@ export const forumService = {
     files?: File[],
   ): Promise<Thread> {
     const formData = new FormData();
-    formData.append('subject', data.subject);
-    formData.append('content', data.content);
-    if (data.authorName) formData.append('authorName', data.authorName);
-    if (data.isPinned) formData.append('isPinned', String(data.isPinned));
+
+    formData.append("subject", data.subject);
+    formData.append("content", data.content);
+    if (data.authorName) formData.append("authorName", data.authorName);
+    if (data.isPinned) formData.append("isPinned", String(data.isPinned));
     if (data.tagIds) {
-      data.tagIds.forEach((tagId) => formData.append('tagIds[]', tagId));
+      data.tagIds.forEach((tagId) => formData.append("tagIds[]", tagId));
     }
 
     if (files) {
-      files.forEach((file) => formData.append('images', file));
+      files.forEach((file) => formData.append("images", file));
     }
 
-    return api.post<Thread>(
-      `forum/categories/${slug}/threads`,
-      formData,
-    );
+    return api.post<Thread>(`forum/categories/${slug}/threads`, formData);
   },
 
   /**
@@ -252,10 +249,10 @@ export const forumService = {
    * Создать категорию
    */
   async createCategory(data: FormData | CreateCategoryDto): Promise<Category> {
-    if (typeof FormData !== 'undefined' && data instanceof FormData) {
-      return api.post<Category>('forum/categories', data);
+    if (typeof FormData !== "undefined" && data instanceof FormData) {
+      return api.post<Category>("forum/categories", data);
     } else {
-      return api.post<Category>('forum/categories', data);
+      return api.post<Category>("forum/categories", data);
     }
   },
 
@@ -267,14 +264,14 @@ export const forumService = {
    * Получить все теги
    */
   async getTags(): Promise<Tag[]> {
-    return api.get<Tag[]>('forum/tags');
+    return api.get<Tag[]>("forum/tags");
   },
 
   /**
    * Создать тег
    */
   async createTag(data: CreateTagDto): Promise<Tag> {
-    return api.post<Tag>('forum/tags', data);
+    return api.post<Tag>("forum/tags", data);
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -285,7 +282,7 @@ export const forumService = {
    * Получить статистику форума
    */
   async getForumStats(): Promise<ForumStats> {
-    return api.get<ForumStats>('forum/stats');
+    return api.get<ForumStats>("forum/stats");
   },
 
   /**
@@ -301,7 +298,7 @@ export const forumService = {
   async getLatestThreads(
     page: number = 1,
     limit: number = 20,
-    nsfw: string = '0',
+    nsfw: string = "0",
   ): Promise<LatestThreadsResponse> {
     const params = new URLSearchParams({
       page: page.toString(),

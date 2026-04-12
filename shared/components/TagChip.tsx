@@ -42,23 +42,24 @@ export default function TagChip({
   const isUrl = !!icon && /^(https?:)?\/\//.test(icon);
 
   const style: React.CSSProperties = {};
+
   if (withColorBackground && tag.color) {
     style.backgroundColor = tag.color || undefined;
   }
 
   const content = (
     <Chip
-      size={size}
-      variant={variant}
       className={`items-center gap-1 text-xs flex   ${className || ""}`}
+      size={size}
       style={style}
+      variant={variant}
       onClick={onClick}
     >
       <div className="flex items-center gap-1">
         {icon ? (
           isUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={icon} alt="" className="w-4 h-4 object-cover rounded" />
+            <img alt="" className="w-4 h-4 object-cover rounded" src={icon} />
           ) : (
             <span>{icon}</span>
           )
@@ -71,7 +72,7 @@ export default function TagChip({
   if (asLink && href) {
     // Оборачиваем в ссылку, но оставляем вид Chip
     return (
-      <a href={href} onClick={onClick} className=" flex">
+      <a className=" flex" href={href} onClick={onClick}>
         {content}
       </a>
     );

@@ -30,27 +30,27 @@
 //   SelectItem,
 //   Textarea
 // } from '@heroui/react'
-// import { 
-//   MdSearch, 
-//   MdMoreVert, 
-//   MdEdit, 
-//   MdDelete, 
+// import {
+//   MdSearch,
+//   MdMoreVert,
+//   MdEdit,
+//   MdDelete,
 //   MdAdd,
 //   MdVisibility,
 //   MdVisibilityOff,
-//   MdFilterList 
+//   MdFilterList
 // } from 'react-icons/md'
-// import { 
-//   useGetAdminBoardsQuery, 
-//   useUpdateAdminBoardMutation, 
+// import {
+//   useGetAdminBoardsQuery,
+//   useUpdateAdminBoardMutation,
 //   useDeleteAdminBoardMutation,
 //   type AdminBoard,
 //   type BoardsFilter,
 //   type UpdateBoardRequest
 // } from '@/src/services/admin.service.old' // TODO: Migrate to React Query from @/src/features/admin
-// import { 
-//   formatAdminDate, 
-//   getStatusColor, 
+// import {
+//   formatAdminDate,
+//   getStatusColor,
 //   getStatusText,
 //   validateBoardName,
 //   validateBoardShortName,
@@ -68,13 +68,13 @@
 //     search: '',
 //     isActive: ''
 //   })
-  
+
 //   // Состояние модальных окон
 //   const [selectedBoard, setSelectedBoard] = useState<AdminBoard | null>(null)
 //   const [editingBoard, setEditingBoard] = useState<AdminBoard | null>(null)
 //   const [editFormData, setEditFormData] = useState<UpdateBoardRequest>({})
 //   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  
+
 //   const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure()
 //   const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure()
 //   const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure()
@@ -98,10 +98,10 @@
 //   }
 
 //   const handleStatusFilterChange = (status: string) => {
-//     setFilters(prev => ({ 
-//       ...prev, 
+//     setFilters(prev => ({
+//       ...prev,
 //       isActive: status === 'all' ? '' : (status === 'active' ? 'true' : 'false'),
-//       page: 1 
+//       page: 1
 //     }))
 //   }
 
@@ -157,7 +157,7 @@
 //     if (!editingBoard) return
 
 //     const updateData: UpdateBoardRequest = {}
-    
+
 //     if (editFormData.name !== editingBoard.name) updateData.name = editFormData.name
 //     if (editFormData.title !== editingBoard.title) updateData.title = editFormData.title
 //     if (editFormData.description !== editingBoard.description) updateData.description = editFormData.description
@@ -433,8 +433,8 @@
 //             <Button variant="light" onPress={onEditModalClose}>
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="primary" 
+//             <Button
+//               color="primary"
 //               onPress={handleUpdateBoard}
 //               isLoading={isUpdating}
 //             >
@@ -461,8 +461,8 @@
 //             <Button variant="light" onPress={onDeleteModalClose}>
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="danger" 
+//             <Button
+//               color="danger"
 //               onPress={handleDeleteBoard}
 //               isLoading={isDeleting}
 //             >

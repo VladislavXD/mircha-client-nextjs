@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
-import { useCategories, useCreateCategory } from '@/src/features/forum/hooks/useForum';
-import { Button, Input, Card, CardBody, Spinner } from '@heroui/react';
+import React, { useState } from "react";
+import { Button, Input, Card, CardBody, Spinner } from "@heroui/react";
+
+import {
+  useCategories,
+  useCreateCategory,
+} from "@/src/features/forum/hooks/useForum";
 
 const CategoryManagement: React.FC = () => {
   const { data: categories, isLoading } = useCategories();
   const createCategory = useCreateCategory();
 
-  const [newCategory, setNewCategory] = useState('');
+  const [newCategory, setNewCategory] = useState("");
 
   const handleCreateCategory = async () => {
     if (!newCategory.trim()) return;
-    const slug = newCategory.trim().toLowerCase().replace(/\s+/g, '-');
+    const slug = newCategory.trim().toLowerCase().replace(/\s+/g, "-");
+
     await createCategory.mutateAsync({ name: newCategory, slug });
-    setNewCategory('');
+    setNewCategory("");
   };
 
   return (
@@ -30,9 +35,9 @@ const CategoryManagement: React.FC = () => {
         )}
         <div>
           <Input
+            placeholder="Название новой категории"
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
-            placeholder="Название новой категории"
           />
           <Button onClick={handleCreateCategory}>Создать категорию</Button>
         </div>

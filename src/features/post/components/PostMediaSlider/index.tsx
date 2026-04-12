@@ -1,22 +1,26 @@
 "use client";
-import React from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
+import React from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
 
-import 'swiper/css';
-import 'swiper/css/navigation';
+import "swiper/css";
+import "swiper/css/navigation";
 
-import { MediaSlide } from './components/MediaSlide';
-import { NavigationButtons } from './components/NavigationButtons';
-import { PaginationDots } from './components/PaginationDots';
-import { FullscreenViewer } from './components/FullscreenViewer';
-import { useMediaSlider } from './hooks/useMediaSlider';
-import { useFullscreenImage } from './hooks/useFullscreenImage';
-import type { MediaSliderProps } from './types';
+import { MediaSlide } from "./components/MediaSlide";
+import { NavigationButtons } from "./components/NavigationButtons";
+import { PaginationDots } from "./components/PaginationDots";
+import { FullscreenViewer } from "./components/FullscreenViewer";
+import { useMediaSlider } from "./hooks/useMediaSlider";
+import { useFullscreenImage } from "./hooks/useFullscreenImage";
 
-import './styles.css';
+import type { MediaSliderProps } from "./types";
 
-const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) => {
+import "./styles.css";
+
+const PostMediaSlider: React.FC<MediaSliderProps> = ({
+  media,
+  className = "",
+}) => {
   const {
     revealedSpoilers,
     aspectRatios,
@@ -41,15 +45,16 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
 
   const handleMediaClick = (index: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    
+
     // Если это спойлер и он еще не раскрыт - раскрываем
     if (media[index].spoiler && !revealedSpoilers.has(index)) {
       revealSpoiler(index);
+
       return;
     }
 
     // Если это изображение и спойлер раскрыт - открываем fullscreen
-    if (media[index].type === 'image') {
+    if (media[index].type === "image") {
       openFullscreen(index);
     }
   };
@@ -61,31 +66,36 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
 
   return (
     <>
-      <div className={`w-full ${className} relative post-media-swiper`} data-no-redirect="true">
+      <div
+        className={`w-full ${className} relative post-media-swiper`}
+        data-no-redirect="true"
+      >
         <Swiper
-          onSwiper={setSwiperInstance}
-          onSlideChange={(swiper) => setCurrentSlide(swiper.activeIndex)}
-          spaceBetween={0}
-          slidesPerView={1}
-          navigation={{
-            prevEl: '.swiper-button-prev-custom',
-            nextEl: '.swiper-button-next-custom',
-          }}
-          modules={[Navigation]}
           className="!pb-0 rounded-2xl overflow-hidden"
+          modules={[Navigation]}
+          navigation={{
+            prevEl: ".swiper-button-prev-custom",
+            nextEl: ".swiper-button-next-custom",
+          }}
+          slidesPerView={1}
+          spaceBetween={0}
+          onSlideChange={(swiper) => setCurrentSlide(swiper.activeIndex)}
+          onSwiper={setSwiperInstance}
         >
           {media.map((item, index) => (
             <SwiperSlide key={index}>
               <MediaSlide
-                item={item}
-                index={index}
-                isSpoilerHidden={!!(item.spoiler && !revealedSpoilers.has(index))}
                 aspectRatio={aspectRatios.get(item.url)}
-                onMediaClick={handleMediaClick}
-                onImageFullscreen={handleImageFullscreen}
                 getVideoRef={getVideoRef}
-                onVideoLoadedMetadata={handleVideoLoadedMetadata}
+                index={index}
+                isSpoilerHidden={
+                  !!(item.spoiler && !revealedSpoilers.has(index))
+                }
+                item={item}
+                onImageFullscreen={handleImageFullscreen}
                 onImageLoadedMetadata={handleImageLoadedMetadata}
+                onMediaClick={handleMediaClick}
+                onVideoLoadedMetadata={handleVideoLoadedMetadata}
               />
             </SwiperSlide>
           ))}
@@ -95,14 +105,14 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
         <NavigationButtons
           currentSlide={currentSlide}
           totalSlides={media.length}
-          onPrev={() => goToSlide(currentSlide - 1)}
           onNext={() => goToSlide(currentSlide + 1)}
+          onPrev={() => goToSlide(currentSlide - 1)}
         />
 
         {/* Точки пагинации */}
         <PaginationDots
-          totalSlides={media.length}
           currentSlide={currentSlide}
+          totalSlides={media.length}
           onSlideClick={goToSlide}
         />
       </div>
@@ -110,8 +120,8 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
       {/* Fullscreen просмотр изображения */}
       {fullscreenIndex !== null && (
         <FullscreenViewer
-          media={media}
           currentIndex={fullscreenIndex}
+          media={media}
           onClose={closeFullscreen}
           onNavigate={navigateFullscreen}
           onSlideClick={openFullscreen}
@@ -122,4 +132,4 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
 };
 
 export default PostMediaSlider;
-export type { PostMedia } from './types';
+export type { PostMedia } from "./types";

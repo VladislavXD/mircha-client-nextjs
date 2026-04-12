@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Image } from "@heroui/react";
-import { VideoPlayer } from './VideoPlayer';
-import { BlurredBackground } from './BlurredBackground';
-import type { PostMedia } from '../types';
+import type { PostMedia } from "../types";
+
+import React, { useState } from "react";
+
+import { VideoPlayer } from "./VideoPlayer";
+import { BlurredBackground } from "./BlurredBackground";
 
 type Props = {
   item: PostMedia;
@@ -19,7 +20,7 @@ type Props = {
 // Определяем стиль отображения на основе aspect ratio
 const getImageFit = (aspectRatio?: number) => {
   if (!aspectRatio) return "object-contain";
-  
+
   // На мобильных (< 768px) всегда используем cover для заполнения
   // На десктопе используем адаптивный подход
   return "object-cover md:object-contain";
@@ -27,21 +28,21 @@ const getImageFit = (aspectRatio?: number) => {
 
 const getImageClasses = (aspectRatio?: number) => {
   const baseFit = getImageFit(aspectRatio);
-  
+
   // На мобильных изображение занимает всю высоту слайдера
   return `relative z-10 w-full h-full ${baseFit} transition-transform duration-300`;
 };
 
-export const MediaSlide: React.FC<Props> = ({ 
-  item, 
-  index, 
-  isSpoilerHidden, 
+export const MediaSlide: React.FC<Props> = ({
+  item,
+  index,
+  isSpoilerHidden,
   aspectRatio,
-  onMediaClick, 
+  onMediaClick,
   onImageFullscreen,
   getVideoRef,
   onVideoLoadedMetadata,
-  onImageLoadedMetadata
+  onImageLoadedMetadata,
 }) => {
   const [isRevealing, setIsRevealing] = useState(false);
 
@@ -50,6 +51,7 @@ export const MediaSlide: React.FC<Props> = ({
     if (onImageLoadedMetadata) {
       const img = e.currentTarget;
       const ratio = img.naturalWidth / img.naturalHeight;
+
       onImageLoadedMetadata(item.url, ratio);
     }
   };
@@ -61,36 +63,40 @@ export const MediaSlide: React.FC<Props> = ({
       onMediaClick(index, e);
     }, 300);
   };
-  
+
   const renderSpoiler = () => (
-    <div 
+    <div
       className={`relative w-full h-full cursor-pointer transition-all duration-300 ${
-        isRevealing ? 'opacity-0 scale-95' : 'opacity-100 scale-100 hover:opacity-90'
+        isRevealing
+          ? "opacity-0 scale-95"
+          : "opacity-100 scale-100 hover:opacity-90"
       }`}
       onClick={handleSpoilerClick}
     >
-      <BlurredBackground src={item.url} type={item.type} opacity="opacity-40" />
-      
+      <BlurredBackground opacity="opacity-40" src={item.url} type={item.type} />
+
       {item.type === "image" ? (
         <img
-          src={item.url}
           alt={`Spoiler ${index + 1}`}
           className="relative z-10 w-full h-full object-cover blur-2xl"
-          style={{ pointerEvents: 'none' }}
+          src={item.url}
+          style={{ pointerEvents: "none" }}
         />
       ) : (
         <video
-          src={item.url}
-          className="relative z-10 w-full h-full object-cover pointer-events-none blur-2xl"
           muted
+          className="relative z-10 w-full h-full object-cover pointer-events-none blur-2xl"
           preload="metadata"
+          src={item.url}
         />
       )}
-      
+
       <div className="absolute inset-0 z-20 flex items-center justify-center">
-        <div className={`bg-black/60 backdrop-blur-sm px-6 py-3 rounded-2xl transition-all duration-300 ${
-          isRevealing ? 'scale-90 opacity-0' : 'scale-100 opacity-100'
-        }`}>
+        <div
+          className={`bg-black/60 backdrop-blur-sm px-6 py-3 rounded-2xl transition-all duration-300 ${
+            isRevealing ? "scale-90 opacity-0" : "scale-100 opacity-100"
+          }`}
+        >
           <p className="text-white font-medium">Нажмите чтобы показать</p>
         </div>
       </div>
@@ -100,14 +106,14 @@ export const MediaSlide: React.FC<Props> = ({
   const renderContent = () => {
     if (item.type === "image") {
       return (
-        <div 
+        <div
           className={`relative w-full h-full cursor-pointer group transition-all duration-300 ${
-            isSpoilerHidden ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+            isSpoilerHidden ? "opacity-0 scale-95" : "opacity-100 scale-100"
           }`}
           onClick={(e) => onImageFullscreen(index, e)}
         >
           <BlurredBackground src={item.url} type="image" />
-          
+
           {/* Градиенты только на десктопе для contain изображений */}
           {aspectRatio && aspectRatio < 1.2 && (
             <>
@@ -115,11 +121,11 @@ export const MediaSlide: React.FC<Props> = ({
               <div className="hidden md:block absolute inset-0 z-[5] shadow-[inset_0_0_100px_rgba(0,0,0,0.3)] pointer-events-none" />
             </>
           )}
-          
+
           <img
-            src={item.url}
             alt={`Image ${index + 1}`}
             className={getImageClasses(aspectRatio)}
+            src={item.url}
             onLoad={handleImageLoad}
           />
         </div>
@@ -128,10 +134,10 @@ export const MediaSlide: React.FC<Props> = ({
 
     return (
       <VideoPlayer
-        src={item.url}
-        isSpoilerRevealed={!isSpoilerHidden}
-        videoRef={getVideoRef(item.url)}
         aspectRatio={aspectRatio}
+        isSpoilerRevealed={!isSpoilerHidden}
+        src={item.url}
+        videoRef={getVideoRef(item.url)}
         onLoadedMetadata={(ratio) => onVideoLoadedMetadata(item.url, ratio)}
       />
     );

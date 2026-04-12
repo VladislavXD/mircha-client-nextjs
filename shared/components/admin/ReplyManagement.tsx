@@ -46,10 +46,10 @@
 //   MdPerson,
 //   MdForum,
 // } from 'react-icons/md'
-// import { 
-//   useGetAdminRepliesQuery, 
+// import {
+//   useGetAdminRepliesQuery,
 //   useGetAdminReplyByIdQuery,
-//   useUpdateAdminReplyMutation, 
+//   useUpdateAdminReplyMutation,
 //   useDeleteAdminReplyMutation,
 //   type AdminReply,
 //   type RepliesFilter,
@@ -67,13 +67,13 @@
 //     page: 1,
 //     limit: 10,
 //   })
-  
+
 //   // Состояние UI
 //   const [searchTerm, setSearchTerm] = useState('')
 //   const [selectedReply, setSelectedReply] = useState<AdminReply | null>(null)
 //   const [editingReply, setEditingReply] = useState<AdminReply | null>(null)
 //   const [isFiltersVisible, setIsFiltersVisible] = useState(false)
-  
+
 //   // Модалки
 //   const { isOpen: isViewOpen, onOpen: onViewOpen, onClose: onViewClose } = useDisclosure()
 //   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure()
@@ -328,7 +328,7 @@
 //                               <MdVisibility />
 //                             </Button>
 //                           </Tooltip>
-                          
+
 //                           <Dropdown>
 //                             <DropdownTrigger>
 //                               <Button
@@ -537,9 +537,9 @@
 
 //   const handleSubmit = (e: React.FormEvent) => {
 //     e.preventDefault()
-    
+
 //     const updateData: UpdateReplyRequest = {}
-    
+
 //     if (formData.content !== reply.content) {
 //       updateData.content = formData.content
 //     }

@@ -1,82 +1,99 @@
+"use client";
 
-"use client"
+import React from "react";
+import { useTranslations } from "next-intl";
+import {
+  Home,
+  Search,
+  Bell,
+  MessageCircle,
+  MessagesSquare,
+  UserCheck,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 
-import React, { useMemo } from "react"
-import { BsPostcard } from "react-icons/bs"
-import { FiUsers } from "react-icons/fi"
-import { FaUsers } from "react-icons/fa"
-import { AiOutlineMessage } from "react-icons/ai"
-import { Badge } from "@heroui/react"
-import { useCurrentUser } from '@/src/features/user'
+import NavButton from "../../ui/navButton";
 
-import NavButton from "../../ui/navButton"
-import { MdOutlineForum } from "react-icons/md"
-import { CiSearch } from "react-icons/ci"
-import { IoMdNotificationsOutline } from "react-icons/io"
-import { LocaleSwitcherSelect } from "../../ui/selects/localeSwitcherSelect"
-import { useTranslations } from "next-intl"
+import { useCurrentUser } from "@/src/features/user";
+import { RootState } from "@/src/store/store";
+import { toggleSidebar } from "@/src/store/sidebar/sidebar.slice";
+import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
-  const t = useTranslations('HomePage.sidebar')
-  
+  const t = useTranslations("HomePage.sidebar");
+  const dispatch = useDispatch();
+  const isOpen = useSelector((state: RootState) => state.sidebar.isOpen);
+  const toggle = () => dispatch(toggleSidebar());
+
   // React Query для получения данных (автоматически проверяет isAuthenticated)
-  const { user: currentUser } = useCurrentUser()
-  
+  const { user: currentUser } = useCurrentUser();
+
   return (
-    <nav className="h-full">
-      <ul className="flex flex-col gap-5">
-        <li>
-          <NavButton href="/" icon={<BsPostcard />}>
-            {t('posts')}
+    <nav className="h-full relative flex flex-col pt-4 overflow-hidden ">
+      {/* Кнопка сворачивания сайдбара (только для desktop/tablet, на мобилках скрываем) */}
+
+      <ul className="flex flex-col gap-4">
+        <li className="flex flex-col items-center gap-2">
+          <Button
+            aria-label={isOpen ? "Свернуть" : "Развернуть"}
+            className="hidden md:flex w-6 h-6 bg-white dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800 rounded-full items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors shadow-sm  "
+            size="icon"
+            variant="ghost"
+            onClick={toggle}
+          >
+            {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          </Button>
+
+          <NavButton href="/" icon={<Home size="1em" />}>
+            {t("posts")}
           </NavButton>
         </li>
         <li>
-          <NavButton href="/search" icon={<CiSearch />}>
-            {t('search')}
+          <NavButton href="/search" icon={<Search size="1em" />}>
+            {t("search")}
           </NavButton>
         </li>
         <li>
-          <NavButton href="/search" icon={<IoMdNotificationsOutline />}>
-            {t('nottifications')}
+          <NavButton href="/search" icon={<Bell size="1em" />}>
+            {t("nottifications")}
           </NavButton>
         </li>
         <li>
           <div className="relative">
-            <Badge
-              content={''}
-              color="danger"
-              size="sm"
-              isInvisible={true}
-              placement="top-right"
-            >
-              <NavButton href="/chat" icon={<AiOutlineMessage />}>
-                {t('messages')}
+            <span className="relative ">
+              <NavButton href="/chat" icon={<MessageCircle size="1em" />}>
+                {t("messages")}
               </NavButton>
-            </Badge>
+            </span>
           </div>
         </li>
         <li>
-          <NavButton href="/forum" icon={<MdOutlineForum />}>
-            {t('forum')}
+          <NavButton href="/forum" icon={<MessagesSquare size="1em" />}>
+            {t("forum")}
           </NavButton>
         </li>
         <li>
-          <NavButton href={`/following/${currentUser?.id}`} icon={<FiUsers />}>
-            {t('follows')}
+          <NavButton
+            href={`/following/${currentUser?.id}`}
+            icon={<UserCheck size="1em" />}
+          >
+            {t("follows")}
           </NavButton>
         </li>
         <li>
-          <NavButton href={`/followers/${currentUser?.id}`} icon={<FaUsers />}>
-            {t('followers')}
+          <NavButton
+            href={`/followers/${currentUser?.id}`}
+            icon={<Users size="1em" />}
+          >
+            {t("followers")}
           </NavButton>
         </li>
       </ul>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
-
-
-
-
+export default Navbar;

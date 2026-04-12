@@ -29,35 +29,35 @@
 //   Select,
 //   SelectItem
 // } from '@heroui/react'
-// import { 
-//   MdSearch, 
-//   MdMoreVert, 
-//   MdEdit, 
-//   MdDelete, 
-//   MdPersonAdd, 
-//   MdLock, 
+// import {
+//   MdSearch,
+//   MdMoreVert,
+//   MdEdit,
+//   MdDelete,
+//   MdPersonAdd,
+//   MdLock,
 //   MdLockOpen,
-//   MdFilterList 
+//   MdFilterList
 // } from 'react-icons/md'
 // // TODO: Migrate to React Query hooks from @/src/features/admin
 // // import { useAdminUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/src/features/admin'
 
 // // TEMPORARY: Keep RTK Query imports until migration complete
-// import { 
-//   useGetAdminUsersQuery, 
-//   useCreateAdminUserMutation, 
-//   useUpdateAdminUserMutation, 
+// import {
+//   useGetAdminUsersQuery,
+//   useCreateAdminUserMutation,
+//   useUpdateAdminUserMutation,
 //   useDeleteAdminUserMutation,
 //   type AdminUser as User,
 //   type UsersFilter,
 //   type CreateUserRequest,
 //   type UpdateUserRequest
 // } from '@/src/services/admin.service.old'
-// import { 
-//   formatAdminDate, 
-//   getRoleColor, 
-//   getRoleText, 
-//   getStatusColor, 
+// import {
+//   formatAdminDate,
+//   getRoleColor,
+//   getRoleText,
+//   getStatusColor,
 //   getStatusText,
 //   validateEmail,
 //   validateUsername,
@@ -74,7 +74,7 @@
 //     role: '',
 //     isActive: ''
 //   })
-  
+
 //   // Состояние модальных окон
 //   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 //   const [editingUser, setEditingUser] = useState<User | null>(null)
@@ -86,7 +86,7 @@
 //     isActive: true
 //   })
 //   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  
+
 //   const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure()
 //   const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure()
 //   const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure()
@@ -115,10 +115,10 @@
 //   }
 
 //   const handleStatusFilterChange = (status: string) => {
-//     setFilters(prev => ({ 
-//       ...prev, 
+//     setFilters(prev => ({
+//       ...prev,
 //       isActive: status === 'all' ? '' : (status === 'active' ? 'true' : 'false'),
-//       page: 1 
+//       page: 1
 //     }))
 //   }
 
@@ -461,8 +461,8 @@
 //             <Button variant="light" onPress={onCreateModalClose}>
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="primary" 
+//             <Button
+//               color="primary"
 //               onPress={handleCreateUser}
 //               isLoading={isCreating}
 //             >
@@ -516,8 +516,8 @@
 //             <Button variant="light" onPress={onEditModalClose}>
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="primary" 
+//             <Button
+//               color="primary"
 //               onPress={handleUpdateUser}
 //               isLoading={isUpdating}
 //             >
@@ -544,8 +544,8 @@
 //             <Button variant="light" onPress={onDeleteModalClose}>
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="danger" 
+//             <Button
+//               color="danger"
 //               onPress={handleDeleteUser}
 //               isLoading={isDeleting}
 //             >

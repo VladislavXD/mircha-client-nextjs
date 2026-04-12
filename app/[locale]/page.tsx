@@ -1,8 +1,6 @@
 import { Metadata, Viewport } from "next";
+
 import Posts from "../HomePage";
-
-
-
 
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
 const siteUrl = "https://mirchan.site/ru";
@@ -17,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Mirchan - это анонимная социальная сеть, где вы можете делиться своими мыслями, идеями и творчеством без страха осуждения.",
   applicationName: "Mirchan",
-  
+
   alternates: { canonical: siteUrl },
   openGraph: {
     type: "website",
@@ -44,18 +42,13 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
     shortcut: ["/favicon.ico"],
-    other: [
-      { rel: "manifest", url: "/site.webmanifest" },
-    ],
+    other: [{ rel: "manifest", url: "/site.webmanifest" }],
   },
 
   appleWebApp: {
     title: "Mirchan",
     statusBarStyle: "default",
   },
-  
-  
-
 };
 
 export const viewport: Viewport = {
@@ -64,12 +57,10 @@ export const viewport: Viewport = {
   themeColor: "#000000",
 };
 
-
-
-
 export default function Home() {
-  return ( <>
-    <Posts/>
-  </>
+  return (
+    <>
+      <Posts />
+    </>
   );
 }

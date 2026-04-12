@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface OnlineStatusState {
   statuses: Record<string, boolean>;
@@ -13,20 +13,26 @@ const initialState: OnlineStatusState = {
  * Используется совместно с Socket.IO для отслеживания статусов в реальном времени
  */
 const onlineStatusSlice = createSlice({
-  name: 'onlineStatus',
+  name: "onlineStatus",
   initialState,
   reducers: {
     /**
      * Установить статус одного пользователя
      */
-    setUserStatus: (state, action: PayloadAction<{ userId: string; isOnline: boolean }>) => {
+    setUserStatus: (
+      state,
+      action: PayloadAction<{ userId: string; isOnline: boolean }>,
+    ) => {
       state.statuses[action.payload.userId] = action.payload.isOnline;
     },
 
     /**
      * Установить статусы нескольких пользователей (массовое обновление)
      */
-    setMultipleStatuses: (state, action: PayloadAction<Record<string, boolean>>) => {
+    setMultipleStatuses: (
+      state,
+      action: PayloadAction<Record<string, boolean>>,
+    ) => {
       state.statuses = {
         ...state.statuses,
         ...action.payload,
@@ -49,11 +55,11 @@ const onlineStatusSlice = createSlice({
   },
 });
 
-export const { 
-  setUserStatus, 
-  setMultipleStatuses, 
-  clearStatuses, 
-  removeUserStatus 
+export const {
+  setUserStatus,
+  setMultipleStatuses,
+  clearStatuses,
+  removeUserStatus,
 } = onlineStatusSlice.actions;
 
 export default onlineStatusSlice.reducer;

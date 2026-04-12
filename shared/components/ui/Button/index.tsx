@@ -1,5 +1,5 @@
-import { Button as NextButton } from "@heroui/react"
-import React from "react"
+import { Button as NextButton } from "@heroui/react";
+import React from "react";
 
 type Props = {
   children: React.ReactNode;
@@ -15,7 +15,7 @@ type Props = {
     | "warning"
     | "danger"
     | undefined;
-}
+};
 
 interface ButtonProps extends Props {
   as?: any;
@@ -30,19 +30,23 @@ const Button = ({
   type,
   fullWidht,
   as,
-  href
+  href,
 }: ButtonProps) => {
-  return <NextButton 
-  as={as}
-  href={href}
-  startContent={icon} 
-  size="md" 
-  color={color}
-  variant='light'
-  className={className}
-  type={type}
-  fullWidth={fullWidht}
-  >{children}</NextButton>
-}
+  return (
+    <NextButton
+      as={as}
+      className={className}
+      color={color}
+      fullWidth={fullWidht}
+      href={href}
+      size="md"
+      startContent={icon}
+      type={type}
+      variant="light"
+    >
+      {children}
+    </NextButton>
+  );
+};
 
-export default Button
+export default Button;
