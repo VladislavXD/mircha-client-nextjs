@@ -9,11 +9,11 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Heart, Eye } from "lucide-react";
 import { MessageCircle } from "lucide-react";
+import { useInView } from "react-intersection-observer";
 
 import { useDeletePost } from "../hooks/usePostMutations";
 import { useLikePost, useUnlikePost } from "../like/hooks";
 import { useAddView } from "../hooks/usePostViews";
-import { useFollow, useUnfollow } from "../../follow/hooks/useFollowMutations";
 import ReportPostModal from "../modals/report";
 import { useOnlineStatus } from "../../chat";
 import { getEditedText } from "../utils/editedText.utils";
@@ -31,7 +31,7 @@ import EditPostModal from "@/shared/components/ui/post/PostModals/EditPost";
 import DeletePost from "@/shared/components/ui/post/PostModals/DeletePost";
 import { useThrottle } from "@/src/hooks/useAntiSpam";
 import { timeAgo } from "@/src/utils/timeAgo";
-import { Card } from "@/components/ui/card";
+import {Card} from "@/components/ui/card"
 
 type Props = {
   post: Post;
@@ -133,7 +133,6 @@ const PostCard = ({
     createdAt: authorCreatedAt,
     followers = [],
     following = [],
-    isFollow = false,
   } = author || {};
 
   // Mutations
@@ -145,6 +144,12 @@ const PostCard = ({
   // Local state
   const [error, setError] = useState("");
   const [viewSent, setViewSent] = useState(false);
+
+  // Visibility state for the animated line
+  const { ref: lineRef, inView: isLineVisible } = useInView({
+    rootMargin: "100px 0px",
+    triggerOnce: false,
+  });
 
   // Modals
   const {
@@ -290,32 +295,9 @@ const PostCard = ({
   const viewsCount = serverViewsCount ?? views.length;
   const followersCount = followers.length;
   const followingCount = following.length;
-  const initialIsFollowing = currentUser
-    ? isFollow || followers.some((f) => f.followerId === currentUser.id)
+  const isFollowing = currentUser
+    ? followers.some((f) => f.followerId === currentUser.id)
     : false;
-  const [optimisticIsFollowing, setOptimisticIsFollowing] =
-    useState(initialIsFollowing);
-
-  useEffect(() => {
-    setOptimisticIsFollowing(initialIsFollowing);
-  }, [initialIsFollowing]);
-
-  const followMutation = useFollow();
-  const unfollowMutation = useUnfollow();
-  const _handleFollowToggle = () => {
-    if (onFollowToggle) {
-      onFollowToggle();
-
-      return;
-    }
-    if (optimisticIsFollowing) {
-      setOptimisticIsFollowing(false);
-      unfollowMutation.mutate(authorId);
-    } else {
-      setOptimisticIsFollowing(true);
-      followMutation.mutate(authorId);
-    }
-  };
 
   const { isOnline } = useOnlineStatus(authorId);
 
@@ -348,7 +330,7 @@ const PostCard = ({
 
   return (
     <Card
-      className="mb-0 relative cursor-pointer transition-all rounded-none shadow-none border-x-0 border-t-0 border-b last:border-b-0 border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010] hover:bg-neutral-50 dark:hover:bg-[#181818]"
+      className="mb-0 relative cursor-pointer transition-all rounded-none shadow-none border-x-0 border-t-0 border-b last:border-b-0 border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010] sm:hover:bg-neutral-50 sm:dark:hover:bg-[#181818]"
       onAuxClick={handleCardAuxClick}
       onClick={handleCardClick}
     >
@@ -370,17 +352,19 @@ const PostCard = ({
               currentUserId={currentUser?.id}
               followersCount={followersCount}
               followingCount={followingCount}
-              isFollowing={optimisticIsFollowing}
+              isFollowing={isFollowing}
               isOnline={isOnline}
               name={name}
               userId={authorId}
               usernameFrameUrl={usernameFrameUrl}
               variant="avatar-only"
-              onFollowToggle={_handleFollowToggle}
+              onFollowToggle={onFollowToggle}
             />
           </div>
           {/* Вертикальная линия потока */}
-          <div className="w-px flex-1 bg-neutral-200 dark:bg-neutral-800 mt-2 rounded-full min-h-[16px]" />
+          <div className="relative w-px flex-1 bg-neutral-200 dark:bg-neutral-800 mt-2 -mb-3 rounded-full min-h-[16px] overflow-hidden">
+            <div className="absolute top-0 w-full h-1/2 bg-gradient-to-b from-transparent via-neutral-400 dark:via-white/60 to-transparent animate-shimmer-vertical" />
+          </div>
         </div>
 
         {/* RIGHT: Контент */}
@@ -400,14 +384,14 @@ const PostCard = ({
                 createdAt={authorCreatedAt}
                 followersCount={followersCount}
                 followingCount={followingCount}
-                isFollowing={optimisticIsFollowing}
+                isFollowing={isFollowing}
                 isOnline={isOnline}
                 name={name}
                 nameClassName="text-sm font-semibold text-neutral-900 dark:text-neutral-100 hover:underline"
                 userId={authorId}
                 usernameFrameUrl={usernameFrameUrl}
                 variant="name-only"
-                onFollowToggle={_handleFollowToggle}
+                onFollowToggle={onFollowToggle}
               />
               <time
                 className="text-neutral-500 dark:text-neutral-400 text-[11px] sm:text-xs shrink-0 ml-2"

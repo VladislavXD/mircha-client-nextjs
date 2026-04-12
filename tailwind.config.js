@@ -21,9 +21,14 @@ const config = {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(200%)' },
         },
+        'shimmer-vertical': {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(200%)' },
+        },
       },
       animation: {
         shimmer: 'shimmer 2.5s linear infinite',
+        'shimmer-vertical': 'shimmer-vertical 2.5s linear infinite',
       },
     },
   },

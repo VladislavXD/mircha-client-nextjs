@@ -82,7 +82,7 @@ export function ProfileHeader({
 
   const prefix = locale ? `/${locale}` : "";
 
-  const { isOnline } = useOnlineStatus(userId);
+  const { isOnline } = useOnlineStatus(userId, currentUser?.id);
 
   if (!data) {
     return <div>Загрузка профиля...</div>;

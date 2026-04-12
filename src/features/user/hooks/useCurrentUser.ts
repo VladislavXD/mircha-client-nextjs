@@ -33,7 +33,7 @@ export function useCurrentUser(
     error,
     refetch,
   } = useQuery<IUser | undefined, Error>({
-    queryKey: ["currentUser"],
+    queryKey: ["profile"],
     queryFn: () => userService.findProfile(),
     retry: false,
     staleTime: 60 * 1000, // Кешируем на 1 минуту
