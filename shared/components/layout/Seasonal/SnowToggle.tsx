@@ -20,12 +20,14 @@ export default function SnowToggle({
     // Читаем из localStorage при монтировании
     const saved = localStorage.getItem("snowfall-enabled");
     const isEnabled = saved === null ? true : saved === "true";
+
     setEnabled(isEnabled);
     onToggle(isEnabled);
   }, []);
 
   const handleToggle = () => {
     const newValue = !enabled;
+
     setEnabled(newValue);
     localStorage.setItem("snowfall-enabled", String(newValue));
     onToggle(newValue);
@@ -36,11 +38,11 @@ export default function SnowToggle({
   return (
     <Button
       isIconOnly
-      variant="light"
-      size="sm"
       aria-label="Переключить снегопад"
-      onPress={handleToggle}
       className={`transition-all ${enabled ? "text-blue-400" : "text-gray-400"}`}
+      size="sm"
+      variant="light"
+      onPress={handleToggle}
     >
       <Snowflake
         className={`transition-transform ${enabled ? "animate-spin-slow" : ""}`}

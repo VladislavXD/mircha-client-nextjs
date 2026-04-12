@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/src/api';
-import { commentService, CommentService } from '../services/commnet.service';
+import { useQuery } from "@tanstack/react-query";
+
+import { commentService } from "../services/commnet.service";
+
+import { api } from "@/src/api";
 
 interface CommentUser {
   id: string;
@@ -30,13 +32,14 @@ export interface CommentData {
  */
 export function usePostComments(postId: string, currentUserId?: string) {
   return useQuery<CommentData[]>({
-    queryKey: ['comments', 'post', postId],
+    queryKey: ["comments", "post", postId],
     queryFn: async () => {
-      const url = currentUserId 
+      const url = currentUserId
         ? `comment/post/${postId}?userId=${currentUserId}`
         : `comment/post/${postId}`;
-      
+
       const response = await api.get<CommentData[]>(url);
+
       return response;
     },
     enabled: !!postId,
@@ -44,30 +47,41 @@ export function usePostComments(postId: string, currentUserId?: string) {
   });
 }
 
-
-export function useGetNewComments(postId: string, userId?: string, cursor?: string) {
+export function useGetNewComments(
+  postId: string,
+  userId?: string,
+  cursor?: string,
+) {
   return useQuery<CommentData[]>({
-    queryKey: ['comments', 'post', postId, 'new', cursor],
+    queryKey: ["comments", "post", postId, "new", cursor],
     queryFn: () => commentService.getNewComments(postId, userId, cursor),
     enabled: !!postId,
     staleTime: 30000,
-  })
+  });
 }
 
-export function useGetOldComments(postId: string, userId?: string, cursor?: string) {
+export function useGetOldComments(
+  postId: string,
+  userId?: string,
+  cursor?: string,
+) {
   return useQuery<CommentData[]>({
-    queryKey: ['comments', 'post', postId, 'old', cursor],
+    queryKey: ["comments", "post", postId, "old", cursor],
     queryFn: () => commentService.getOldComments(postId, userId, cursor),
     enabled: !!postId,
     staleTime: 30000,
-  })
+  });
 }
 
-export function useGetPopularComments(postId: string, userId?: string, cursor?: string) {
+export function useGetPopularComments(
+  postId: string,
+  userId?: string,
+  cursor?: string,
+) {
   return useQuery<CommentData[]>({
-    queryKey: ['comments', 'post', postId, 'popular', cursor],
+    queryKey: ["comments", "post", postId, "popular", cursor],
     queryFn: () => commentService.getPopularComments(postId, userId, cursor),
     enabled: !!postId,
     staleTime: 30000,
-  })
+  });
 }

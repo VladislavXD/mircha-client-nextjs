@@ -1,9 +1,9 @@
-export * from './SettingsForm'
-export * from './SettingsSidebar'
-export * from './SettingsPageWrapper'
-export * from './ProfileSettings'
-export * from './SecuritySettings'
-export * from './PrivacySettings'
-export * from './AppearanceSettings'
-export * from './ChangePasswordModal'
-export { default as UserProfileModal } from './UserProfileModal'
+export * from "./SettingsForm";
+export * from "./SettingsSidebar";
+export * from "./SettingsPageWrapper";
+export * from "./ProfileSettings";
+export * from "./SecuritySettings";
+export * from "./PrivacySettings";
+export * from "./AppearanceSettings";
+export * from "./ChangePasswordModal";
+export { default as UserProfileModal } from "./UserProfileModal";

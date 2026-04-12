@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 type Props = {
   totalSlides: number;
@@ -18,13 +18,13 @@ export const PaginationDots: React.FC<Props> = ({
       {Array.from({ length: totalSlides }).map((_, idx) => (
         <button
           key={idx}
-          onClick={() => onSlideClick(idx)}
+          aria-label={`Go to slide ${idx + 1}`}
           className={`transition-all ${
             idx === currentSlide
-              ? 'w-6 h-2 bg-white rounded-full' 
-              : 'w-2 h-2 bg-white/50 rounded-full hover:bg-white/70'
+              ? "w-6 h-2 bg-white rounded-full"
+              : "w-2 h-2 bg-white/50 rounded-full hover:bg-white/70"
           }`}
-          aria-label={`Go to slide ${idx + 1}`}
+          onClick={() => onSlideClick(idx)}
         />
       ))}
     </div>

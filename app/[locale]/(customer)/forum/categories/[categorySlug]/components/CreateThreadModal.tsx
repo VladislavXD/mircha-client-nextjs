@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import {
   Modal,
   ModalContent,
@@ -12,165 +12,183 @@ import {
   Textarea,
   Chip,
   Select,
-  SelectItem
-} from '@heroui/react'
-import { useCreateThreadInCategory, useTags } from '@/src/features/forum/hooks/useForum'
-import { toast } from 'react-hot-toast'
-import type { Category } from '@/src/features/forum/types/forum.types'
-import { useTranslations } from 'next-intl'
+  SelectItem,
+} from "@heroui/react";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+
+import {
+  useCreateThreadInCategory,
+  useTags,
+} from "@/src/features/forum/hooks/useForum";
 
 interface CreateThreadModalProps {
-  isOpen: boolean
-  onClose: () => void
-  categorySlug: string
-  category: any
+  isOpen: boolean;
+  onClose: () => void;
+  categorySlug: string;
+  category: any;
 }
 
-const CreateThreadModal: React.FC<CreateThreadModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  categorySlug, 
-  category 
+const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
+  isOpen,
+  onClose,
+  categorySlug,
+  category,
 }) => {
-  const t = useTranslations('Forum.createThread')
-  const { mutateAsync: createThread, isPending: isLoading } = useCreateThreadInCategory()
-  const { data: tags } = useTags()
-  
+  const t = useTranslations("Forum.createThread");
+  const { mutateAsync: createThread, isPending: isLoading } =
+    useCreateThreadInCategory();
+  const { data: tags } = useTags();
+
   const [formData, setFormData] = useState({
-    subject: '',
-    content: '',
-    authorName: '',
-    threadSlug: ''
-  })
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
+    subject: "",
+    content: "",
+    authorName: "",
+    threadSlug: "",
+  });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!formData.content.trim()) {
-      toast.error(t('errorRequired'))
-      return
+      toast.error(t("errorRequired"));
+
+      return;
     }
 
     if (selectedFiles.length > 5) {
-      toast.error('Максимум 5 файлов')
-      return
+      toast.error("Максимум 5 файлов");
+
+      return;
     }
 
     try {
-      const formDataToSend = new FormData()
-      formDataToSend.append('subject', formData.subject)
-      formDataToSend.append('content', formData.content)
-      formDataToSend.append('authorName', formData.authorName || 'Аноним')
-      
+      const formDataToSend = new FormData();
+
+      formDataToSend.append("subject", formData.subject);
+      formDataToSend.append("content", formData.content);
+      formDataToSend.append("authorName", formData.authorName || "Аноним");
+
       // Добавляем slug если указан
       if (formData.threadSlug.trim()) {
-        formDataToSend.append('slug', formData.threadSlug.trim())
+        formDataToSend.append("slug", formData.threadSlug.trim());
       }
 
       // Добавляем выбранные теги как массив ID
       if (selectedTags.size > 0) {
-        const tagIds = Array.from(selectedTags).map(slug => {
-          const tag = tags?.find(t => t.slug === slug)
-          return tag?.id
-        }).filter(Boolean)
-        
-        tagIds.forEach(id => {
-          if (id) formDataToSend.append('tagIds[]', id)
-        })
-      }
-      
-      selectedFiles.forEach(file => {
-        formDataToSend.append('images', file)
-      })
+        const tagIds = Array.from(selectedTags)
+          .map((slug) => {
+            const tag = tags?.find((t) => t.slug === slug);
 
-      await createThread({ 
-        slug: categorySlug, 
+            return tag?.id;
+          })
+          .filter(Boolean);
+
+        tagIds.forEach((id) => {
+          if (id) formDataToSend.append("tagIds[]", id);
+        });
+      }
+
+      selectedFiles.forEach((file) => {
+        formDataToSend.append("images", file);
+      });
+
+      await createThread({
+        slug: categorySlug,
         data: {
           subject: formData.subject,
           content: formData.content,
-          authorName: formData.authorName || 'Аноним',
-          tagIds: Array.from(selectedTags).map(slug => {
-            const tag = tags?.find(t => t.slug === slug)
-            return tag?.id
-          }).filter(Boolean) as string[]
+          authorName: formData.authorName || "Аноним",
+          tagIds: Array.from(selectedTags)
+            .map((slug) => {
+              const tag = tags?.find((t) => t.slug === slug);
+
+              return tag?.id;
+            })
+            .filter(Boolean) as string[],
         },
-        files: selectedFiles
-      })
-      
-      toast.success('Тред создан успешно!')
-      onClose()
+        files: selectedFiles,
+      });
+
+      toast.success("Тред создан успешно!");
+      onClose();
       setFormData({
-        subject: '',
-        content: '',
-        authorName: '',
-        threadSlug: ''
-      })
-      setSelectedFiles([])
-      setSelectedTags(new Set())
-      
+        subject: "",
+        content: "",
+        authorName: "",
+        threadSlug: "",
+      });
+      setSelectedFiles([]);
+      setSelectedTags(new Set());
+
       // Перезагрузка страницы для обновления списка тредов
-      window.location.reload()
+      window.location.reload();
     } catch (error: any) {
-      toast.error(error?.message || t('errorCreate'))
+      toast.error(error?.message || t("errorCreate"));
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    
-    if (files.length === 0) return
+    const files = Array.from(e.target.files || []);
+
+    if (files.length === 0) return;
 
     // Проверка количества файлов
     if (selectedFiles.length + files.length > 5) {
-      toast.error('Максимум 5 файлов')
-      return
+      toast.error("Максимум 5 файлов");
+
+      return;
     }
 
     // Проверка каждого файла (базовые ограничения)
     for (const file of files) {
       // Проверка размера файла (5MB по умолчанию)
       if (file.size > 5242880) {
-        toast.error(`Файл ${file.name} слишком большой. Максимальный размер: 5MB`)
-        return
+        toast.error(
+          `Файл ${file.name} слишком большой. Максимальный размер: 5MB`,
+        );
+
+        return;
       }
 
       // Проверка типа файла
-      const fileExt = file.name.split('.').pop()?.toLowerCase()
-      const allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'webm', 'mp4']
+      const fileExt = file.name.split(".").pop()?.toLowerCase();
+      const allowedTypes = ["jpg", "jpeg", "png", "gif", "webp", "webm", "mp4"];
+
       if (fileExt && !allowedTypes.includes(fileExt)) {
-        toast.error(`Тип файла ${fileExt} не поддерживается. Разрешённые типы: ${allowedTypes.join(', ')}`)
-        return
+        toast.error(
+          `Тип файла ${fileExt} не поддерживается. Разрешённые типы: ${allowedTypes.join(", ")}`,
+        );
+
+        return;
       }
     }
 
-    setSelectedFiles(prev => [...prev, ...files])
-  }
+    setSelectedFiles((prev) => [...prev, ...files]);
+  };
 
   const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
-  }
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const generateSlug = (subject: string) => {
     return subject
       .toLowerCase()
-      .replace(/[^a-zA-Zа-яё0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .slice(0, 50)
-  }
+      .replace(/[^a-zA-Zа-яё0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .slice(0, 50);
+  };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose}
-      size="2xl"
-      scrollBehavior="inside"
-    >
+    <Modal isOpen={isOpen} scrollBehavior="inside" size="2xl" onClose={onClose}>
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold">{t('title')} {category.name}</h2>
+            <h2 className="text-xl font-bold">
+              {t("title")} {category.name}
+            </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Создайте новую тему для обсуждения в категории
             </p>
@@ -179,71 +197,88 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
           <ModalBody className="gap-4">
             {/* Имя автора */}
             <Input
-              label={t('nameLabel')}
-              placeholder={t('namePlaceholder')}
+              description={t("nameDescription")}
+              label={t("nameLabel")}
+              placeholder={t("namePlaceholder")}
               value={formData.authorName}
-              onChange={(e) => setFormData(prev => ({ ...prev, authorName: e.target.value }))}
               variant="bordered"
-              description={t('nameDescription')}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, authorName: e.target.value }))
+              }
             />
 
             {/* Тема треда */}
             <Input
-              label={t('subjectLabel')}
-              placeholder={t('subjectPlaceholder')}
+              isRequired
+              label={t("subjectLabel")}
+              placeholder={t("subjectPlaceholder")}
               value={formData.subject}
+              variant="bordered"
               onChange={(e) => {
-                const subject = e.target.value
-                setFormData(prev => ({ 
-                  ...prev, 
+                const subject = e.target.value;
+
+                setFormData((prev) => ({
+                  ...prev,
                   subject,
                   // Автогенерация slug только если он пустой
-                  threadSlug: prev.threadSlug || generateSlug(subject)
-                }))
+                  threadSlug: prev.threadSlug || generateSlug(subject),
+                }));
               }}
-              variant="bordered"
-              isRequired
             />
 
             {/* Slug треда */}
             <Input
+              description="Используется в URL. Оставьте пустым для автогенерации"
               label="URL-адрес (slug)"
               placeholder="thread-url-slug"
+              startContent={
+                <span className="text-sm text-gray-500">
+                  /forum/categories/{categorySlug}/
+                </span>
+              }
               value={formData.threadSlug}
-              onChange={(e) => setFormData(prev => ({ ...prev, threadSlug: e.target.value }))}
               variant="bordered"
-              description="Используется в URL. Оставьте пустым для автогенерации"
-              startContent={<span className="text-sm text-gray-500">/forum/categories/{categorySlug}/</span>}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, threadSlug: e.target.value }))
+              }
             />
 
             {/* Выбор тегов */}
             {tags && tags.length > 0 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="thread-tags">{t('tagsLabel')}</label>
+                <label className="text-sm font-medium" htmlFor="thread-tags">
+                  {t("tagsLabel")}
+                </label>
                 <Select
                   id="thread-tags"
-                  label={t('tagsLabel')}
-                  placeholder={t('tagsPlaceholder')}
-                  selectionMode="multiple"
-                  selectedKeys={selectedTags}
-                  onSelectionChange={(keys) => setSelectedTags(keys as Set<string>)}
-                  variant="bordered"
                   items={tags}
+                  label={t("tagsLabel")}
+                  placeholder={t("tagsPlaceholder")}
+                  selectedKeys={selectedTags}
+                  selectionMode="multiple"
+                  variant="bordered"
+                  onSelectionChange={(keys) =>
+                    setSelectedTags(keys as Set<string>)
+                  }
                 >
-                  {(tag:any) => (
+                  {(tag: any) => (
                     <SelectItem
                       key={tag.slug}
-                      textValue={tag.name}
+                      description={tag.description || undefined}
                       startContent={
                         tag.icon ? (
                           /^https?:\/\//.test(tag.icon) ? (
-                            <img src={tag.icon} alt="" className="w-4 h-4 object-cover rounded" />
+                            <img
+                              alt=""
+                              className="w-4 h-4 object-cover rounded"
+                              src={tag.icon}
+                            />
                           ) : (
                             <span className="text-sm">{tag.icon}</span>
                           )
                         ) : null
                       }
-                      description={tag.description || undefined}
+                      textValue={tag.name}
                     >
                       {tag.name}
                     </SelectItem>
@@ -254,27 +289,30 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                 {selectedTags.size > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {Array.from(selectedTags).map((tagSlug) => {
-                      const tag = tags.find(t => t.slug === tagSlug)
-                      if (!tag) return null
+                      const tag = tags.find((t) => t.slug === tagSlug);
+
+                      if (!tag) return null;
+
                       return (
                         <Chip
                           key={tag.slug}
                           size="sm"
-                          variant="flat"
                           style={{ backgroundColor: tag.color || undefined }}
+                          variant="flat"
                           onClose={() => {
-                            const newTags = new Set(selectedTags)
-                            newTags.delete(tagSlug)
-                            setSelectedTags(newTags)
+                            const newTags = new Set(selectedTags);
+
+                            newTags.delete(tagSlug);
+                            setSelectedTags(newTags);
                           }}
                         >
                           {tag.icon ? (
                             /^https?:\/\//.test(tag.icon) ? (
                               <img
-                                src={tag.icon}
                                 alt=""
                                 className="inline-block w-4 h-4 object-cover rounded mr-1 align-[-2px]"
                                 loading="lazy"
+                                src={tag.icon}
                               />
                             ) : (
                               <span className="mr-1">{tag.icon}</span>
@@ -282,7 +320,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                           ) : null}
                           {tag.name}
                         </Chip>
-                      )
+                      );
                     })}
                   </div>
                 )}
@@ -291,59 +329,68 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 
             {/* Содержание */}
             <Textarea
-              label={t('contentLabel')}
+              isRequired
+              label={t("contentLabel")}
+              maxRows={8}
+              minRows={4}
               placeholder="Введите содержание треда..."
               value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
               variant="bordered"
-              minRows={4}
-              maxRows={8}
-              isRequired
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, content: e.target.value }))
+              }
             />
 
             {/* Загрузка файла */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('fileLabel')}</label>
+              <label className="text-sm font-medium">{t("fileLabel")}</label>
               <input
-                type="file"
                 multiple
                 accept=".jpg,.jpeg,.png,.gif,.webp,.webm,.mp4"
-                onChange={handleFileChange}
                 className="block w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-full file:border-0
                   file:text-sm file:font-semibold
                   file:bg-primary-50 file:text-primary-700
                   hover:file:bg-primary-100"
+                type="file"
+                onChange={handleFileChange}
               />
-              
+
               {/* Список выбранных файлов */}
               {selectedFiles.length > 0 && (
                 <div className="space-y-3">
-                  <p className="text-sm font-medium">Выбранные файлы ({selectedFiles.length}/5):</p>
+                  <p className="text-sm font-medium">
+                    Выбранные файлы ({selectedFiles.length}/5):
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {selectedFiles.map((file, index) => {
                       const fileURL = URL.createObjectURL(file);
-                      const isImage = file.type.startsWith('image/');
-                      const isVideo = file.type.startsWith('video/');
-                      
+                      const isImage = file.type.startsWith("image/");
+                      const isVideo = file.type.startsWith("video/");
+
                       return (
-                        <div key={index} className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <div
+                          key={index}
+                          className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
+                        >
                           {/* Превью медиа */}
                           <div className="aspect-square relative bg-gray-200 dark:bg-gray-700">
                             {isImage ? (
                               <img
-                                src={fileURL}
                                 alt={file.name}
                                 className="w-full h-full object-cover"
+                                src={fileURL}
                                 onLoad={() => URL.revokeObjectURL(fileURL)}
                               />
                             ) : isVideo ? (
                               <video
-                                src={fileURL}
-                                className="w-full h-full object-cover"
                                 muted
-                                onLoadedData={() => URL.revokeObjectURL(fileURL)}
+                                className="w-full h-full object-cover"
+                                src={fileURL}
+                                onLoadedData={() =>
+                                  URL.revokeObjectURL(fileURL)
+                                }
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
@@ -352,18 +399,18 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                                     <span className="text-xl">📄</span>
                                   </div>
                                   <span className="text-xs text-gray-600 dark:text-gray-400">
-                                    {file.name.split('.').pop()?.toUpperCase()}
+                                    {file.name.split(".").pop()?.toUpperCase()}
                                   </span>
                                 </div>
                               </div>
                             )}
-                            
+
                             {/* Кнопка удаления */}
                             <Button
-                              size="sm"
-                              color="danger"
-                              variant="solid"
                               className="absolute top-1 right-1 min-w-unit-6 w-6 h-6 p-0"
+                              color="danger"
+                              size="sm"
+                              variant="solid"
                               onPress={() => removeFile(index)}
                             >
                               ×
@@ -379,7 +426,10 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 
                           {/* Информация о файле */}
                           <div className="p-2">
-                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate" title={file.name}>
+                            <p
+                              className="text-xs text-gray-600 dark:text-gray-400 truncate"
+                              title={file.name}
+                            >
                               {file.name}
                             </p>
                             <p className="text-xs text-gray-500">
@@ -399,8 +449,8 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                 <p>Максимум файлов: 5</p>
                 <div className="flex flex-wrap gap-1">
                   <span>Поддерживаемые форматы:</span>
-                  {['JPG', 'PNG', 'GIF', 'WEBP', 'WEBM', 'MP4'].map(type => (
-                    <Chip key={type} size="sm" variant="flat" color="default">
+                  {["JPG", "PNG", "GIF", "WEBP", "WEBM", "MP4"].map((type) => (
+                    <Chip key={type} color="default" size="sm" variant="flat">
                       {type}
                     </Chip>
                   ))}
@@ -410,30 +460,26 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
           </ModalBody>
 
           <ModalFooter>
-            <Button 
-              color="danger" 
-              variant="light" 
-              onPress={onClose}
+            <Button
+              color="danger"
               disabled={isLoading}
+              variant="light"
+              onPress={onClose}
             >
-              {t('cancel')}
+              {t("cancel")}
             </Button>
-            <Button 
-              color="primary" 
-              type="submit"
-              isLoading={isLoading}
-            >
-              {t('submit')}
+            <Button color="primary" isLoading={isLoading} type="submit">
+              {t("submit")}
             </Button>
           </ModalFooter>
         </form>
       </ModalContent>
     </Modal>
-  )
-}
+  );
+};
 
-export default CreateThreadModal
-  
+export default CreateThreadModal;
+
 //   const [formData, setFormData] = useState({
 //     subject: '',
 //     content: '',
@@ -445,7 +491,7 @@ export default CreateThreadModal
 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault()
-    
+
 //     if (!formData.content.trim()) {
 //       toast.error(t('errorRequired'))
 //       return
@@ -461,21 +507,21 @@ export default CreateThreadModal
 //       formDataToSend.append('subject', formData.subject)
 //       formDataToSend.append('content', formData.content)
 //       formDataToSend.append('authorName', formData.authorName || 'Аноним')
-      
+
 //       // Добавляем slug если указан
 //       if (formData.threadSlug.trim()) {
 //         formDataToSend.append('threadSlug', formData.threadSlug.trim())
 //       }
-      
+
 //       selectedFiles.forEach(file => {
 //         formDataToSend.append('images', file)
 //       })
 
-//       const thread = await createThread({ 
-//         slug: categorySlug, 
-//         formData: formDataToSend 
+//       const thread = await createThread({
+//         slug: categorySlug,
+//         formData: formDataToSend
 //       }).unwrap()
-      
+
 //       // Назначаем выбранные теги
 //       if (selectedTags.size > 0) {
 //         const tagSlugs = Array.from(selectedTags)
@@ -487,7 +533,7 @@ export default CreateThreadModal
 //           }
 //         }
 //       }
-      
+
 //       toast.success('Тред создан успешно!')
 //       onClose()
 //       setFormData({
@@ -505,7 +551,7 @@ export default CreateThreadModal
 
 //   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 //     const files = Array.from(e.target.files || [])
-    
+
 //     if (files.length === 0) return
 
 //     // Проверка количества файлов
@@ -547,8 +593,8 @@ export default CreateThreadModal
 //   }
 
 //   return (
-//     <Modal 
-//       isOpen={isOpen} 
+//     <Modal
+//       isOpen={isOpen}
 //       onClose={onClose}
 //       size="2xl"
 //       scrollBehavior="inside"
@@ -580,8 +626,8 @@ export default CreateThreadModal
 //               value={formData.subject}
 //               onChange={(e) => {
 //                 const subject = e.target.value
-//                 setFormData(prev => ({ 
-//                   ...prev, 
+//                 setFormData(prev => ({
+//                   ...prev,
 //                   subject,
 //                   // Автогенерация slug только если он пустой
 //                   threadSlug: prev.threadSlug || generateSlug(subject)
@@ -711,7 +757,7 @@ export default CreateThreadModal
 //                   file:bg-primary-50 file:text-primary-700
 //                   hover:file:bg-primary-100"
 //               />
-              
+
 //               {/* Список выбранных файлов */}
 //               {selectedFiles.length > 0 && (
 //                 <div className="space-y-3">
@@ -721,7 +767,7 @@ export default CreateThreadModal
 //                       const fileURL = URL.createObjectURL(file);
 //                       const isImage = file.type.startsWith('image/');
 //                       const isVideo = file.type.startsWith('video/');
-                      
+
 //                       return (
 //                         <div key={index} className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
 //                           {/* Превью медиа */}
@@ -752,7 +798,7 @@ export default CreateThreadModal
 //                                 </div>
 //                               </div>
 //                             )}
-                            
+
 //                             {/* Кнопка удаления */}
 //                             <Button
 //                               size="sm"
@@ -805,16 +851,16 @@ export default CreateThreadModal
 //           </ModalBody>
 
 //           <ModalFooter>
-//             <Button 
-//               color="danger" 
-//               variant="light" 
+//             <Button
+//               color="danger"
+//               variant="light"
 //               onPress={onClose}
 //               disabled={isLoading}
 //             >
 //               {t('cancel')}
 //             </Button>
-//             <Button 
-//               color="primary" 
+//             <Button
+//               color="primary"
 //               type="submit"
 //               isLoading={isLoading}
 //             >

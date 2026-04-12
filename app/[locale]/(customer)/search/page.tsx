@@ -1,17 +1,14 @@
-import type { Metadata } from 'next'
-import SearchPage from './searchPage'
+import type { Metadata } from "next";
+
+import SearchPage from "./searchPage";
 // import { NO_INDEX_PAGE } from '../../constants/seo.constants'
 
-
-
 export const metadata: Metadata = {
-	title: 'Search',
-	description: 'Search page',
-	// ...NO_INDEX_PAGE
-}
+  title: "Search",
+  description: "Search page",
+  // ...NO_INDEX_PAGE
+};
 
 export default function SearchPageWrapper() {
-	return <SearchPage />
-	
-
+  return <SearchPage />;
 }

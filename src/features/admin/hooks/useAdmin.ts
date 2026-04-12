@@ -3,8 +3,6 @@
  * React Query хуки для административной панели
  */
 
-import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from '@tanstack/react-query';
-import * as adminService from '../services/admin.service';
 import type {
   AdminStats,
   AdminUsersResponse,
@@ -16,20 +14,33 @@ import type {
   GetUsersQueryParams,
   UpdateUserRoleDto,
   UpdateUserDto,
-  CreateBoardDto,
   UpdateBoardDto,
-} from '../types/admin.types';
+} from "../types/admin.types";
+
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryOptions,
+} from "@tanstack/react-query";
+
+import * as adminService from "../services/admin.service";
 
 // ============ Query Keys ============
 
 export const adminKeys = {
-  all: ['admin'] as const,
-  stats: () => [...adminKeys.all, 'stats'] as const,
-  users: (params?: GetUsersQueryParams) => [...adminKeys.all, 'users', params] as const,
-  boards: (params?: PaginationQueryParams) => [...adminKeys.all, 'boards', params] as const,
-  threads: (params?: PaginationQueryParams) => [...adminKeys.all, 'threads', params] as const,
-  replies: (params?: PaginationQueryParams) => [...adminKeys.all, 'replies', params] as const,
-  media: (params?: PaginationQueryParams) => [...adminKeys.all, 'media', params] as const,
+  all: ["admin"] as const,
+  stats: () => [...adminKeys.all, "stats"] as const,
+  users: (params?: GetUsersQueryParams) =>
+    [...adminKeys.all, "users", params] as const,
+  boards: (params?: PaginationQueryParams) =>
+    [...adminKeys.all, "boards", params] as const,
+  threads: (params?: PaginationQueryParams) =>
+    [...adminKeys.all, "threads", params] as const,
+  replies: (params?: PaginationQueryParams) =>
+    [...adminKeys.all, "replies", params] as const,
+  media: (params?: PaginationQueryParams) =>
+    [...adminKeys.all, "media", params] as const,
 };
 
 // ============ СТАТИСТИКА ============
@@ -37,7 +48,9 @@ export const adminKeys = {
 /**
  * Получить статистику системы
  */
-export const useAdminStats = (options?: Omit<UseQueryOptions<AdminStats>, 'queryKey' | 'queryFn'>) => {
+export const useAdminStats = (
+  options?: Omit<UseQueryOptions<AdminStats>, "queryKey" | "queryFn">,
+) => {
   return useQuery({
     queryKey: adminKeys.stats(),
     queryFn: adminService.getStats,
@@ -53,7 +66,7 @@ export const useAdminStats = (options?: Omit<UseQueryOptions<AdminStats>, 'query
  */
 export const useAdminUsers = (
   params: GetUsersQueryParams = {},
-  options?: Omit<UseQueryOptions<AdminUsersResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<AdminUsersResponse>, "queryKey" | "queryFn">,
 ) => {
   return useQuery({
     queryKey: adminKeys.users(params),
@@ -101,8 +114,13 @@ export const useUpdateUserRole = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: UpdateUserRoleDto }) =>
-      adminService.updateUserRole(userId, data),
+    mutationFn: ({
+      userId,
+      data,
+    }: {
+      userId: string;
+      data: UpdateUserRoleDto;
+    }) => adminService.updateUserRole(userId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.users() });
       queryClient.invalidateQueries({ queryKey: adminKeys.stats() });
@@ -132,7 +150,7 @@ export const useToggleUserStatus = () => {
  */
 export const useAdminBoards = (
   params: PaginationQueryParams = {},
-  options?: Omit<UseQueryOptions<AdminBoardsResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<AdminBoardsResponse>, "queryKey" | "queryFn">,
 ) => {
   return useQuery({
     queryKey: adminKeys.boards(params),
@@ -164,8 +182,13 @@ export const useUpdateBoard = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ boardId, data }: { boardId: string; data: UpdateBoardDto }) =>
-      adminService.updateBoard(boardId, data),
+    mutationFn: ({
+      boardId,
+      data,
+    }: {
+      boardId: string;
+      data: UpdateBoardDto;
+    }) => adminService.updateBoard(boardId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.boards() });
     },
@@ -194,7 +217,7 @@ export const useDeleteBoard = () => {
  */
 export const useAdminThreads = (
   params: PaginationQueryParams = {},
-  options?: Omit<UseQueryOptions<AdminThreadsResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<AdminThreadsResponse>, "queryKey" | "queryFn">,
 ) => {
   return useQuery({
     queryKey: adminKeys.threads(params),
@@ -226,7 +249,7 @@ export const useDeleteThread = () => {
  */
 export const useAdminReplies = (
   params: PaginationQueryParams = {},
-  options?: Omit<UseQueryOptions<AdminRepliesResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<AdminRepliesResponse>, "queryKey" | "queryFn">,
 ) => {
   return useQuery({
     queryKey: adminKeys.replies(params),
@@ -258,7 +281,10 @@ export const useDeleteReply = () => {
  */
 export const useAdminMedia = (
   params: PaginationQueryParams = {},
-  options?: Omit<UseQueryOptions<AdminMediaFilesResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<
+    UseQueryOptions<AdminMediaFilesResponse>,
+    "queryKey" | "queryFn"
+  >,
 ) => {
   return useQuery({
     queryKey: adminKeys.media(params),

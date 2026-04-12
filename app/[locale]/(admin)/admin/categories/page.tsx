@@ -1,5 +1,5 @@
-import CategoryManagement from '@/shared/components/admin/CategoryManagement'
+import CategoryManagement from "@/shared/components/admin/CategoryManagement";
 
 export default function CategoriesPage() {
-  return <CategoryManagement />
+  return <CategoryManagement />;
 }

@@ -1,60 +1,61 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {
-	FLUSH,
-	PAUSE,
-	PERSIST,
-	PURGE,
-	REGISTER,
-	REHYDRATE,
-	persistStore
-} from 'redux-persist'
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
+  persistStore,
+} from "redux-persist";
+
 // import { userSlice } from './user/user.slice'
-import onlineStatusReducer from './onlineStatus/onlineStatus.slice'
+import onlineStatusReducer from "./onlineStatus/onlineStatus.slice";
+import sidebarReducer from "./sidebar/sidebar.slice";
 
 // import { filtersSlice } from './filters/filters.slice'
-
 
 //сохранять в store пользователя из поиска по которому кликнул
 //сохранять статус nsfw пользователя для треда
 //online status for user - DONE (Redux slice)
 // а так же сохранять еще что то
 
-
-const isClient = typeof window !== 'undefined'
+const isClient = typeof window !== "undefined";
 
 const combinedReducers = combineReducers({
-	// user: userSlice.reducer,
-	onlineStatus: onlineStatusReducer,
-	// filters: filtersSlice.reducer
-})
+  // user: userSlice.reducer,
+  onlineStatus: onlineStatusReducer,
+  sidebar: sidebarReducer,
+  // filters: filtersSlice.reducer
+});
 
-let mainReducer = combinedReducers
+let mainReducer = combinedReducers;
 
 if (isClient) {
-	const { persistReducer } = require('redux-persist')
-	const storage = require('redux-persist/lib/storage').default
+  const { persistReducer } = require("redux-persist");
+  const storage = require("redux-persist/lib/storage").default;
 
-	const persistConfig = {
-		key: 'mirchanRoot',
-		storage,
-		whitelist: ['user'] // onlineStatus НЕ сохраняем - он должен обновляться при каждом входе
-	}
+  const persistConfig = {
+    key: "mirchanRoot",
+    storage,
+    whitelist: ["user"], // onlineStatus НЕ сохраняем - он должен обновляться при каждом входе
+  };
 
-	mainReducer = persistReducer(persistConfig, combinedReducers)
+  mainReducer = persistReducer(persistConfig, combinedReducers);
 }
 
 export const store = configureStore({
-	reducer: mainReducer,
-	middleware: getDefaultMiddleware =>
-		getDefaultMiddleware({
-			serializableCheck: {
-				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
-			}
-		})
-})
+  reducer: mainReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
+});
 
-export const persistor = persistStore(store)
+export const persistor = persistStore(store);
 
-export type TypeRootState = ReturnType<typeof mainReducer>
-export type RootState = TypeRootState // Алиас для совместимости
-export type AppDispatch = typeof store.dispatch
+export type TypeRootState = ReturnType<typeof mainReducer>;
+export type RootState = TypeRootState; // Алиас для совместимости
+export type AppDispatch = typeof store.dispatch;

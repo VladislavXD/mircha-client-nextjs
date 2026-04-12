@@ -4,7 +4,7 @@
 
 // /**
 //  * React Query хук для получения статистики форума
-//  * 
+//  *
 //  * @example
 //  * const { data, isLoading } = useForumStats()
 //  */

@@ -5,16 +5,14 @@ import type { ThemeProviderProps } from "next-themes";
 import * as React from "react";
 import { HeroUIProvider } from "@heroui/system";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { Provider, useSelector } from "react-redux";
-import { PersistGate } from 'redux-persist/integration/react';
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 
+import { QueryProvider } from "./QueryProvider";
 
 import { ViewsProvider } from "@/shared/components/providers/ViewsProvider";
-import ReCapchaProvider from "./ReCapchaProvider";
 import { persistor, store } from "@/src/store/store";
-import { QueryProvider } from "./QueryProvider";
-import SocketConnectionManager from '@/src/features/socket/SocketConnectionManager';
-
+import SocketConnectionManager from "@/src/features/socket/SocketConnectionManager";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -29,10 +27,9 @@ export function Providers({ children, themeProps }: ProvidersProps) {
           <PersistGate loading={null} persistor={persistor}>
             <SocketConnectionManager />
 
-              <NextThemesProvider {...themeProps}>
-                <ViewsProvider>{children}</ViewsProvider>
-              </NextThemesProvider>
-
+            <NextThemesProvider {...themeProps}>
+              <ViewsProvider>{children}</ViewsProvider>
+            </NextThemesProvider>
           </PersistGate>
         </Provider>
       </HeroUIProvider>

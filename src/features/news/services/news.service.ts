@@ -1,11 +1,11 @@
 /**
  * News Service - API для работы с новостями через NestJS backend
- * 
+ *
  * Использует axios для HTTP запросов к NestJS серверу
  * Endpoints: GET /news/headlines, GET /news/search
  */
 
-import { api } from '@/src/api';
+import { api } from "@/src/api";
 
 // Типы для новостей
 export interface NewsArticle {
@@ -48,15 +48,15 @@ export const newsService = {
    * @returns Promise<NewsResponse>
    */
   async getHeadlines(params: GetHeadlinesParams = {}): Promise<NewsResponse> {
-    const { lang = 'ru', category = 'technology' } = params;
-    
+    const { lang = "ru", category = "technology" } = params;
+
     const queryParams = new URLSearchParams({
       lang,
       category,
     });
 
     const response = await api.get<NewsResponse>(
-      `news/headlines?${queryParams.toString()}`
+      `news/headlines?${queryParams.toString()}`,
     );
 
     return response;
@@ -71,7 +71,7 @@ export const newsService = {
     const { q, pageSize = 5 } = params;
 
     if (!q) {
-      throw new Error('Search query is required');
+      throw new Error("Search query is required");
     }
 
     const queryParams = new URLSearchParams({
@@ -80,7 +80,7 @@ export const newsService = {
     });
 
     const response = await api.get<NewsResponse>(
-      `news/search?${queryParams.toString()}`
+      `news/search?${queryParams.toString()}`,
     );
 
     return response;

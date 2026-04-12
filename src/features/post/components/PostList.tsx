@@ -1,18 +1,23 @@
 "use client";
 
+import type { User } from "../types";
+
 import React, { useEffect } from "react";
-import { Spinner, Tab, Tabs } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { HiOutlineSparkles, HiOutlineUserGroup } from "react-icons/hi2";
+import { Loader2 } from "lucide-react";
+import { useInView } from "react-intersection-observer";
 
 import { usePosts } from "../hooks/usePostQueries";
-import { useProfile } from "@/src/features/profile/hooks";
-import type { User } from "../types";
+import Notice from "../../notice/components/Notice";
+
 import PostCard from "./PostCard";
 import CreatePost from "./CreatePost";
+import { RecommendedUsersBlock } from "./RecommendedUsers/RecommendedUsersBlock";
+
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useProfile } from "@/src/features/profile/hooks";
 import CardSkeleton from "@/shared/components/ui/post/Card/Skeleton";
-import Notice from "../../notice/components/Notice";
-import { useInView } from "react-intersection-observer";
 
 /**
  * PostList - основной компонент для отображения ленты постов
@@ -27,6 +32,7 @@ import { useInView } from "react-intersection-observer";
 const PostList = () => {
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
+
   // Инициализируем запрос профиля на главной, чтобы состояние авторизации было доступно
   useProfile();
   const currentUser = queryClient.getQueryData<User>(["profile"]);
@@ -81,61 +87,59 @@ const PostList = () => {
       </div>
     );
   }
+
   return (
-    <div className="space-y-5 ">
+    <div className="space-y-5 mt-5">
       <Notice />
 
       {currentUser && (
-        <span>
+        <div className="flex flex-col gap-4">
           <CreatePost />
-          <div className="mb-0">
-            <Tabs
-              aria-label="Options"
-              classNames={{
-                tabList:
-                  "gap-6 w-full mb-0 relative rounded-none p-0 bg-transparent border-b border-divider/40",
-                cursor:
-                  "w-full bg-default-foreground/80 h-[1.5px] rounded-full",
-                tab: "px-1 h-11 data-[hover=true]:opacity-100",
-                tabContent:
-                  "text-default-400 font-medium text-sm tracking-wide group-data-[selected=true]:text-default-foreground transition-colors duration-200",
-                panel: "mb-0 w-full pt-0",
-                base: "w-full",
-              }}
-              variant="underlined"
-            >
-              <Tab
-                key="recommended"
-                title={
-                  <div className="flex items-center gap-2">
-                    <HiOutlineSparkles className="w-4 h-4" />
-                    <span>Рекомендуемые</span>
-                  </div>
-                }
-              />
-              <Tab
-                key="following"
-                title={
-                  <div className="flex items-center gap-2">
-                    <HiOutlineUserGroup className="w-4 h-4" />
-                    <span>Подписки</span>
-                  </div>
-                }
-              />
-            </Tabs>
-          </div>
-        </span>
+          <Tabs className="w-full" defaultValue="recommended">
+            <TabsList className="grid w-full grid-cols-2 rounded-[1.5rem] bg-neutral-100 dark:bg-[#101010]  border border-neutral-200 dark:border-neutral-800/70  auto-rows-fr h-auto">
+              <TabsTrigger
+                className="rounded-[1.25rem] h-full py-3 text-neutral-500 dark:text-neutral-400 data-[state=active]:text-black dark:data-[state=active]:text-white data-[state=active]:bg-white dark:data-[state=active]:bg-[#1c1c1c] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-2"
+                value="recommended"
+              >
+                <HiOutlineSparkles
+                  className="w-[18px] h-[18px] shrink-0"
+                  strokeWidth={1.5}
+                />
+                <span className="font-medium text-[14px]">Рекомендуемые</span>
+              </TabsTrigger>
+              <TabsTrigger
+                className="rounded-[1.25rem] h-full py-3 text-neutral-500 dark:text-neutral-400 data-[state=active]:text-black dark:data-[state=active]:text-white data-[state=active]:bg-white dark:data-[state=active]:bg-[#1c1c1c] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-2"
+                value="following"
+              >
+                <HiOutlineUserGroup
+                  className="w-[18px] h-[18px] shrink-0"
+                  strokeWidth={1.5}
+                />
+                <span className="font-medium text-[14px]">Подписки</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       )}
 
-      {posts.pages.map((page) =>
-        page.items.map((post) => (
-          <PostCard key={post.id} post={post} cardFor="post" />
-        )),
-      )}
+      <div className="rounded-[1.5rem] overflow-hidden border border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010] flex flex-col">
+        {posts.pages.map((page, pageIndex) =>
+          page.items.map((post, postIndex) => (
+            <React.Fragment key={post.id}>
+              <PostCard cardFor="post" post={post} />
+              {pageIndex === 0 && postIndex === 4 && (
+                <div className=" bg-neutral-50 dark:bg-black/50 border-y border-neutral-200 dark:border-neutral-800/70">
+                  <RecommendedUsersBlock />
+                </div>
+              )}
+            </React.Fragment>
+          )),
+        )}
+      </div>
 
       {hasNextPage && (
-        <div className="flex justify-center py-4">
-          <Spinner size="md" ref={ref} />
+        <div ref={ref} className="flex justify-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
         </div>
       )}
     </div>

@@ -1,8 +1,7 @@
-import {Skeleton} from "@heroui/react";
-
+import { Skeleton } from "@heroui/react";
 
 interface ProfileSkeletonProps {
-	isLoaded?: boolean;
+  isLoaded?: boolean;
 }
 export default function ProfileSkeleton({ isLoaded }: ProfileSkeletonProps) {
   return (

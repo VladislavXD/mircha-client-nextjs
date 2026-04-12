@@ -1,4 +1,3 @@
-import { api } from "@/src/api";
 import type {
   Chat,
   GetMessagesResponse,
@@ -7,9 +6,11 @@ import type {
   DeleteChatResponse,
 } from "../types";
 
+import { api } from "@/src/api";
+
 /**
  * Chat Service - API для работы с чатами
- * 
+ *
  * Endpoints:
  * - GET /chats - Список всех чатов пользователя
  * - GET /chats/:otherUserId - Получить/создать чат с пользователем
@@ -22,7 +23,7 @@ class ChatService {
    * Получить список всех чатов пользователя
    * Возвращает чаты с последним сообщением, информацией о собеседнике,
    * количеством непрочитанных сообщений и статусом онлайн
-   * 
+   *
    * @returns Список чатов
    */
   async getUserChats(): Promise<Chat[]> {
@@ -30,10 +31,29 @@ class ChatService {
   }
 
   /**
+   * Получить список всех групп и каналов пользователя
+   *
+   * @returns Список чатов с типом GROUP/CHANNEL
+   */
+  async getUserGroups(): Promise<Chat[]> {
+    return api.get<Chat[]>("groups");
+  }
+
+  /**
+   * Получить группу по ID
+   *
+   * @param groupId - ID группы
+   * @returns Группа с сообщениями
+   */
+  async getGroupById(groupId: string): Promise<Chat> {
+    return api.get<Chat>(`groups/${groupId}`);
+  }
+
+  /**
    * Получить или создать чат с пользователем
    * Если чат уже существует - возвращает его,
    * если нет - создает новый
-   * 
+   *
    * @param otherUserId - ID собеседника
    * @returns Чат с последними 50 сообщениями
    */
@@ -43,17 +63,17 @@ class ChatService {
 
   /**
    * Получить сообщения чата с пагинацией
-   * 
+   *
    * @param chatId - ID чата
    * @param params - Параметры пагинации (page, limit)
    * @returns Сообщения с информацией о пагинации
    */
   async getChatMessages(
     chatId: string,
-    params?: GetMessagesParams
+    params?: GetMessagesParams,
   ): Promise<GetMessagesResponse> {
     const searchParams = new URLSearchParams();
-    
+
     if (params?.page) {
       searchParams.append("page", params.page.toString());
     }
@@ -69,7 +89,7 @@ class ChatService {
 
   /**
    * Отметить все непрочитанные сообщения в чате как прочитанные
-   * 
+   *
    * @param chatId - ID чата
    * @returns Количество обновленных сообщений
    */
@@ -80,7 +100,7 @@ class ChatService {
   /**
    * Удалить чат
    * Все сообщения удалятся автоматически (cascade)
-   * 
+   *
    * @param chatId - ID чата
    * @returns Подтверждение удаления
    */

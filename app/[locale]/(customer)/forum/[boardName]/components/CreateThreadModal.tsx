@@ -1,246 +1,291 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
+import type { Board } from "@/src/features/forum";
+
+import React, { useState } from "react";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+
+import { useCreateThread } from "@/src/features/forum";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  Textarea,
-  Chip
-} from '@heroui/react'
-import { useCreateThread } from '@/src/features/forum'
-import { toast } from 'react-hot-toast'
-import type { Board } from '@/src/features/forum'
-import { useTranslations } from 'next-intl'
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateThreadModalProps {
-  isOpen: boolean
-  onClose: () => void
-  boardName: string
-  board: Board
+  isOpen: boolean;
+  onClose: () => void;
+  boardName: string;
+  board: Board;
 }
 
-const CreateThreadModal: React.FC<CreateThreadModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  boardName, 
-  board 
+const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
+  isOpen,
+  onClose,
+  boardName,
+  board,
 }) => {
-  const t = useTranslations('Forum.createThread')
-  const createThread = useCreateThread()
-  
+  const t = useTranslations("Forum.createThread");
+  const createThread = useCreateThread();
+
   const [formData, setFormData] = useState({
-    subject: '',
-    content: '',
-    authorName: ''
-  })
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+    subject: "",
+    content: "",
+    authorName: "",
+  });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!formData.content.trim()) {
-      toast.error(t('errorRequired'))
-      return
+      toast.warning(t("errorRequired"));
+
+      return;
     }
 
     if (selectedFiles.length > 5) {
-      toast.error('Максимум 5 файлов')
-      return
+      toast.warning("Максимум 5 файлов");
+
+      return;
     }
 
     try {
-      await createThread.mutateAsync({ 
-        boardName, 
+      await createThread.mutateAsync({
+        boardName,
         data: {
           subject: formData.subject,
           content: formData.content,
-          authorName: formData.authorName || 'Аноним'
+          authorName: formData.authorName || "Аноним",
         },
-        files: selectedFiles
-      })
-      
-      toast.success('Тред создан успешно!')
-      onClose()
+        files: selectedFiles,
+      });
+
+      toast.success("Тред создан успешно!");
+      onClose();
       setFormData({
-        subject: '',
-        content: '',
-        authorName: ''
-      })
-      setSelectedFiles([])
+        subject: "",
+        content: "",
+        authorName: "",
+      });
+      setSelectedFiles([]);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || t('errorCreate'))
+      toast.warning(error?.response?.data?.message || t("errorCreate"));
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    
-    if (files.length === 0) return
+    const files = Array.from(e.target.files || []);
+
+    if (files.length === 0) return;
 
     // Проверка количества файлов
     if (selectedFiles.length + files.length > 5) {
-      toast.error('Максимум 5 файлов')
-      return
+      toast.warning("Максимум 5 файлов");
+
+      return;
     }
 
     // Проверка каждого файла
     for (const file of files) {
       // Проверка размера файла
       if (file.size > (board.maxFileSize || 5242880)) {
-        toast.error(`Файл ${file.name} слишком большой. Максимальный размер: ${Math.round((board.maxFileSize || 5242880) / 1024 / 1024)}MB`)
-        return
+        toast.warning(
+          `Файл ${file.name} слишком большой. Максимальный размер: ${Math.round(
+            (board.maxFileSize || 5242880) / 1024 / 1024,
+          )}MB`,
+        );
+
+        return;
       }
 
       // Проверка типа файла
-      const fileExt = file.name.split('.').pop()?.toLowerCase()
-      if (fileExt && board.allowedFileTypes && !board.allowedFileTypes.includes(fileExt)) {
-        toast.error(`Тип файла ${fileExt} не поддерживается. Разрешённые типы: ${board.allowedFileTypes.join(', ')}`)
-        return
+      const fileExt = file.name.split(".").pop()?.toLowerCase();
+
+      if (
+        fileExt &&
+        board.allowedFileTypes &&
+        !board.allowedFileTypes.includes(fileExt)
+      ) {
+        toast.warning(
+          `Тип файла ${fileExt} не поддерживается. Разрешённые типы: ${board.allowedFileTypes.join(
+            ", ",
+          )}`,
+        );
+
+        return;
       }
     }
 
-    setSelectedFiles(prev => [...prev, ...files])
-  }
+    setSelectedFiles((prev) => [...prev, ...files]);
+  };
 
   const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
-  }
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose}
-      size="2xl"
-      scrollBehavior="inside"
-    >
-      <ModalContent>
-        <form onSubmit={handleSubmit}>
-          <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold">{t('title')} /{boardName}/</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+    <Dialog open={isOpen} onOpenChange={(open) => { if(!open) onClose(); }}>
+      <DialogContent 
+        className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl p-0 flex flex-col overflow-hidden rounded-t-[1.5rem] sm:rounded-[1.5rem] bg-white dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70"
+        showCloseButton={true}
+      >
+        <form onSubmit={handleSubmit} className="flex flex-col max-h-[90vh]">
+          {/* Header */}
+          <DialogHeader className="flex-shrink-0 flex flex-col gap-1 px-4 sm:px-6 py-4 border-b border-neutral-200 dark:border-neutral-800/70 m-0">
+            <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+              {t("title")} /{boardName}/
+            </DialogTitle>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
               Создайте новую тему для обсуждения
             </p>
-          </ModalHeader>
+          </DialogHeader>
 
-          <ModalBody className="gap-4">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-5 bg-white dark:bg-[#101010]">
+            
             {/* Имя автора */}
-            <Input
-              label={t('nameLabel')}
-              placeholder={t('namePlaceholder')}
-              value={formData.authorName}
-              onChange={(e) => setFormData(prev => ({ ...prev, authorName: e.target.value }))}
-              variant="bordered"
-              description={t('nameDescription')}
-            />
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                {t("nameLabel")}
+              </label>
+              <Input
+                placeholder={t("namePlaceholder")}
+                value={formData.authorName}
+                className="bg-neutral-50 dark:bg-[#161616] border-neutral-200 dark:border-neutral-800/70 focus-visible:ring-1 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600 h-10 w-full"
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, authorName: e.target.value }))
+                }
+              />
+              <p className="text-xs text-neutral-500">{t("nameDescription")}</p>
+            </div>
 
             {/* Тема треда */}
-            <Input
-              label={t('subjectLabel')}
-              placeholder={t('subjectPlaceholder')}
-              value={formData.subject}
-              onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-              variant="bordered"
-            />
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                {t("subjectLabel")}
+              </label>
+              <Input
+                placeholder={t("subjectPlaceholder")}
+                value={formData.subject}
+                className="bg-neutral-50 dark:bg-[#161616] border-neutral-200 dark:border-neutral-800/70 focus-visible:ring-1 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600 h-10 w-full"
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, subject: e.target.value }))
+                }
+              />
+            </div>
 
             {/* Содержание */}
-            <Textarea
-              label={t('contentLabel')}
-              placeholder="Введите содержание треда..."
-              value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              variant="bordered"
-              minRows={4}
-              maxRows={8}
-              isRequired
-            />
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                {t("contentLabel")} <span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                required
+                placeholder="Введите содержание треда..."
+                value={formData.content}
+                className="min-h-[120px] bg-neutral-50 dark:bg-[#161616] border-neutral-200 dark:border-neutral-800/70 focus-visible:ring-1 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600 w-full resize-y"
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, content: e.target.value }))
+                }
+              />
+            </div>
 
             {/* Загрузка файла */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('fileLabel')}</label>
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                {t("fileLabel")}
+              </label>
               <input
-                type="file"
                 multiple
-                accept={board.allowedFileTypes?.map(type => `.${type}`).join(',')}
+                accept={board.allowedFileTypes
+                  ?.map((type) => `.${type}`)
+                  .join(",")}
+                className="block w-full text-sm text-neutral-500 dark:text-neutral-400
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-neutral-100 file:text-neutral-900
+                    dark:file:bg-neutral-800 dark:file:text-neutral-100
+                    hover:file:bg-neutral-200 dark:hover:file:bg-neutral-700 transition-colors cursor-pointer"
+                type="file"
                 onChange={handleFileChange}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-primary-50 file:text-primary-700
-                  hover:file:bg-primary-100"
               />
-              
+
               {/* Список выбранных файлов */}
               {selectedFiles.length > 0 && (
-                <div className="space-y-3">
-                  <p className="text-sm font-medium">Выбранные файлы ({selectedFiles.length}/5):</p>
+                <div className="space-y-3 bg-neutral-50 dark:bg-[#161616] border border-neutral-200 dark:border-neutral-800/70 rounded-xl p-4">
+                  <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                    Выбранные файлов ({selectedFiles.length}/5):
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {selectedFiles.map((file, index) => {
                       const fileURL = URL.createObjectURL(file);
-                      const isImage = file.type.startsWith('image/');
-                      const isVideo = file.type.startsWith('video/');
-                      
+                      const isImage = file.type.startsWith("image/");
+                      const isVideo = file.type.startsWith("video/");
+
                       return (
-                        <div key={index} className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <div
+                          key={index}
+                          className="relative bg-white dark:bg-[#101010] rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800/70"
+                        >
                           {/* Превью медиа */}
-                          <div className="aspect-square relative bg-gray-200 dark:bg-gray-700">
+                          <div className="aspect-square relative bg-neutral-100 dark:bg-neutral-900">
                             {isImage ? (
                               <img
-                                src={fileURL}
                                 alt={file.name}
                                 className="w-full h-full object-cover"
+                                src={fileURL}
                                 onLoad={() => URL.revokeObjectURL(fileURL)}
                               />
                             ) : isVideo ? (
                               <video
-                                src={fileURL}
-                                className="w-full h-full object-cover"
                                 muted
+                                className="w-full h-full object-cover"
+                                src={fileURL}
                                 onLoadedData={() => URL.revokeObjectURL(fileURL)}
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <div className="text-center">
-                                  <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                                    <span className="text-xl">📄</span>
-                                  </div>
-                                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                                    {file.name.split('.').pop()?.toUpperCase()}
-                                  </span>
+                              <div className="w-full h-full flex flex-col items-center justify-center p-2">
+                                <div className="w-12 h-12 mb-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
+                                  <span className="text-xl">📄</span>
                                 </div>
+                                <span className="text-xs text-neutral-600 dark:text-neutral-400 text-center font-medium">
+                                  {file.name.split(".").pop()?.toUpperCase()}
+                                </span>
                               </div>
                             )}
-                            
+
                             {/* Кнопка удаления */}
                             <Button
-                              size="sm"
-                              color="danger"
-                              variant="solid"
-                              className="absolute top-1 right-1 min-w-unit-6 w-6 h-6 p-0"
-                              onPress={() => removeFile(index)}
+                              type="button"
+                              className="absolute top-2 right-2 w-7 h-7 rounded-full p-0 flex items-center justify-center shadow-lg bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/10"
+                              onClick={() => removeFile(index)}
                             >
-                              ×
+                              <span className="text-base leading-none mb-0.5">×</span>
                             </Button>
 
                             {/* Индикатор типа файла */}
                             {isVideo && (
-                              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">
-                                ▶
+                              <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded shadow-sm border border-white/10">
+                                ▶ VIDEO
                               </div>
                             )}
                           </div>
 
                           {/* Информация о файле */}
-                          <div className="p-2">
-                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate" title={file.name}>
+                          <div className="p-2.5">
+                            <p
+                              className="text-xs text-neutral-800 dark:text-neutral-200 truncate font-medium"
+                              title={file.name}
+                            >
                               {file.name}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-[11px] text-neutral-500 mt-0.5">
                               {(file.size / 1024 / 1024).toFixed(1)}MB
                             </p>
                           </div>
@@ -252,42 +297,56 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
               )}
 
               {/* Информация о лимитах */}
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>Максимальный размер файла: {Math.round((board.maxFileSize || 5242880) / 1024 / 1024)}MB</p>
-                <p>Максимум файлов: 5</p>
-                <div className="flex flex-wrap gap-1">
+              <div className="text-[13px] text-neutral-500 dark:text-neutral-400 space-y-1.5 pt-2">
+                <p>
+                  • Максимальный размер файла:{" "}
+                  <span className="font-medium text-neutral-700 dark:text-neutral-300">
+                    {Math.round((board.maxFileSize || 5242880) / 1024 / 1024)}MB
+                  </span>
+                </p>
+                <p>
+                  • Максимум файлов: <span className="font-medium text-neutral-700 dark:text-neutral-300">5</span>
+                </p>
+                <div className="flex flex-wrap gap-2 items-center mt-2">
                   <span>Поддерживаемые форматы:</span>
-                  {board.allowedFileTypes?.map(type => (
-                    <Chip key={type} size="sm" variant="flat" color="default">
-                      {type.toUpperCase()}
-                    </Chip>
-                  ))}
+                  <div className="flex flex-wrap gap-1.5">
+                    {board.allowedFileTypes?.map((type) => (
+                      <span 
+                        key={type} 
+                        className="px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 rounded text-[11px] font-medium"
+                      >
+                        {type.toUpperCase()}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </ModalBody>
+            
+          </div>
 
-          <ModalFooter>
-            <Button 
-              color="danger" 
-              variant="light" 
-              onPress={onClose}
+          <div className="flex-shrink-0 flex items-center justify-end gap-3 px-4 sm:px-6 py-4 border-t border-neutral-200 dark:border-neutral-800/70 bg-neutral-50 dark:bg-neutral-900/30">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
               disabled={createThread.isPending}
+              className="rounded-full border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
-              {t('cancel')}
+              {t("cancel")}
             </Button>
-            <Button 
-              color="primary" 
+            <Button
               type="submit"
-              isLoading={createThread.isPending}
+              disabled={createThread.isPending}
+              className="rounded-full bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
             >
-              {t('submit')}
+              {createThread.isPending ? "Создание..." : t("submit")}
             </Button>
-          </ModalFooter>
+          </div>
         </form>
-      </ModalContent>
-    </Modal>
-  )
-}
+      </DialogContent>
+    </Dialog>
+  );
+};
 
-export default CreateThreadModal
+export default CreateThreadModal;

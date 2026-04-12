@@ -1,26 +1,27 @@
 /**
  * Хук для управления состоянием спойлеров
- * 
+ *
  * @module features/post/hooks/useSpoiler
  */
 
-import { useState, useCallback, useEffect } from 'react'
-import { SpoilerUtils, type SpoilerConfig } from '../utils/spoiler.utils'
+import { useState, useCallback, useEffect } from "react";
+
+import { SpoilerUtils, type SpoilerConfig } from "../utils/spoiler.utils";
 
 interface UseSpoilerOptions {
-  postId: string
-  mediaIndex?: number
-  initialRevealed?: boolean
-  persistState?: boolean
-  config?: SpoilerConfig
+  postId: string;
+  mediaIndex?: number;
+  initialRevealed?: boolean;
+  persistState?: boolean;
+  config?: SpoilerConfig;
 }
 
 interface UseSpoilerReturn {
-  isRevealed: boolean
-  toggle: () => void
-  reveal: () => void
-  hide: () => void
-  config: Required<SpoilerConfig>
+  isRevealed: boolean;
+  toggle: () => void;
+  reveal: () => void;
+  hide: () => void;
+  config: Required<SpoilerConfig>;
 }
 
 /**
@@ -33,34 +34,35 @@ export const useSpoiler = ({
   persistState = false,
   config = {},
 }: UseSpoilerOptions): UseSpoilerReturn => {
-  const spoilerKey = SpoilerUtils.getSpoilerKey(postId, mediaIndex)
+  const spoilerKey = SpoilerUtils.getSpoilerKey(postId, mediaIndex);
 
   // Загружаем сохраненное состояние если нужно
   const [isRevealed, setIsRevealed] = useState<boolean>(() => {
     if (persistState) {
-      return SpoilerUtils.loadSpoilerState(spoilerKey)
+      return SpoilerUtils.loadSpoilerState(spoilerKey);
     }
-    return initialRevealed
-  })
+
+    return initialRevealed;
+  });
 
   // Сохраняем состояние при изменении
   useEffect(() => {
     if (persistState) {
-      SpoilerUtils.saveSpoilerState(spoilerKey, isRevealed)
+      SpoilerUtils.saveSpoilerState(spoilerKey, isRevealed);
     }
-  }, [isRevealed, persistState, spoilerKey])
+  }, [isRevealed, persistState, spoilerKey]);
 
   const reveal = useCallback(() => {
-    setIsRevealed(true)
-  }, [])
+    setIsRevealed(true);
+  }, []);
 
   const hide = useCallback(() => {
-    setIsRevealed(false)
-  }, [])
+    setIsRevealed(false);
+  }, []);
 
   const toggle = useCallback(() => {
-    setIsRevealed((prev) => !prev)
-  }, [])
+    setIsRevealed((prev) => !prev);
+  }, []);
 
   return {
     isRevealed,
@@ -70,12 +72,12 @@ export const useSpoiler = ({
     config: {
       blurAmount: config.blurAmount ?? 20,
       showButton: config.showButton ?? true,
-      buttonText: config.buttonText ?? 'Показать спойлер',
-      revealedText: config.revealedText ?? 'Скрыть спойлер',
+      buttonText: config.buttonText ?? "Показать спойлер",
+      revealedText: config.revealedText ?? "Скрыть спойлер",
       autoRevealOnClick: config.autoRevealOnClick ?? true,
     },
-  }
-}
+  };
+};
 
 /**
  * Хук для управления множественными спойлерами (для медиа галереи)
@@ -83,50 +85,54 @@ export const useSpoiler = ({
 export const useMultipleSpoilers = (
   postId: string,
   mediaCount: number,
-  spoilerIndices: number[] = []
+  spoilerIndices: number[] = [],
 ) => {
   const [revealedIndices, setRevealedIndices] = useState<Set<number>>(
-    new Set()
-  )
+    new Set(),
+  );
 
   const revealMedia = useCallback((index: number) => {
-    setRevealedIndices((prev) => new Set(prev).add(index))
-  }, [])
+    setRevealedIndices((prev) => new Set(prev).add(index));
+  }, []);
 
   const hideMedia = useCallback((index: number) => {
     setRevealedIndices((prev) => {
-      const next = new Set(prev)
-      next.delete(index)
-      return next
-    })
-  }, [])
+      const next = new Set(prev);
+
+      next.delete(index);
+
+      return next;
+    });
+  }, []);
 
   const toggleMedia = useCallback((index: number) => {
     setRevealedIndices((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
+
       if (next.has(index)) {
-        next.delete(index)
+        next.delete(index);
       } else {
-        next.add(index)
+        next.add(index);
       }
-      return next
-    })
-  }, [])
+
+      return next;
+    });
+  }, []);
 
   const revealAll = useCallback(() => {
-    setRevealedIndices(new Set(spoilerIndices))
-  }, [spoilerIndices])
+    setRevealedIndices(new Set(spoilerIndices));
+  }, [spoilerIndices]);
 
   const hideAll = useCallback(() => {
-    setRevealedIndices(new Set())
-  }, [])
+    setRevealedIndices(new Set());
+  }, []);
 
   const isMediaRevealed = useCallback(
     (index: number): boolean => {
-      return revealedIndices.has(index) || !spoilerIndices.includes(index)
+      return revealedIndices.has(index) || !spoilerIndices.includes(index);
     },
-    [revealedIndices, spoilerIndices]
-  )
+    [revealedIndices, spoilerIndices],
+  );
 
   return {
     isMediaRevealed,
@@ -137,5 +143,5 @@ export const useMultipleSpoilers = (
     hideAll,
     revealedCount: revealedIndices.size,
     totalSpoilers: spoilerIndices.length,
-  }
-}
+  };
+};

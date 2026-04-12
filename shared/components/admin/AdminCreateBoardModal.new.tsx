@@ -25,13 +25,13 @@
 //   onSuccess?: () => void
 // }
 
-// const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({ 
-//   isOpen, 
-//   onClose, 
-//   onSuccess 
+// const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({
+//   isOpen,
+//   onClose,
+//   onSuccess
 // }) => {
 //   const [createBoard, { isLoading }] = useCreateAdminBoardMutation()
-  
+
 //   const [formData, setFormData] = useState({
 //     name: '',
 //     title: '',
@@ -51,7 +51,7 @@
 
 //   const handleSubmit = async () => {
 //     if (isLoading) return // Предотвращаем повторные запросы
-    
+
 //     if (!formData.name.trim() || !formData.title.trim()) {
 //       toast.error('Название и заголовок обязательны')
 //       return
@@ -62,7 +62,7 @@
 //       toast.success('Борд создан успешно!')
 //       onClose()
 //       if (onSuccess) onSuccess()
-      
+
 //       // Сброс формы
 //       setFormData({
 //         name: '',
@@ -101,8 +101,8 @@
 //   ]
 
 //   return (
-//     <Modal 
-//       isOpen={isOpen} 
+//     <Modal
+//       isOpen={isOpen}
 //       onClose={onClose}
 //       size="2xl"
 //       scrollBehavior="inside"
@@ -111,7 +111,7 @@
 //         <ModalHeader>
 //           <h3 className="text-lg font-semibold">Создать новый борд</h3>
 //         </ModalHeader>
-        
+
 //         <ModalBody className="space-y-4">
 //           <Input
 //             label="Короткое имя борда"
@@ -121,7 +121,7 @@
 //             description="Только буквы и цифры, до 10 символов"
 //             isRequired
 //           />
-          
+
 //           <Input
 //             label="Название борда"
 //             placeholder="Random, Technology, Politics..."
@@ -147,7 +147,7 @@
 //               min={5}
 //               max={50}
 //             />
-            
+
 //             <Input
 //               type="number"
 //               label="Тредов на страницу"
@@ -156,7 +156,7 @@
 //               min={5}
 //               max={25}
 //             />
-            
+
 //             <Input
 //               type="number"
 //               label="Лимит бампа"
@@ -165,7 +165,7 @@
 //               min={50}
 //               max={1000}
 //             />
-            
+
 //             <Input
 //               type="number"
 //               label="Лимит изображений"
@@ -212,7 +212,7 @@
 //             NSFW контент
 //           </Switch>
 //         </ModalBody>
-        
+
 //         <ModalFooter>
 //           <Button
 //             color="danger"

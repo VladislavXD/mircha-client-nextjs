@@ -1,5 +1,8 @@
 "use client";
 
+import type { CreateFeedbackDto } from "../types";
+import type { User } from "@/src/types/types";
+
 import React, { useState } from "react";
 import {
   Modal,
@@ -20,8 +23,6 @@ import { AlertTriangle, Upload, X } from "lucide-react";
 
 import { useCreateFeedback } from "../hooks/useFeedbackMutations";
 import { FeedbackType, ReportReason } from "../types";
-import type { CreateFeedbackDto } from "../types";
-import type { User } from "@/src/types/types";
 
 interface ReportModalProps {
   isOpen: boolean;
@@ -40,7 +41,7 @@ interface FormData {
 
 /**
  * ReportModal - универсальная модалка для жалоб
- * 
+ *
  * Может использоваться для:
  * - Жалобы на посты
  * - Жалобы на комментарии
@@ -78,11 +79,12 @@ const ReportModal = ({
 
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(
-    null
+    null,
   );
 
   const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (file) {
       setScreenshot(file);
       setScreenshotPreview(URL.createObjectURL(file));
@@ -98,7 +100,10 @@ const ReportModal = ({
   };
 
   const onSubmit = handleSubmit((data) => {
-    const feedbackData: CreateFeedbackDto & { userName?: string; userEmail?: string } = {
+    const feedbackData: CreateFeedbackDto & {
+      userName?: string;
+      userEmail?: string;
+    } = {
       type: defaultType,
       reason: data.reason,
       subject: data.subject,
@@ -106,7 +111,7 @@ const ReportModal = ({
       targetId,
       targetType,
       screenshot: screenshot || undefined,
-      userName: currentUser?.username || currentUser?.name || 'Аноним',
+      userName: currentUser?.username || currentUser?.name || "Аноним",
       userEmail: currentUser?.email,
     };
 
@@ -123,8 +128,8 @@ const ReportModal = ({
       },
       onError: (error) => {
         // Toast уже показан в хуке, просто логируем
-        console.error('Failed to submit feedback:', error);
-      }
+        console.error("Failed to submit feedback:", error);
+      },
     });
   });
 
@@ -162,15 +167,15 @@ const ReportModal = ({
 
   return (
     <Modal
-      isOpen={isOpen}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-      size="2xl"
-      scrollBehavior="inside"
       classNames={{
         base: "bg-background",
         backdrop: "bg-black/50 backdrop-blur-sm",
+      }}
+      isOpen={isOpen}
+      scrollBehavior="inside"
+      size="2xl"
+      onOpenChange={(open) => {
+        if (!open) onClose();
       }}
     >
       <ModalContent>
@@ -181,178 +186,182 @@ const ReportModal = ({
               <span>{getModalTitle()}</span>
             </ModalHeader>
 
-          <ModalBody>
-            {/* Информация о цели жалобы */}
-            {targetId && targetTitle && (
-              <div className="mb-4 p-3 rounded-lg bg-default-100">
-                <p className="text-sm text-default-600">
-                  {targetType === "post" && "Пост: "}
-                  {targetType === "comment" && "Комментарий: "}
-                  {targetType === "user" && "Пользователь: "}
-                  <span className="font-medium text-default-900">
-                    {targetTitle}
-                  </span>
-                </p>
-                {targetId && (
-                  <p className="text-xs text-default-500 mt-1">ID: {targetId}</p>
-                )}
-              </div>
-            )}
-
-            {/* Информация о отправителе */}
-            {currentUser && (
-              <div className="mb-4 p-3 rounded-lg bg-primary-50 dark:bg-primary-100/10">
-                <p className="text-sm">
-                  <span className="text-default-600">Отправитель: </span>
-                  <span className="font-medium text-primary">
-                    {currentUser.name || currentUser.email}
-                  </span>
-                </p>
-                <p className="text-xs text-default-500 mt-1">
-                  ID: {currentUser.id}
-                </p>
-              </div>
-            )}
-
-            {/* Причина жалобы */}
-            <Controller
-              name="reason"
-              control={control}
-              rules={{ required: "Выберите причину" }}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  label="Причина жалобы"
-                  placeholder="Выберите причину"
-                  errorMessage={errors.reason?.message}
-                  isInvalid={!!errors.reason}
-                  isRequired
-                  classNames={{
-                    label: "font-medium",
-                  }}
-                >
-                  {reasonOptions.map((option) => (
-                    <SelectItem key={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </Select>
-              )}
-            />
-
-            {/* Тема */}
-            <Controller
-              name="subject"
-              control={control}
-              rules={{
-                required: "Укажите тему",
-                minLength: { value: 5, message: "Минимум 5 символов" },
-                maxLength: { value: 100, message: "Максимум 100 символов" },
-              }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Тема"
-                  placeholder="Краткое описание проблемы"
-                  errorMessage={errors.subject?.message}
-                  isInvalid={!!errors.subject}
-                  isRequired
-                  classNames={{
-                    label: "font-medium",
-                  }}
-                />
-              )}
-            />
-
-            {/* Подробное описание */}
-            <Controller
-              name="description"
-              control={control}
-              rules={{
-                required: "Опишите проблему",
-                minLength: { value: 20, message: "Минимум 20 символов" },
-                maxLength: { value: 1000, message: "Максимум 1000 символов" },
-              }}
-              render={({ field }) => (
-                <Textarea
-                  {...field}
-                  label="Подробное описание"
-                  placeholder="Расскажите подробнее о проблеме..."
-                  errorMessage={errors.description?.message}
-                  isInvalid={!!errors.description}
-                  isRequired
-                  minRows={4}
-                  maxRows={8}
-                  classNames={{
-                    label: "font-medium",
-                  }}
-                />
-              )}
-            />
-
-            {/* Скриншот (опционально) */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-default-700">
-                Скриншот (опционально)
-              </label>
-
-              {!screenshot ? (
-                <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-default-300 rounded-lg cursor-pointer hover:border-primary transition-colors">
-                  <Upload size={20} className="text-default-500" />
-                  <span className="text-sm text-default-600">
-                    Загрузить скриншот
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleScreenshotChange}
-                    className="hidden"
-                  />
-                </label>
-              ) : (
-                <div className="relative">
-                  <img
-                    src={screenshotPreview!}
-                    alt="Screenshot preview"
-                    className="w-full h-auto rounded-lg border border-default-200"
-                  />
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    color="danger"
-                    variant="flat"
-                    className="absolute top-2 right-2"
-                    onClick={removeScreenshot}
-                  >
-                    <X size={16} />
-                  </Button>
+            <ModalBody>
+              {/* Информация о цели жалобы */}
+              {targetId && targetTitle && (
+                <div className="mb-4 p-3 rounded-lg bg-default-100">
+                  <p className="text-sm text-default-600">
+                    {targetType === "post" && "Пост: "}
+                    {targetType === "comment" && "Комментарий: "}
+                    {targetType === "user" && "Пользователь: "}
+                    <span className="font-medium text-default-900">
+                      {targetTitle}
+                    </span>
+                  </p>
+                  {targetId && (
+                    <p className="text-xs text-default-500 mt-1">
+                      ID: {targetId}
+                    </p>
+                  )}
                 </div>
               )}
-            </div>
 
-            {/* Предупреждение */}
-            <div className="p-3 rounded-lg bg-warning-50 dark:bg-warning-100/10 border border-warning-200">
-              <p className="text-xs text-warning-700 dark:text-warning-600">
-                ⚠️ Ложные жалобы могут привести к блокировке вашего аккаунта.
-                Модераторы рассмотрят вашу жалобу в течение 24 часов.
-              </p>
-            </div>
-          </ModalBody>
+              {/* Информация о отправителе */}
+              {currentUser && (
+                <div className="mb-4 p-3 rounded-lg bg-primary-50 dark:bg-primary-100/10">
+                  <p className="text-sm">
+                    <span className="text-default-600">Отправитель: </span>
+                    <span className="font-medium text-primary">
+                      {currentUser.name || currentUser.email}
+                    </span>
+                  </p>
+                  <p className="text-xs text-default-500 mt-1">
+                    ID: {currentUser.id}
+                  </p>
+                </div>
+              )}
 
-          <ModalFooter>
-            <Button variant="light" onPress={onModalClose} isDisabled={isLoading}>
-              Отмена
-            </Button>
-            <Button
-              color="danger"
-              type="submit"
-              isLoading={isLoading}
-              startContent={!isLoading && <AlertTriangle size={16} />}
-            >
-              {isLoading ? "Отправка..." : "Отправить жалобу"}
-            </Button>
-          </ModalFooter>
-        </form>
+              {/* Причина жалобы */}
+              <Controller
+                control={control}
+                name="reason"
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    isRequired
+                    classNames={{
+                      label: "font-medium",
+                    }}
+                    errorMessage={errors.reason?.message}
+                    isInvalid={!!errors.reason}
+                    label="Причина жалобы"
+                    placeholder="Выберите причину"
+                  >
+                    {reasonOptions.map((option) => (
+                      <SelectItem key={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </Select>
+                )}
+                rules={{ required: "Выберите причину" }}
+              />
+
+              {/* Тема */}
+              <Controller
+                control={control}
+                name="subject"
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    isRequired
+                    classNames={{
+                      label: "font-medium",
+                    }}
+                    errorMessage={errors.subject?.message}
+                    isInvalid={!!errors.subject}
+                    label="Тема"
+                    placeholder="Краткое описание проблемы"
+                  />
+                )}
+                rules={{
+                  required: "Укажите тему",
+                  minLength: { value: 5, message: "Минимум 5 символов" },
+                  maxLength: { value: 100, message: "Максимум 100 символов" },
+                }}
+              />
+
+              {/* Подробное описание */}
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    isRequired
+                    classNames={{
+                      label: "font-medium",
+                    }}
+                    errorMessage={errors.description?.message}
+                    isInvalid={!!errors.description}
+                    label="Подробное описание"
+                    maxRows={8}
+                    minRows={4}
+                    placeholder="Расскажите подробнее о проблеме..."
+                  />
+                )}
+                rules={{
+                  required: "Опишите проблему",
+                  minLength: { value: 20, message: "Минимум 20 символов" },
+                  maxLength: { value: 1000, message: "Максимум 1000 символов" },
+                }}
+              />
+
+              {/* Скриншот (опционально) */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-default-700">
+                  Скриншот (опционально)
+                </label>
+
+                {!screenshot ? (
+                  <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-default-300 rounded-lg cursor-pointer hover:border-primary transition-colors">
+                    <Upload className="text-default-500" size={20} />
+                    <span className="text-sm text-default-600">
+                      Загрузить скриншот
+                    </span>
+                    <input
+                      accept="image/*"
+                      className="hidden"
+                      type="file"
+                      onChange={handleScreenshotChange}
+                    />
+                  </label>
+                ) : (
+                  <div className="relative">
+                    <img
+                      alt="Screenshot preview"
+                      className="w-full h-auto rounded-lg border border-default-200"
+                      src={screenshotPreview!}
+                    />
+                    <Button
+                      isIconOnly
+                      className="absolute top-2 right-2"
+                      color="danger"
+                      size="sm"
+                      variant="flat"
+                      onClick={removeScreenshot}
+                    >
+                      <X size={16} />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Предупреждение */}
+              <div className="p-3 rounded-lg bg-warning-50 dark:bg-warning-100/10 border border-warning-200">
+                <p className="text-xs text-warning-700 dark:text-warning-600">
+                  ⚠️ Ложные жалобы могут привести к блокировке вашего аккаунта.
+                  Модераторы рассмотрят вашу жалобу в течение 24 часов.
+                </p>
+              </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                isDisabled={isLoading}
+                variant="light"
+                onPress={onModalClose}
+              >
+                Отмена
+              </Button>
+              <Button
+                color="danger"
+                isLoading={isLoading}
+                startContent={!isLoading && <AlertTriangle size={16} />}
+                type="submit"
+              >
+                {isLoading ? "Отправка..." : "Отправить жалобу"}
+              </Button>
+            </ModalFooter>
+          </form>
         )}
       </ModalContent>
     </Modal>

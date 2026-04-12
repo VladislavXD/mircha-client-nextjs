@@ -3,6 +3,7 @@ import React from "react";
 import { Card, CardBody, Avatar, Chip } from "@heroui/react";
 import Link from "next/link";
 import { Repeat } from "lucide-react";
+
 import { EmojiText } from "@/shared/components/ui/EmojiText";
 import { formatToClientDate } from "@/app/utils/formatToClientDate";
 
@@ -34,7 +35,7 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
   const safeContent = typeof postContent === "string" ? postContent : "";
 
   return (
-    <Card 
+    <Card
       className="w-full hover:shadow-lg transition-all duration-300 border border-default-200"
       shadow="sm"
     >
@@ -43,18 +44,17 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center w-8 h-8 bg-success-100 dark:bg-success-900/30 rounded-full">
-              <Repeat size={16} className="text-success-600 dark:text-success-400" />
+              <Repeat
+                className="text-success-600 dark:text-success-400"
+                size={16}
+              />
             </div>
             <span className="text-sm font-medium text-default-700">
               Вы репостнули
             </span>
           </div>
           {createdAt && (
-            <Chip
-              size="sm"
-              variant="flat"
-              className="text-xs bg-default-100"
-            >
+            <Chip className="text-xs bg-default-100" size="sm" variant="flat">
               {formatToClientDate(createdAt)}
             </Chip>
           )}
@@ -73,15 +73,15 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
         <div className="p-4 bg-default-50 dark:bg-default-100/50 rounded-xl border border-default-200">
           {/* Автор */}
           {postAuthorId && (
-            <Link 
-              href={`/user/${postAuthorId}`}
+            <Link
               className="flex items-center gap-3 mb-3 group"
+              href={`/user/${postAuthorId}`}
             >
               <Avatar
-                src={postAuthorAvatarUrl}
+                className="flex-shrink-0 ring-2 ring-default-200 group-hover:ring-primary-400 transition-all"
                 name={postAuthorName}
                 size="sm"
-                className="flex-shrink-0 ring-2 ring-default-200 group-hover:ring-primary-400 transition-all"
+                src={postAuthorAvatarUrl}
               />
               <span className="text-sm font-semibold text-default-900 group-hover:text-primary-600 transition-colors">
                 {postAuthorName}
@@ -90,16 +90,13 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
           )}
 
           {/* Контент */}
-          <Link 
-            href={`/posts/${postId}`} 
-            className="block group"
-          >
+          <Link className="block group" href={`/posts/${postId}`}>
             {safeContent && (
               <div className="mb-3">
                 <EmojiText
-                  text={safeContent}
-                  emojiUrls={postEmojiUrls}
                   className="text-sm text-default-700 leading-relaxed line-clamp-4 group-hover:text-default-900 transition-colors"
+                  emojiUrls={postEmojiUrls}
+                  text={safeContent}
                 />
               </div>
             )}
@@ -108,9 +105,9 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
             {postImageUrl && (
               <div className="rounded-lg overflow-hidden shadow-sm">
                 <img
-                  src={postImageUrl}
                   alt="Post media"
                   className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+                  src={postImageUrl}
                 />
               </div>
             )}
@@ -122,4 +119,3 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
 };
 
 export default ProfileRepostItem;
-

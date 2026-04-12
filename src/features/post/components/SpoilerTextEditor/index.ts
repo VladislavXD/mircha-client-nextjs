@@ -1,1 +1,1 @@
-export { SpoilerTextEditor, default } from './SpoilerTextEditor'
+export { SpoilerTextEditor, default } from "./SpoilerTextEditor";

@@ -1,319 +1,195 @@
-"use client"
-import React, { useState, useEffect, useRef } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { useGetOrCreateChat, useMarkMessagesAsRead } from "@/src/features/chat"
-import { useOnlineStatus } from "@/src/features/chat/hooks/useOnlineStatus"
-import { OnlineBadge } from "@/src/features/chat/components"
-import type { Message } from "@/src/features/chat/types"
-import { socketService } from "@/src/features/socket/socketService"
-import { Card, Input, Button, Spinner } from "@heroui/react"
-import { Send, ArrowLeft, Phone, Video } from "lucide-react"
-import { useProfile } from "@/src/features/profile"
+
+"use client";
+import type { Message } from "@/src/features/chat/types";
+
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
+import { useGetOrCreateChat, useMarkMessagesAsRead } from "@/src/features/chat";
+import { useOnlineStatus } from "@/src/features/chat/hooks/useOnlineStatus";
+import { socketService } from "@/src/features/socket/socketService";
+import { useProfile } from "@/src/features/profile";
+import { ChatHeader, ChatMessageList, ChatInput } from "@/src/features/chat/components";
 
 export const ChatWindow: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>()
-  const router = useRouter()
-  const { user: currentUser } = useProfile()
-  // Токен больше не нужен - используем сессионную аутентификацию
-  // const token = getAuthToken()
+  const { userId } = useParams<{ userId: string }>();
+  const router = useRouter();
+  const { user: currentUser } = useProfile();
 
-  const [messages, setMessages] = useState<Message[]>([])
-  const [newMessage, setNewMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const [typingUsers, setTypingUsers] = useState<
-    { userId: string; userName: string }[]
-  >([])
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<{ userId: string; userName: string }[]>([]);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data: chatData, isLoading } = useGetOrCreateChat(userId, { enabled: !!userId })
-  const { mutate: markAsRead } = useMarkMessagesAsRead()
-  const { isOnline } = useOnlineStatus(chatData?.otherParticipant?.id)
+  const { data: chatData, isLoading } = useGetOrCreateChat(userId, {
+    enabled: !!userId,
+  });
+  const { mutate: markAsRead } = useMarkMessagesAsRead();
+  const { isOnline } = useOnlineStatus(chatData?.otherParticipant?.id);
 
-  // Присоединяемся к чату (Socket.IO подключается глобально через SocketConnectionManager)
+  // Join chat room and initialize messages
   useEffect(() => {
     if (chatData?.id) {
-      socketService.joinChat(chatData.id)
-      setMessages(chatData.messages || [])
+      socketService.joinDirectChat(chatData.id);
+      setMessages(chatData.messages || []);
 
       const unreadMessageIds =
         chatData.messages
           ?.filter((msg: Message) => !msg.isRead && msg.senderId !== currentUser?.id)
-          .map((msg: Message) => msg.id) || []
+          .map((msg: Message) => msg.id) || [];
 
       if (unreadMessageIds.length > 0) {
-        markAsRead(chatData.id)
+        markAsRead(chatData.id);
       }
     }
-  }, [chatData, currentUser?.id, markAsRead])
+  }, [chatData, currentUser?.id, markAsRead]);
 
-  // Обработчики Socket.IO событий
+  // Socket.IO event handlers
   useEffect(() => {
     const handleNewMessage = (message: Message) => {
       if (message.chatId === chatData?.id) {
-        setMessages(prev => [...prev, message])
-        // Убираем автоматическое markAsRead - теперь используем массовое прочтение при открытии чата
+        setMessages((prev) => [...prev, message]);
       }
-    }
+    };
 
-    const handleTypingStart = (data: {
-      userId: string
-      userName: string
-      chatId: string
-    }) => {
+    const handleTypingStart = (data: { userId: string; userName: string; chatId: string }) => {
       if (data.chatId === chatData?.id && data.userId !== currentUser?.id) {
-        setTypingUsers(prev => {
-          const exists = prev.find(user => user.userId === data.userId)
-          if (!exists) return [...prev, { userId: data.userId, userName: data.userName }]
-          return prev
-        })
+        setTypingUsers((prev) => {
+          const exists = prev.find((user) => user.userId === data.userId);
+          if (!exists) return [...prev, { userId: data.userId, userName: data.userName }];
+          return prev;
+        });
       }
-    }
+    };
 
     const handleTypingStop = (data: { userId: string; chatId: string }) => {
       if (data.chatId === chatData?.id) {
-        setTypingUsers(prev => prev.filter(user => user.userId !== data.userId))
+        setTypingUsers((prev) => prev.filter((user) => user.userId !== data.userId));
       }
-    }
+    };
 
-    const handleUserStatusChange = (data: {
-      userId: string
-      isOnline: boolean
-      chatId: string
-    }) => {
-      if (data.chatId === chatData?.id && data.userId === chatData?.otherParticipant?.id) {
-        // Статус автоматически обновляется через хук useOnlineStatus
-      }
-    }
-
-    const handleMessagesRead = (data: {
-      chatId: string
-      readerId: string
-      messageCount: number
-      timestamp: string
-    }) => {
+    const handleMessagesRead = (data: { chatId: string; readerId: string }) => {
       if (data.chatId === chatData?.id && data.readerId !== currentUser?.id) {
-        // Обновляем статус прочтения для сообщений от текущего пользователя
-        setMessages(prev => prev.map(msg => 
-          msg.senderId === currentUser?.id && !msg.isRead 
-            ? { ...msg, isRead: true } 
-            : msg
-        ))
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.senderId === currentUser?.id && !msg.isRead ? { ...msg, isRead: true } : msg
+          )
+        );
       }
-    }
+    };
 
-    socketService.onNewMessage(handleNewMessage)
-    socketService.onTypingStart(handleTypingStart)
-    socketService.onTypingStop(handleTypingStop)
-    socketService.onUserStatusChange(handleUserStatusChange)
-    socketService.onMessagesRead(handleMessagesRead)
+    socketService.onNewDirectMessage(handleNewMessage);
+    socketService.onTypingStart(handleTypingStart);
+    socketService.onTypingStop(handleTypingStop);
+    socketService.onMessagesRead(handleMessagesRead);
 
     return () => {
-      socketService.off("new_message", handleNewMessage)
-      socketService.off("user_typing_start", handleTypingStart)
-      socketService.off("user_typing_stop", handleTypingStop)
-      socketService.off("user_status_change", handleUserStatusChange)
-      socketService.off("messages_read", handleMessagesRead)
-    }
-  }, [chatData?.id, chatData?.otherParticipant?.id, currentUser?.id])
+      socketService.off("new_direct_message", handleNewMessage);
+      socketService.off("user_typing_start", handleTypingStart);
+      socketService.off("user_typing_stop", handleTypingStop);
+      socketService.off("messages_read", handleMessagesRead);
+    };
+  }, [chatData?.id, currentUser?.id]);
 
-  // Эффект для отметки сообщений как прочитанных при фокусе окна
+  // Mark as read on focus
   useEffect(() => {
     const handleWindowFocus = () => {
       if (chatData?.id && currentUser?.id) {
-        // Отмечаем все непрочитанные сообщения как прочитанные
-        const hasUnreadMessages = messages.some(msg => 
-          !msg.isRead && msg.senderId !== currentUser.id
-        )
-        if (hasUnreadMessages) {
-          markAsRead(chatData.id)
-        }
+        const hasUnreadMessages = messages.some((msg) => !msg.isRead && msg.senderId !== currentUser.id);
+        if (hasUnreadMessages) markAsRead(chatData.id);
       }
-    }
-
-    window.addEventListener('focus', handleWindowFocus)
-    
-    // Также отмечаем при монтировании, если окно уже в фокусе
+    };
+    window.addEventListener("focus", handleWindowFocus);
     if (document.hasFocus() && chatData?.id && currentUser?.id) {
-      const hasUnreadMessages = messages.some(msg => 
-        !msg.isRead && msg.senderId !== currentUser.id
-      )
-      if (hasUnreadMessages) {
-        markAsRead(chatData.id)
-      }
+      handleWindowFocus();
     }
-
-    return () => {
-      window.removeEventListener('focus', handleWindowFocus)
-    }
-  }, [chatData?.id, currentUser?.id, messages, markAsRead])
-
-  // Автопрокрутка к последним сообщениям
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+    return () => window.removeEventListener("focus", handleWindowFocus);
+  }, [chatData?.id, currentUser?.id, messages, markAsRead]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !chatData?.id) return
-    socketService.sendMessage(chatData.id, newMessage.trim())
-    setNewMessage("")
+    if (!newMessage.trim() || !chatData?.id) return;
+    socketService.sendDirectMessage(chatData.id, newMessage.trim());
+    setNewMessage("");
     if (isTyping) {
-      socketService.stopTyping(chatData.id)
-      setIsTyping(false)
+      socketService.stopTypingDirect(chatData.id);
+      setIsTyping(false);
     }
-  }
+  };
 
   const handleInputChange = (value: string) => {
-    setNewMessage(value)
-    if (!chatData?.id) return
+    setNewMessage(value);
+    if (!chatData?.id) return;
 
     if (value.trim() && !isTyping) {
-      socketService.startTyping(chatData.id)
-      setIsTyping(true)
+      socketService.startTypingDirect(chatData.id);
+      setIsTyping(true);
     } else if (!value.trim() && isTyping) {
-      socketService.stopTyping(chatData.id)
-      setIsTyping(false)
+      socketService.stopTypingDirect(chatData.id);
+      setIsTyping(false);
     }
 
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     if (value.trim()) {
       typingTimeoutRef.current = setTimeout(() => {
         if (isTyping) {
-          socketService.stopTyping(chatData.id)
-          setIsTyping(false)
+          socketService.stopTypingDirect(chatData.id);
+          setIsTyping(false);
         }
-      }, 3000)
+      }, 3000);
     }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
+  };
 
   const formatMessageTime = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
-    }
-    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
-  }
+    const date = new Date(dateString);
+    const diffInHours = (new Date().getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 24) return date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-[calc(100dvh-12rem)] sm:h-[calc(100vh-8rem)]">
-        <Spinner size="lg" />
+      <div className="flex justify-center items-center h-full w-full bg-background">
+        <Loader2 className="animate-spin text-muted-foreground" size={32} />
       </div>
-    )
+    );
   }
 
   if (!chatData) {
     return (
-      <div className="flex justify-center items-center h-[calc(100dvh-12rem)] sm:h-[calc(100vh-8rem)]">
-        <div className="text-red-500">Ошибка загрузки чата</div>
+      <div className="flex justify-center items-center h-full w-full bg-background">
+        <div className="text-destructive font-medium">Ошибка загрузки чата</div>
       </div>
-    )
+    );
   }
 
-  const otherUser = chatData.otherParticipant
+  const otherUser = chatData.otherParticipant;
 
   return (
-    <div className="flex flex-col bg-gray-50 h-[calc(100dvh-12rem)] sm:h-[calc(100vh-8rem)]">
-      {/* Заголовок чата */}
-      <Card className="flex-shrink-0 p-4 rounded-none border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Button
-              isIconOnly
-              variant="light"
-              onClick={() => router.push("/chat")}
-            >
-              <ArrowLeft size={20} />
-            </Button>
-
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <OnlineBadge
-                  name={otherUser?.name || "Неизвестный пользователь"}
-                  description={isOnline ? "В сети" : "Не в сети"}
-                  avatarUrl={otherUser?.avatarUrl || undefined}
-                  isOnline={isOnline}
-                  size="md"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex space-x-2">
-            <Button isIconOnly variant="light">
-              <Phone size={20} />
-            </Button>
-            <Button isIconOnly variant="light">
-              <Video size={20} />
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Область сообщений */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map(message => {
-          const isOwn = message.senderId === currentUser?.id
-          return (
-            <div key={message.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  isOwn ? "bg-blue-500 text-white" : "bg-white text-gray-800 shadow-sm"
-                }`}
-              >
-                <div className="break-words">{message.content}</div>
-                <div className={`text-xs mt-1 ${isOwn ? "text-blue-100" : "text-gray-500"}`}>
-                  {formatMessageTime(message.createdAt)}
-                  {isOwn && message.isRead && <span className="ml-2">✓✓</span>}
-                </div>
-              </div>
-            </div>
-          )
-        })}
-        {typingUsers.length > 0 && (
-          <div className="flex justify-start">
-            <div className="bg-gray-200 px-4 py-2 rounded-lg">
-              <div className="text-sm text-gray-600">
-                {typingUsers.map(user => user.userName).join(", ")} печатает...
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Поле ввода сообщения */}
-      <Card className="flex-shrink-0 p-4 rounded-none border-t">
-        <div className="flex space-x-2">
-          <Input
-            value={newMessage}
-            onChange={e => handleInputChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Введите сообщение..."
-            className="flex-1"
-            size="lg"
-          />
-          <Button
-            color="primary"
-            isIconOnly
-            onClick={handleSendMessage}
-            isDisabled={!newMessage.trim()}
-            size="lg"
-          >
-            <Send size={20} />
-          </Button>
-        </div>
-      </Card>
+    <div className="flex flex-col bg-background h-full w-full">
+      <ChatHeader
+        onBack={() => router.push("/chat")}
+        avatarUrl={otherUser?.avatarUrl || undefined}
+        name={otherUser?.name || "Неизвестный пользователь"}
+        isOnline={isOnline}
+        description={isOnline ? "В сети" : "Не в сети"}
+      />
+      <ChatMessageList
+        messages={messages}
+        currentUserId={currentUser?.id}
+        typingUsers={typingUsers}
+        formatMessageTime={formatMessageTime}
+        isGroup={false}
+      />
+      <ChatInput
+        newMessage={newMessage}
+        setNewMessage={setNewMessage}
+        handleSendMessage={handleSendMessage}
+        handleInputChange={handleInputChange}
+      />
     </div>
-  )
-}
+  );
+};

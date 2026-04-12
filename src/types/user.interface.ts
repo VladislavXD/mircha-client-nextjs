@@ -1,8 +1,8 @@
-import { User } from "@/src/types/types"
+import { User } from "@/src/types/types";
 
 export interface IUserState {
-	email: string
-	role?: 'ADMIN' | 'MODERATOR' | 'USER'
+  email: string;
+  role?: "ADMIN" | "MODERATOR" | "USER";
 }
 
 export interface ITokens {
@@ -12,19 +12,17 @@ export interface ITokens {
 }
 
 export interface IAuthUser {
-	name?: string
-	email: string
-	password: string
-	recaptchaToken?: string
+  name?: string;
+  email: string;
+  password: string;
+  recaptchaToken?: string;
 }
-
 
 export interface IInitialState {
-	user: IUserState | null
-	isAuthenticated?: boolean
+  user: IUserState | null;
+  isAuthenticated?: boolean;
 }
 
-
 export interface IAuthResponse extends ITokens {
-	user: User
+  user: User;
 }

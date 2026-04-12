@@ -1,20 +1,27 @@
 "use client";
 
+import type { Post, User } from "../types";
+
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Card as NextCard,
-  useDisclosure,
-} from "@heroui/react";
+import { useDisclosure } from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Heart, Eye, Forward } from "lucide-react";
+import { Heart, Eye } from "lucide-react";
 import { MessageCircle } from "lucide-react";
 
 import { useDeletePost } from "../hooks/usePostMutations";
 import { useLikePost, useUnlikePost } from "../like/hooks";
 import { useAddView } from "../hooks/usePostViews";
-import type { Post, User } from "../types";
+import { useFollow, useUnfollow } from "../../follow/hooks/useFollowMutations";
+import ReportPostModal from "../modals/report";
+import { useOnlineStatus } from "../../chat";
+import { getEditedText } from "../utils/editedText.utils";
+
+import PostMediaSlider, { type PostMedia } from "./PostMediaSlider/index";
+import { RepostButton } from "./RepostButton";
+import { CommentsModal } from "./comments";
+import ShareDropdown from "./shareDropdown";
 
 import UserComponent from "@/shared/components/ui/User";
 import MetaInfo from "@/shared/components/ui/MetaInfo";
@@ -23,14 +30,8 @@ import { EmojiText } from "@/shared/components/ui/EmojiText";
 import EditPostModal from "@/shared/components/ui/post/PostModals/EditPost";
 import DeletePost from "@/shared/components/ui/post/PostModals/DeletePost";
 import { useThrottle } from "@/src/hooks/useAntiSpam";
-import ReportPostModal from "../modals/report";
-import { useOnlineStatus } from "../../chat";
-import PostMediaSlider, { type PostMedia } from "./PostMediaSlider/index";
 import { timeAgo } from "@/src/utils/timeAgo";
-import { RepostButton } from "./RepostButton";
-import { CommentsModal } from "./comments";
-import { getEditedText } from "../utils/editedText.utils";
-import ShareDropdown from "./shareDropdown";
+import { Card } from "@/components/ui/card";
 
 type Props = {
   post: Post;
@@ -86,12 +87,15 @@ const PostCard = ({
   // Обработка медиа: если есть массив media, используем его, иначе создаём из одиночного image
   const postMedia: PostMedia[] = React.useMemo(() => {
     const mediaArray = (post as any)?.media;
+
     if (Array.isArray(mediaArray) && mediaArray.length > 0) {
       return mediaArray.map((m: any) => {
         // Определяем тип: бэкенд возвращает "IMAGE", "VIDEO", "GIF"
         let mediaType: "image" | "video" = "image";
+
         if (m.type) {
           const typeUpper = String(m.type).toUpperCase();
+
           mediaType = typeUpper === "VIDEO" ? "video" : "image";
         } else if (m.mimeType) {
           mediaType = m.mimeType.startsWith("video/") ? "video" : "image";
@@ -113,6 +117,7 @@ const PostCard = ({
         },
       ];
     }
+
     return [];
   }, [post, imageUrl]);
 
@@ -128,6 +133,7 @@ const PostCard = ({
     createdAt: authorCreatedAt,
     followers = [],
     following = [],
+    isFollow = false,
   } = author || {};
 
   // Mutations
@@ -172,6 +178,7 @@ const PostCard = ({
   const handleLike = () => {
     if (!currentUser) {
       setError("Вы не авторизованы");
+
       return;
     }
 
@@ -228,6 +235,7 @@ const PostCard = ({
     if (viewSent || !id || cardFor !== "post" || !currentUser) return;
 
     const el = inViewRef.current;
+
     if (!el) return;
 
     let timeoutId: NodeJS.Timeout;
@@ -282,15 +290,39 @@ const PostCard = ({
   const viewsCount = serverViewsCount ?? views.length;
   const followersCount = followers.length;
   const followingCount = following.length;
-  const isFollowing = currentUser
-    ? followers.some((f) => f.followerId === currentUser.id)
+  const initialIsFollowing = currentUser
+    ? isFollow || followers.some((f) => f.followerId === currentUser.id)
     : false;
+  const [optimisticIsFollowing, setOptimisticIsFollowing] =
+    useState(initialIsFollowing);
+
+  useEffect(() => {
+    setOptimisticIsFollowing(initialIsFollowing);
+  }, [initialIsFollowing]);
+
+  const followMutation = useFollow();
+  const unfollowMutation = useUnfollow();
+  const _handleFollowToggle = () => {
+    if (onFollowToggle) {
+      onFollowToggle();
+
+      return;
+    }
+    if (optimisticIsFollowing) {
+      setOptimisticIsFollowing(false);
+      unfollowMutation.mutate(authorId);
+    } else {
+      setOptimisticIsFollowing(true);
+      followMutation.mutate(authorId);
+    }
+  };
 
   const { isOnline } = useOnlineStatus(authorId);
 
   // Обработчик клика на карточку для перехода на страницу поста
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
+
     if (
       target.closest("a") ||
       target.closest("button") ||
@@ -315,81 +347,82 @@ const PostCard = ({
   };
 
   return (
-    <NextCard
-      className="mb-0 relative cursor-pointer transition-all rounded-none shadow-none border-t-1 border-default-200 hover:bg-[#070c0d] bg-black"
-      onClick={handleCardClick}
+    <Card
+      className="mb-0 relative cursor-pointer transition-all rounded-none shadow-none border-x-0 border-t-0 border-b last:border-b-0 border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010] hover:bg-neutral-50 dark:hover:bg-[#181818]"
       onAuxClick={handleCardAuxClick}
+      onClick={handleCardClick}
     >
-      <div className="flex gap-3 px-3 sm:px-4 pt-3 pb-1">
-
+      <div className="flex gap-3.5 px-4 sm:px-5 pt-4 pb-3">
         {/* LEFT: Аватар */}
         <div className="flex flex-col items-center shrink-0">
           <div
-            onClick={(e) => e.stopPropagation()}
             className="transition-transform duration-150 active:scale-90"
+            onClick={(e) => e.stopPropagation()}
           >
             <UserComponent
-              variant="avatar-only"
-              userId={authorId}
-              avatarUrl={avatarUrl}
+              showFollowBadge
+              avatarClassName="!w-9 !h-9 sm:!w-11 sm:!h-11"
               avatarFrameUrl={avatarFrameUrl}
-              usernameFrameUrl={usernameFrameUrl}
+              avatarUrl={avatarUrl}
               backgroundUrl={backgroundUrl}
-              name={name}
               bio={bio}
               createdAt={authorCreatedAt}
+              currentUserId={currentUser?.id}
               followersCount={followersCount}
               followingCount={followingCount}
-              isFollowing={isFollowing}
+              isFollowing={optimisticIsFollowing}
               isOnline={isOnline}
-              onFollowToggle={onFollowToggle}
-              showFollowBadge
-              currentUserId={currentUser?.id}
-              avatarClassName="!w-8 !h-8 sm:!w-10 sm:!h-10"
+              name={name}
+              userId={authorId}
+              usernameFrameUrl={usernameFrameUrl}
+              variant="avatar-only"
+              onFollowToggle={_handleFollowToggle}
             />
           </div>
           {/* Вертикальная линия потока */}
-          <div className="w-px flex-1 bg-default-200/30 mt-2 rounded-full min-h-[16px]" />
+          <div className="w-px flex-1 bg-neutral-200 dark:bg-neutral-800 mt-2 rounded-full min-h-[16px]" />
         </div>
 
         {/* RIGHT: Контент */}
         <div className="flex-1 min-w-0 pb-3">
-
           {/* Имя + время + дропдаун */}
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-start justify-between mb-1">
             <Link
+              className="flex items-center gap-1.5 min-w-0 flex-1"
               href={`/user/${authorId}`}
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1.5 min-w-0 flex-1"
             >
               <UserComponent
-                variant="name-only"
-                userId={authorId}
-                avatarUrl={avatarUrl}
                 avatarFrameUrl={avatarFrameUrl}
-                usernameFrameUrl={usernameFrameUrl}
+                avatarUrl={avatarUrl}
                 backgroundUrl={backgroundUrl}
-                name={name}
                 bio={bio}
                 createdAt={authorCreatedAt}
                 followersCount={followersCount}
                 followingCount={followingCount}
-                isFollowing={isFollowing}
+                isFollowing={optimisticIsFollowing}
                 isOnline={isOnline}
-                onFollowToggle={onFollowToggle}
-                nameClassName="text-xs sm:text-sm text-white"
+                name={name}
+                nameClassName="text-sm font-semibold text-neutral-900 dark:text-neutral-100 hover:underline"
+                userId={authorId}
+                usernameFrameUrl={usernameFrameUrl}
+                variant="name-only"
+                onFollowToggle={_handleFollowToggle}
               />
-              <time dateTime={createdAt} className="text-white/50 text-[9px] sm:text-xs shrink-0">
+              <time
+                className="text-neutral-500 dark:text-neutral-400 text-[11px] sm:text-xs shrink-0 ml-2"
+                dateTime={createdAt}
+              >
                 {timeAgo(createdAt || "")}
               </time>
             </Link>
-            <div onClick={(e) => e.stopPropagation()} className="shrink-0 ml-1">
+            <div className="shrink-0 ml-1" onClick={(e) => e.stopPropagation()}>
               <PostDropdown
-                isLoading={isDeleteLoading}
-                onEdit={handleEditClick}
-                onDelete={handleDeleteClick}
-                onReport={onReportOpen}
                 authorId={authorId}
+                isLoading={isDeleteLoading}
+                onDelete={handleDeleteClick}
+                onEdit={handleEditClick}
+                onReport={onReportOpen}
               />
             </div>
           </div>
@@ -398,12 +431,16 @@ const PostCard = ({
           <div
             ref={inViewRef}
             className="cursor-pointer"
-            onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
+            onClick={
+              cardFor !== "current-post"
+                ? () => router.push(`/posts/${id}`)
+                : undefined
+            }
           >
             <EmojiText
-              text={safeContent}
-              emojiUrls={emojiUrls}
               className="font-serif text-[13px] sm:text-[15px] md:text-[16px] leading-relaxed tracking-wide break-words"
+              emojiUrls={emojiUrls}
+              text={safeContent}
             />
           </div>
 
@@ -421,49 +458,77 @@ const PostCard = ({
           {cardFor !== "comment" && (
             <div
               className="flex items-center justify-between mt-1"
-              onClick={cardFor !== "current-post" ? () => router.push(`/posts/${id}`) : undefined}
+              onClick={
+                cardFor !== "current-post"
+                  ? () => router.push(`/posts/${id}`)
+                  : undefined
+              }
             >
               <div className="flex items-center -ml-1.5 gap-2">
                 <div
-                  onClick={(e) => { e.stopPropagation(); handleLikeWithThrottle(); }}
                   className={`cursor-pointer transition-opacity ${
-                    isThrottled || isLikeLoading || isUnlikeLoading ? "opacity-50" : "opacity-100"
+                    isThrottled || isLikeLoading || isUnlikeLoading
+                      ? "opacity-50"
+                      : "opacity-100"
                   }`}
-                  title={isThrottled ? "Подождите немного перед следующим лайком" : ""}
+                  title={
+                    isThrottled
+                      ? "Подождите немного перед следующим лайком"
+                      : ""
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLikeWithThrottle();
+                  }}
                 >
                   <MetaInfo
-                    {...(likeByUser ? { fill: "#d91002", color: "#d91002" } : {})}
+                    {...(likeByUser
+                      ? { fill: "#d91002", color: "#d91002" }
+                      : {})}
+                    Icon={Heart}
                     count={likesCount}
                     type="heart"
-                    Icon={Heart}
                   />
                 </div>
-                <div onClick={(e) => { e.stopPropagation(); onCommentsOpen(); }} className="cursor-pointer">
-                  <MetaInfo count={commentsCount} Icon={MessageCircle} />
+                <div
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCommentsOpen();
+                  }}
+                >
+                  <MetaInfo Icon={MessageCircle} count={commentsCount} />
                 </div>
                 <RepostButton
-                  postId={id}
-                  repostedByUser={repostedByUser}
-                  repostCount={repostCount}
                   post={post}
-                  
+                  postId={id}
+                  repostCount={repostCount}
+                  repostedByUser={repostedByUser}
                 />
 
-               
-                  <ShareDropdown linkToCopy={`https://mirchan.site/posts/${id}`} />
-
+                <ShareDropdown
+                  linkToCopy={`https://mirchan.site/posts/${id}`}
+                />
               </div>
               {/* Просмотры */}
               <div className="flex items-center gap-2">
-                {getEditedText({ isEdited: post.isEdited, updatedAt: post.updatedAt }) && (
+                {getEditedText({
+                  isEdited: post.isEdited,
+                  updatedAt: post.updatedAt,
+                }) && (
                   <p className="text-[9px] text-default-500">
-                    {getEditedText({ isEdited: post.isEdited, updatedAt: post.updatedAt })}
+                    {getEditedText({
+                      isEdited: post.isEdited,
+                      updatedAt: post.updatedAt,
+                    })}
                   </p>
                 )}
                 {cardFor === "current-post" && (
                   <div className="text-xs text-default-400 flex items-center gap-1">
                     <Eye size={13} />
-                    {viewsCount > 1000 ? `${(viewsCount / 1000).toFixed(1)}k` : viewsCount}
+                    {viewsCount > 1000
+                      ? `${(viewsCount / 1000).toFixed(1)}k`
+                      : viewsCount}
                   </div>
                 )}
               </div>
@@ -476,20 +541,20 @@ const PostCard = ({
 
       {/* Delete confirmation modal */}
       <DeletePost
+        error={error}
         isOpen={isDeleteOpen}
+        loading={isDeleteLoading}
         onClose={onDeleteClose}
         onDelete={handleDelete}
-        loading={isDeleteLoading}
-        error={error}
       />
 
       {/* Edit post modal */}
       <EditPostModal
-        isOpen={isEditOpen}
-        onClose={onEditClose}
-        postId={id}
         initialContent={safeContent}
         initialEmojiUrls={emojiUrls}
+        isOpen={isEditOpen}
+        postId={id}
+        onClose={onEditClose}
         onUpdated={() => {
           // React Query will auto-refetch on close
           onEditClose();
@@ -498,17 +563,17 @@ const PostCard = ({
 
       <ReportPostModal
         isOpen={isReportOpen}
-        onClose={onReportClose}
         post={post}
+        onClose={onReportClose}
       />
 
       {/* Comments modal */}
       <CommentsModal
         isOpen={isCommentsOpen}
-        onClose={onCommentsClose}
         post={post}
+        onClose={onCommentsClose}
       />
-    </NextCard>
+    </Card>
   );
 };
 

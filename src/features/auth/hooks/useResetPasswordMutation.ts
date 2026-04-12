@@ -1,40 +1,22 @@
-import { useMutation } from '@tanstack/react-query'
-// import { toast } from 'sonner'
+import { useMutation } from "@tanstack/react-query";
 
-// import { toastMessageHandler } from '@/shared/utils'
-
-import { TypeResetPasswordSchema } from '../schemes'
-import { passwordRecoveryService } from '../services'
-import { addToast } from '@heroui/react'
+import { TypeResetPasswordSchema } from "../schemes";
+import { passwordRecoveryService } from "../services";
 
 /**
  * Хук для выполнения мутации сброса пароля.
  */
 export function useResetPasswordMutation() {
-	const { mutate: reset, isPending: isLoadingReset } = useMutation({
-		mutationKey: ['reset password'],
-		mutationFn: ({
-			values,
-			recaptcha
-		}: {
-			values: TypeResetPasswordSchema
-			recaptcha: string
-		}) => passwordRecoveryService.reset(values, recaptcha),
-		onSuccess() {
-			addToast({
-				title: "На вашу почту была отправлена ссылка для подтверждения.",
-				color: "success",
-			})
-		},
+  const { mutateAsync: resetAsync, isPending: isLoadingReset } = useMutation({
+    mutationKey: ["reset password"],
+    mutationFn: ({
+      values,
+      recaptcha,
+    }: {
+      values: TypeResetPasswordSchema;
+      recaptcha: string;
+    }) => passwordRecoveryService.reset(values, recaptcha),
+  });
 
-		onError(error) {
-			addToast({
-				title: "Ошибка сброса пароля",
-				description: (error as Error).message,
-				color: "danger",
-			})
-		}
-	})
-
-	return { reset, isLoadingReset }
+  return { resetAsync, isLoadingReset };
 }

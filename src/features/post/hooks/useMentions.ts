@@ -10,8 +10,10 @@ export const useMentions = () => {
 
   const detectMention = useCallback((text: string) => {
     const atIndex = text.lastIndexOf("@");
+
     if (atIndex !== -1) {
       const query = text.slice(atIndex + 1);
+
       if (!query || query.includes(" ") || query.includes("@")) {
         setShowHit(false);
       } else {

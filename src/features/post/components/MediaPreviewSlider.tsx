@@ -1,11 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
-import { IoMdClose } from "react-icons/io";
-import { BsThreeDots } from "react-icons/bs";
-import { MdOutlineVisibilityOff, MdOutlineVisibility } from "react-icons/md";
+import React from "react";
+import { X, MoreHorizontal, EyeOff, Eye } from "lucide-react";
 import { Spoiler } from "spoiled";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export type MediaFile = {
   id: string;
@@ -22,31 +27,36 @@ type Props = {
   disabled?: boolean;
 };
 
-const MediaPreviewSlider: React.FC<Props> = ({ media, onRemove, onToggleSpoiler, disabled }) => {
+const MediaPreviewSlider: React.FC<Props> = ({
+  media,
+  onRemove,
+  onToggleSpoiler,
+  disabled,
+}) => {
   if (!media || media.length === 0) return null;
 
   return (
     <div className="mt-3 mb-3">
-      <div className="flex gap-3 overflow-auto  pb-2 scrollbar-thin scrollbar-thumb-default-300 scrollbar-track-default-100">
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700 scrollbar-track-transparent">
         {media.map((m) => (
           <div
             key={m.id}
-            className="relative shrink-0 w-40 h-40 rounded-xl overflow-hidden border-2 border-default-200 bg-default-50 hover:border-primary transition-colors"
+            className="relative shrink-0 w-40 h-40 rounded-[1.25rem] overflow-hidden border border-neutral-200 dark:border-neutral-800/70 bg-neutral-100 dark:bg-[#161616] group"
           >
             {m.spoiler ? (
               <Spoiler revealOn="click">
                 {m.type === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img 
-                    src={m.preview} 
-                    alt="media" 
-                    className="w-full h-full object-cover" 
+                  <img
+                    alt="media"
+                    className="w-full h-full object-cover"
+                    src={m.preview}
                   />
                 ) : (
-                  <video 
-                    src={m.preview} 
-                    className="w-full h-full object-cover" 
+                  <video
                     controls
+                    className="w-full h-full object-cover"
+                    src={m.preview}
                   />
                 )}
               </Spoiler>
@@ -54,70 +64,69 @@ const MediaPreviewSlider: React.FC<Props> = ({ media, onRemove, onToggleSpoiler,
               <>
                 {m.type === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img 
-                    src={m.preview} 
-                    alt="media" 
-                    className="w-full h-full object-cover" 
+                  <img
+                    alt="media"
+                    className="w-full h-full object-cover"
+                    src={m.preview}
                   />
                 ) : (
-                  <video 
-                    src={m.preview} 
-                    className="w-full h-full object-cover" 
+                  <video
                     controls
+                    className="w-full h-full object-cover"
+                    src={m.preview}
                   />
                 )}
               </>
             )}
 
-            {/* Кнопка меню (три точки) */}
+            {/* Menu Button (Three dots) */}
             {onToggleSpoiler && (
-              <Dropdown placement="bottom-end">
-                <DropdownTrigger>
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="solid"
-                    className="absolute top-2 left-2 shadow-lg bg-default-900/80 text-white"
-                    isDisabled={disabled}
-                    aria-label="Media options"
-                  >
-                    <BsThreeDots size={18} />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu aria-label="Media actions">
-                  <DropdownItem
-                    key="spoiler"
-                    startContent={m.spoiler ? <MdOutlineVisibility size={18} /> : <MdOutlineVisibilityOff size={18} />}
-                    onClick={() => onToggleSpoiler(m.id)}
-                  >
-                    {m.spoiler ? "Убрать спойлер" : "Отметить как спойлер"}
-                  </DropdownItem>
+              <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      aria-label="Media options"
+                      className="h-8 w-8 rounded-full shadow-lg bg-black/60 hover:bg-black/80 text-white border-0"
+                      disabled={disabled}
+                      size="icon"
+                      variant="secondary"
+                    >
+                      <MoreHorizontal size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="rounded-[1rem]">
+                    <DropdownMenuItem
+                      className="gap-2 cursor-pointer"
+                      onClick={() => onToggleSpoiler(m.id)}
+                    >
+                      {m.spoiler ? <Eye size={16} /> : <EyeOff size={16} />}
+                      {m.spoiler ? "Убрать спойлер" : "Отметить как спойлер"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
                 </DropdownMenu>
-              </Dropdown>
+              </div>
             )}
 
-            {/* Кнопка удаления */}
+            {/* Delete button */}
             <Button
-              isIconOnly
-              size="sm"
-              variant="solid"
-              color="danger"
-              className="absolute top-2 right-2 shadow-lg"
-              onClick={() => onRemove(m.id)}
-              isDisabled={disabled}
               aria-label="Remove media"
+              className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              disabled={disabled}
+              size="icon"
+              variant="destructive"
+              onClick={() => onRemove(m.id)}
             >
-              <IoMdClose size={18} />
+              <X size={16} />
             </Button>
 
-            {/* Индикатор типа */}
-            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-xs font-medium">
+            {/* Type indicator */}
+            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-black/70 text-white text-[11px] font-medium backdrop-blur-md">
               {m.type === "image" ? "Фото" : "Видео"}
             </div>
           </div>
         ))}
       </div>
-      <div className="text-xs text-default-500 mt-1">
+      <div className="text-[12px] text-neutral-500 mt-1 font-medium px-1">
         {media.length} / 30 файлов
       </div>
     </div>

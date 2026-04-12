@@ -1,4 +1,6 @@
-"use client"
+"use client";
+
+import type { AdminThread } from "../types/admin.types";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -20,7 +22,7 @@ import {
   Spinner,
   Pagination,
 } from "@heroui/react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import {
   MdSearch,
   MdForum,
@@ -28,8 +30,8 @@ import {
   MdPerson,
   MdDelete,
 } from "react-icons/md";
+
 import { useAdminThreads, useDeleteThread } from "../hooks/useAdmin";
-import type { AdminThread } from "../types/admin.types";
 
 interface ThreadManagementProps {
   className?: string;
@@ -40,7 +42,11 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const { data, isPending, error, refetch } = useAdminThreads({ page, limit, search: searchTerm });
+  const { data, isPending, error, refetch } = useAdminThreads({
+    page,
+    limit,
+    search: searchTerm,
+  });
   const deleteThreadMutation = useDeleteThread();
 
   // Дебаунс поиска
@@ -49,6 +55,7 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
       setPage(1);
       refetch();
     }, 500);
+
     return () => clearTimeout(t);
   }, [searchTerm]);
 
@@ -72,15 +79,18 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
         <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <MdForum className="text-primary" size={24} />
-            <h2 className="text-lg sm:text-xl font-semibold">Управление тредами</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">
+              Управление тредами
+            </h2>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Select
               label="На странице"
-              size="sm"
               selectedKeys={[String(limit)]}
+              size="sm"
               onSelectionChange={(keys) => {
                 const v = Number(Array.from(keys)[0] ?? 10);
+
                 setLimit(v);
                 setPage(1);
               }}
@@ -96,13 +106,13 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
           <div className="space-y-4 mb-6">
             <div className="flex gap-4 items-center">
               <Input
+                isClearable
+                className="flex-1"
                 placeholder="Поиск по заголовку..."
+                size="sm"
+                startContent={<MdSearch />}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                startContent={<MdSearch />}
-                className="flex-1"
-                isClearable
-                size="sm"
               />
             </div>
           </div>
@@ -110,7 +120,11 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
           {error ? (
             <div className="text-center py-8">
               <p className="text-danger">Ошибка загрузки тредов</p>
-              <Button color="primary" onPress={() => refetch()} className="mt-4">
+              <Button
+                className="mt-4"
+                color="primary"
+                onPress={() => refetch()}
+              >
                 Повторить
               </Button>
             </div>
@@ -123,14 +137,22 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
               <Table
                 aria-label="Таблица тредов"
                 className="min-h-[400px]"
-                classNames={{ wrapper: "shadow-none border border-divider overflow-x-auto" }}
+                classNames={{
+                  wrapper: "shadow-none border border-divider overflow-x-auto",
+                }}
               >
                 <TableHeader>
                   <TableColumn className="min-w-48">ТРЕД</TableColumn>
-                  <TableColumn className="min-w-32 hidden sm:table-cell">АВТОР</TableColumn>
+                  <TableColumn className="min-w-32 hidden sm:table-cell">
+                    АВТОР
+                  </TableColumn>
                   <TableColumn className="min-w-24">ДОСКА</TableColumn>
-                  <TableColumn className="min-w-20 hidden md:table-cell">ОТВЕТЫ</TableColumn>
-                  <TableColumn className="min-w-32 hidden lg:table-cell">СОЗДАН</TableColumn>
+                  <TableColumn className="min-w-20 hidden md:table-cell">
+                    ОТВЕТЫ
+                  </TableColumn>
+                  <TableColumn className="min-w-32 hidden lg:table-cell">
+                    СОЗДАН
+                  </TableColumn>
                   <TableColumn className="min-w-24">ДЕЙСТВИЯ</TableColumn>
                 </TableHeader>
                 <TableBody emptyContent="Треды не найдены">
@@ -163,7 +185,9 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
                       <TableCell className="min-w-20 hidden md:table-cell">
                         <div className="flex items-center gap-1">
                           <MdForum className="text-default-400" size={16} />
-                          <span className="text-xs sm:text-small">{thread._count?.replies ?? 0}</span>
+                          <span className="text-xs sm:text-small">
+                            {thread._count?.replies ?? 0}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell className="min-w-32 hidden lg:table-cell">
@@ -178,11 +202,11 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
                         <div className="flex items-center gap-1">
                           <Tooltip content="Удалить">
                             <Button
+                              color="danger"
+                              isLoading={deleteThreadMutation.isPending}
                               size="sm"
                               variant="light"
-                              color="danger"
                               onPress={() => handleDelete(thread.id)}
-                              isLoading={deleteThreadMutation.isPending}
                             >
                               <MdDelete />
                             </Button>
@@ -197,11 +221,11 @@ export default function ThreadManagement({ className }: ThreadManagementProps) {
               {totalPages > 1 && (
                 <div className="flex justify-center mt-4">
                   <Pagination
-                    total={totalPages}
-                    page={page}
-                    onChange={setPage}
                     showControls
                     showShadow
+                    page={page}
+                    total={totalPages}
+                    onChange={setPage}
                   />
                 </div>
               )}

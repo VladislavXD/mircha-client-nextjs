@@ -32,17 +32,17 @@
 //   replyToPostId?: string // ID поста на который отвечаем
 // }
 
-// const ReplyToPostModal: React.FC<ReplyToPostModalProps> = ({ 
-//   isOpen, 
-//   onClose, 
-//   boardName, 
-//   threadId, 
+// const ReplyToPostModal: React.FC<ReplyToPostModalProps> = ({
+//   isOpen,
+//   onClose,
+//   boardName,
+//   threadId,
 //   thread,
 //   replyToPost,
 //   replyToPostId
 // }) => {
 //   const [createReply, { isLoading }] = useCreateReplyMutation()
-  
+
 //   const [formData, setFormData] = useState({
 //     content: '',
 //     authorName: ''
@@ -61,7 +61,7 @@
 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault()
-    
+
 //     if (!formData.content.trim()) {
 //       toast.error('Содержание ответа обязательно')
 //       return
@@ -71,22 +71,22 @@
 //       const formDataToSend = new FormData()
 //       formDataToSend.append('content', formData.content)
 //       formDataToSend.append('authorName', formData.authorName || 'Аноним')
-      
+
 //       // Добавляем ID поста на который отвечаем
 //       if (replyToPostId) {
 //         formDataToSend.append('replyToId', replyToPostId)
 //       }
-      
+
 //       if (selectedFile) {
 //         formDataToSend.append('image', selectedFile)
 //       }
 
-//       await createReply({ 
-//         boardName, 
+//       await createReply({
+//         boardName,
 //         threadId,
-//         formData: formDataToSend 
+//         formData: formDataToSend
 //       }).unwrap()
-      
+
 //       toast.success('Ответ отправлен!')
 //       onClose()
 //       setFormData({
@@ -142,8 +142,8 @@
 //   }
 
 //   return (
-//     <Modal 
-//       isOpen={isOpen} 
+//     <Modal
+//       isOpen={isOpen}
 //       onClose={handleClose}
 //       size="2xl"
 //       scrollBehavior="inside"
@@ -181,7 +181,7 @@
 //                           />
 //                         </div>
 //                       )}
-                      
+
 //                       {/* Содержание поста */}
 //                       <div className="flex-1 min-w-0">
 //                         <div className="flex items-center gap-2 mb-1 text-xs">
@@ -189,9 +189,9 @@
 //                             {replyToPost.authorName || 'Анон'}
 //                           </span>
 //                           <span className="text-gray-500">
-//                             {formatDistanceToNow(new Date(replyToPost.createdAt), { 
-//                               addSuffix: true, 
-//                               locale: ru 
+//                             {formatDistanceToNow(new Date(replyToPost.createdAt), {
+//                               addSuffix: true,
+//                               locale: ru
 //                             })}
 //                           </span>
 //                           <span className="text-blue-500 font-mono">
@@ -250,7 +250,7 @@
 //                   dark:file:bg-primary-900 dark:file:text-primary-300
 //                   dark:hover:file:bg-primary-800"
 //               />
-              
+
 //               {selectedFile && (
 //                 <div className="flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
 //                   <span className="text-sm truncate">{selectedFile.name}</span>
@@ -281,16 +281,16 @@
 //           </ModalBody>
 
 //           <ModalFooter>
-//             <Button 
-//               color="danger" 
-//               variant="light" 
+//             <Button
+//               color="danger"
+//               variant="light"
 //               onPress={handleClose}
 //               disabled={isLoading}
 //             >
 //               Отмена
 //             </Button>
-//             <Button 
-//               color="primary" 
+//             <Button
+//               color="primary"
 //               type="submit"
 //               isLoading={isLoading}
 //             >

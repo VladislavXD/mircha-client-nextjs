@@ -1,6 +1,8 @@
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { chatService } from "../services/chat.service";
 import type { Chat, GetMessagesResponse, GetMessagesParams } from "../types";
+
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+
+import { chatService } from "../services/chat.service";
 
 /**
  * Query keys для чатов
@@ -8,25 +10,27 @@ import type { Chat, GetMessagesResponse, GetMessagesParams } from "../types";
 export const chatKeys = {
   all: ["chats"] as const,
   lists: () => [...chatKeys.all, "list"] as const,
+  groups: () => [...chatKeys.all, "groups"] as const,
   list: (filters?: any) => [...chatKeys.lists(), { filters }] as const,
   details: () => [...chatKeys.all, "detail"] as const,
   detail: (id: string) => [...chatKeys.details(), id] as const,
-  messages: (chatId: string) => [...chatKeys.detail(chatId), "messages"] as const,
+  messages: (chatId: string) =>
+    [...chatKeys.detail(chatId), "messages"] as const,
   messagesList: (chatId: string, params?: GetMessagesParams) =>
     [...chatKeys.messages(chatId), params] as const,
 };
 
 /**
  * Хук для получения списка всех чатов пользователя
- * 
+ *
  * @param options - Опции React Query
  * @returns Список чатов с информацией о собеседниках
- * 
+ *
  * @example
  * const { data: chats, isLoading } = useGetUserChats()
  */
 export function useGetUserChats(
-  options?: Omit<UseQueryOptions<Chat[], Error>, "queryKey" | "queryFn">
+  options?: Omit<UseQueryOptions<Chat[], Error>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Chat[], Error>({
     queryKey: chatKeys.lists(),
@@ -37,18 +41,58 @@ export function useGetUserChats(
 }
 
 /**
+ * Хук для получения списка всех групп пользователя
+ *
+ * @param options - Опции React Query
+ * @returns Список групп
+ *
+ * @example
+ * const { data: groups, isLoading } = useGetUserGroups()
+ */
+export function useGetUserGroups(
+  options?: Omit<UseQueryOptions<Chat[], Error>, "queryKey" | "queryFn">,
+) {
+  return useQuery<Chat[], Error>({
+    queryKey: chatKeys.groups(),
+    queryFn: () => chatService.getUserGroups(),
+    staleTime: 30 * 1000,
+    ...options,
+  });
+}
+
+/**
+ * Хук для получения группы по ID
+ *
+ * @param groupId - ID группы
+ * @param options - Опции React Query
+ * @returns Группа с сообщениями
+ */
+export function useGetGroupById(
+  groupId: string,
+  options?: Omit<UseQueryOptions<Chat, Error>, "queryKey" | "queryFn">,
+) {
+  return useQuery<Chat, Error>({
+    queryKey: chatKeys.detail(groupId),
+    queryFn: () => chatService.getGroupById(groupId),
+    enabled: !!groupId,
+    staleTime: 10 * 1000,
+    ...options,
+  });
+}
+
+/**
  * Хук для получения или создания чата с пользователем
- * 
+ *
  * @param otherUserId - ID собеседника
  * @param options - Опции React Query
  * @returns Чат с сообщениями
- * 
+ *
  * @example
  * const { data: chat } = useGetOrCreateChat('user-id')
  */
 export function useGetOrCreateChat(
   otherUserId: string,
-  options?: Omit<UseQueryOptions<Chat, Error>, "queryKey" | "queryFn">
+  options?: Omit<UseQueryOptions<Chat, Error>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Chat, Error>({
     queryKey: chatKeys.detail(otherUserId),
@@ -61,19 +105,22 @@ export function useGetOrCreateChat(
 
 /**
  * Хук для получения сообщений чата с пагинацией
- * 
+ *
  * @param chatId - ID чата
  * @param params - Параметры пагинации
  * @param options - Опции React Query
  * @returns Сообщения с пагинацией
- * 
+ *
  * @example
  * const { data, fetchNextPage, hasNextPage } = useGetChatMessages(chatId, { page: 1, limit: 50 })
  */
 export function useGetChatMessages(
   chatId: string,
   params?: GetMessagesParams,
-  options?: Omit<UseQueryOptions<GetMessagesResponse, Error>, "queryKey" | "queryFn">
+  options?: Omit<
+    UseQueryOptions<GetMessagesResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
 ) {
   return useQuery<GetMessagesResponse, Error>({
     queryKey: chatKeys.messagesList(chatId, params),

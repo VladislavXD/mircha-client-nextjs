@@ -1,4 +1,4 @@
-import { viewsCache, viewsRateLimiter } from './viewsOptimizations';
+import { viewsCache, viewsRateLimiter } from "./viewsOptimizations";
 
 // Менеджер для группировки и отложенной отправки просмотров
 class ViewsManager {
@@ -42,6 +42,7 @@ class ViewsManager {
     // Если достигли максимального размера батча - отправляем немедленно
     if (this.viewsQueue.size >= this.MAX_BATCH_SIZE) {
       this.processBatch();
+
       return;
     }
 
@@ -62,6 +63,7 @@ class ViewsManager {
     }
 
     const postIds = Array.from(this.viewsQueue);
+
     this.viewsQueue.clear();
 
     if (this.batchTimeout) {
@@ -70,23 +72,38 @@ class ViewsManager {
     }
 
     try {
-      console.log(`Обрабатываем батч из ${postIds.length} просмотров:`, postIds);
-      
+      console.log(
+        `Обрабатываем батч из ${postIds.length} просмотров:`,
+        postIds,
+      );
+
       await this.addViewCallback(postIds);
-      console.log(`Отправлен батч просмотров для ${postIds.length} постов:`, postIds);
+      console.log(
+        `Отправлен батч просмотров для ${postIds.length} постов:`,
+        postIds,
+      );
     } catch (error) {
-      console.error('Ошибка при отправке батча просмотров:', error);
-      
+      console.error("Ошибка при отправке батча просмотров:", error);
+
       // В случае ошибки можно добавить повторную попытку
       // Но не добавляем обратно в очередь, чтобы избежать бесконечного цикла
-      
+
       // Опционально: можно сохранить в localStorage для повторной попытки позже
       try {
-        const failedViews = JSON.parse(localStorage.getItem('failedViews') || '[]');
+        const failedViews = JSON.parse(
+          localStorage.getItem("failedViews") || "[]",
+        );
+
         failedViews.push(...postIds);
-        localStorage.setItem('failedViews', JSON.stringify(failedViews.slice(-50))); // Сохраняем только последние 50
+        localStorage.setItem(
+          "failedViews",
+          JSON.stringify(failedViews.slice(-50)),
+        ); // Сохраняем только последние 50
       } catch (storageError) {
-        console.warn('Не удалось сохранить неудачные просмотры в localStorage:', storageError);
+        console.warn(
+          "Не удалось сохранить неудачные просмотры в localStorage:",
+          storageError,
+        );
       }
     }
   }

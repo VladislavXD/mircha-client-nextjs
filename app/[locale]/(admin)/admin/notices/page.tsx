@@ -1,5 +1,5 @@
-import { NoticeManagement } from '@/src/features/admin'
+import { NoticeManagement } from "@/src/features/admin";
 
 export default function NoticesPage() {
-  return <NoticeManagement />
+  return <NoticeManagement />;
 }

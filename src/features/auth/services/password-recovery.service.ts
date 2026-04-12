@@ -1,58 +1,59 @@
-import { api } from '@/src/api'
+import type { IAuthResponse } from "../types";
 
-import { TypeNewPasswordSchema, TypeResetPasswordSchema } from '../schemes'
-import type { IAuthResponse } from '../types'
+import { TypeNewPasswordSchema, TypeResetPasswordSchema } from "../schemes";
+
+import { api } from "@/src/api";
 
 /**
  * Сервис для восстановления пароля.
  */
 class PasswordRecoveryService {
-	/**
-	 * Сброс пароля.
-	 *
-	 * @param {TypeResetPasswordSchema} body - Данные для сброса пароля.
-	 * @param {string} [recaptcha] - Токен reCAPTCHA (опционально).
-	 * @returns {Promise<IAuthResponse>} - Ответ с данными пользователя.
-	 */
-	public async reset(body: TypeResetPasswordSchema, recaptcha?: string) {
-		const headers = recaptcha ? { recaptcha } : undefined
+  /**
+   * Сброс пароля.
+   *
+   * @param {TypeResetPasswordSchema} body - Данные для сброса пароля.
+   * @param {string} [recaptcha] - Токен reCAPTCHA (опционально).
+   * @returns {Promise<IAuthResponse>} - Ответ с данными пользователя.
+   */
+  public async reset(body: TypeResetPasswordSchema, recaptcha?: string) {
+    const headers = recaptcha ? { recaptcha } : undefined;
 
-		const response = await api.post<IAuthResponse>(
-			'auth/password-recovery/reset',
-			body,
-			{
-				headers
-			}
-		)
+    const response = await api.post<IAuthResponse>(
+      "auth/password-recovery/reset",
+      body,
+      {
+        headers,
+      },
+    );
 
-		return response
-	}
+    return response;
+  }
 
-	/**
-	 * Установка нового пароля.
-	 *
-	 * @param {TypeNewPasswordSchema} body - Данные для нового пароля.
-	 * @param {string | null} token - Токен для подтверждения.
-	 * @param {string} [recaptcha] - Токен reCAPTCHA (опционально).
-	 * @returns {Promise<IAuthResponse>} - Ответ с данными пользователя.
-	 */
-	public async new(
-		body: TypeNewPasswordSchema,
-		token: string | null,
-		recaptcha?: string
-	) {
-		const headers = recaptcha ? { recaptcha } : undefined
+  /**
+   * Установка нового пароля.
+   *
+   * @param {TypeNewPasswordSchema} body - Данные для нового пароля.
+   * @param {string | null} token - Токен для подтверждения.
+   * @param {string} [recaptcha] - Токен reCAPTCHA (опционально).
+   * @returns {Promise<IAuthResponse>} - Ответ с данными пользователя.
+   */
+  public async new(
+    body: TypeNewPasswordSchema,
+    token: string | null,
+    recaptcha?: string,
+  ) {
+    const headers = recaptcha ? { recaptcha } : undefined;
 
-		const response = await api.post<IAuthResponse>(
-			`auth/password-recovery/new/${token}`,
-			body,
-			{
-				headers
-			}
-		)
+    const response = await api.post<IAuthResponse>(
+      `auth/password-recovery/new/${token}`,
+      body,
+      {
+        headers,
+      },
+    );
 
-		return response
-	}
+    return response;
+  }
 }
 
-export const passwordRecoveryService = new PasswordRecoveryService()
+export const passwordRecoveryService = new PasswordRecoveryService();

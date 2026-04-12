@@ -1,11 +1,10 @@
-import { User } from "@/src/types/types"
+import { User } from "@/src/types/types";
 
 export interface IAuthUser {
-	email: string;
-	password: string;
-	name?: string;
+  email: string;
+  password: string;
+  name?: string;
 }
-
 
 export interface ITokens {
   accessToken: string;
@@ -13,7 +12,6 @@ export interface ITokens {
   token: string;
 }
 
-
 export interface IAuthResponse extends ITokens {
-	user: User;
+  user: User;
 }

@@ -6,13 +6,13 @@
  * @property {string} message - Сообщение об ошибке.
  */
 export class FetchError extends Error {
-	public constructor(
-		public statusCode: number,
-		public message: string
-	) {
-		super(message) // Вызов конструктора родительского класса
+  public constructor(
+    public statusCode: number,
+    public message: string,
+  ) {
+    super(message); // Вызов конструктора родительского класса
 
-		// Установка прототипа для корректной работы instanceof
-		Object.setPrototypeOf(this, new.target.prototype)
-	}
+    // Установка прототипа для корректной работы instanceof
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
 }

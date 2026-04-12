@@ -10,7 +10,7 @@
 //  */
 // export async function getLatestPosts(params: LatestPostsQuery = {}): Promise<LatestPostsResponse> {
 //   const { page = 1, limit = 20, board, category, tag, nsfw } = params
-  
+
 //   const queryParams = new URLSearchParams()
 //   queryParams.set('page', String(page))
 //   queryParams.set('limit', String(limit))
@@ -18,7 +18,7 @@
 //   if (category) queryParams.set('category', category)
 //   if (tag) queryParams.set('tag', tag)
 //   if (nsfw) queryParams.set('nsfw', nsfw)
-  
+
 //   const response = await instance.get(`/forum/posts/latest?${queryParams.toString()}`)
 //   return response.data
 // }

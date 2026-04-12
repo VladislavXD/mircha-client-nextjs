@@ -12,6 +12,7 @@ export default function FestiveBanner() {
   useEffect(() => {
     // Создаём 30-40 огоньков равномерно распределённых
     const numLights = 35;
+
     setLights(Array.from({ length: numLights }, (_, i) => i));
   }, []);
 
@@ -23,6 +24,7 @@ export default function FestiveBanner() {
       "bg-yellow-400",
       "bg-pink-500",
     ];
+
     return colors[index % colors.length];
   };
 

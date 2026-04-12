@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Spinner } from "@heroui/react";
 import { useTheme } from "next-themes";
+
 import ForumHome from "@/shared/components/forum/ForumHome";
 import MobileForumExtras from "@/shared/components/forum/MobileForumExtras";
 
@@ -16,15 +16,19 @@ const ForumPage = () => {
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-6xl">
       <div className="flex justify-center sm:justify-start mb-4 sm:mb-6">
-        <span
-          className="font-bold text-inherit flex items-center gap-2"
-        >
+        <span className="font-bold text-inherit flex items-center gap-2">
           <img
-            src={theme === "dark" ? "/mirchan-logo-icon-light.svg" : "/mirchan-logo-icon-dark.svg"}
-            className="w-8 h-8 sm:w-10 sm:h-10"
             alt="Mirchan Logo"
+            className="w-8 h-8 sm:w-10 sm:h-10"
+            src={
+              theme === "dark"
+                ? "/mirchan-logo-icon-light.svg"
+                : "/mirchan-logo-icon-dark.svg"
+            }
           />
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Mirchan - Forum</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+            Mirchan - Forum
+          </h1>
         </span>
       </div>
 

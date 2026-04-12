@@ -1,12 +1,19 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import { Select, SelectItem, Spinner } from "@heroui/react";
-import { MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+
 import GoBack from "@/shared/components/ui/GoBack";
 import PostCard from "@/src/features/post/components/PostCard";
 import { usePost } from "@/src/features/post";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   CommentForm,
   CommentItem,
@@ -16,8 +23,14 @@ import {
   useCreateReply,
   useDeleteComment,
 } from "@/src/features/post/comment/hooks/useComment";
-import { usePostComments, CommentData } from "@/src/features/post/comment/hooks/usePostComments";
-import { useLikeComment, useUnlikeComment } from "@/src/features/post/like/hooks";
+import {
+  usePostComments,
+  CommentData,
+} from "@/src/features/post/comment/hooks/usePostComments";
+import {
+  useLikeComment,
+  useUnlikeComment,
+} from "@/src/features/post/like/hooks";
 
 type SortKey = "newest" | "oldest" | "mostLiked";
 
@@ -27,7 +40,10 @@ const sortOptions: { key: SortKey; label: string }[] = [
   { key: "mostLiked", label: "Популярные" },
 ];
 
-function sortComments(comments: CommentData[], sortKey: SortKey): CommentData[] {
+function sortComments(
+  comments: CommentData[],
+  sortKey: SortKey,
+): CommentData[] {
   return [...comments].sort((a, b) => {
     if (sortKey === "newest") {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -38,13 +54,12 @@ function sortComments(comments: CommentData[], sortKey: SortKey): CommentData[] 
     if (sortKey === "mostLiked") {
       return (b.score ?? b.likeCount ?? 0) - (a.score ?? a.likeCount ?? 0);
     }
+
     return 0;
   });
 }
 
 const CurrentPost = () => {
-
-
   const { id: postId } = useParams<{ id: string }>();
   const { data: post, isLoading } = usePost(postId);
   const queryClient = useQueryClient();
@@ -60,10 +75,16 @@ const CurrentPost = () => {
 
   const { data: commentsData, isLoading: isLoadingComments } = usePostComments(
     postId,
-    currentUser?.id
+    currentUser?.id,
   );
 
-  if (isLoading) return <Spinner className="flex justify-center h-full" />;
+  if (isLoading)
+    return (
+      <Loader2
+        className="animate-spin text-neutral-500 mx-auto my-12"
+        size={32}
+      />
+    );
   if (!post) return <div className="text-center">Пост не найден</div>;
 
   const rawComments = (commentsData || []).filter((c) => !!c.user);
@@ -77,82 +98,91 @@ const CurrentPost = () => {
     }
   };
 
-
-  
-
   return (
-    <div className="flex flex-col">
+    <div className="space-y-4">
       <GoBack />
 
-      <PostCard post={post} cardFor="current-post" />
+      <div className="flex flex-col mb-10 overflow-hidden border border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010] rounded-[1.5rem]">
+        <PostCard cardFor="current-post" post={post} />
 
-      <div className="bg-transparent border-e border-divider">
-        <CommentForm
-          onSubmit={(content) => createComment({ postId, content })}
-          currentUser={currentUser}
-        />
+        <div className="px-4 py-4 border-b border-neutral-200 dark:border-neutral-800/70">
+          <CommentForm
+            currentUser={currentUser}
+            onSubmit={(content) => createComment({ postId, content })}
+          />
+        </div>
+
+        <div className="px-4 py-3 flex items-center justify-between gap-4 font-semibold border-b border-neutral-200 dark:border-neutral-800/70 bg-neutral-50 dark:bg-[#161616]">
+          <div className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300">
+            <MessageCircle size={18} strokeWidth={2} />
+            <span className="text-[15px]">Комментарии</span>
+            <span className="text-sm font-medium text-neutral-400">
+              ({comments.length || post.commentsCount || 0})
+            </span>
+          </div>
+
+          <Select
+            defaultValue="newest"
+            onValueChange={(value) => setSortKey(value as SortKey)}
+          >
+            <SelectTrigger className="w-[160px] h-8 bg-transparent border-neutral-200 dark:border-neutral-800 focus:ring-0 focus:ring-offset-0 focus:bg-neutral-100 dark:focus:bg-[#202020] rounded-full text-xs font-medium cursor-pointer">
+              <SelectValue placeholder="Сортировать по" />
+            </SelectTrigger>
+            <SelectContent className="rounded-[1rem] border-neutral-200 dark:border-neutral-800/70 shadow-lg">
+              {sortOptions.map((option) => (
+                <SelectItem
+                  key={option.key}
+                  className="cursor-pointer rounded-[0.75rem] text-sm focus:bg-neutral-100 dark:focus:bg-[#202020] focus:text-neutral-900 dark:focus:text-neutral-100"
+                  value={option.key}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="bg-white dark:bg-[#101010]">
+          {isLoadingComments ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="animate-spin text-neutral-500" size={24} />
+            </div>
+          ) : comments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <MessageCircle
+                className="text-neutral-300 dark:text-neutral-700 mb-4"
+                size={40}
+                strokeWidth={1}
+              />
+              <p className="text-neutral-600 dark:text-neutral-300 font-medium">
+                Пока нет комментариев
+              </p>
+              <p className="text-neutral-400 text-sm mt-1">
+                Станьте первым, кто оставит комментарий!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1 p-2 sm:p-3">
+              {comments.map((comment) => (
+                <CommentItem
+                  key={comment.id}
+                  {...comment}
+                  currentUser={currentUser}
+                  user={comment.user}
+                  onDelete={(id) => {
+                    if (window.confirm("Удалить комментарий?"))
+                      deleteComment({ id, postId });
+                  }}
+                  onLike={handleCommentLike}
+                  onReply={(commentId, content) =>
+                    createReply({ postId, content, replyToId: commentId })
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-
-      <div className="px-3 py-3 flex items-center justify-between gap-2 font-semibold border-b border-divider w-full">
-        <div className="flex items-center gap-1 text-default-600">
-          <MessageCircle size={18} />
-          <span>Комментарии</span>
-          <span className="text-sm text-default-400">
-            ({comments.length || post.commentsCount || 0})
-          </span>
-        </div>
-
-        <Select
-          className="max-w-[160px]"
-          placeholder="Сортировать по"
-          variant="flat"
-          size="sm"
-          defaultSelectedKeys={["newest"]}
-          disallowEmptySelection
-          isRequired
-          onSelectionChange={(keys) => {
-            const selected = Array.from(keys)[0] as SortKey;
-            if (selected) setSortKey(selected);
-          }}
-        >
-          {sortOptions.map((option) => (
-            <SelectItem key={option.key}>{option.label}</SelectItem>
-          ))}
-        </Select>
-      </div>
-
-      {isLoadingComments ? (
-        <div className="flex justify-center py-12 text-default-500">
-          Загрузка комментариев...
-        </div>
-      ) : comments.length === 0 ? (
-        <div className="flex flex-col items-center py-12 text-center">
-          <MessageCircle size={48} className="text-default-300 mb-4" />
-          <p className="text-default-500 font-medium">Пока нет комментариев</p>
-          <p className="text-default-400 text-sm mt-1">
-            Станьте первым, кто оставит комментарий!
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-1 px-3 py-2">
-          {comments.map((comment) => (
-            <CommentItem
-              key={comment.id}
-              {...comment}
-              user={comment.user}
-              onReply={(commentId, content) =>
-                createReply({ postId, content, replyToId: commentId })
-              }
-              onLike={handleCommentLike}
-              onDelete={(id) => {
-                if (window.confirm("Удалить комментарий?"))
-                  deleteComment({ id, postId });
-              }}
-              currentUser={currentUser}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

@@ -13,14 +13,12 @@
 // import RichTextarea, { createEmojiPlugin, createMentionPlugin } from "../../inputs/RichTextarea";
 // import { useSelector } from "react-redux";
 
-
 // type Props = {};
 
 // const CreatePost = (props: Props) => {
 //   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 //   const [imagePreview, setImagePreview] = useState<string | null>(null);
 //   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
-
 
 //   const {
 //     handleSubmit,

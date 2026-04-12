@@ -1,5 +1,5 @@
-import React from 'react';
-import { Badge, User } from '@heroui/react';
+import React from "react";
+import { Badge, User } from "@heroui/react";
 
 interface OnlineBadgeProps {
   /** URL аватара пользователя */
@@ -11,9 +11,18 @@ interface OnlineBadgeProps {
   /** Статус онлайн */
   isOnline: boolean;
   /** Размер аватара */
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   /** Дополнительные пропы для Badge компонента */
-  badgeProps?: Omit<React.ComponentProps<typeof Badge>, 'content' | 'color' | 'variant' | 'size' | 'isInvisible' | 'placement' | 'children'>;
+  badgeProps?: Omit<
+    React.ComponentProps<typeof Badge>,
+    | "content"
+    | "color"
+    | "variant"
+    | "size"
+    | "isInvisible"
+    | "placement"
+    | "children"
+  >;
 }
 
 /**
@@ -22,29 +31,29 @@ interface OnlineBadgeProps {
  */
 export const OnlineBadge: React.FC<OnlineBadgeProps> = ({
   avatarUrl,
-  name = '',
-  description = '',
+  name = "",
+  description = "",
   isOnline,
-  size = 'md',
-  badgeProps = {}
+  size = "md",
+  badgeProps = {},
 }) => {
   return (
     <Badge
-      content=""
       color={isOnline ? "success" : "default"}
-      variant={isOnline ? "solid" : "flat"}
-      size="sm"
+      content=""
       isInvisible={!isOnline}
       placement="bottom-right"
+      size="sm"
+      variant={isOnline ? "solid" : "flat"}
       {...badgeProps}
     >
       <User
-        name={name}
-        description={description}
         avatarProps={{
           src: avatarUrl,
-          size
+          size,
         }}
+        description={description}
+        name={name}
       />
     </Badge>
   );

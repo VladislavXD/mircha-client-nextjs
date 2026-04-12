@@ -47,10 +47,10 @@
 //   MdLock,
 //   MdLockOpen
 // } from 'react-icons/md'
-// import { 
-//   useGetAdminThreadsQuery, 
+// import {
+//   useGetAdminThreadsQuery,
 //   useGetAdminThreadByIdQuery,
-//   useUpdateAdminThreadMutation, 
+//   useUpdateAdminThreadMutation,
 //   useDeleteAdminThreadMutation,
 //   type AdminThread,
 //   type ThreadsFilter,
@@ -68,13 +68,13 @@
 //     page: 1,
 //     limit: 10,
 //   })
-  
+
 //   // Состояние UI
 //   const [searchTerm, setSearchTerm] = useState('')
 //   const [selectedThread, setSelectedThread] = useState<AdminThread | null>(null)
 //   const [editingThread, setEditingThread] = useState<AdminThread | null>(null)
 //   const [isFiltersVisible, setIsFiltersVisible] = useState(false)
-  
+
 //   // Модалки
 //   const { isOpen: isViewOpen, onOpen: onViewOpen, onClose: onViewClose } = useDisclosure()
 //   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure()
@@ -147,9 +147,9 @@
 
 //   const handleToggleThreadStatus = async (thread: AdminThread) => {
 //     try {
-//       await updateThread({ 
-//         id: thread.id, 
-//         data: { isActive: !thread.isActive } 
+//       await updateThread({
+//         id: thread.id,
+//         data: { isActive: !thread.isActive }
 //       }).unwrap()
 //       toast.success(`Тред ${thread.isActive ? 'заблокирован' : 'разблокирован'}`)
 //       refetch()
@@ -160,9 +160,9 @@
 
 //   const handleToggleThreadPinned = async (thread: AdminThread) => {
 //     try {
-//       await updateThread({ 
-//         id: thread.id, 
-//         data: { isPinned: !thread.isPinned } 
+//       await updateThread({
+//         id: thread.id,
+//         data: { isPinned: !thread.isPinned }
 //       }).unwrap()
 //       toast.success(`Тред ${thread.isPinned ? 'откреплен' : 'закреплен'}`)
 //       refetch()
@@ -246,7 +246,7 @@
 //                       label="Борда"
 //                       placeholder="Все борды"
 //                       selectedKeys={filters.boardShortId ? [filters.boardShortId] : []}
-//                       onSelectionChange={(keys) => 
+//                       onSelectionChange={(keys) =>
 //                         handleFilterChange('boardShortId', Array.from(keys)[0] || undefined)
 //                       }
 //                     >
@@ -377,7 +377,7 @@
 //                               <MdVisibility />
 //                             </Button>
 //                           </Tooltip>
-                          
+
 //                           <Dropdown>
 //                             <DropdownTrigger>
 //                               <Button
@@ -573,9 +573,9 @@
 
 //   const handleSubmit = (e: React.FormEvent) => {
 //     e.preventDefault()
-    
+
 //     const updateData: UpdateThreadRequest = {}
-    
+
 //     if (formData.title !== thread.title) {
 //       updateData.title = formData.title
 //     }

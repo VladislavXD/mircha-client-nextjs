@@ -1,6 +1,6 @@
 const rtf = new Intl.RelativeTimeFormat("ru", { numeric: "auto" });
 
-export function timeAgo(date: Date | string ) {
+export function timeAgo(date: Date | string) {
   const parsedDate = typeof date === "string" ? new Date(date) : date;
   const diff = (parsedDate.getTime() - Date.now()) / 1000;
 

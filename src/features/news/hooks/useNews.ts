@@ -1,5 +1,6 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { api } from '@/src/api'
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+
+import { api } from "@/src/api";
 
 // Типы для новостей
 export interface NewsArticle {
@@ -24,11 +25,11 @@ export interface NewsResponse {
 
 // Query keys
 export const newsKeys = {
-  all: ['news'] as const,
-  headlines: (lang?: string, category?: string) => 
-    [...newsKeys.all, 'headlines', { lang, category }] as const,
-  search: (q: string, pageSize?: number) => 
-    [...newsKeys.all, 'search', { q, pageSize }] as const,
+  all: ["news"] as const,
+  headlines: (lang?: string, category?: string) =>
+    [...newsKeys.all, "headlines", { lang, category }] as const,
+  search: (q: string, pageSize?: number) =>
+    [...newsKeys.all, "search", { q, pageSize }] as const,
 };
 
 /**
@@ -36,9 +37,9 @@ export const newsKeys = {
  */
 export const useTopHeadlines = (
   params: { lang?: string; category?: string } = {},
-  options?: Omit<UseQueryOptions<NewsResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<NewsResponse>, "queryKey" | "queryFn">,
 ) => {
-  const { lang = 'ru', category = 'technology' } = params;
+  const { lang = "ru", category = "technology" } = params;
 
   return useQuery<NewsResponse>({
     queryKey: newsKeys.headlines(lang, category),
@@ -47,11 +48,11 @@ export const useTopHeadlines = (
         lang,
         category,
       });
-      
+
       const response = await api.get<NewsResponse>(
-        `news/headlines?${queryParams.toString()}`
+        `news/headlines?${queryParams.toString()}`,
       );
-      
+
       return response;
     },
     staleTime: 30 * 60 * 1000,
@@ -65,7 +66,7 @@ export const useTopHeadlines = (
  */
 export const useSearchNews = (
   params: { q: string; pageSize?: number },
-  options?: Omit<UseQueryOptions<NewsResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<NewsResponse>, "queryKey" | "queryFn">,
 ) => {
   const { q, pageSize = 5 } = params;
 
@@ -76,11 +77,11 @@ export const useSearchNews = (
         q,
         pageSize: pageSize.toString(),
       });
-      
+
       const response = await api.get<NewsResponse>(
-        `news/search?${queryParams.toString()}`
+        `news/search?${queryParams.toString()}`,
       );
-      
+
       return response;
     },
     enabled: !!q,

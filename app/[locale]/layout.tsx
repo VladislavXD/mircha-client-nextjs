@@ -1,13 +1,13 @@
 import "@/src/assets/styles/globals.css";
-import clsx from "clsx";
-import { fontSans, fontSerif } from "@/src/config/fonts";
-import type { Metadata, Viewport } from "next";
+import type { Viewport } from "next";
 
-import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
-import ClientProviders from "@/src/Providers/ClientProviders";
-import { getMessages } from "next-intl/server";
-import { Locale, routing } from "@/src/i18n/routing";
+import clsx from "clsx";
+import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
+
+import { fontSans, fontSerif } from "@/src/config/fonts";
+import ClientProviders from "@/src/Providers/ClientProviders";
+import { Locale, routing } from "@/src/i18n/routing";
 import VisitorTracker from "@/app/api/checkClient/VisitorTracker";
 
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
@@ -23,7 +23,7 @@ import VisitorTracker from "@/app/api/checkClient/VisitorTracker";
 //   description:
 //     "Mirchan - это анонимная социальная сеть, где вы можете делиться своими мыслями, идеями и творчеством без страха осуждения.",
 //   applicationName: "Mirchan",
-  
+
 //   alternates: { canonical: siteUrl },
 //   openGraph: {
 //     type: "website",
@@ -59,8 +59,6 @@ import VisitorTracker from "@/app/api/checkClient/VisitorTracker";
 //     title: "Mirchan",
 //     statusBarStyle: "default",
 //   },
-  
-  
 
 // };
 
@@ -79,8 +77,7 @@ export default async function RootLayout({
   children,
   params,
 }: Readonly<RootLayoutProps>) {
-
-  const {locale} =await  params
+  const { locale } = await params;
 
   const messages = (await import(`@/messages/${locale}.json`)).default;
 
@@ -94,10 +91,10 @@ export default async function RootLayout({
         className={clsx(
           "min-h-screen text-foreground bg-background font-sans antialiased",
           fontSans.variable,
-          fontSerif.variable
+          fontSerif.variable,
         )}
       >
-        <NextIntlClientProvider messages={messages} locale={locale}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <VisitorTracker />
           <ClientProviders>{children}</ClientProviders>
         </NextIntlClientProvider>

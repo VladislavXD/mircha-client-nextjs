@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import Link from "next/link";
 import { Button, Card, CardBody, Chip } from "@heroui/react";
+
 import { useCategories } from "@/src/features/forum";
 
 // Порядок секций и их лейблы
@@ -42,6 +43,7 @@ export default function CategoriesListFull() {
 
     for (const cat of roots) {
       const key = (cat.group ?? "other").toLowerCase();
+
       if (!map[key]) map[key] = [];
       map[key].push(cat);
     }
@@ -54,7 +56,7 @@ export default function CategoriesListFull() {
     // Фильтр для Social Media по whitelist (по slug самой категории)
     if (map["social-media"]) {
       map["social-media"] = map["social-media"].filter((c) =>
-        SOCIAL_WHITELIST.includes(c.slug)
+        SOCIAL_WHITELIST.includes(c.slug),
       );
     }
 
@@ -68,6 +70,7 @@ export default function CategoriesListFull() {
     <div className="mt-6 space-y-8">
       {GROUP_ORDER.map((groupKey) => {
         const list = grouped[groupKey];
+
         if (!list || list.length === 0) return null;
 
         return (
@@ -75,7 +78,13 @@ export default function CategoriesListFull() {
             <h2 className="text-lg font-semibold mb-3 flex justify-between items-center">
               {GROUP_LABELS[groupKey] || groupKey}
               {groupKey === "social-media" && (
-                <Button as={Link} href="/forum/categories" className="ml-4" size="sm" variant="ghost">
+                <Button
+                  as={Link}
+                  className="ml-4"
+                  href="/forum/categories"
+                  size="sm"
+                  variant="ghost"
+                >
                   Все категории
                 </Button>
               )}
@@ -85,8 +94,8 @@ export default function CategoriesListFull() {
               {list.map((cat) => (
                 <Link
                   key={cat.id}
-                  href={`/forum/categories/${cat.slug}`}
                   className="block"
+                  href={`/forum/categories/${cat.slug}`}
                 >
                   <Card className="hover:shadow-md transition-shadow cursor-pointer w-full">
                     <CardBody className="p-3">
@@ -95,9 +104,9 @@ export default function CategoriesListFull() {
                         <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-default-200">
                           {cat.imageUrl ? (
                             <img
-                              src={cat.imageUrl}
                               alt={cat.name}
                               className="w-full h-full object-cover"
+                              src={cat.imageUrl}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[10px] text-default-500">
@@ -114,9 +123,9 @@ export default function CategoriesListFull() {
                             </h3>
                             {cat._count?.threads !== undefined && (
                               <Chip
+                                className="text-[10px]"
                                 size="sm"
                                 variant="flat"
-                                className="text-[10px]"
                               >
                                 {cat._count.threads} тредов
                               </Chip>
@@ -136,14 +145,14 @@ export default function CategoriesListFull() {
                                 {cat.children
                                   .slice()
                                   .sort((a: any, b: any) =>
-                                    a.name.localeCompare(b.name, "ru")
+                                    a.name.localeCompare(b.name, "ru"),
                                   )
                                   .map((ch: any) => (
                                     <Chip
                                       key={ch.id}
+                                      className="text-[10px]"
                                       size="sm"
                                       variant="bordered"
-                                      className="text-[10px]"
                                     >
                                       {ch.name}
                                     </Chip>

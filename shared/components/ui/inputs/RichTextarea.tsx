@@ -1,22 +1,22 @@
-"use client"
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Textarea } from '@heroui/react'
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { Textarea } from "@heroui/react";
 
 export type RichTextareaProps = {
-  value: string
-  onChange: (next: string) => void
-  placeholder?: string
-  disabled?: boolean
-  className?: string
-  plugins?: Array<React.FC<RichTextareaPluginProps>>
-}
+  value: string;
+  onChange: (next: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+  plugins?: Array<React.FC<RichTextareaPluginProps>>;
+};
 
 export type RichTextareaPluginProps = {
-  value: string
-  setValue: (next: string) => void
-  textareaRef: React.RefObject<HTMLTextAreaElement>
-  disabled?: boolean
-}
+  value: string;
+  setValue: (next: string) => void;
+  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  disabled?: boolean;
+};
 
 const RichTextarea: React.FC<RichTextareaProps> = ({
   value,
@@ -24,23 +24,23 @@ const RichTextarea: React.FC<RichTextareaProps> = ({
   placeholder,
   disabled,
   className,
-  plugins = []
+  plugins = [],
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleValueChange = (newValue: string) => {
-    onChange(newValue)
-  }
+    onChange(newValue);
+  };
 
   return (
     <div className={className}>
       <Textarea
-        value={value}
         ref={textareaRef}
-        labelPlacement='outside'
-        placeholder={placeholder}
-        className='mb-3 whitespace-pre-wrap'
+        className="mb-3 whitespace-pre-wrap"
         disabled={disabled}
+        labelPlacement="outside"
+        placeholder={placeholder}
+        value={value}
         onValueChange={handleValueChange}
       />
 
@@ -48,110 +48,137 @@ const RichTextarea: React.FC<RichTextareaProps> = ({
       {plugins.map((Plugin, idx) => (
         <Plugin
           key={idx}
-          value={value}
+          disabled={disabled}
           setValue={onChange}
           textareaRef={textareaRef}
-          disabled={disabled}
+          value={value}
         />
       ))}
     </div>
-  )
-}
+  );
+};
 
 // =====================
 // Плагины по умолчанию
 // =====================
 
 // Emoji Plugin
-import EmojiPicker from './EmojiPicker'
-export const createEmojiPlugin = (opts?: { onUrlsChange?: (urls: string[]) => void }) => {
-  const EmojiPlugin: React.FC<RichTextareaPluginProps> = ({ value, setValue, textareaRef, disabled }) => {
-    const [emojiUrls, setEmojiUrls] = useState<string[]>([])
+import EmojiPicker from "./EmojiPicker";
+export const createEmojiPlugin = (opts?: {
+  onUrlsChange?: (urls: string[]) => void;
+}) => {
+  const EmojiPlugin: React.FC<RichTextareaPluginProps> = ({
+    value,
+    setValue,
+    textareaRef,
+    disabled,
+  }) => {
+    const [emojiUrls, setEmojiUrls] = useState<string[]>([]);
 
     const handleEmojiSelect = (emojiUrl: string) => {
-      const textarea = textareaRef.current
-      if (!textarea) return
-      const cursorPosition = textarea.selectionStart || 0
-      const textBefore = value.substring(0, cursorPosition)
-      const textAfter = value.substring(cursorPosition)
-      const emojiIndex = emojiUrls.length
-      const emojiMarker = `[emoji:${emojiIndex}]`
-      const newText = textBefore + emojiMarker + textAfter
-  const nextUrls = [...emojiUrls, emojiUrl]
-  setValue(newText)
-  setEmojiUrls(nextUrls)
-  // Сообщаем вверх только в момент изменения, исключаем бесконечные циклы из useEffect
-  opts?.onUrlsChange?.(nextUrls)
+      const textarea = textareaRef.current;
+
+      if (!textarea) return;
+      const cursorPosition = textarea.selectionStart || 0;
+      const textBefore = value.substring(0, cursorPosition);
+      const textAfter = value.substring(cursorPosition);
+      const emojiIndex = emojiUrls.length;
+      const emojiMarker = `[emoji:${emojiIndex}]`;
+      const newText = textBefore + emojiMarker + textAfter;
+      const nextUrls = [...emojiUrls, emojiUrl];
+
+      setValue(newText);
+      setEmojiUrls(nextUrls);
+      // Сообщаем вверх только в момент изменения, исключаем бесконечные циклы из useEffect
+      opts?.onUrlsChange?.(nextUrls);
       setTimeout(() => {
-        const newCursorPosition = cursorPosition + emojiMarker.length
-        textarea.setSelectionRange(newCursorPosition, newCursorPosition)
-        textarea.focus()
-      }, 0)
-    }
+        const newCursorPosition = cursorPosition + emojiMarker.length;
+
+        textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+        textarea.focus();
+      }, 0);
+    };
 
     return (
-      <div className='mb-3 flex gap-3 '>
-        <EmojiPicker onEmojiSelect={handleEmojiSelect} disabled={disabled} />
+      <div className="mb-3 flex gap-3 ">
+        <EmojiPicker disabled={disabled} onEmojiSelect={handleEmojiSelect} />
       </div>
-    )
-  }
-  return EmojiPlugin
-}
+    );
+  };
+
+  return EmojiPlugin;
+};
 
 // Mention Plugin
-import Mention from './Mention'
+import Mention from "./Mention";
 export const createMentionPlugin = () => {
-  const MentionPlugin: React.FC<RichTextareaPluginProps> = ({ value, setValue, textareaRef }) => {
-    const [mention, setMention] = useState<string>('')
-    const [showHit, setShowHit] = useState<boolean>(false)
-    const [atStartIndex, setAtStartIndex] = useState<number | null>(null)
+  const MentionPlugin: React.FC<RichTextareaPluginProps> = ({
+    value,
+    setValue,
+    textareaRef,
+  }) => {
+    const [mention, setMention] = useState<string>("");
+    const [showHit, setShowHit] = useState<boolean>(false);
+    const [atStartIndex, setAtStartIndex] = useState<number | null>(null);
 
     useEffect(() => {
-      const atIndex = value.lastIndexOf('@')
+      const atIndex = value.lastIndexOf("@");
+
       if (atIndex !== -1) {
-        const query = value.slice(atIndex + 1)
-        if (!query || query.includes(' ') || query.includes('@')) {
-          setShowHit(false)
+        const query = value.slice(atIndex + 1);
+
+        if (!query || query.includes(" ") || query.includes("@")) {
+          setShowHit(false);
         } else {
-          setMention(query)
-          setShowHit(true)
-          setAtStartIndex(atIndex)
+          setMention(query);
+          setShowHit(true);
+          setAtStartIndex(atIndex);
         }
       } else {
-        setShowHit(false)
-        setAtStartIndex(null)
+        setShowHit(false);
+        setAtStartIndex(null);
       }
-    }, [value])
+    }, [value]);
 
-    const handleSelectMention = (user: { id: string; name?: string | null }) => {
-      const textarea = textareaRef.current
-      const name = (user.name || '').trim()
-      if (!textarea || atStartIndex === null) return
+    const handleSelectMention = (user: {
+      id: string;
+      name?: string | null;
+    }) => {
+      const textarea = textareaRef.current;
+      const name = (user.name || "").trim();
 
-      const token = `[mention:${user.id}|${name || 'user'}]`
+      if (!textarea || atStartIndex === null) return;
 
-      const before = value.slice(0, atStartIndex)
-      const cursor = textarea.selectionStart || atStartIndex + 1
-      const after = value.slice(cursor)
-      const next = `${before}${token}${after}`
+      const token = `[mention:${user.id}|${name || "user"}]`;
 
-      setValue(next)
-      setShowHit(false)
-      setMention('')
-      setAtStartIndex(null)
+      const before = value.slice(0, atStartIndex);
+      const cursor = textarea.selectionStart || atStartIndex + 1;
+      const after = value.slice(cursor);
+      const next = `${before}${token}${after}`;
 
-      const newPos = before.length + token.length
+      setValue(next);
+      setShowHit(false);
+      setMention("");
+      setAtStartIndex(null);
+
+      const newPos = before.length + token.length;
+
       setTimeout(() => {
-        textarea.focus()
-        textarea.setSelectionRange(newPos, newPos)
-      }, 0)
-    }
+        textarea.focus();
+        textarea.setSelectionRange(newPos, newPos);
+      }, 0);
+    };
 
     return showHit ? (
-      <Mention showHit={showHit} mention={mention} onSelect={handleSelectMention} />
-    ) : null
-  }
-  return MentionPlugin
-}
+      <Mention
+        mention={mention}
+        showHit={showHit}
+        onSelect={handleSelectMention}
+      />
+    ) : null;
+  };
 
-export default RichTextarea
+  return MentionPlugin;
+};
+
+export default RichTextarea;

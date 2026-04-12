@@ -9,13 +9,13 @@
  * - массивами, содержащими строки, числа, булевы значения или undefined
  */
 export type TypeSearchParams = {
-	[key: string]:
-		| string
-		| number
-		| boolean
-		| undefined
-		| Array<string | number | boolean | undefined>
-}
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | undefined
+    | Array<string | number | boolean | undefined>;
+};
 
 /**
  * Интерфейс для параметров запроса, расширяющий стандартные параметры RequestInit.
@@ -25,8 +25,8 @@ export type TypeSearchParams = {
  * @property {TypeSearchParams} [params] - Параметры поиска, которые будут добавлены к URL.
  */
 export interface RequestOptions extends RequestInit {
-	headers?: Record<string, string>
-	params?: TypeSearchParams
+  headers?: Record<string, string>;
+  params?: TypeSearchParams;
 }
 
 /**
@@ -37,6 +37,6 @@ export interface RequestOptions extends RequestInit {
  * @property {Params} [params] - Параметры, которые будут добавлены к запросу, если они определены.
  */
 export type TypeFetchRequestConfig<Params = undefined> =
-	Params extends undefined
-		? { config?: RequestOptions }
-		: { params: Params; config?: RequestOptions }
+  Params extends undefined
+    ? { config?: RequestOptions }
+    : { params: Params; config?: RequestOptions };

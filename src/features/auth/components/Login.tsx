@@ -1,19 +1,24 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import Input from "@/shared/components/ui/Input/Input";
-import { addToast, Button, InputOtp, Link } from "@heroui/react";
-import ErrorMessage from "@/shared/components/ui/ErrorMessage";
-
-
+import Link from "next/link";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginSchema, TypeLoginSchema } from "../schemes";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useTheme } from "next-themes";
-import { useLoginMutation } from "../hooks";
-import { AuthSocial } from "./AuthSocial";
 import { useTranslations } from "next-intl";
 
-const ReCAPTCHAComponent = ReCAPTCHA as any;
+import { useLoginMutation } from "../hooks";
+// import { AuthSocial } from "./AuthSocial";
+import { LoginSchema, TypeLoginSchema } from "../schemes";
+
+import ErrorMessage from "@/shared/components/ui/ErrorMessage";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { Button } from "@/components/ui/button";
+import Input from "@/shared/components/ui/Input/Input";
 
 type Login = {
   email: string;
@@ -29,7 +34,7 @@ type Props = {
 
 const Login = ({ setSelected, setIsShowFactor, isShowTwoFactor }: Props) => {
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
-  const t = useTranslations('Auth.login');
+  const t = useTranslations("Auth.login");
   const { theme } = useTheme();
 
   const {
@@ -49,112 +54,122 @@ const Login = ({ setSelected, setIsShowFactor, isShowTwoFactor }: Props) => {
 
   const [error, setError] = useState("");
 
-
   // React Query mutation для логина
 
-  const { login, isLoadingLogin } = useLoginMutation(setIsShowFactor);
+  const { loginAsync, isLoadingLogin } = useLoginMutation(setIsShowFactor);
   const onSubmit = async (values: TypeLoginSchema) => {
-    
     // Для 2FA проверяем код
     if (isShowTwoFactor) {
       if (!values.code || values.code.length !== 6) {
-        addToast({
-          title: t('enterCode'),
-          color: "danger",
-        });
+        toast.error(t("enterCode"));
+
         return;
       }
+
       // Отправляем email, password и code
-      login({ values, recaptcha: recaptchaValue || "" });
+
+      toast.promise(loginAsync({ values, recaptcha: recaptchaValue || "" }), {
+        loading: t("verifying"),
+        success: t("success"),
+        error: (err) => err.message || t("error"),
+      });
+
       return;
     }
-    
+
     // Для обычного логина проверяем recaptcha
     if (recaptchaValue) {
-      login({ values, recaptcha: recaptchaValue });
-    } else {
-      addToast({
-        title: "Пожалуйста, завершите проверку reCAPTCHA",
-        color: "danger",
+      toast.promise(loginAsync({ values, recaptcha: recaptchaValue }), {
+        loading: t("verifying"),
+        success: t("success"),
+        error: (err) => err.message || t("error"),
       });
+    } else {
+      toast.error("Пожалуйста, завершите проверку reCAPTCHA");
     }
   };
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className={`flex flex-col items-center gap-2 ${!isShowTwoFactor ? 'hidden' : ''}`}>
-        <p className="text-small text-default-500">{t('twoFactorDesc')}</p>
+      <div
+        className={`flex flex-col items-center gap-2 ${!isShowTwoFactor ? "hidden" : ""}`}
+      >
+        <p className="text-sm text-gray-500">{t("twoFactorDesc")}</p>
         <Controller
           control={control}
           name="code"
           render={({ field }) => {
-            console.log("InputOtp field value:", field.value);
             return (
-              <InputOtp
-                length={6}
-                placeholder='123456'
-                disabled={isLoadingLogin}
-                errorMessage={errors.code?.message}
-                isInvalid={!!errors.code}
-                value={field.value || ""}
-                onValueChange={(value) => {
-                  field.onChange(value);
-                }}
-              />
+              <div className="flex flex-col gap-2">
+                <InputOTP
+                  disabled={isLoadingLogin}
+                  maxLength={6}
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+                {errors.code && (
+                  <span className="text-sm text-red-500">
+                    {errors.code.message}
+                  </span>
+                )}
+              </div>
             );
           }}
         />
       </div>
-      <div className={`flex flex-col gap-4 ${isShowTwoFactor ? 'hidden' : ''}`}>
+      <div className={`flex flex-col gap-4 ${isShowTwoFactor ? "hidden" : ""}`}>
         <Input
           control={control}
+          label={t("email")}
           name="email"
-          label={t('email')}
-          type="email"
           required="Обязательное поле"
+          type="email"
         />
         <Input
           control={control}
+          label={t("password")}
           name="password"
-          label={t('password')}
-          type="password"
           required="Обязательное поле"
+          type="password"
         />
         <div className="flex items-center justify-between">
           <Link
+            className="ml-auto inline-block text-sm text-blue-600 hover:text-blue-800 underline"
             href="/auth/reset-password"
-            className="ml-auto inline-block text-sm underline"
           >
-            {t('forgotPassword')}
+            {t("forgotPassword")}
           </Link>
         </div>
         <ReCAPTCHA
           sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
-          onChange={setRecaptchaValue}
           theme={theme === "dark" ? "dark" : "light"}
+          onChange={setRecaptchaValue}
         />
         <ErrorMessage error={error} />
-        <p className="text-center text-small">
-          {t('noAccount')}{" "}
-          <Link
-            size="sm"
-            className="cursor-pointer"
-            onPress={() => setSelected("register")}
+        <p className="text-center text-sm">
+          {t("noAccount")}{" "}
+          <button
+            className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+            type="button"
+            onClick={() => setSelected("register")}
           >
-            {t('register')}
-          </Link>
+            {t("register")}
+          </button>
         </p>
       </div>
 
       <div className="flex gap-2 justify-end">
-        <Button
-          disabled={isLoadingLogin}
-          fullWidth
-          color="primary"
-          type="submit"
-          isLoading={isLoadingLogin}
-        >
-          {t('submit')}
+        <Button className="w-full " disabled={isLoadingLogin} type="submit">
+          {isLoadingLogin ? "Загрузка..." : t("submit")}
         </Button>
       </div>
     </form>

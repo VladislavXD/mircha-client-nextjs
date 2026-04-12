@@ -1,17 +1,26 @@
-'use client'
+"use client";
 
-import { useState, useMemo } from 'react'
-import { useDisclosure } from '@heroui/react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-hot-toast'
-import { userService } from '@/src/features/user/services'
-import { ProfileFrames, ProfileBackground } from '@/app/[locale]/(customer)/user/[id]/ProfileData'
-import type { AppearanceType, SelectedAppearanceItem, BackgroundPreset, FramePreset } from '../types'
+import type {
+  AppearanceType,
+  SelectedAppearanceItem,
+  BackgroundPreset,
+  FramePreset,
+} from "../types";
+
+import { useState, useMemo } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { userService } from "@/src/features/user/services";
+import {
+  ProfileFrames,
+  ProfileBackground,
+} from "@/app/[locale]/(customer)/user/[id]/ProfileData";
 
 interface UpdateAppearanceData {
-	id: string
-	avatarFrameUrl?: string
-	backgroundUrl?: string
+  id: string;
+  avatarFrameUrl?: string;
+  backgroundUrl?: string;
 }
 
 /**
@@ -19,135 +28,146 @@ interface UpdateAppearanceData {
  * Содержит логику модалок выбора, пресеты и мутацию обновления.
  */
 export function useAppearance(userId?: string) {
-	const queryClient = useQueryClient()
-	
-	// Состояния для appearance
-	const [appearanceType, setAppearanceType] = useState<AppearanceType>(null)
-	const [selectedItem, setSelectedItem] = useState<SelectedAppearanceItem | null>(null)
-	const appearanceModal = useDisclosure()
-	const confirmModal = useDisclosure()
+  const queryClient = useQueryClient();
 
-	// Пресеты для рамок
-	const FRAME_PRESETS: FramePreset[] = useMemo(
-		() =>
-			ProfileFrames.map((f) => ({
-				id: String(f.id),
-				url: f.url,
-				label: f.name,
-			})),
-		[]
-	)
+  // Состояния для appearance
+  const [appearanceType, setAppearanceType] = useState<AppearanceType>(null);
+  const [selectedItem, setSelectedItem] =
+    useState<SelectedAppearanceItem | null>(null);
+  const [isAppearanceOpen, setIsAppearanceOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-	// Пресеты для фонов
-	const BACKGROUND_PRESETS: BackgroundPreset[] = useMemo(
-		() =>
-			ProfileBackground.map((b) => ({
-				id: String(b.id),
-				url: b.url,
-				label: b.name,
-				type: (b as any).type ?? 'video',
-			})),
-		[]
-	)
+  // Пресеты для рамок
+  const FRAME_PRESETS: FramePreset[] = useMemo(
+    () =>
+      ProfileFrames.map((f) => ({
+        id: String(f.id),
+        url: f.url,
+        label: f.name,
+      })),
+    [],
+  );
 
-	// Мутация для обновления appearance
-	const updateAppearanceMutation = useMutation({
-		mutationFn: async (data: UpdateAppearanceData) => {
-			return userService.updateProfile({
-				avatarFrameUrl: data.avatarFrameUrl,
-				backgroundUrl: data.backgroundUrl,
-			} as any)
-		},
-		onSuccess: async () => {
-			toast.success('Оформление обновлено')
-			// Инвалидируем кеш профиля и принудительно перезапрашиваем
-			await Promise.all([
-				queryClient.invalidateQueries({ 
-					queryKey: ['user', userId],
-					refetchType: 'active' // Перезапросить активные запросы
-				}),
-				queryClient.invalidateQueries({ 
-					queryKey: ['profile'],
-					refetchType: 'active'
-				})
-			])
-		},
-		onError: (error: any) => {
-			toast.error(error?.message || 'Ошибка обновления оформления')
-		},
-	})
+  // Пресеты для фонов
+  const BACKGROUND_PRESETS: BackgroundPreset[] = useMemo(
+    () =>
+      ProfileBackground.map((b) => ({
+        id: String(b.id),
+        url: b.url,
+        label: b.name,
+        type: (b as any).type ?? "video",
+      })),
+    [],
+  );
 
-	/**
-	 * Открыть модалку выбора оформления
-	 */
-	const openAppearance = (type: 'frame' | 'background') => {
-		setAppearanceType(type)
-		appearanceModal.onOpen()
-	}
+  // Мутация для обновления appearance
+  const updateAppearanceMutation = useMutation({
+    mutationFn: async (data: UpdateAppearanceData) => {
+      return userService.updateProfile({
+        avatarFrameUrl: data.avatarFrameUrl,
+        backgroundUrl: data.backgroundUrl,
+      } as any);
+    },
+    onSuccess: async () => {
+      toast.success("Оформление обновлено");
+      // Инвалидируем кеш профиля и принудительно перезапрашиваем
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["user", userId],
+          refetchType: "active", // Перезапросить активные запросы
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["profile"],
+          refetchType: "active",
+        }),
+      ]);
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Ошибка обновления оформления");
+    },
+  });
 
-	/**
-	 * Выбрать элемент оформления
-	 */
-	const handleSelectAppearance = (item: SelectedAppearanceItem) => {
-		setSelectedItem(item)
-		confirmModal.onOpen()
-	}
+  /**
+   * Открыть модалку выбора оформления
+   */
+  const openAppearance = (type: "frame" | "background") => {
+    setAppearanceType(type);
+    setIsAppearanceOpen(true);
+  };
 
-	/**
-	 * Подтвердить выбор оформления
-	 */
-	const handleConfirmAppearance = async () => {
-		if (!selectedItem || !userId) return
+  /**
+   * Выбрать элемент оформления
+   */
+  const handleSelectAppearance = (item: SelectedAppearanceItem) => {
+    setSelectedItem(item);
+    setIsConfirmOpen(true);
+  };
 
-		try {
-			// Отправляем запрос и ждем завершения (включая инвалидацию)
-			await updateAppearanceMutation.mutateAsync({
-				id: userId,
-				avatarFrameUrl: selectedItem.type === 'frame' ? selectedItem.url : undefined,
-				backgroundUrl: selectedItem.type === 'background' ? selectedItem.url : undefined,
-			})
-			
-			// Закрываем модалки и сбрасываем состояние только после успеха
-			confirmModal.onClose()
-			appearanceModal.onClose()
-			setSelectedItem(null)
-			setAppearanceType(null)
-		} catch (error) {
-			console.error('Appearance update error:', error)
-			// При ошибке не закрываем модалки, чтобы пользователь мог попробовать еще раз
-		}
-	}
+  /**
+   * Подтвердить выбор оформления
+   */
+  const handleConfirmAppearance = async () => {
+    if (!selectedItem || !userId) return;
 
-	/**
-	 * Закрыть все модалки и сбросить состояние
-	 */
-	const closeAppearanceModals = () => {
-		confirmModal.onClose()
-		appearanceModal.onClose()
-		setSelectedItem(null)
-		setAppearanceType(null)
-	}
+    try {
+      // Отправляем запрос и ждем завершения (включая инвалидацию)
+      await updateAppearanceMutation.mutateAsync({
+        id: userId,
+        avatarFrameUrl:
+          selectedItem.type === "frame" ? selectedItem.url : undefined,
+        backgroundUrl:
+          selectedItem.type === "background" ? selectedItem.url : undefined,
+      });
 
-	return {
-		// Состояния
-		appearanceType,
-		selectedItem,
-		appearanceModal,
-		confirmModal,
-		
-		// Пресеты
-		FRAME_PRESETS,
-		BACKGROUND_PRESETS,
-		
-		// Загрузка
-		isUpdating: updateAppearanceMutation.isPending,
-		
-		// Действия
-		openAppearance,
-		handleSelectAppearance,
-		handleConfirmAppearance,
-		closeAppearanceModals,
-		setAppearanceType,
-		setSelectedItem,
-	}
+      // Закрываем модалки и сбрасываем состояние только после успеха
+      setIsConfirmOpen(false);
+      setIsAppearanceOpen(false);
+      setSelectedItem(null);
+      setAppearanceType(null);
+    } catch (error) {
+      console.error("Appearance update error:", error);
+      // При ошибке не закрываем модалки, чтобы пользователь мог попробовать еще раз
+    }
+  };
+
+  /**
+   * Закрыть все модалки и сбросить состояние
+   */
+  const closeAppearanceModals = () => {
+    setIsConfirmOpen(false);
+    setIsAppearanceOpen(false);
+    setSelectedItem(null);
+    setAppearanceType(null);
+  };
+
+  return {
+    // Состояния
+    appearanceType,
+    selectedItem,
+    appearanceModal: {
+      isOpen: isAppearanceOpen,
+      onOpenChange: setIsAppearanceOpen,
+      onClose: () => setIsAppearanceOpen(false),
+    },
+    confirmModal: {
+      isOpen: isConfirmOpen,
+      onOpenChange: setIsConfirmOpen,
+      onClose: () => setIsConfirmOpen(false),
+    },
+
+    // Пресеты
+    FRAME_PRESETS,
+    BACKGROUND_PRESETS,
+
+    // Загрузка
+    isUpdating: updateAppearanceMutation.isPending,
+
+    // Действия
+    openAppearance,
+    handleSelectAppearance,
+    handleConfirmAppearance,
+    closeAppearanceModals,
+    setAppearanceType,
+    setSelectedItem,
+  };
 }

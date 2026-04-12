@@ -1,14 +1,20 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { Card as NextCard, CardBody, CardHeader, Image, Button, Spinner } from "@heroui/react";
-import { formatToClientDate } from "@/app/utils/formatToClientDate";
-import { EmojiText } from "@/shared/components/ui/EmojiText";
+import {
+  Card as NextCard,
+  CardBody,
+  CardHeader,
+  Image,
+  Spinner,
+} from "@heroui/react";
 import { FcDislike } from "react-icons/fc";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
 import { FaRegComment } from "react-icons/fa";
-// TODO: Migrate to React Query - useLikePost/useUnlikePost already exist in features/post/like?
 
+import { EmojiText } from "@/shared/components/ui/EmojiText";
+import { formatToClientDate } from "@/app/utils/formatToClientDate";
+// TODO: Migrate to React Query - useLikePost/useUnlikePost already exist in features/post/like?
 
 export type ProfilePostCardProps = {
   postId: string;
@@ -65,41 +71,63 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({
   };
 
   return (
-    <NextCard shadow="sm" className="border border-default-100">
+    <NextCard className="border border-default-100" shadow="sm">
       <CardHeader className="justify-between py-3">
-        <Link href={`/user/${authorId}`} className="flex items-center gap-3">
+        <Link className="flex items-center gap-3" href={`/user/${authorId}`}>
           <div className="relative w-9 h-9">
-            {avatarFrameUrl && avatarFrameUrl !== 'none' && (
-              <img src={avatarFrameUrl} alt="frame" className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none" />
+            {avatarFrameUrl && avatarFrameUrl !== "none" && (
+              <img
+                alt="frame"
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                src={avatarFrameUrl}
+              />
             )}
-            <Image src={authorAvatarUrl || "/default-avatar.png"} alt={authorName} className="w-9 h-9 rounded-xl object-cover " />
+            <Image
+              alt={authorName}
+              className="w-9 h-9 rounded-xl object-cover "
+              src={authorAvatarUrl || "/default-avatar.png"}
+            />
           </div>
           <div className="flex flex-col leading-tight">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm">{authorName}</span>
               {usernameFrameUrl && (
-                <span className="text-[10px] px-2 py-0.5 rounded bg-default-100">decor</span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-default-100">
+                  decor
+                </span>
               )}
             </div>
             {createdAt && (
-              <span className="text-[11px] text-default-500">{formatToClientDate(createdAt as any)}</span>
+              <span className="text-[11px] text-default-500">
+                {formatToClientDate(createdAt as any)}
+              </span>
             )}
           </div>
         </Link>
       </CardHeader>
       <CardBody className="py-0">
         <div className="text-sm">
-          <EmojiText text={content} emojiUrls={emojiUrls} />
+          <EmojiText emojiUrls={emojiUrls} text={content} />
         </div>
         {imageUrl && (
           <div className="mt-2 overflow-hidden rounded-lg">
-            <Image isBlurred src={imageUrl} alt="Изображение поста" className="w-full h-auto object-cover" style={{ maxHeight: 280 }} />
+            <Image
+              isBlurred
+              alt="Изображение поста"
+              className="w-full h-auto object-cover"
+              src={imageUrl}
+              style={{ maxHeight: 280 }}
+            />
           </div>
         )}
         <div className="flex items-center gap-5 text-default-500 text-xs mt-3">
-          <button onClick={handleLike} className="flex items-center gap-1 hover:text-primary transition-colors" disabled={true}>
+          <button
+            className="flex items-center gap-1 hover:text-primary transition-colors"
+            disabled={true}
+            onClick={handleLike}
+          >
             {true ? (
-              <Spinner size="sm" className="mx-1" />
+              <Spinner className="mx-1" size="sm" />
             ) : (
               <>
                 {optimisticLiked ? <FcDislike /> : <MdOutlineFavoriteBorder />}
@@ -107,7 +135,10 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({
               </>
             )}
           </button>
-          <Link href={`/posts/${postId}`} className="flex items-center gap-1 hover:text-primary transition-colors">
+          <Link
+            className="flex items-center gap-1 hover:text-primary transition-colors"
+            href={`/posts/${postId}`}
+          >
             <FaRegComment />
             <span>{commentsCount}</span>
           </Link>

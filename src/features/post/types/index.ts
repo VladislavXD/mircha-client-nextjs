@@ -1,6 +1,6 @@
 /**
  * Централизованный экспорт типов для фичи постов
- * 
+ *
  * @module features/post/types
  */
 
@@ -10,13 +10,9 @@ export type {
   MediaFileDto,
   MediaPreviewData,
   MediaLimits,
-} from './media.types'
+} from "./media.types";
 
-export {
-  MediaType,
-  DEFAULT_MEDIA_LIMITS,
-  MediaUtils,
-} from './media.types'
+export { MediaType, DEFAULT_MEDIA_LIMITS, MediaUtils } from "./media.types";
 
 // Пост типы
 export type {
@@ -34,18 +30,16 @@ export type {
   PostFilters,
   PaginationParams,
   PaginatedPostsResponse,
-} from './post.types'
+} from "./post.types";
 
 // Для обратной совместимости - экспортируем User
-export type { User } from '@/src/types/types'
+export type { User } from "@/src/types/types";
 
 /**
  * DTO для добавления просмотров батчем
  */
 export interface AddViewsBatchResponse {
-	message: string
-	processedCount: number
-	postIds: string[]
+  message: string;
+  processedCount: number;
+  postIds: string[];
 }
-
-

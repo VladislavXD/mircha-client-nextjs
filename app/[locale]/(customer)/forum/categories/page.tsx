@@ -51,14 +51,14 @@
 //             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
 //               {category.imageUrl && (
 //                 <div className="h-32 overflow-hidden">
-//                   <img 
-//                     src={category.imageUrl} 
+//                   <img
+//                     src={category.imageUrl}
 //                     alt={category.name}
 //                     className="w-full h-full object-cover"
 //                   />
 //                 </div>
 //               )}
-              
+
 //               <CardHeader className="flex justify-between items-start px-4">
 //                 <div className="min-w-0 flex-1">
 //                   <h3 className="text-lg font-bold text-blue-600 break-words">

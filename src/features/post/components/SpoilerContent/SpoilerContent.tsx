@@ -3,49 +3,55 @@
  * Рендерит HTML, созданный в SpoilerTextEditor
  */
 
-'use client'
+"use client";
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
 
 interface SpoilerContentProps {
-  html: string
-  className?: string
+  html: string;
+  className?: string;
 }
 
-export const SpoilerContent: React.FC<SpoilerContentProps> = ({ html, className = '' }) => {
-  const contentRef = useRef<HTMLDivElement>(null)
+export const SpoilerContent: React.FC<SpoilerContentProps> = ({
+  html,
+  className = "",
+}) => {
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!contentRef.current) return
+    if (!contentRef.current) return;
 
     // Находим все спойлеры и добавляем обработчики
-    const spoilers = contentRef.current.querySelectorAll('[data-spoiler="true"]')
-    
+    const spoilers = contentRef.current.querySelectorAll(
+      '[data-spoiler="true"]',
+    );
+
     spoilers.forEach((spoiler) => {
-      const element = spoiler as HTMLElement
-      
+      const element = spoiler as HTMLElement;
+
       // Убираем старые обработчики если есть
-      const newElement = element.cloneNode(true) as HTMLElement
-      element.parentNode?.replaceChild(newElement, element)
-      
+      const newElement = element.cloneNode(true) as HTMLElement;
+
+      element.parentNode?.replaceChild(newElement, element);
+
       // Добавляем обработчик клика
-      newElement.addEventListener('click', function() {
-        if (this.style.filter === 'blur(5px)' || this.style.filter === '') {
-          this.style.filter = 'none'
+      newElement.addEventListener("click", function () {
+        if (this.style.filter === "blur(5px)" || this.style.filter === "") {
+          this.style.filter = "none";
         } else {
-          this.style.filter = 'blur(5px)'
+          this.style.filter = "blur(5px)";
         }
-      })
-    })
-  }, [html])
+      });
+    });
+  }, [html]);
 
   return (
     <div
+      dangerouslySetInnerHTML={{ __html: html }}
       ref={contentRef}
       className={`whitespace-pre-wrap break-words text-foreground ${className}`}
-      dangerouslySetInnerHTML={{ __html: html }}
     />
-  )
-}
+  );
+};
 
-export default SpoilerContent
+export default SpoilerContent;

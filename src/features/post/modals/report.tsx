@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
-import { ReportModal, FeedbackType } from "@/src/features/feedback";
 import type { Post } from "../types";
+
+import React from "react";
+
+import { ReportModal, FeedbackType } from "@/src/features/feedback";
 
 interface ReportPostModalProps {
   isOpen: boolean;
@@ -14,7 +16,7 @@ interface ReportPostModalProps {
 
 /**
  * ReportPostModal - обертка над ReportModal для жалоб на посты
- * 
+ *
  * @param isOpen - открыта ли модалка
  * @param onClose - callback для закрытия
  * @param post - объект поста (приоритет)
@@ -30,12 +32,11 @@ const ReportPostModal: React.FC<ReportPostModalProps> = ({
 }) => {
   const targetId = post?.id || postId || "";
   const targetTitle = post?.content || postContent || "";
-  
+
   // Преобразуем content в строку, если это объект
-  const contentString = typeof targetTitle === 'string' 
-    ? targetTitle 
-    : JSON.stringify(targetTitle);
-  
+  const contentString =
+    typeof targetTitle === "string" ? targetTitle : JSON.stringify(targetTitle);
+
   const displayTitle =
     contentString.length > 100
       ? `${contentString.slice(0, 100)}...`
@@ -43,12 +44,12 @@ const ReportPostModal: React.FC<ReportPostModalProps> = ({
 
   return (
     <ReportModal
-      isOpen={isOpen}
-      onClose={onClose}
-      targetId={targetId}
-      targetType="post"
-      targetTitle={displayTitle}
       defaultType={FeedbackType.POST_REPORT}
+      isOpen={isOpen}
+      targetId={targetId}
+      targetTitle={displayTitle}
+      targetType="post"
+      onClose={onClose}
     />
   );
 };

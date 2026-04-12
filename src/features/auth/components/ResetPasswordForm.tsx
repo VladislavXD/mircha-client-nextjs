@@ -1,104 +1,119 @@
+"use client";
 
-'use client'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTheme } from "next-themes";
+import { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useTheme } from 'next-themes'
-import { useState } from 'react'
-import ReCAPTCHA from 'react-google-recaptcha'
-import { Controller, useForm } from 'react-hook-form'
-import { addToast, Button, Input } from '@heroui/react'
+import { useResetPasswordMutation } from "../hooks";
+import { ResetPasswordSchema, type TypeResetPasswordSchema } from "../schemes";
 
-import { useResetPasswordMutation } from '../hooks'
-import { ResetPasswordSchema, type TypeResetPasswordSchema } from '../schemes'
-import { AuthWrapper } from './AuthWrapper'
-import { useTranslations } from 'next-intl'
+import { AuthWrapper } from "./AuthWrapper";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 /**
  * Форма для сброса пароля.
  */
 export function ResetPasswordForm() {
-	const { theme } = useTheme()
-	const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null)
-	const t = useTranslations('Auth.resetPassword')
+  const { theme } = useTheme();
+  const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
+  const t = useTranslations("Auth.resetPassword");
 
-	const form = useForm<TypeResetPasswordSchema>({
-		resolver: zodResolver(ResetPasswordSchema),
-		defaultValues: {
-			email: ''
-		}
-	})
+  const form = useForm<TypeResetPasswordSchema>({
+    resolver: zodResolver(ResetPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
 
-	const { reset, isLoadingReset } = useResetPasswordMutation()
+  const { resetAsync, isLoadingReset } = useResetPasswordMutation();
+  const tToasts = useTranslations("Toasts");
 
-	const onSubmit = (values: TypeResetPasswordSchema) => {
-		if (recaptchaValue) {
-			reset({ values, recaptcha: recaptchaValue })
-		} else {
-			addToast({ title: 'Пожалуйста, завершите проверку reCAPTCHA', color: 'danger' })
-		}
-	}
+  const onSubmit = (values: TypeResetPasswordSchema) => {
+    if (recaptchaValue) {
+      toast.promise(resetAsync({ values, recaptcha: recaptchaValue }), {
+        loading: t("sending"),
+        success: {
+          message: t("success"),
+          description: t("sent"),
+        },
+        error: {
+          message: t("error"),
+        },
+      });
+    } else {
+      toast.error(tToasts("reCaptchaError"));
+    }
+  };
 
-	return (
-		<AuthWrapper
-			heading={t('title')}
-			description={t('description')}
-			backButtonLabel={t('backToLogin')}
-			backButtonHref='/auth'
-		>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className='flex flex-col gap-4'
-			>
-					{/* Email */}
-					<Controller
-						control={form.control}
-						name='email'
-						render={({ field, fieldState }) => (
-							<Input
-								label={t('email')}
-								placeholder='ivan@example.com'
-								disabled={isLoadingReset}
-								type='email'
-								autoComplete='email'
-								aria-label={t('email')}
-								isInvalid={!!fieldState.error}
-								errorMessage={fieldState.error?.message}
-								{...field}
-							/>
-						)}
-					/>
-					{/* reCAPTCHA */}
-					<div
-						className={`flex justify-center ${
-							isLoadingReset ? 'pointer-events-none opacity-60' : ''
-						}`}
-						aria-disabled={isLoadingReset}
-					>
-						<ReCAPTCHA
-							sitekey={
-								process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string
-							}
-							onChange={setRecaptchaValue}
-							onExpired={() => setRecaptchaValue(null)}
-							theme={theme === 'light' ? 'light' : 'dark'}
-						/>
-					</div>
-					{/* Submit */}
-					<Button
-						type='submit'
-						isDisabled={isLoadingReset}
-						fullWidth
-						color='primary'
-						isLoading={isLoadingReset}
-					>
-						{isLoadingReset ? t('sending') : t('submit')}
-					</Button>
+  return (
+    <AuthWrapper
+      backButtonHref="/auth"
+      backButtonLabel={t("backToLogin")}
+      description={t("description")}
+      heading={t("title")}
+    >
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        {/* Email */}
+        <Controller
+          control={form.control}
+          name="email"
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="email">{t("email")}</Label>
+              <Input
+                aria-label={t("email")}
+                autoComplete="email"
+                disabled={isLoadingReset}
+                id="email"
+                placeholder="ivan@example.com"
+                type="email"
+                {...field}
+              />
+              {fieldState.error && (
+                <span className="text-sm text-red-500">
+                  {fieldState.error.message}
+                </span>
+              )}
+            </div>
+          )}
+        />
+        {/* reCAPTCHA */}
+        <div
+          aria-disabled={isLoadingReset}
+          className={`flex justify-center ${
+            isLoadingReset ? "pointer-events-none opacity-60" : ""
+          }`}
+        >
+          <ReCAPTCHA
+            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
+            theme={theme === "light" ? "light" : "dark"}
+            onChange={setRecaptchaValue}
+            onExpired={() => setRecaptchaValue(null)}
+          />
+        </div>
+        {/* Submit */}
+        <Button className="w-full" disabled={isLoadingReset} type="submit">
+          {isLoadingReset ? t("sending") : t("submit")}
+        </Button>
 
-					{/* Helper text */}
-					<p className='text-xs text-muted-foreground text-center'>
-						{t('../common.checkSpam', { defaultValue: 'Если письма нет, проверьте папку «Спам» или попробуйте другой адрес.' })}
-					</p>
-			</form>
-		</AuthWrapper>
-	)
+        {/* Helper text */}
+        <p className="text-xs text-muted-foreground text-center">
+          {t("../common.checkSpam", {
+            defaultValue:
+              "Если письма нет, проверьте папку «Спам» или попробуйте другой адрес.",
+          })}
+        </p>
+      </form>
+    </AuthWrapper>
+  );
 }

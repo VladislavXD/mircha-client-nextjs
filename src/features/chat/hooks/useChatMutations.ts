@@ -1,15 +1,22 @@
-import { useMutation, useQueryClient, UseMutationOptions } from "@tanstack/react-query";
-import toast from "react-hot-toast";
-import { chatService } from "../services/chat.service";
-import { chatKeys } from "./useChatQueries";
 import type { MarkAsReadResponse, DeleteChatResponse } from "../types";
+
+import {
+  useMutation,
+  useQueryClient,
+  UseMutationOptions,
+} from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { chatService } from "../services/chat.service";
+
+import { chatKeys } from "./useChatQueries";
 
 /**
  * Хук для пометки сообщений как прочитанных
- * 
+ *
  * @param options - Опции React Query
  * @returns Мутация для пометки сообщений
- * 
+ *
  * @example
  * const { mutate: markAsRead } = useMarkMessagesAsRead()
  * markAsRead(chatId)
@@ -18,7 +25,7 @@ export function useMarkMessagesAsRead(
   options?: Omit<
     UseMutationOptions<MarkAsReadResponse, Error, string>,
     "mutationFn"
-  >
+  >,
 ) {
   const queryClient = useQueryClient();
 
@@ -27,10 +34,10 @@ export function useMarkMessagesAsRead(
     onSuccess: (data, chatId) => {
       // Обновляем список чатов (уменьшаем счетчик непрочитанных)
       queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
-      
+
       // Обновляем детали чата
       queryClient.invalidateQueries({ queryKey: chatKeys.detail(chatId) });
-      
+
       // Обновляем сообщения чата
       queryClient.invalidateQueries({ queryKey: chatKeys.messages(chatId) });
     },
@@ -44,10 +51,10 @@ export function useMarkMessagesAsRead(
 
 /**
  * Хук для удаления чата
- * 
+ *
  * @param options - Опции React Query
  * @returns Мутация для удаления чата
- * 
+ *
  * @example
  * const { mutate: deleteChat, isPending } = useDeleteChat()
  * deleteChat(chatId, {
@@ -56,13 +63,23 @@ export function useMarkMessagesAsRead(
  */
 export function useDeleteChat(
   options?: Omit<
-    UseMutationOptions<DeleteChatResponse, Error, string, { previousChats?: any }>,
+    UseMutationOptions<
+      DeleteChatResponse,
+      Error,
+      string,
+      { previousChats?: any }
+    >,
     "mutationFn"
-  >
+  >,
 ) {
   const queryClient = useQueryClient();
 
-  return useMutation<DeleteChatResponse, Error, string, { previousChats?: any }>({
+  return useMutation<
+    DeleteChatResponse,
+    Error,
+    string,
+    { previousChats?: any }
+  >({
     mutationFn: (chatId: string) => chatService.deleteChat(chatId),
     onMutate: async (chatId) => {
       // Отменяем текущие запросы
@@ -74,6 +91,7 @@ export function useDeleteChat(
       // Оптимистично удаляем чат из списка
       queryClient.setQueryData(chatKeys.lists(), (old: any) => {
         if (!old) return old;
+
         return old.filter((chat: any) => chat.id !== chatId);
       });
 
@@ -82,13 +100,13 @@ export function useDeleteChat(
     onSuccess: (data, chatId) => {
       // Удаляем детали чата из кэша
       queryClient.removeQueries({ queryKey: chatKeys.detail(chatId) });
-      
+
       // Удаляем сообщения чата из кэша
       queryClient.removeQueries({ queryKey: chatKeys.messages(chatId) });
-      
+
       // Обновляем список чатов
       queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
-      
+
       toast.success("Чат успешно удалён");
     },
     onError: (error, chatId, context) => {
@@ -96,7 +114,7 @@ export function useDeleteChat(
       if (context?.previousChats) {
         queryClient.setQueryData(chatKeys.lists(), context.previousChats);
       }
-      
+
       console.error("Ошибка при удалении чата:", error);
       toast.error("Не удалось удалить чат");
     },

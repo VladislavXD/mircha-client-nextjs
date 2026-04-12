@@ -1,7 +1,3 @@
-
-
-
-
 // import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // // Типы для новостей
@@ -29,8 +25,8 @@
 // export const newsApi = createApi({
 //   reducerPath: 'newsApi',
 //   baseQuery: fetchBaseQuery({
-//     baseUrl: process.env.NODE_ENV === 'production' 
-//       ? 'https://mirchan-expres-api.onrender.com/api' 
+//     baseUrl: process.env.NODE_ENV === 'production'
+//       ? 'https://mirchan-expres-api.onrender.com/api'
 //       : 'http://localhost:5000/api',
 //   }),
 //   tagTypes: ['News'],
@@ -41,20 +37,20 @@
 //           lang,
 //           category,
 //         });
-        
+
 //         return `news/headlines?${params.toString()}`;
 //       },
 //       providesTags: ['News'],
 //       keepUnusedDataFor: 30 * 60, // 30 минут кеша
 //     }),
-    
+
 //     searchNews: builder.query<NewsResponse, { q: string; pageSize?: number }>({
 //       query: ({ q, pageSize = 5 }) => {
 //         const params = new URLSearchParams({
 //           q,
 //           pageSize: pageSize.toString(),
 //         });
-        
+
 //         return `news/search?${params.toString()}`;
 //       },
 //       providesTags: ['News'],
@@ -63,12 +59,9 @@
 //   }),
 // });
 
-// export const { 
-//   useGetTopHeadlinesQuery, 
+// export const {
+//   useGetTopHeadlinesQuery,
 //   useSearchNewsQuery,
 //   useLazyGetTopHeadlinesQuery,
-//   useLazySearchNewsQuery 
+//   useLazySearchNewsQuery
 // } = newsApi;
-
-
-

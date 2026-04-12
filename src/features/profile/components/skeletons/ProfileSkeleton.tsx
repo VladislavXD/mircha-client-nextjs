@@ -93,10 +93,13 @@ export default function ProfileSkeleton() {
             <Skeleton className="w-32 rounded-lg">
               <div className="h-6 w-32 rounded-lg bg-default-300" />
             </Skeleton>
-            
+
             {/* Post Skeletons */}
             {[1, 2, 3].map((item) => (
-              <div key={item} className="space-y-3 border-b border-divider pb-4 last:border-b-0">
+              <div
+                key={item}
+                className="space-y-3 border-b border-divider pb-4 last:border-b-0"
+              >
                 {/* Post Header */}
                 <div className="flex items-center gap-3">
                   <Skeleton className="rounded-full">
@@ -111,7 +114,7 @@ export default function ProfileSkeleton() {
                     </Skeleton>
                   </div>
                 </div>
-                
+
                 {/* Post Content */}
                 <div className="space-y-2">
                   <Skeleton className="w-full rounded-lg">
@@ -121,14 +124,14 @@ export default function ProfileSkeleton() {
                     <div className="h-4 w-5/6 rounded-lg bg-default-200" />
                   </Skeleton>
                 </div>
-                
+
                 {/* Post Image (optional) */}
                 {item % 2 === 0 && (
                   <Skeleton className="w-full rounded-lg">
                     <div className="h-48 w-full rounded-lg bg-default-300" />
                   </Skeleton>
                 )}
-                
+
                 {/* Post Actions */}
                 <div className="flex gap-4">
                   <Skeleton className="w-16 rounded-lg">
@@ -149,4 +152,3 @@ export default function ProfileSkeleton() {
     </div>
   );
 }
-

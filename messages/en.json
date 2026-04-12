@@ -24,7 +24,10 @@
         "about": "About",
         "feedback": "Feedback",
         "login": "Log in",
-        "registered": "Registered"
+        "registered": "Registered",
+        "logoutLoading": "Logging out",
+        "logoutSuccess": "Logged out",
+        "logoutError": "Error logging out"
       }
     },
     "rightSidebar": {
@@ -75,7 +78,8 @@
       "location": "Location",
       "avatar": "Avatar",
       "changeAvatar": "Change avatar",
-      "saveChanges": "Save changes"
+      "saveChanges": "Save changes",
+      "cancel": "Cancel"
     },
     "security": {
       "title": "Security",
@@ -137,7 +141,11 @@
       "register": "Sign up",
       "twoFactorCode": "Two-factor authentication code",
       "twoFactorDesc": "Enter the code for two-factor authentication",
-      "enterCode": "Enter 6-digit code"
+      "enterCode": "Enter 6-digit code",
+      "verifying": "Verifying code…",
+      "success": "Login successful",
+      "loginDescription": "You have been successfully authenticated",
+      "error": "Invalid email, password or 2FA code"
     },
     "register": {
       "title": "Sign up",
@@ -147,7 +155,11 @@
       "confirmPassword": "Confirm password",
       "submit": "Sign up",
       "hasAccount": "Already have an account?",
-      "login": "Log in"
+      "login": "Log in",
+      "verifying": "Verifying code…",
+      "success": "Registration successful",
+      "error": "Registration error. Please try again.",
+      "registerDescription": "Please confirm your email before logging in"
     },
     "resetPassword": {
       "title": "Password recovery",
@@ -155,7 +167,10 @@
       "email": "Email",
       "submit": "Send link",
       "sending": "Sending link…",
-      "backToLogin": "Back to login"
+      "backToLogin": "Back to login",
+      "success": "successfully sent",
+      "sent": "A link to confirm your email has been sent",
+      "error": "Error sending reset link. Please try again"
     },
     "newPassword": {
       "title": "New password",
@@ -328,5 +343,31 @@
     "addImage": "Add image",
     "previewPost": "Post preview",
     "EmojiPicker": "Choose emoji"
+  },
+  "Toasts": {
+    "linkCopied": "Link copied",
+    "copyError": "Failed to copy link",
+    "fileSelected": "File selected",
+    "subscriptionError": "Subscription error",
+    "subscriptionErrorDesc": "Could not perform action. Please try again in 15 minutes.",
+    "notAuthorized": "You are not authorized",
+    "notAuthorizedDesc": "Please log in to the system.",
+    "reCaptchaError": "Please complete the reCAPTCHA verification",
+    "sending": "Sending...",
+    "passwordChangedSuccess": "Password changed successfully",
+    "passwordChangedDesc": "Your password has been successfully updated",
+    "passwordChangeError": "Error changing password",
+    "newPasswordSuccess": "Password set successfully",
+    "newPasswordDesc": "You can now sign in to your account",
+    "newPasswordError": "Error setting password",
+    "profileUpdateSuccess": "Profile updated successfully",
+    "profileUpdateDesc": "Your profile has been successfully updated",
+    "profileUpdateError": "Error updating profile",
+    "appearanceUpdateSuccess": "Appearance updated successfully",
+    "appearanceUpdateDesc": "Your appearance settings have been updated",
+    "appearanceUpdateError": "Error updating appearance",
+    "securityUpdateSuccess": "Security settings updated",
+    "securityUpdateDesc": "Your security settings have been updated",
+    "securityUpdateError": "Error updating security settings"
   }
 }

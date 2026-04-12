@@ -1,35 +1,33 @@
 import React from "react";
-import { MessageCircle } from 'lucide-react';
 import { Button } from "@heroui/button";
 import { useRouter } from "next/navigation";
 import { FaUser } from "react-icons/fa";
 
-
 type Props = {};
 
 const NotAuthenticated = (props: Props) => {
-	const router = useRouter();	
+  const router = useRouter();
 
   return (
     <div className="flex flex-col items-center w-full justify-center min-h-[60vh] p-8 space-y-6">
       <div className="relative">
         <FaUser
-          size={80}
           className="text-gray-300 dark:text-gray-700"
+          size={80}
           strokeWidth={1.5}
         />
-				
+
         <div className="absolute -bottom-1 -right-1 bg-gray-200 dark:bg-gray-800 rounded-full p-1.5">
           <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
+            className="text-gray-500"
             fill="none"
+            height="24"
             stroke="currentColor"
             strokeWidth="2"
-            className="text-gray-500"
+            viewBox="0 0 24 24"
+            width="24"
           >
-            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+            <rect height="11" rx="2" ry="2" width="18" x="3" y="11" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
         </div>

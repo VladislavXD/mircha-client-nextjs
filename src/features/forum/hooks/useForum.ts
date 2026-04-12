@@ -1,9 +1,6 @@
-import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
-import { forumService } from '../services/forum.service';
 import type {
   Board,
   Thread,
-  Reply,
   Category,
   Tag,
   ForumStats,
@@ -15,27 +12,36 @@ import type {
   CreateReplyDto,
   CreateCategoryDto,
   CreateTagDto,
-} from '../types/forum.types';
+} from "../types/forum.types";
+
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseQueryOptions,
+} from "@tanstack/react-query";
+
+import { forumService } from "../services/forum.service";
 
 // ═══════════════════════════════════════════════════════════════
 // Query Keys
 // ═══════════════════════════════════════════════════════════════
 
 export const forumKeys = {
-  all: ['forum'] as const,
-  boards: () => [...forumKeys.all, 'boards'] as const,
+  all: ["forum"] as const,
+  boards: () => [...forumKeys.all, "boards"] as const,
   board: (boardName: string) => [...forumKeys.boards(), boardName] as const,
   boardThreads: (boardName: string, page: number, tag?: string) =>
-    [...forumKeys.board(boardName), 'threads', { page, tag }] as const,
+    [...forumKeys.board(boardName), "threads", { page, tag }] as const,
   thread: (boardName: string, threadId: string) =>
-    [...forumKeys.board(boardName), 'thread', threadId] as const,
-  categories: () => [...forumKeys.all, 'categories'] as const,
+    [...forumKeys.board(boardName), "thread", threadId] as const,
+  categories: () => [...forumKeys.all, "categories"] as const,
   category: (slug: string) => [...forumKeys.categories(), slug] as const,
-  tags: () => [...forumKeys.all, 'tags'] as const,
-  stats: () => [...forumKeys.all, 'stats'] as const,
-  latestPosts: (limit: number) => [...forumKeys.all, 'latest', limit] as const,
+  tags: () => [...forumKeys.all, "tags"] as const,
+  stats: () => [...forumKeys.all, "stats"] as const,
+  latestPosts: (limit: number) => [...forumKeys.all, "latest", limit] as const,
   latestThreads: (page: number, limit: number, nsfw: string) =>
-    [...forumKeys.all, 'latestThreads', { page, limit, nsfw }] as const,
+    [...forumKeys.all, "latestThreads", { page, limit, nsfw }] as const,
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -46,7 +52,7 @@ export const forumKeys = {
  * Получение всех бордов
  */
 export function useBoards(
-  options?: Omit<UseQueryOptions<Board[]>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<Board[]>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Board[]>({
     queryKey: forumKeys.boards(),
@@ -61,7 +67,7 @@ export function useBoards(
  */
 export function useBoardByName(
   boardName: string,
-  options?: Omit<UseQueryOptions<Board>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<Board>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Board>({
     queryKey: forumKeys.board(boardName),
@@ -79,7 +85,7 @@ export function useBoardThreads(
   boardName: string,
   page: number = 1,
   tagSlug?: string,
-  options?: Omit<UseQueryOptions<BoardThreadsResponse>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<BoardThreadsResponse>, "queryKey" | "queryFn">,
 ) {
   return useQuery<BoardThreadsResponse>({
     queryKey: forumKeys.boardThreads(boardName, page, tagSlug),
@@ -111,10 +117,17 @@ export function useUpdateBoard() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ boardName, data }: { boardName: string; data: UpdateBoardDto }) =>
-      forumService.updateBoard(boardName, data),
+    mutationFn: ({
+      boardName,
+      data,
+    }: {
+      boardName: string;
+      data: UpdateBoardDto;
+    }) => forumService.updateBoard(boardName, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: forumKeys.board(variables.boardName) });
+      queryClient.invalidateQueries({
+        queryKey: forumKeys.board(variables.boardName),
+      });
       queryClient.invalidateQueries({ queryKey: forumKeys.boards() });
     },
   });
@@ -130,7 +143,7 @@ export function useUpdateBoard() {
 export function useThread(
   boardName: string,
   threadId: string,
-  options?: Omit<UseQueryOptions<Thread>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<Thread>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Thread>({
     queryKey: forumKeys.thread(boardName, threadId),
@@ -205,7 +218,7 @@ export function useCreateReply() {
  * Получение всех категорий
  */
 export function useCategories(
-  options?: Omit<UseQueryOptions<Category[]>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<Category[]>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Category[]>({
     queryKey: forumKeys.categories(),
@@ -220,7 +233,7 @@ export function useCategories(
  */
 export function useCategoryBySlug(
   slug: string,
-  options?: Omit<UseQueryOptions<Category>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<Category>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Category>({
     queryKey: forumKeys.category(slug),
@@ -239,10 +252,14 @@ export function useCategoryThreads(
   page: number = 1,
   limit: number = 10,
   tagSlug?: string,
-  options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<any>, "queryKey" | "queryFn">,
 ) {
   return useQuery({
-    queryKey: [...forumKeys.category(slug), 'threads', { page, limit, tag: tagSlug }],
+    queryKey: [
+      ...forumKeys.category(slug),
+      "threads",
+      { page, limit, tag: tagSlug },
+    ],
     queryFn: () => forumService.getCategoryThreads(slug, page, limit, tagSlug),
     enabled: !!slug,
     staleTime: 1 * 60 * 1000, // 1 минута
@@ -268,7 +285,7 @@ export function useCreateThreadInCategory() {
     }) => forumService.createThreadInCategory(slug, data, files),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [...forumKeys.category(variables.slug), 'threads'],
+        queryKey: [...forumKeys.category(variables.slug), "threads"],
       });
     },
   });
@@ -280,11 +297,12 @@ export function useCreateThreadInCategory() {
 export function useThreadByCategoryAndSlug(
   categorySlug: string,
   threadSlug: string,
-  options?: Omit<UseQueryOptions<Thread>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<Thread>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Thread>({
-    queryKey: [...forumKeys.category(categorySlug), 'thread', threadSlug],
-    queryFn: () => forumService.getThreadByCategoryAndSlug(categorySlug, threadSlug),
+    queryKey: [...forumKeys.category(categorySlug), "thread", threadSlug],
+    queryFn: () =>
+      forumService.getThreadByCategoryAndSlug(categorySlug, threadSlug),
     enabled: !!categorySlug && !!threadSlug,
     staleTime: 1 * 60 * 1000,
     ...options,
@@ -310,7 +328,7 @@ export function useCreateReplyInCategory() {
     onSuccess: (_, variables) => {
       // Инвалидируем кэш треда чтобы обновить список ответов
       queryClient.invalidateQueries({
-        queryKey: [...forumKeys.category(variables.categorySlug), 'thread'],
+        queryKey: [...forumKeys.category(variables.categorySlug), "thread"],
       });
     },
   });
@@ -323,7 +341,8 @@ export function useCreateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: FormData | CreateCategoryDto) => forumService.createCategory(data),
+    mutationFn: (data: FormData | CreateCategoryDto) =>
+      forumService.createCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: forumKeys.categories() });
     },
@@ -338,7 +357,7 @@ export function useCreateCategory() {
  * Получение всех тегов
  */
 export function useTags(
-  options?: Omit<UseQueryOptions<Tag[]>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<Tag[]>, "queryKey" | "queryFn">,
 ) {
   return useQuery<Tag[]>({
     queryKey: forumKeys.tags(),
@@ -370,7 +389,7 @@ export function useCreateTag() {
  * Получение статистики форума
  */
 export function useForumStats(
-  options?: Omit<UseQueryOptions<ForumStats>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<ForumStats>, "queryKey" | "queryFn">,
 ) {
   return useQuery<ForumStats>({
     queryKey: forumKeys.stats(),
@@ -385,7 +404,7 @@ export function useForumStats(
  */
 export function useLatestPosts(
   limit: number = 10,
-  options?: Omit<UseQueryOptions<LatestPost[]>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<LatestPost[]>, "queryKey" | "queryFn">,
 ) {
   return useQuery<LatestPost[]>({
     queryKey: forumKeys.latestPosts(limit),
@@ -401,8 +420,8 @@ export function useLatestPosts(
 export function useLatestThreads(
   page: number = 1,
   limit: number = 20,
-  nsfw: string = '0',
-  options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>,
+  nsfw: string = "0",
+  options?: Omit<UseQueryOptions<any>, "queryKey" | "queryFn">,
 ) {
   return useQuery({
     queryKey: forumKeys.latestThreads(page, limit, nsfw),
