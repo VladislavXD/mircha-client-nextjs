@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHAT_ID = process.env.TELEGRAM_CHAT_ID_CHECKCLIENT;
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const USER_ID = process.env.TELEGRAM_USER_ID;
 
 async function sendTelegramMessage(text: string) {
-  if (!BOT_TOKEN || !CHAT_ID) {
+  if (!BOT_TOKEN || !USER_ID) {
     return;
   }
 
@@ -13,7 +13,7 @@ async function sendTelegramMessage(text: string) {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: "HTML" }),
+      body: JSON.stringify({ chat_id: USER_ID, text, parse_mode: "HTML" }),
     },
   );
 

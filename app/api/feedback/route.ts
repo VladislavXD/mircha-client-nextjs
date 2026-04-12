@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Telegram credentials
-    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    const CHAT_ID = process.env.TELEGRAM_CHAT_ID_FEEDBACK;
+    const BOT_TOKEN = process.env.BOT_TOKEN;
+    const CHAT_ID = process.env.TELEGRAM_CHAT_ID || "6463185441";
 
     if (!BOT_TOKEN || !CHAT_ID) {
       return NextResponse.json(
