@@ -266,7 +266,7 @@ export const ChatList: React.FC<ChatListProps> = ({ isCollapsed = false }) => {
               <>
                 <div>
                   <p className="text-base font-medium text-foreground">
-                    У вас пока нет чатов
+                    У вас пока нет чатов 
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Найдите пользователей и начните общение!
