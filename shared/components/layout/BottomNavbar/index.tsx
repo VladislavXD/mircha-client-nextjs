@@ -1,13 +1,16 @@
 "use client";
-import { Badge, Skeleton, Avatar } from "@heroui/react";
+
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import { Home, MessageCircle, Search, Theater } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
 import { useCurrentUser } from "@/src/features/user";
-import { useGetUserChats, useOnlineStatus } from "@/src/features/chat";
+import { useGetUserChats } from "@/src/features/chat";
 
 const useScrollDirection = () => {
   const [scrollDirection, setScrollDirection] = useState("up");
@@ -16,7 +19,6 @@ const useScrollDirection = () => {
     let lastScrollY = 0;
 
     const handleScroll = () => {
-      // Ищем контейнер с overflow-y-auto
       const scrollContainer = document.querySelector(
         ".overflow-y-auto.scrollbar-hide",
       );
@@ -34,14 +36,12 @@ const useScrollDirection = () => {
       lastScrollY = currentScrollY;
     };
 
-    // Находим контейнер и добавляем слушатель
     const scrollContainer = document.querySelector(
       ".overflow-y-auto.scrollbar-hide",
     );
 
     if (scrollContainer) {
       scrollContainer.addEventListener("scroll", handleScroll);
-
       return () => scrollContainer.removeEventListener("scroll", handleScroll);
     }
   }, []);
@@ -51,20 +51,16 @@ const useScrollDirection = () => {
 
 const BottomNav = () => {
   const scrollDirection = useScrollDirection();
-  const navClass = scrollDirection === "up" ? "opacity-100" : "opacity-25";
+  const navClass = scrollDirection === "up" ? "translate-y-0" : "translate-y-[150%]";
 
-  console.log(window.scrollY);
   const pathname = usePathname();
   const { theme } = useTheme();
 
-  // Используем новые React Query хуки
   const { user: current, isLoading } = useCurrentUser();
-  const { data: chats, refetch } = useGetUserChats();
+  const { data: chats } = useGetUserChats();
 
-  // Вычисляем общее количество непрочитанных сообщений
   const totalUnreadCount = useMemo(() => {
     if (!chats) return 0;
-
     return chats.reduce(
       (sum: number, chat: any) => sum + (chat.unreadCount || 0),
       0,
@@ -74,53 +70,43 @@ const BottomNav = () => {
   const avatarUrl = current?.avatarUrl;
   const id = current?.id;
 
-  // Проверяем активность страницы с учетом локализации /ru или /en
   const isActivePage = (path: string) => {
     const cleanPathname = pathname.replace(/^\/(ru|en)/, "") || "/";
-
     if (path === "/") {
       return cleanPathname === "/";
     }
-
     return cleanPathname === path || cleanPathname.startsWith(`${path}/`);
   };
 
-  // ✅ ИСПРАВЛЕНО: Активная страница = белый/черный, неактивная = серый
   const getIconColor = (isActive: boolean) => {
     const isDark = theme === "dark";
-
     if (isActive) {
-      // На активной странице - яркий цвет
       return isDark ? "#ffffff" : "#000000";
     } else {
-      // На неактивной странице - серый
       return isDark ? "#6b7280" : "#9ca3af";
     }
   };
 
-
-
   return (
     <>
-      {/* Island-style floating navbar */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 sm:hidden transition-opacity duration-700 ${navClass}`}
+        className={`fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 sm:hidden transition-transform duration-500 ease-in-out ${navClass}`}
       >
-        <div className="mx-auto max-w-md backdrop-blur-lg bg-zinc-100/70 dark:bg-zinc-900/70 rounded-3xl shadow-2xl border border-zinc-200/50 dark:border-zinc-800/50">
-          <div className="flex justify-around items-center py-3 px-2">
+        <div className="mx-auto max-w-[280px] backdrop-blur-xl bg-white/70 dark:bg-black/70 rounded-[20px] shadow-lg border border-neutral-200/50 dark:border-neutral-800/50">
+          <div className="flex justify-around items-center py-1.5 px-1">
             {/* Home */}
             <Link
-              className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 ${
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
                 isActivePage("/")
-                  ? "bg-zinc-900 dark:bg-zinc-100"
-                  : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                  ? "bg-neutral-900 dark:bg-white"
+                  : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
               }`}
               href="/"
             >
               <Home
                 className="transition-colors ease-out"
                 fill="none"
-                size={24}
+                size={20}
                 stroke={
                   isActivePage("/")
                     ? theme === "dark"
@@ -128,23 +114,23 @@ const BottomNav = () => {
                       : "#ffffff"
                     : getIconColor(false)
                 }
-                strokeWidth={1.5}
+                strokeWidth={2.2}
               />
             </Link>
 
             {/* Search */}
             <Link
-              className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 ${
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
                 isActivePage("/search")
-                  ? "bg-zinc-900 dark:bg-zinc-100"
-                  : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                  ? "bg-neutral-900 dark:bg-white"
+                  : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
               }`}
               href="/search"
             >
               <Search
                 className="transition-colors ease-out"
                 fill="none"
-                size={24}
+                size={20}
                 stroke={
                   isActivePage("/search")
                     ? theme === "dark"
@@ -152,23 +138,23 @@ const BottomNav = () => {
                       : "#ffffff"
                     : getIconColor(false)
                 }
-                strokeWidth={1.5}
+                strokeWidth={2.2}
               />
             </Link>
 
             {/* Forum */}
             <Link
-              className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 ${
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
                 isActivePage("/forum")
-                  ? "bg-zinc-900 dark:bg-zinc-100"
-                  : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                  ? "bg-neutral-900 dark:bg-white"
+                  : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
               }`}
               href="/forum"
             >
               <Theater
                 className="transition-colors ease-out"
                 fill="none"
-                size={24}
+                size={20}
                 stroke={
                   isActivePage("/forum")
                     ? theme === "dark"
@@ -176,30 +162,24 @@ const BottomNav = () => {
                       : "#ffffff"
                     : getIconColor(false)
                 }
-                strokeWidth={1.5}
+                strokeWidth={2.2}
               />
             </Link>
 
             {/* Chat */}
             <Link
-              className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 relative ${
                 isActivePage("/chat")
-                  ? "bg-zinc-900 dark:bg-zinc-100"
-                  : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                  ? "bg-neutral-900 dark:bg-white"
+                  : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
               }`}
               href="/chat"
             >
-              <Badge
-                color="danger"
-                content={totalUnreadCount}
-                isInvisible={totalUnreadCount === 0}
-                placement="top-right"
-                size="sm"
-              >
+              <div className="relative">
                 <MessageCircle
                   className="transition-colors ease-out"
                   fill="none"
-                  size={24}
+                  size={20}
                   stroke={
                     isActivePage("/chat")
                       ? theme === "dark"
@@ -207,37 +187,41 @@ const BottomNav = () => {
                         : "#ffffff"
                       : getIconColor(false)
                   }
-                  strokeWidth={1.5}
+                  strokeWidth={2.2}
                 />
-              </Badge>
+                {totalUnreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-red-500 px-[3px] text-[9px] font-bold text-white border-[1.5px] border-white dark:border-black backdrop-content">
+                    {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                  </span>
+                )}
+              </div>
             </Link>
 
             {/* Profile */}
             {isLoading ? (
-              <div className="flex items-center justify-center w-12 h-12">
-                <Skeleton className="rounded-full w-9 h-9" />
+              <div className="flex items-center justify-center w-10 h-10">
+                <Skeleton className="rounded-full w-[24px] h-[24px]" />
               </div>
             ) : (
               current && (
                 <Link
-                  className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 active:scale-90 ${
+                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
                     isActivePage(`/user/${id}`)
-                      ? "bg-zinc-900 dark:bg-zinc-100"
-                      : "hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                      ? "bg-neutral-900 dark:bg-white"
+                      : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
                   }`}
                   href={`/user/${id}`}
                 >
                   <Avatar
-                    className="w-9 h-9"
-                    classNames={{
-                      base: isActivePage(`/user/${id}`)
-                        ? "ring-2 ring-white dark:ring-black"
-                        : "",
-                    }}
-                    isBordered={isActivePage(`/user/${id}`)}
-                    size="sm"
-                    src={avatarUrl}
-                  />
+                    className={`w-[24px] h-[24px] ${
+                      isActivePage(`/user/${id}`)
+                        ? "ring-2 ring-offset-2 ring-black dark:ring-white dark:ring-offset-black"
+                        : "opacity-80 hover:opacity-100 transition-opacity"
+                    }`}
+                  >
+                    <AvatarImage src={avatarUrl || ""} alt="Avatar" className="object-cover" />
+                    <AvatarFallback className="bg-neutral-200 dark:bg-neutral-800" />
+                  </Avatar>
                 </Link>
               )
             )}

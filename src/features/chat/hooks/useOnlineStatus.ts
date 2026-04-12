@@ -2,22 +2,23 @@ import { useMemo } from "react";
 
 import { socketService } from "@/src/features/socket/socketService";
 import { useAppSelector } from "@/src/hooks/reduxHooks";
-import { useProfile } from "@/src/features/profile/hooks/useProfile";
 
 /**
  * Хук для получения онлайн-статуса пользователя
  * Читает данные из Redux (обновляются через SocketConnectionManager)
  *
  * @param userId - ID пользователя
+ * @param currentUserId - ID текущего авторизованного пользователя
  * @returns Статус онлайн
  */
-export function useOnlineStatus(userId: string | undefined) {
-  const { user: currentUser } = useProfile();
-
+export function useOnlineStatus(
+  userId: string | undefined,
+  currentUserId?: string,
+) {
   // Для текущего пользователя - статус сокета
   const isCurrentUser = useMemo(
-    () => userId && currentUser?.id === userId,
-    [userId, currentUser?.id],
+    () => !!userId && !!currentUserId && currentUserId === userId,
+    [userId, currentUserId],
   );
 
   // Получаем статус из Redux

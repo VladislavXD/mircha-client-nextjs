@@ -50,7 +50,7 @@ const SearchUser = () => {
                 <Link
                   key={user.id}
                   className="flex items-center gap-3 p-3 transition-colors hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] rounded-[1rem] group/item"
-                  href={`/profile/${user.id}`}
+                  href={`/user/${user.id}`}
                   onClick={() => setQuery("")}
                 >
                   <Avatar className="w-10 h-10 shrink-0 border border-neutral-200 dark:border-neutral-800/70">
