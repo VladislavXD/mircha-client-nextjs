@@ -1,6 +1,7 @@
+import type { Message } from "@/src/features/chat/types";
+
 import React, { useRef, useEffect } from "react";
 import { Avatar } from "@heroui/react";
-import type { Message } from "@/src/features/chat/types";
 
 interface ChatMessageListProps {
   messages: Message[];
@@ -33,24 +34,30 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
 
       {messages.map((message, index) => {
         const isOwn = message.senderId === currentUserId;
-        const isLastInGroup = index === messages.length - 1 || messages[index + 1]?.senderId !== message.senderId;
-        const isFirstInGroup = index === 0 || messages[index - 1]?.senderId !== message.senderId;
+        const isLastInGroup =
+          index === messages.length - 1 ||
+          messages[index + 1]?.senderId !== message.senderId;
+        const isFirstInGroup =
+          index === 0 || messages[index - 1]?.senderId !== message.senderId;
 
         return (
-          <div key={message.id} className={`flex gap-2 items-end ${isOwn ? "justify-end" : "justify-start"} ${!isLastInGroup && isGroup ? "mb-px" : "mb-1.5"}`}>
+          <div
+            key={message.id}
+            className={`flex gap-2 items-end ${isOwn ? "justify-end" : "justify-start"} ${!isLastInGroup && isGroup ? "mb-px" : "mb-1.5"}`}
+          >
             {!isOwn && isGroup ? (
               isLastInGroup ? (
                 <Avatar
                   className="flex-shrink-0 w-7 h-7 rounded-full mb-0.5"
                   icon={<div />}
-                  src={message.sender?.avatarUrl || undefined}
                   name={message.sender?.name?.[0] || "?"}
+                  src={message.sender?.avatarUrl || undefined}
                 />
               ) : (
                 <div className="w-7 flex-shrink-0" />
               )
             ) : null}
-            
+
             <div
               className={`max-w-[82%] lg:max-w-[68%] px-3 py-1.5 relative group ${
                 isOwn
@@ -63,7 +70,9 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
                   {message.sender.name}
                 </div>
               )}
-              <div className="break-words leading-snug text-sm">{message.content}</div>
+              <div className="break-words leading-snug text-sm">
+                {message.content}
+              </div>
               <div
                 className={`text-[10px] mt-0.5 flex items-center justify-end gap-1 ${
                   isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
@@ -71,7 +80,11 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
               >
                 {formatMessageTime(message.createdAt)}
                 {isOwn && (
-                  <span className={message.isRead ? "text-primary-foreground" : "opacity-50"}>
+                  <span
+                    className={
+                      message.isRead ? "text-primary-foreground" : "opacity-50"
+                    }
+                  >
                     {message.isRead ? "✓✓" : "✓"}
                   </span>
                 )}
@@ -90,9 +103,18 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
               </span>
               <span>печатает</span>
               <span className="flex gap-0.5 mt-1">
-                <span className="w-1 h-1 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-1 h-1 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-1 h-1 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                <span
+                  className="w-1 h-1 bg-muted-foreground/60 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                />
+                <span
+                  className="w-1 h-1 bg-muted-foreground/60 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                />
+                <span
+                  className="w-1 h-1 bg-muted-foreground/60 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                />
               </span>
             </div>
           </div>

@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { Pencil, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 
 import { useCreatePost } from "../hooks/usePostMutations";
 
@@ -23,6 +24,8 @@ import MediaPreviewSlider from "./MediaPreviewSlider";
 
 import { Button } from "@/components/ui/button";
 import Mention from "@/shared/components/ui/inputs/Mention";
+import { useAppDispatch } from "@/src/hooks/reduxHooks";
+import { setCreatePostView } from "@/src/store/CreatePostModal/CreatePostModal.slice";
 
 interface FormData {
   post: string;
@@ -30,10 +33,30 @@ interface FormData {
 
 const MAX_MEDIA = 30;
 
-const CreatePost = () => {
+const CreatePost = ({
+  className,
+  onSuccessComplete,
+  disableViewportTracking = false,
+}: {
+  className?: string;
+  onSuccessComplete?: () => void;
+  disableViewportTracking?: boolean;
+}) => {
+  const dispatch = useAppDispatch();
   const t = useTranslations();
   const queryClient = useQueryClient();
   const currentUser = queryClient.getQueryData<User>(["profile"]);
+
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    initialInView: true,
+  });
+
+  useEffect(() => {
+    if (!disableViewportTracking) {
+      dispatch(setCreatePostView(inView));
+    }
+  }, [inView, disableViewportTracking, dispatch]);
 
   const { mutateAsync: createPostAsync, isPending: isLoading } =
     useCreatePost();
@@ -89,64 +112,88 @@ const CreatePost = () => {
 
   // Обработчик выбора эмодзи
   const handleEmojiSelect = (emojiUrl: string) => {
+    const newIndex = selectedEmojis.length;
+
     setSelectedEmojis((prev) => [...prev, emojiUrl]);
 
-    const editor = editorRef.current;
+    setTimeout(() => {
+      const editor = editorRef.current;
 
-    if (!editor) return;
+      if (!editor) return;
 
-    // Сфокусируемся на редакторе
-    editor.focus();
+      editor.focus();
 
-    const emojiIndex = selectedEmojis.length;
-    const token = `[emoji:${emojiIndex}]`;
+      const sel = window.getSelection();
 
-    const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) {
+        // Fallback: just append to the end of editor
+        const span = document.createElement("span");
 
-    if (sel && sel.rangeCount > 0) {
+        span.className = "inline-block align-middle mx-0.5";
+        span.contentEditable = "false";
+        span.setAttribute("data-emoji-index", String(newIndex));
+
+        const img = document.createElement("img");
+
+        img.src = emojiUrl;
+        img.alt = "emoji";
+        img.className = "w-6 h-6 object-contain";
+        img.width = 24;
+        img.height = 24;
+        span.appendChild(img);
+
+        editor.appendChild(span);
+        const serialized = serializeDOM(
+          editor.childNodes as unknown as NodeListOf<ChildNode>,
+        );
+
+        setPostContent(serialized);
+        editor.dispatchEvent(new Event("input", { bubbles: true }));
+
+        return;
+      }
+
       const range = sel.getRangeAt(0);
 
-      // Проверяем, находится ли выделение внутри редактора
+      const span = document.createElement("span");
+
+      span.className = "inline-block align-middle mx-0.5";
+      span.contentEditable = "false";
+      span.setAttribute("data-emoji-index", String(newIndex));
+
+      const img = document.createElement("img");
+
+      img.src = emojiUrl;
+      img.alt = "emoji";
+      img.className = "w-6 h-6 object-contain";
+      img.width = 24;
+      img.height = 24;
+
+      span.appendChild(img);
+
       if (editor.contains(range.commonAncestorContainer)) {
         range.deleteContents();
-        const textNode = document.createTextNode(token);
-
-        range.insertNode(textNode);
-        range.setStartAfter(textNode);
+        range.insertNode(span);
+        range.setStartAfter(span);
         range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
       } else {
-        // Если выделение не в редакторе, добавляем в конец
-        const textNode = document.createTextNode(token);
+        editor.appendChild(span);
+        const newRange = document.createRange();
 
-        editor.appendChild(textNode);
-        const range = document.createRange();
-
-        range.setStartAfter(textNode);
-        range.collapse(true);
+        newRange.setStartAfter(span);
+        newRange.collapse(true);
         sel.removeAllRanges();
-        sel.addRange(range);
+        sel.addRange(newRange);
       }
-    } else {
-      // Если нет выделения, добавляем в конец
-      const textNode = document.createTextNode(token);
 
-      editor.appendChild(textNode);
-      const range = document.createRange();
+      const serialized = serializeDOM(
+        editor.childNodes as unknown as NodeListOf<ChildNode>,
+      );
 
-      range.setStartAfter(textNode);
-      range.collapse(true);
-      const newSel = window.getSelection();
+      setPostContent(serialized);
 
-      if (newSel) {
-        newSel.removeAllRanges();
-        newSel.addRange(range);
-      }
-    }
-
-    // Trigger input event for serialization
-    editor.dispatchEvent(new Event("input", { bubbles: true }));
+      editor.dispatchEvent(new Event("input", { bubbles: true }));
+    }, 0);
   };
 
   // Обработка ввода с обнаружением упоминаний
@@ -303,6 +350,10 @@ const CreatePost = () => {
         setSelectedEmojis([]);
         resetMention();
 
+        if (onSuccessComplete) {
+          onSuccessComplete();
+        }
+
         return "Пост успешно опубликован!";
       },
       error: (err) => {
@@ -317,7 +368,8 @@ const CreatePost = () => {
 
   return (
     <form
-      className="bg-white dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 p-4 sm:p-5 rounded-[1.5rem] mb-6 flex flex-col gap-4 shadow-sm"
+      ref={disableViewportTracking ? undefined : ref}
+      className={`bg-white dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 p-4 sm:p-5 rounded-[1.5rem] mb-6 flex flex-col gap-4 shadow-sm ${className || ""}`}
       onSubmit={onSubmit}
     >
       <div ref={containerRef} className="relative">

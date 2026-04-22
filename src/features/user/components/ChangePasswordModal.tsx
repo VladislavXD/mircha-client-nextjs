@@ -1,20 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-} from "@heroui/react";
 import { Eye, EyeOff, Key } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 import { useChangePassword } from "../hooks";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -87,105 +89,106 @@ export function ChangePasswordModal({
   };
 
   return (
-    <Modal
-      classNames={{
-        base: "rounded-none sm:rounded-xl",
-        header: "border-b border-divider",
-        body: "py-6",
-        footer: "border-t border-divider",
-      }}
-      isOpen={isOpen}
-      size="md"
-      onClose={handleClose}
-    >
-      <ModalContent>
-        <ModalHeader className="flex items-center gap-2">
-          <Key className="w-5 h-5 text-primary" />
-          <span>Смена пароля</span>
-        </ModalHeader>
-        <ModalBody>
-          <div className="flex flex-col gap-4">
-            {/* Текущий пароль */}
-            <Input
-              endContent={
-                <button
-                  className="focus:outline-none"
-                  type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  {showCurrentPassword ? (
-                    <EyeOff className="w-4 h-4 text-default-400" />
-                  ) : (
-                    <Eye className="w-4 h-4 text-default-400" />
-                  )}
-                </button>
-              }
-              label="Текущий пароль"
-              placeholder="Введите текущий пароль"
-              type={showCurrentPassword ? "text" : "password"}
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-            />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Key className="w-5 h-5 text-primary" />
+            <span>Смена пароля</span>
+          </DialogTitle>
+        </DialogHeader>
 
-            {/* Новый пароль */}
-            <Input
-              endContent={
-                <button
-                  className="focus:outline-none"
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? (
-                    <EyeOff className="w-4 h-4 text-default-400" />
-                  ) : (
-                    <Eye className="w-4 h-4 text-default-400" />
-                  )}
-                </button>
-              }
-              label="Новый пароль"
-              placeholder="Введите новый пароль"
-              type={showNewPassword ? "text" : "password"}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-
-            {/* Подтверждение нового пароля */}
-            <Input
-              endContent={
-                <button
-                  className="focus:outline-none"
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="w-4 h-4 text-default-400" />
-                  ) : (
-                    <Eye className="w-4 h-4 text-default-400" />
-                  )}
-                </button>
-              }
-              label="Подтвердите новый пароль"
-              placeholder="Введите новый пароль еще раз"
-              type={showConfirmPassword ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-
-            {/* Ошибка валидации */}
-            {error && <p className="text-sm text-danger">{error}</p>}
-
-            {/* Подсказка */}
+        <div className="flex flex-col gap-4 py-4">
+          {/* Текущий пароль */}
+          <div className="space-y-2">
+            <Label htmlFor="currentPassword">Текущий пароль</Label>
+            <div className="relative">
+              <Input
+                id="currentPassword"
+                placeholder="Введите текущий пароль"
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+              >
+                {showCurrentPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button isDisabled={isLoading} variant="flat" onPress={handleClose}>
+
+          {/* Новый пароль */}
+          <div className="space-y-2">
+            <Label htmlFor="newPassword">Новый пароль</Label>
+            <div className="relative">
+              <Input
+                id="newPassword"
+                placeholder="Введите новый пароль"
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+              >
+                {showNewPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Подтверждение нового пароля */}
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Подтвердите новый пароль</Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                placeholder="Введите новый пароль еще раз"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Ошибка валидации */}
+          {error && (
+            <p className="text-sm font-medium text-destructive">{error}</p>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button disabled={isLoading} variant="ghost" onClick={handleClose}>
             Отмена
           </Button>
-          <Button color="primary" isLoading={isLoading} onPress={handleSubmit}>
-            Изменить пароль
+          <Button disabled={isLoading} onClick={handleSubmit}>
+            {isLoading ? t("sending") : "Изменить пароль"}
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

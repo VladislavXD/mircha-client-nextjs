@@ -9,10 +9,7 @@ import {
 
 import { cn } from "@/lib/utils";
 
-function ResizablePanelGroup({
-  className,
-  ...props
-}: GroupProps) {
+function ResizablePanelGroup({ className, ...props }: GroupProps) {
   return (
     <Group
       className={cn(

@@ -1,65 +1,120 @@
 "use client";
 
+import type { MediaSliderProps, PostMedia } from "./types";
+
 import React, { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { useInView } from "react-intersection-observer";
 import { X, Volume2, VolumeX } from "lucide-react";
+
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import type { MediaSliderProps, PostMedia } from "./types";
 
-const VideoPlayerItem = ({ src, isSingle }: { src: string; isSingle: boolean }) => {
+const VideoPlayerItem = ({
+  src,
+  isSingle,
+}: {
+  src: string;
+  isSingle: boolean;
+}) => {
   const [isMuted, setIsMuted] = useState(true);
   const { ref, inView } = useInView({ threshold: 0.6, rootMargin: "-20% 0px" });
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const pathname = usePathname();
+  const mountedPathname = useRef(pathname);
+  const isActiveRoute = pathname === mountedPathname.current;
+
   useEffect(() => {
-    if (inView && videoRef.current) {
-      const playPromise = videoRef.current.play();
+    const video = videoRef.current;
+
+    if (inView && isActiveRoute && video) {
+      const playPromise = video.play();
+
       if (playPromise !== undefined) {
         playPromise.catch(() => {});
       }
-    } else if (videoRef.current) {
-      videoRef.current.pause();
+    } else if (video) {
+      video.pause();
     }
-  }, [inView]);
+
+    return () => {
+      if (video) {
+        video.pause();
+      }
+    };
+  }, [inView, isActiveRoute]);
+
+  // Pause this video if another video starts playing anywhere on the page
+  useEffect(() => {
+    const handleGlobalPlay = (e: Event) => {
+      if (
+        e.target instanceof HTMLVideoElement &&
+        e.target !== videoRef.current &&
+        videoRef.current &&
+        !videoRef.current.paused
+      ) {
+        videoRef.current.pause();
+      }
+    };
+
+    window.addEventListener("play", handleGlobalPlay, true);
+
+    return () => {
+      window.removeEventListener("play", handleGlobalPlay, true);
+    };
+  }, []);
 
   return (
-    <div className={`relative flex justify-center group ${isSingle ? "w-fit max-w-full h-auto" : "w-auto h-full"}`} ref={ref}>
+    <div
+      ref={ref}
+      className={`relative flex justify-center group ${isSingle ? "w-fit max-w-full h-auto" : "w-auto h-full"}`}
+    >
       <video
         ref={videoRef}
-        src={src}
-        muted={isMuted}
-        playsInline
         loop
+        playsInline
+        className={`${isSingle ? "w-auto max-w-full h-auto max-h-[45vh] sm:max-h-[55vh] object-contain" : "w-auto h-full object-contain min-w-[140px]"} cursor-pointer rounded-[16px]`}
+        muted={isMuted}
+        preload="metadata"
+        src={src}
         onClick={(e) => {
           e.stopPropagation();
           if (videoRef.current) {
-            videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause();
+            videoRef.current.paused
+              ? videoRef.current.play()
+              : videoRef.current.pause();
           }
         }}
-        className={`${isSingle ? "w-auto max-w-full h-auto max-h-[45vh] sm:max-h-[55vh] object-contain" : "w-auto h-full object-contain min-w-[140px]"} cursor-pointer rounded-[16px]`}
-        preload="metadata"
       />
-      <button 
-        type="button"
+      <button
         className="absolute bottom-3 right-3 p-1.5 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full text-white transition-opacity sm:opacity-0 group-hover:opacity-100 z-10"
+        type="button"
         onClick={(e) => {
-           e.stopPropagation();
-           setIsMuted(!isMuted);
-           if (videoRef.current && videoRef.current.paused) videoRef.current.play();
+          e.stopPropagation();
+          setIsMuted(!isMuted);
+          if (videoRef.current && videoRef.current.paused)
+            videoRef.current.play();
         }}
       >
-        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        {isMuted ? (
+          <VolumeX className="w-4 h-4" />
+        ) : (
+          <Volume2 className="w-4 h-4" />
+        )}
       </button>
     </div>
   );
 };
 
-const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) => {
+const PostMediaSlider: React.FC<MediaSliderProps> = ({
+  media,
+  className = "",
+}) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
@@ -68,9 +123,10 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
   useEffect(() => {
     if (!api) return;
     const onSelect = () => setCurrent(api.selectedScrollSnap());
+
     api.on("select", onSelect);
     api.on("reInit", onSelect);
-    
+
     return () => {
       api.off("select", onSelect);
       api.off("reInit", onSelect);
@@ -83,24 +139,34 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
   const handleReveal = (index: number) => {
     setRevealed((prev) => {
       const next = new Set(prev);
+
       next.add(index);
+
       return next;
     });
   };
 
   const renderSpoiler = (item: PostMedia, index: number, isSingle: boolean) => (
-    <button 
-      type="button"
+    <button
       className={`${isSingle ? "w-fit max-w-full min-w-[200px] h-auto max-h-[55vh]" : "w-full h-full"} relative flex items-center justify-center bg-neutral-200 dark:bg-neutral-800 overflow-hidden cursor-pointer group active:scale-[0.98] active:opacity-90 transition-all duration-200`}
+      type="button"
       onClick={(e) => {
-         e.stopPropagation();
-         handleReveal(index);
+        e.stopPropagation();
+        handleReveal(index);
       }}
     >
       {item.type === "image" ? (
-         <img src={item.url} alt="" className={`${isSingle ? "w-auto max-w-full h-auto max-h-[55vh]" : "w-full h-full"} object-contain blur-[30px] opacity-80 group-hover:opacity-100 transition-opacity`} />
+        <img
+          alt=""
+          className={`${isSingle ? "w-auto max-w-full h-auto max-h-[55vh]" : "w-full h-full"} object-contain blur-[30px] opacity-80 group-hover:opacity-100 transition-opacity`}
+          src={item.url}
+        />
       ) : (
-         <video src={item.url} muted className={`${isSingle ? "w-auto max-w-full h-auto max-h-[55vh]" : "w-full h-full"} object-contain blur-[30px] opacity-80 group-hover:opacity-100 transition-opacity`} />
+        <video
+          muted
+          className={`${isSingle ? "w-auto max-w-full h-auto max-h-[55vh]" : "w-full h-full"} object-contain blur-[30px] opacity-80 group-hover:opacity-100 transition-opacity`}
+          src={item.url}
+        />
       )}
       <div className="absolute z-10 px-4 py-2.5 bg-black/60 backdrop-blur-md rounded-xl text-sm font-medium text-white shadow-lg transition-transform group-hover:scale-105">
         Нажмите чтобы показать
@@ -119,57 +185,61 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
         </div>
       );
     }
-    
+
     if (item.type === "image") {
       return (
-        <button 
-          type="button"
+        <button
           className={`${containerClasses} cursor-zoom-in block active:scale-[0.98] active:opacity-90 transition-all duration-200`}
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             setFullscreenIndex(index);
           }}
         >
-          <img 
-            src={item.url} 
-            alt={`Media ${index + 1}`} 
+          <img
+            alt={`Media ${index + 1}`}
             className={`${isSingle ? "w-auto max-w-full h-auto max-h-[45vh] sm:max-h-[55vh] object-contain block" : "w-auto h-full object-contain min-w-[140px]"} rounded-[16px]`}
-            loading={index <= 1 ? "eager" : "lazy"} 
+            loading={index <= 1 ? "eager" : "lazy"}
+            src={item.url}
           />
         </button>
       );
     }
-    
+
     return (
-      <div className={`${containerClasses} active:scale-[0.98] active:opacity-90 transition-all duration-200`}>
-        <VideoPlayerItem src={item.url} isSingle={isSingle} />
+      <div
+        className={`${containerClasses} active:scale-[0.98] active:opacity-90 transition-all duration-200`}
+      >
+        <VideoPlayerItem isSingle={isSingle} src={item.url} />
       </div>
     );
   };
 
   return (
     <>
-      <div className={`relative w-full pt-1.5 pb-1 ${className}`} data-no-redirect="true" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`relative w-full pt-1.5 pb-1 ${className}`}
+        data-no-redirect="true"
+        onClick={(e) => e.stopPropagation()}
+      >
         {!hasMultiple ? (
           // Одиночное медиа (без карусели, естественный размер)
-          <div className="w-full">
-            {renderMedia(media[0], 0)}
-          </div>
+          <div className="w-full">{renderMedia(media[0], 0)}</div>
         ) : (
           // Слайдер для нескольких медиа
           <>
             <Carousel
-              setApi={setApi}
-              opts={{ 
+              className="w-full"
+              opts={{
                 dragFree: true,
                 align: "start",
-                containScroll: "trimSnaps"
+                containScroll: "trimSnaps",
               }}
-              className="w-full"
+              setApi={setApi}
             >
               <CarouselContent className="-ml-2">
                 {media.map((item, index) => (
-                  <CarouselItem 
+                  <CarouselItem
                     key={`${item.url}-${index}`}
                     className="pl-2 basis-auto h-[200px] sm:h-[300px] flex-shrink-0"
                   >
@@ -182,12 +252,12 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
             {/* Компактные индикаторы внизу */}
             {api?.scrollSnapList().length && api.scrollSnapList().length > 1 ? (
               <div className="flex justify-center mt-3 gap-1.5 z-20 pointer-events-none">
-                 {api.scrollSnapList().map((_, i) => (
-                   <div 
-                     key={i} 
-                     className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === current ? "bg-neutral-800 dark:bg-neutral-200" : "bg-neutral-300 dark:bg-neutral-700"}`} 
-                   />
-                 ))}
+                {api.scrollSnapList().map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === current ? "bg-neutral-800 dark:bg-neutral-200" : "bg-neutral-300 dark:bg-neutral-700"}`}
+                  />
+                ))}
               </div>
             ) : null}
           </>
@@ -196,45 +266,55 @@ const PostMediaSlider: React.FC<MediaSliderProps> = ({ media, className = "" }) 
 
       {/* Оптимизированный Fullscreen */}
       {fullscreenIndex !== null && (
-        <div 
-           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl"
-           onClick={() => setFullscreenIndex(null)}
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl"
+          onClick={() => setFullscreenIndex(null)}
         >
-           <button 
-             type="button"
-             className="absolute top-4 right-4 z-50 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors"
-             onClick={(e) => { e.stopPropagation(); setFullscreenIndex(null); }}
-           >
-             <X className="w-6 h-6" />
-           </button>
-           
-           <Carousel
-              opts={{ startIndex: fullscreenIndex, align: "center", dragFree: true }}
-              className="w-full h-full"
-            >
-              <CarouselContent className="h-[100dvh] ml-0">
-                {media.map((item, index) => (
-                   <CarouselItem key={`fs-${index}`} className="flex items-center justify-center w-full h-full pl-0 basis-full">
-                      {item.type === "image" ? (
-                         <img 
-                           src={item.url} 
-                           alt="Fullscreen" 
-                           className="max-w-full max-h-[100dvh] object-contain cursor-default" 
-                           onClick={(e) => e.stopPropagation()} 
-                         />
-                      ) : (
-                         <video 
-                           src={item.url} 
-                           controls 
-                           autoPlay={index === fullscreenIndex}
-                           className="w-full max-h-[100dvh] object-contain" 
-                           onClick={(e) => e.stopPropagation()} 
-                         />
-                      )}
-                   </CarouselItem>
-                ))}
-              </CarouselContent>
-           </Carousel>
+          <button
+            className="absolute top-4 right-4 z-50 p-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFullscreenIndex(null);
+            }}
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          <Carousel
+            className="w-full h-full"
+            opts={{
+              startIndex: fullscreenIndex,
+              align: "center",
+              dragFree: true,
+            }}
+          >
+            <CarouselContent className="h-[100dvh] ml-0">
+              {media.map((item, index) => (
+                <CarouselItem
+                  key={`fs-${index}`}
+                  className="flex items-center justify-center w-full h-full pl-0 basis-full"
+                >
+                  {item.type === "image" ? (
+                    <img
+                      alt="Fullscreen"
+                      className="max-w-full max-h-[100dvh] object-contain cursor-default"
+                      src={item.url}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <video
+                      controls
+                      autoPlay={index === fullscreenIndex}
+                      className="w-full max-h-[100dvh] object-contain"
+                      src={item.url}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </div>
       )}
     </>

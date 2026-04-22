@@ -28,13 +28,11 @@ const Header = () => {
             <Image
               priority
               alt="Mirchan Logo"
-              height={100}
+              height={70}
               src={
-                theme === "dark"
-                  ? "/mirchan-logo-light.svg"
-                  : "/mirchan-logo-dark.svg"
+                theme === "dark" ? "/mrchLogo_light.svg" : "/mrchLogo_dark.svg"
               }
-              width={100}
+              width={70}
             />
           </Link>
           {/* Whats new update btn */}
@@ -43,7 +41,7 @@ const Header = () => {
             variant="ghost"
             onClick={() => setIsOpen(true)}
           >
-            dev 1.0.0
+            v1.0.2
           </Button>
           <UpdatesModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </div>

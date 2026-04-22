@@ -54,7 +54,7 @@ function withLocale(url: string, locale: "ru" | "en" | null) {
 }
 
 // Объединённый middleware: i18n + auth (HTTP-only session + NextAuth/jwt + fallback token)
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const locale = getLocaleFromPath(pathname);
 

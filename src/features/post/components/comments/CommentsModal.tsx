@@ -97,6 +97,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
       <DialogContent
         className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl p-0 flex flex-col max-h-[90vh] overflow-hidden rounded-t-[1.5rem] sm:rounded-[1.5rem] bg-white dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70"
         showCloseButton={true}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <DialogHeader className="flex-shrink-0 flex flex-row items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b border-neutral-200 dark:border-neutral-800/70 m-0">
@@ -110,7 +111,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
         </DialogHeader>
 
         {/* Прокручиваемая область с постом и комментариями */}
-        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-3 sm:py-4 bg-white dark:bg-[#101010]">
+        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-3 sm:py-4 bg-white dark:bg-[#101010] ">
           {/* Post Preview */}
           <div className="mb-4 sm:mb-6">
             <PostPreview post={post} />

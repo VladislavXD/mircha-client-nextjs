@@ -1,6 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Plus } from "lucide-react";
 
 import Header from "../shared/components/layout/Header";
 import Navbar from "../shared/components/layout/Navbar";
@@ -9,7 +10,11 @@ import RightSideBar from "../shared/components/layout/RightSideBar";
 
 import AuthGuard from "./[locale]/AuthGuard";
 
+import { SettingsModal } from "@/src/features/user/components/SettingsModal/SettingsModal";
 import { RootState } from "@/src/store/store";
+import { openCreatePostModal } from "@/src/store/CreatePostModal/CreatePostModal.slice";
+import { CreatePostModal } from "@/shared/components/ui/Modals/CreatePostModal";
+import { useAppSelector } from "@/src/hooks/reduxHooks";
 
 export default function LayoutContent({
   children,
@@ -29,6 +34,11 @@ export default function LayoutContent({
   const hideRightSidebar =
     pathname?.includes(`${prefix}/dashboard/settings`) ||
     pathname?.includes(`${prefix}/chat`);
+
+  const dispatch = useDispatch();
+  const isCreatePostview = useAppSelector(
+    (state) => state.createPostModal.createPostView,
+  );
 
   return (
     <>
@@ -52,6 +62,19 @@ export default function LayoutContent({
         /* Обычный Layout с AuthGuard для защищённых страниц */
         <div className="relative flex flex-col h-screen mb-0">
           {/* Основной контент без отступа от header */}
+
+          {/* Кнопка добавления поста в виде модалки */}
+          <div
+            className={`absolute right-4 bottom-20 md:right-10 md:bottom-10 z-50 rounded-[1.25rem] border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#101010] cursor-pointer w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-lg sm:hover:bg-neutral-50 sm:dark:hover:bg-[#181818] hover:scale-105 active:scale-95 transition-all duration-200 ${isCreatePostview ? "opacity-0 pointer-events-none translate-y-10" : "opacity-100 translate-y-0"}`}
+            onClick={() => dispatch(openCreatePostModal())}
+          >
+            <Plus
+              className="text-neutral-700 dark:text-neutral-300"
+              size={28}
+            />
+          </div>
+          <CreatePostModal />
+
           <div className="flex flex-1 overflow-hidden">
             <div className="container mx-auto max-w-7xl flex flex-1 overflow-hidden flex-col">
               {/* Header с границей снизу, только над контентом */}
@@ -82,6 +105,7 @@ export default function LayoutContent({
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                   <div className="flex-1 overflow-y-auto scrollbar-hide pb-24 md:pb-8">
                     <AuthGuard>{children}</AuthGuard>
+                    <SettingsModal />
                   </div>
                 </div>
 

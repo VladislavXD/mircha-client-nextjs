@@ -21,7 +21,7 @@ export function useVerificationMutation() {
       toast.success("Почта успешно подтверждена");
       const prefix = locale ? `/${locale}` : "";
 
-      router.push(`${prefix}/dashboard/settings`);
+      router.push(`${prefix}/dashboard`);
     },
     onError(error) {
       toast.error("Ошибка подтверждения почты");

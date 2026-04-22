@@ -1,4 +1,3 @@
-
 "use client";
 import type { Message } from "@/src/features/chat/types";
 
@@ -9,7 +8,11 @@ import { Loader2 } from "lucide-react";
 import { useGetGroupById, useMarkMessagesAsRead } from "@/src/features/chat";
 import { socketService } from "@/src/features/socket/socketService";
 import { useProfile } from "@/src/features/profile";
-import { ChatHeader, ChatMessageList, ChatInput } from "@/src/features/chat/components";
+import {
+  ChatHeader,
+  ChatMessageList,
+  ChatInput,
+} from "@/src/features/chat/components";
 
 export const GroupChatWindow: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -19,7 +22,9 @@ export const GroupChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [typingUsers, setTypingUsers] = useState<{ userId: string; userName: string }[]>([]);
+  const [typingUsers, setTypingUsers] = useState<
+    { userId: string; userName: string }[]
+  >([]);
 
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -35,7 +40,9 @@ export const GroupChatWindow: React.FC = () => {
 
       const unreadMessageIds =
         chatData.messages
-          ?.filter((msg: Message) => !msg.isRead && msg.senderId !== currentUser?.id)
+          ?.filter(
+            (msg: Message) => !msg.isRead && msg.senderId !== currentUser?.id,
+          )
           .map((msg: Message) => msg.id) || [];
 
       if (unreadMessageIds.length > 0) {
@@ -52,11 +59,18 @@ export const GroupChatWindow: React.FC = () => {
       }
     };
 
-    const handleTypingStart = (data: { userId: string; userName: string; chatId: string }) => {
+    const handleTypingStart = (data: {
+      userId: string;
+      userName: string;
+      chatId: string;
+    }) => {
       if (data.chatId === chatData?.id && data.userId !== currentUser?.id) {
         setTypingUsers((prev) => {
           const exists = prev.find((user) => user.userId === data.userId);
-          if (!exists) return [...prev, { userId: data.userId, userName: data.userName }];
+
+          if (!exists)
+            return [...prev, { userId: data.userId, userName: data.userName }];
+
           return prev;
         });
       }
@@ -64,7 +78,9 @@ export const GroupChatWindow: React.FC = () => {
 
     const handleTypingStop = (data: { userId: string; chatId: string }) => {
       if (data.chatId === chatData?.id) {
-        setTypingUsers((prev) => prev.filter((user) => user.userId !== data.userId));
+        setTypingUsers((prev) =>
+          prev.filter((user) => user.userId !== data.userId),
+        );
       }
     };
 
@@ -72,8 +88,10 @@ export const GroupChatWindow: React.FC = () => {
       if (data.chatId === chatData?.id && data.readerId !== currentUser?.id) {
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.senderId === currentUser?.id && !msg.isRead ? { ...msg, isRead: true } : msg
-          )
+            msg.senderId === currentUser?.id && !msg.isRead
+              ? { ...msg, isRead: true }
+              : msg,
+          ),
         );
       }
     };
@@ -94,14 +112,19 @@ export const GroupChatWindow: React.FC = () => {
   useEffect(() => {
     const handleWindowFocus = () => {
       if (chatData?.id && currentUser?.id) {
-        const hasUnreadMessages = messages.some((msg) => !msg.isRead && msg.senderId !== currentUser.id);
+        const hasUnreadMessages = messages.some(
+          (msg) => !msg.isRead && msg.senderId !== currentUser.id,
+        );
+
         if (hasUnreadMessages) markAsRead(chatData.id);
       }
     };
+
     window.addEventListener("focus", handleWindowFocus);
     if (document.hasFocus() && chatData?.id && currentUser?.id) {
       handleWindowFocus();
     }
+
     return () => window.removeEventListener("focus", handleWindowFocus);
   }, [chatData?.id, currentUser?.id, messages, markAsRead]);
 
@@ -140,9 +163,21 @@ export const GroupChatWindow: React.FC = () => {
 
   const formatMessageTime = (dateString: string) => {
     const date = new Date(dateString);
-    const diffInHours = (new Date().getTime() - date.getTime()) / (1000 * 60 * 60);
-    if (diffInHours < 24) return date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    const diffInHours =
+      (new Date().getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 24)
+      return date.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+    return date.toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   if (isLoading) {
@@ -163,28 +198,30 @@ export const GroupChatWindow: React.FC = () => {
 
   const groupName = chatData.name || "Безымянная группа";
   const groupAvatar = chatData.avatarUrl || undefined;
-  const participantCount = Array.isArray(chatData.participants) ? chatData.participants.length : 0;
+  const participantCount = Array.isArray(chatData.participants)
+    ? chatData.participants.length
+    : 0;
 
   return (
     <div className="flex flex-col bg-background h-full w-full">
       <ChatHeader
-        onBack={() => router.push("/chat")}
         avatarUrl={groupAvatar}
-        name={groupName}
         description={`${participantCount} участник(ов)`}
+        name={groupName}
+        onBack={() => router.push("/chat")}
       />
       <ChatMessageList
-        messages={messages}
         currentUserId={currentUser?.id}
-        typingUsers={typingUsers}
         formatMessageTime={formatMessageTime}
         isGroup={true}
+        messages={messages}
+        typingUsers={typingUsers}
       />
       <ChatInput
+        handleInputChange={handleInputChange}
+        handleSendMessage={handleSendMessage}
         newMessage={newMessage}
         setNewMessage={setNewMessage}
-        handleSendMessage={handleSendMessage}
-        handleInputChange={handleInputChange}
       />
     </div>
   );

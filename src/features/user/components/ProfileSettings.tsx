@@ -2,23 +2,20 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Avatar,
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Input,
-  Textarea,
-} from "@heroui/react";
 import { z } from "zod";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { Camera } from "lucide-react";
 
 import { useUpdateProfileMutation } from "../hooks";
 
 import { useProfile } from "@/src/features/profile/hooks";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const profileSchema = z
   .object({
@@ -44,6 +41,7 @@ export function ProfileSettings() {
   const { user, isLoading } = useProfile();
   const { updateAsync, isLoadingUpdate } = useUpdateProfileMutation();
   const avatarFileRef = useRef<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const t = useTranslations("Settings.profile");
   const tToasts = useTranslations("Toasts");
 
@@ -74,12 +72,10 @@ export function ProfileSettings() {
   const onSubmit = (values: ProfileFormData) => {
     const fd = new FormData();
 
-    // Обязательные поля - всегда отправляем (из формы или из профиля)
     fd.append("name", values.name || user?.name || "");
     fd.append("email", values.email || user?.email || "");
     fd.append("username", values.username || (user as any)?.username || "");
 
-    // Опциональные поля - отправляем только если заполнены
     if (values.dateOfBirth) fd.append("dateOfBirth", values.dateOfBirth);
     if (values.bio) fd.append("bio", values.bio);
     if (values.status) fd.append("status", values.status);
@@ -100,253 +96,252 @@ export function ProfileSettings() {
 
   if (isLoading) {
     return (
-      <Card className="rounded-none shadow-none md:rounded-xl md:shadow-medium">
-        <CardBody className="p-4 sm:p-6">
-          <div className="py-8 text-center text-default-500">
-            {t("loading")}
-          </div>
-        </CardBody>
-      </Card>
+      <div className="py-8 text-center text-sm text-muted-foreground">
+        {t("loading") || "Загрузка..."}
+      </div>
     );
   }
 
   if (!user) {
     return (
-      <Card className="rounded-none shadow-none md:rounded-xl md:shadow-medium">
-        <CardBody className="p-4 sm:p-6">
-          <div className="py-8 text-center text-default-500">
-            {t("notFound")}
-          </div>
-        </CardBody>
-      </Card>
+      <div className="py-8 text-center text-sm text-muted-foreground">
+        {t("notFound") || "Пользователь не найден"}
+      </div>
     );
   }
 
-  console.log("user in ProfileSettings:", user.backgroundUrl);
+  const currentAvatarUrl =
+    avatarPreview ||
+    (user as any)?.avatarUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&size=96`;
 
   return (
-    <Card className="w-full rounded-none shadow-none md:rounded-xl md:shadow-medium">
-      <CardHeader className="flex flex-col gap-3 pb-4 p-4 sm:p-6">
-        <div className="flex items-center gap-4 w-full">
-          <Avatar
-            className="w-20 h-20"
-            name={user?.name}
-            src={(user as any)?.avatarUrl || undefined}
-          />
-          <div className="flex-1">
-            <h2 className="text-lg sm:text-xl font-semibold">{t("title")}</h2>
-            <p className="text-small text-default-500">{t("description")}</p>
+    <form
+      className="w-full flex flex-col h-full overflow-hidden"
+      onSubmit={form.handleSubmit(onSubmit)}
+    >
+      <div className="flex flex-col sm:flex-row gap-5 pb-2">
+        {/* Left Col: Avatar */}
+        <div className="flex flex-col items-center gap-2 sm:w-1/4 shrink-0 mt-2">
+          <div className="relative group w-24 h-24 rounded-full overflow-hidden border border-muted shadow-sm">
+            <Avatar className="w-full h-full">
+              <AvatarImage
+                alt={user?.name || "Avatar"}
+                className="object-cover"
+                src={currentAvatarUrl}
+              />
+              <AvatarFallback className="text-xl">
+                {user?.name?.[0]?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <label
+              className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-all duration-200"
+              htmlFor="avatar-upload"
+            >
+              <Camera className="w-6 h-6 text-white" />
+            </label>
           </div>
-        </div>
-      </CardHeader>
-      <CardBody className="p-4 sm:p-6">
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          {/* Превью профиля */}
-          <div className="relative h-48 rounded-lg overflow-hidden border border-default-200">
-            <video
-              autoPlay
-              loop
-              muted
-              className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20"
-              controls={false}
-              src={(user as any)?.backgroundUrl || undefined}
-            />
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: (user as any)?.backgroundUrl
-                  ? `url(${(user as any)?.backgroundUrl})`
-                  : undefined,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative">
-                {(user as any)?.avatarFrameUrl && (
-                  <div
-                    className="absolute inset-0 pointer-events-none z-10"
-                    style={{
-                      backgroundImage: `url(${(user as any)?.avatarFrameUrl})`,
-                      backgroundSize: "contain",
-                      backgroundPosition: "center",
-                      backgroundRepeat: "no-repeat",
-                      width: "120px",
-                      height: "120px",
-                      left: "50%",
-                      top: "50%",
-                      transform: "translate(-50%, -50%)",
-                    }}
-                  />
-                )}
-                <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-white shadow-lg">
-                  <img
-                    alt={user?.name || "Avatar"}
-                    className="w-full h-full object-cover"
-                    src={
-                      (user as any)?.avatarUrl ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&size=96`
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="absolute bottom-2 right-2 text-xs text-white bg-black/50 px-2 py-1 rounded">
-              Предпросмотр профиля
-            </div>
-          </div>
-
-          {/* Аватар */}
-          <div className="flex flex-col gap-2">
-            <label className="text-small font-medium">Аватар</label>
-            <input
+          <div className="text-center">
+            <label
+              className="cursor-pointer text-xs font-medium text-primary hover:underline"
+              htmlFor="avatar-upload"
+            >
+              {t("changeAvatar") || "Изменить аватар"}
+            </label>
+            <Input
               accept="image/*"
-              className="border-small border-default-200 rounded-medium p-2 hover:border-default-400 transition"
+              className="hidden"
+              id="avatar-upload"
               type="file"
               onChange={(e) => {
                 const f = e.target.files?.[0] || null;
 
                 avatarFileRef.current = f;
-                if (f)
-                  toast.info(tToasts("fileSelected"), { description: f.name });
+                if (f) setAvatarPreview(URL.createObjectURL(f));
               }}
             />
-            <p className="text-tiny text-default-400">
-              JPG, PNG или GIF. Максимум 5MB.
-            </p>
           </div>
+        </div>
 
-          {/* Основные поля */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Right Col: Fields */}
+        <div className="flex-1 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             <Controller
               control={form.control}
               name="name"
               render={({ field, fieldState }) => (
-                <Input
-                  errorMessage={fieldState.error?.message}
-                  isDisabled={isLoadingUpdate}
-                  isInvalid={!!fieldState.error}
-                  label="Имя"
-                  placeholder="Иван Иванов"
-                  {...field}
-                />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="email"
-              render={({ field, fieldState }) => (
-                <Input
-                  errorMessage={fieldState.error?.message}
-                  isDisabled={isLoadingUpdate}
-                  isInvalid={!!fieldState.error}
-                  label="Email"
-                  placeholder="ivan@example.com"
-                  type="email"
-                  {...field}
-                />
+                <div className="flex flex-col gap-1">
+                  <Label
+                    className="text-[11px] uppercase tracking-wider text-muted-foreground"
+                    htmlFor="nameInput"
+                  >
+                    {t("name") || "Имя"}
+                  </Label>
+                  <Input
+                    className="h-8 text-xs"
+                    disabled={isLoadingUpdate}
+                    id="nameInput"
+                    {...field}
+                  />
+                </div>
               )}
             />
             <Controller
               control={form.control}
               name="username"
               render={({ field, fieldState }) => (
-                <Input
-                  errorMessage={fieldState.error?.message}
-                  isDisabled={isLoadingUpdate}
-                  isInvalid={!!fieldState.error}
-                  label="имя пользователя"
-                  placeholder="ivan123"
-                  {...field}
-                />
+                <div className="flex flex-col gap-1">
+                  <Label
+                    className="text-[11px] uppercase tracking-wider text-muted-foreground"
+                    htmlFor="usernameInput"
+                  >
+                    {t("username") || "Имя пользователя"}
+                  </Label>
+                  <Input
+                    className="h-8 text-xs"
+                    disabled={isLoadingUpdate}
+                    id="usernameInput"
+                    {...field}
+                  />
+                </div>
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="email"
+              render={({ field, fieldState }) => (
+                <div className="flex flex-col gap-1">
+                  <Label
+                    className="text-[11px] uppercase tracking-wider text-muted-foreground"
+                    htmlFor="emailInput"
+                  >
+                    {t("email") || "Email"}
+                  </Label>
+                  <Input
+                    className="h-8 text-xs"
+                    disabled={isLoadingUpdate}
+                    id="emailInput"
+                    type="email"
+                    {...field}
+                  />
+                </div>
               )}
             />
             <Controller
               control={form.control}
               name="dateOfBirth"
               render={({ field, fieldState }) => (
-                <Input
-                  errorMessage={fieldState.error?.message}
-                  isDisabled={isLoadingUpdate}
-                  isInvalid={!!fieldState.error}
-                  label="Дата рождения"
-                  type="date"
-                  {...field}
-                />
+                <div className="flex flex-col gap-1">
+                  <Label
+                    className="text-[11px] uppercase tracking-wider text-muted-foreground"
+                    htmlFor="dobInput"
+                  >
+                    {t("dateOfBirth") || "Дата рождения"}
+                  </Label>
+                  <Input
+                    className="h-8 text-xs"
+                    disabled={isLoadingUpdate}
+                    id="dobInput"
+                    type="date"
+                    {...field}
+                  />
+                </div>
               )}
             />
           </div>
 
-          {/* О себе */}
           <Controller
             control={form.control}
             name="bio"
-            render={({ field, fieldState }) => (
-              <Textarea
-                errorMessage={fieldState.error?.message}
-                isDisabled={isLoadingUpdate}
-                isInvalid={!!fieldState.error}
-                label="О себе"
-                placeholder="Расскажите немного о себе..."
-                {...field}
-              />
+            render={({ field }) => (
+              <div className="flex flex-col gap-1">
+                <Label
+                  className="text-[11px] uppercase tracking-wider text-muted-foreground"
+                  htmlFor="bioInput"
+                >
+                  {t("bio") || "О себе"}
+                </Label>
+                <Textarea
+                  className="resize-none text-xs min-h-[56px] p-2"
+                  disabled={isLoadingUpdate}
+                  id="bioInput"
+                  {...field}
+                />
+              </div>
             )}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <Controller
               control={form.control}
               name="status"
-              render={({ field, fieldState }) => (
-                <Input
-                  errorMessage={fieldState.error?.message}
-                  isDisabled={isLoadingUpdate}
-                  isInvalid={!!fieldState.error}
-                  label="Статус"
-                  placeholder="На связи"
-                  {...field}
-                />
+              render={({ field }) => (
+                <div className="flex flex-col gap-1">
+                  <Label
+                    className="text-[11px] uppercase tracking-wider text-muted-foreground"
+                    htmlFor="statusInput"
+                  >
+                    {t("status") || "Статус"}
+                  </Label>
+                  <Input
+                    className="h-8 text-xs"
+                    disabled={isLoadingUpdate}
+                    id="statusInput"
+                    {...field}
+                  />
+                </div>
               )}
             />
             <Controller
               control={form.control}
               name="location"
-              render={({ field, fieldState }) => (
-                <Input
-                  errorMessage={fieldState.error?.message}
-                  isDisabled={isLoadingUpdate}
-                  isInvalid={!!fieldState.error}
-                  label="Местоположение"
-                  placeholder="Москва, Россия"
-                  {...field}
-                />
+              render={({ field }) => (
+                <div className="flex flex-col gap-1">
+                  <Label
+                    className="text-[11px] uppercase tracking-wider text-muted-foreground"
+                    htmlFor="locationInput"
+                  >
+                    {t("location") || "Местоположение"}
+                  </Label>
+                  <Input
+                    className="h-8 text-xs"
+                    disabled={isLoadingUpdate}
+                    id="locationInput"
+                    {...field}
+                  />
+                </div>
               )}
             />
           </div>
+        </div>
+      </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              isDisabled={isLoadingUpdate}
-              type="button"
-              variant="flat"
-              onPress={() => form.reset()}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              color="primary"
-              isDisabled={isLoadingUpdate}
-              isLoading={isLoadingUpdate}
-              type="submit"
-            >
-              {t("saveChanges")}
-            </Button>
-          </div>
-        </form>
-      </CardBody>
-    </Card>
+      <div className="flex justify-end gap-2 pt-3 border-t mt-3">
+        <Button
+          className="h-8 text-xs"
+          disabled={isLoadingUpdate}
+          size="sm"
+          type="button"
+          variant="ghost"
+          onClick={() => {
+            form.reset();
+            setAvatarPreview(null);
+            avatarFileRef.current = null;
+          }}
+        >
+          {t("cancel") || "Отмена"}
+        </Button>
+        <Button
+          className="h-8 text-xs"
+          disabled={isLoadingUpdate}
+          size="sm"
+          type="submit"
+        >
+          {isLoadingUpdate
+            ? t("loading") || "Загрузка..."
+            : t("saveChanges") || "Сохранить"}
+        </Button>
+      </div>
+    </form>
   );
 }

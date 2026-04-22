@@ -1,22 +1,22 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Textarea,
-} from "@heroui/react";
+import { Loader2 } from "lucide-react";
 
 import EmojiPicker from "../../inputs/EmojiPicker";
-import { EmojiText } from "../../EmojiText";
 import ErrorMessage from "../../ErrorMessage";
 // TODO: Migrate to React Query - Create useUpdatePost mutation
 import Mention from "../../inputs/Mention";
 
 import { useUpdatePost } from "@/src/features/post";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 // NOTE: avoid module-level /g regex reuse with .exec() – always create fresh per call
 const EMOJI_MARKER_REGEX = () => /\[emoji:(\d+)\]/g;
@@ -63,69 +63,6 @@ function removeEmojiFromText(text: string, removedIndex: number) {
 
   return updated;
 }
-
-// ===== Small UI pieces =====
-const PreviewSection: React.FC<{ content: string; emojis: string[] }> = ({
-  content,
-  emojis,
-}) => {
-  if (!content && emojis.length === 0) return null;
-
-  return (
-    <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-default-50 to-default-100 border border-default-200 shadow-sm">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-2 h-2 rounded-full bg-primary" />
-        <span className="text-sm font-medium text-default-600">Превью</span>
-      </div>
-      <div className="bg-background/70 backdrop-blur-sm rounded-lg p-3 border border-default-200/50">
-        <EmojiText
-          className="text-default-700 leading-relaxed"
-          emojiUrls={emojis}
-          text={content || ""}
-        />
-        {content === "" && (
-          <div className="text-default-400 italic">Здесь появится ваш пост</div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const EmojiList: React.FC<{
-  emojis: string[];
-  onRemove: (i: number) => void;
-}> = ({ emojis, onRemove }) => {
-  if (emojis.length === 0) return null;
-
-  return (
-    <div>
-      <div className="text-sm text-default-500 mb-2">Эмодзи в посте</div>
-      <div className="grid grid-cols-6 gap-3">
-        {emojis.map((url, idx) => (
-          <div key={`emoji-${idx}`} className="relative group">
-            <img
-              alt={`emoji-${idx}`}
-              className="w-12 h-12 rounded-md object-cover border border-default-200"
-              src={url}
-            />
-            <Button
-              className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              color="danger"
-              size="sm"
-              variant="flat"
-              onPress={() => onRemove(idx)}
-            >
-              ×
-            </Button>
-            <div className="text-[10px] text-default-400 mt-1 text-center">
-              [{`emoji:${idx}`}]
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 // ===== Component =====
 interface EditPostModalProps {
@@ -291,51 +228,50 @@ const EditPostModal: React.FC<EditPostModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} size="md" onClose={onClose}>
-      <ModalContent>
-        <>
-          <ModalHeader>Редактировать пост</ModalHeader>
-          <ModalBody>
-            <Textarea
-              ref={textareaRef}
-              className="mb-2"
-              labelPlacement="outside"
-              placeholder="Измените текст поста"
-              value={content}
-              onChange={(e) => handleChange(e)}
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Редактировать пост</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-4 py-4">
+          <Textarea
+            ref={textareaRef}
+            className="min-h-[100px] resize-none"
+            placeholder="Измените текст поста"
+            value={content}
+            onChange={(e) => handleChange(e as any)}
+          />
+          {/* отображение отмеченных людей */}
+          {showHit && (
+            <Mention
+              mention={mention}
+              showHit={showHit}
+              onSelect={handleSelectMention}
             />
-            {/* отображение отмеченных людей */}
-            {showHit && (
-              <Mention
-                mention={mention}
-                showHit={showHit}
-                onSelect={handleSelectMention}
-              />
-            )}
+          )}
 
-            <div className="mb-3 flex gap-3 items-center">
-              <EmojiPicker
-                disabled={isPending}
-                onEmojiSelect={handleEmojiSelect}
-              />
-            </div>
+          <div className="flex gap-3 items-center">
+            <EmojiPicker
+              disabled={isPending}
+              onEmojiSelect={handleEmojiSelect}
+            />
+          </div>
 
-            <PreviewSection content={content} emojis={emojis} />
-            <EmojiList emojis={emojis} onRemove={removeEmojiAt} />
+          <ErrorMessage error={error} />
+        </div>
 
-            <ErrorMessage error={error} />
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onClose}>
-              Отмена
-            </Button>
-            <Button color="primary" isLoading={isPending} onPress={handleSave}>
-              Сохранить
-            </Button>
-          </ModalFooter>
-        </>
-      </ModalContent>
-    </Modal>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            Отмена
+          </Button>
+          <Button disabled={isPending} onClick={handleSave}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Сохранить
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

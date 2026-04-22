@@ -57,9 +57,7 @@ export function SelectAppearanceModal({
             >
               <div
                 className={`relative flex items-center justify-center overflow-hidden rounded-[1rem] bg-neutral-200 dark:bg-neutral-900 ${
-                  appearanceType === "frame"
-                    ? "aspect-square"
-                    : "aspect-[16/9]"
+                  appearanceType === "frame" ? "aspect-square" : "aspect-[16/9]"
                 }`}
               >
                 {appearanceType === "frame" ? (
@@ -120,11 +118,7 @@ export function SelectAppearanceModal({
           ))}
         </div>
         <DialogFooter>
-          <Button
-            className="rounded-full"
-            variant="ghost"
-            onClick={onClose}
-          >
+          <Button className="rounded-full" variant="ghost" onClick={onClose}>
             Закрыть
           </Button>
         </DialogFooter>

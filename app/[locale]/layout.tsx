@@ -4,11 +4,16 @@ import type { Viewport } from "next";
 import clsx from "clsx";
 import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { fontSans, fontSerif } from "@/src/config/fonts";
 import ClientProviders from "@/src/Providers/ClientProviders";
 import { Locale, routing } from "@/src/i18n/routing";
 import VisitorTracker from "@/app/api/checkClient/VisitorTracker";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
 // const siteUrl = "https://mirchan.site/ru";
@@ -95,7 +100,9 @@ export default async function RootLayout({
         )}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <VisitorTracker />
+          <Suspense fallback={null}>
+            <VisitorTracker />
+          </Suspense>
           <ClientProviders>{children}</ClientProviders>
         </NextIntlClientProvider>
       </body>

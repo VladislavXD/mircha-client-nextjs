@@ -31,7 +31,7 @@ import EditPostModal from "@/shared/components/ui/post/PostModals/EditPost";
 import DeletePost from "@/shared/components/ui/post/PostModals/DeletePost";
 import { useThrottle } from "@/src/hooks/useAntiSpam";
 import { timeAgo } from "@/src/utils/timeAgo";
-import {Card} from "@/components/ui/card"
+import { Card } from "@/components/ui/card";
 
 type Props = {
   post: Post;

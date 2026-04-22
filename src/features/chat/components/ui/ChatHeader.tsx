@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowLeft, Phone, Video } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { OnlineBadge } from "@/src/features/chat/components";
 

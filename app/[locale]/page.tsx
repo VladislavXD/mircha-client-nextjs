@@ -4,7 +4,7 @@ import Posts from "../HomePage";
 
 // Важно: убедитесь, что этот файл существует: /public/images/mirchanLogo.jpg
 const siteUrl = "https://mirchan.site/ru";
-const ogImage = "/images/mirchanLogo.png";
+const ogImage = "/mirchan_logo.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -36,13 +36,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon/favicon.ico" },
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon/favicon.svg", type: "image/svg+xml" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-    shortcut: ["/favicon.ico"],
-    other: [{ rel: "manifest", url: "/site.webmanifest" }],
+    apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: ["/favicon/favicon.ico"],
+    other: [{ rel: "manifest", url: "/favicon/site.webmanifest" }],
   },
 
   appleWebApp: {

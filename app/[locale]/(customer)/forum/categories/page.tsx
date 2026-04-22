@@ -109,3 +109,7 @@
 // };
 
 // export default CategoriesPage;
+
+export default function CategoriesPage() {
+  return <div>Categories Page (WIP)</div>;
+}

@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 
-export default function AdminPage({ params }: { params: { locale: string } }) {
+export default async function AdminPage(props: {
+  params: Promise<{ locale: string }>;
+}) {
+  const params = await props.params;
   const locale = params?.locale || "ru";
 
   redirect(`/${locale}/admin/dashboard`);

@@ -32,7 +32,7 @@ const phases: { status: PhaseStatus; phase: string; items: string[] }[] = [
     ],
   },
   {
-    status: "active",
+    status: "done",
     phase: "Фаза 2 — Социальность",
     items: [
       "Страница поста с полной лентой комментариев",
@@ -44,7 +44,7 @@ const phases: { status: PhaseStatus; phase: string; items: string[] }[] = [
     ],
   },
   {
-    status: "planned",
+    status: "active",
     phase: "Фаза 3 — Мессенджер",
     items: [
       "Приватные чаты",
@@ -52,11 +52,13 @@ const phases: { status: PhaseStatus; phase: string; items: string[] }[] = [
       "Медиа в чатах",
       "Статус онлайн и индикатор набора",
       "Прочитанность сообщений",
+      "Уведомления о новых сообщениях",
+      "голосовые сообщения/каналы",
     ],
   },
   {
     status: "planned",
-    phase: "Фаза 4 — Форум",
+    phase: "Фаза 4 — Форум (50/50)",
     items: [
       "Доски и темы форума",
       "Категории и теги",
@@ -130,9 +132,8 @@ export default function UpdatesModal({ isOpen, onClose }: UpdatesModalProps) {
 
             <ModalBody>
               <p className="text-sm text-default-500 mb-4">
-                Mirchan — анонимная социальная сеть. Ниже — дорожная карта
-                проекта: что уже работает, что делается прямо сейчас и что будет
-                дальше.
+                Mirchan — социальная сеть. Ниже — дорожная карта проекта: что
+                уже работает, что делается прямо сейчас и что будет дальше.
               </p>
 
               <div className="relative">

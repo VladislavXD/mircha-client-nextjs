@@ -3,6 +3,7 @@ import type { TypeLoginSchema } from "../schemes";
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
+
 // import { toast } from 'sonner'
 
 // import { toastMessageHandler } from '@/shared/utils'
@@ -38,7 +39,7 @@ export function useLoginMutation(
       } else {
         const prefix = locale ? `/${locale}` : "";
 
-        router.push(`${prefix}/dashboard/settings`);
+        router.push(`${prefix}/user/${data.user.id}`);
         // router.replace(`${prefix}/dashboard/settings`)
         // window.location.href = `${prefix}/dashboard/settings`
         // router.refresh()
