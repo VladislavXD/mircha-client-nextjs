@@ -12,6 +12,8 @@ import {
 // import { userSlice } from './user/user.slice'
 import onlineStatusReducer from "./onlineStatus/onlineStatus.slice";
 import sidebarReducer from "./sidebar/sidebar.slice";
+import settingsModalReducer from "./settingsModal/settingsModal.slice";
+import { createPostModalSlice } from "./CreatePostModal/CreatePostModal.slice";
 
 // import { filtersSlice } from './filters/filters.slice'
 
@@ -26,6 +28,8 @@ const combinedReducers = combineReducers({
   // user: userSlice.reducer,
   onlineStatus: onlineStatusReducer,
   sidebar: sidebarReducer,
+  settingsModal: settingsModalReducer,
+  createPostModal: createPostModalSlice.reducer,
   // filters: filtersSlice.reducer
 });
 

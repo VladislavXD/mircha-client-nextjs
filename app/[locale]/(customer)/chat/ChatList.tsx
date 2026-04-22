@@ -130,7 +130,7 @@ export const ChatList: React.FC<ChatListProps> = ({ isCollapsed = false }) => {
   const filteredChats = useMemo(() => {
     let sourceData: Chat[] = [];
     const personalChats = (chats || []).filter(
-      (chat) => !chat.type || chat.type === "DIRECT"
+      (chat) => !chat.type || chat.type === "DIRECT",
     );
 
     if (activeTab === "all") {
@@ -138,6 +138,7 @@ export const ChatList: React.FC<ChatListProps> = ({ isCollapsed = false }) => {
       sourceData = [...personalChats, ...(groups || [])].sort((a, b) => {
         const timeA = new Date(a.lastMessageAt || a.createdAt).getTime();
         const timeB = new Date(b.lastMessageAt || b.createdAt).getTime();
+
         return timeB - timeA;
       });
     } else if (activeTab === "personal") {
@@ -266,7 +267,7 @@ export const ChatList: React.FC<ChatListProps> = ({ isCollapsed = false }) => {
               <>
                 <div>
                   <p className="text-base font-medium text-foreground">
-                    У вас пока нет чатов 
+                    У вас пока нет чатов
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Найдите пользователей и начните общение!

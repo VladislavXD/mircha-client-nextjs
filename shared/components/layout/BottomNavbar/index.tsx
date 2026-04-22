@@ -8,7 +8,6 @@ import { Home, MessageCircle, Search, Theater } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
 import { useCurrentUser } from "@/src/features/user";
 import { useGetUserChats } from "@/src/features/chat";
 
@@ -42,6 +41,7 @@ const useScrollDirection = () => {
 
     if (scrollContainer) {
       scrollContainer.addEventListener("scroll", handleScroll);
+
       return () => scrollContainer.removeEventListener("scroll", handleScroll);
     }
   }, []);
@@ -51,7 +51,8 @@ const useScrollDirection = () => {
 
 const BottomNav = () => {
   const scrollDirection = useScrollDirection();
-  const navClass = scrollDirection === "up" ? "translate-y-0" : "translate-y-[150%]";
+  const navClass =
+    scrollDirection === "up" ? "translate-y-0" : "translate-y-[150%]";
 
   const pathname = usePathname();
   const { theme } = useTheme();
@@ -61,6 +62,7 @@ const BottomNav = () => {
 
   const totalUnreadCount = useMemo(() => {
     if (!chats) return 0;
+
     return chats.reduce(
       (sum: number, chat: any) => sum + (chat.unreadCount || 0),
       0,
@@ -72,14 +74,17 @@ const BottomNav = () => {
 
   const isActivePage = (path: string) => {
     const cleanPathname = pathname.replace(/^\/(ru|en)/, "") || "/";
+
     if (path === "/") {
       return cleanPathname === "/";
     }
+
     return cleanPathname === path || cleanPathname.startsWith(`${path}/`);
   };
 
   const getIconColor = (isActive: boolean) => {
     const isDark = theme === "dark";
+
     if (isActive) {
       return isDark ? "#ffffff" : "#000000";
     } else {
@@ -219,7 +224,11 @@ const BottomNav = () => {
                         : "opacity-80 hover:opacity-100 transition-opacity"
                     }`}
                   >
-                    <AvatarImage src={avatarUrl || ""} alt="Avatar" className="object-cover" />
+                    <AvatarImage
+                      alt="Avatar"
+                      className="object-cover"
+                      src={avatarUrl || ""}
+                    />
                     <AvatarFallback className="bg-neutral-200 dark:bg-neutral-800" />
                   </Avatar>
                 </Link>

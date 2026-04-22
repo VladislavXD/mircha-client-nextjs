@@ -52,6 +52,7 @@ const PostList = () => {
       fetchNextPage();
     }
   }, [inView]);
+
   if (isLoading) {
     return (
       <div className="space-y-5">

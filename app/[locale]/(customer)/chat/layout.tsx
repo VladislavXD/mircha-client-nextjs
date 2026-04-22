@@ -32,7 +32,9 @@ export default function ChatLayout({
 
   if (isMobile) {
     return (
-      <div className={`flex w-full overflow-hidden sm:rounded-xl bg-background border border-border mt-0 ${isChatWindowOpen ? "fixed inset-0 z-[100] h-[100dvh] flex-col" : "h-[calc(100dvh-12rem)] sm:h-[calc(100vh-8rem)]"}`}>
+      <div
+        className={`flex w-full overflow-hidden sm:rounded-xl bg-background border border-border mt-0 ${isChatWindowOpen ? "fixed inset-0 z-[100] h-[100dvh] flex-col" : "h-[calc(100dvh-12rem)] sm:h-[calc(100vh-8rem)]"}`}
+      >
         <div
           className={`w-full shrink-0 border-r border-border bg-background flex flex-col ${
             isChatWindowOpen ? "hidden" : "flex"

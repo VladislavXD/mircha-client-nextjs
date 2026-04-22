@@ -17,6 +17,7 @@ export function useUpdateProfileMutation() {
     onSuccess() {
       // Инвалидируем кеш профиля, чтобы данные перезагрузились
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 

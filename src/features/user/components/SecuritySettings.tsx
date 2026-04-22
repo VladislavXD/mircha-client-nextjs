@@ -1,16 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Divider,
-  Switch,
-  useDisclosure,
-} from "@heroui/react";
 import { z } from "zod";
 import { Shield, Key, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -21,6 +13,8 @@ import { useUpdateProfileMutation } from "../hooks";
 import { ChangePasswordModal } from "./ChangePasswordModal";
 
 import { useProfile } from "@/src/features/profile/hooks";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 const securitySchema = z.object({
   isTwoFactorEnabled: z.boolean(),
@@ -33,7 +27,7 @@ export function SecuritySettings() {
   const { updateAsync, isLoadingUpdate } = useUpdateProfileMutation();
   const t = useTranslations("Settings.security");
   const tToasts = useTranslations("Toasts");
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<SecurityFormData>({
     resolver: zodResolver(securitySchema),
@@ -48,118 +42,116 @@ export function SecuritySettings() {
       success: {
         message: tToasts("securityUpdateSuccess"),
         description: tToasts("securityUpdateDesc"),
-      },
+      } as any,
       error: tToasts("securityUpdateError"),
     });
   };
 
   if (isLoading) {
     return (
-      <Card className="rounded-none shadow-none md:rounded-xl md:shadow-medium">
-        <CardBody className="p-4 sm:p-6">
-          <div className="py-8 text-center text-default-500">
-            {t("loading")}
-          </div>
-        </CardBody>
-      </Card>
+      <div className="py-8 text-center text-muted-foreground text-sm">
+        {t("loading")}
+      </div>
     );
   }
 
   return (
-    <Card className="w-full rounded-none shadow-none md:rounded-xl md:shadow-medium">
-      <CardHeader className="p-4 sm:p-6">
-        <div className="flex items-center gap-3">
-          <Shield className="w-6 h-6 text-primary" />
-          <div>
-            <h2 className="text-lg sm:text-xl font-semibold">{t("title")}</h2>
-            <p className="text-small text-default-500">{t("description")}</p>
-          </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center gap-3">
+        <Shield className="w-5 h-5 text-primary" />
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">{t("title")}</h2>
+          <p className="text-xs text-muted-foreground">{t("description")}</p>
         </div>
-      </CardHeader>
-      <CardBody className="p-4 sm:p-6">
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          {/* Смена пароля */}
-          <div className="flex items-start justify-between gap-4 p-4 border border-default-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <Key className="w-5 h-5 text-default-500 mt-1" />
-              <div>
-                <h3 className="text-medium font-semibold">{t("password")}</h3>
-                <p className="text-small text-default-500 mt-1">
-                  {t("passwordDesc")}
-                </p>
-              </div>
+      </div>
+
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        {/* Смена пароля */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 border rounded-lg bg-card">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <Key className="hidden sm:block w-4 h-4 text-muted-foreground" />
+            <div>
+              <h3 className="text-sm font-medium">{t("password")}</h3>
+              <p className="text-xs text-muted-foreground">
+                {t("passwordDesc")}
+              </p>
             </div>
-            <Button color="primary" size="sm" variant="flat" onPress={onOpen}>
-              {t("changePassword")}
-            </Button>
           </div>
+          <Button
+            className="h-8 text-xs shrink-0"
+            size="sm"
+            type="button"
+            variant="outline"
+            onClick={() => setIsOpen(true)}
+          >
+            {t("changePassword")}
+          </Button>
+        </div>
 
-          <Divider />
-
-          {/* Двухфакторная аутентификация */}
-          <div className="flex items-start justify-between gap-4 p-4 border border-default-200 rounded-lg">
-            <div className="flex items-start gap-3 flex-1">
-              <Smartphone className="w-5 h-5 text-default-500 mt-1" />
-              <div className="flex-1">
-                <h3 className="text-medium font-semibold">{t("twoFactor")}</h3>
-                <p className="text-small text-default-500 mt-1">
-                  {t("twoFactorDesc")}
-                </p>
-              </div>
+        {/* Двухфакторная аутентификация */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 border rounded-lg bg-card">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+            <Smartphone className="hidden sm:block w-4 h-4 text-muted-foreground" />
+            <div>
+              <h3 className="text-sm font-medium">{t("twoFactor")}</h3>
+              <p className="text-xs text-muted-foreground">
+                {t("twoFactorDesc")}
+              </p>
             </div>
-            <Controller
-              control={form.control}
-              name="isTwoFactorEnabled"
-              render={({ field }) => (
-                <Switch
-                  isDisabled={isLoadingUpdate}
-                  isSelected={field.value}
-                  onValueChange={field.onChange}
-                />
-              )}
-            />
           </div>
+          <Controller
+            control={form.control}
+            name="isTwoFactorEnabled"
+            render={({ field }) => (
+              <Switch
+                checked={field.value}
+                disabled={isLoadingUpdate}
+                onCheckedChange={field.onChange}
+              />
+            )}
+          />
+        </div>
 
-          <Divider />
-
-          {/* Активные сессии */}
-          <div className="p-4 border border-default-200 rounded-lg">
-            <h3 className="text-medium font-semibold mb-3">Активные сессии</h3>
-            <p className="text-small text-default-500 mb-4">
+        {/* Активные сессии */}
+        <div className="p-3 border rounded-lg bg-card">
+          <div className="mb-3">
+            <h3 className="text-sm font-medium">Активные сессии</h3>
+            <p className="text-xs text-muted-foreground">
               Здесь будут отображаться ваши активные сеансы на разных
               устройствах
             </p>
-            <div className="flex items-center justify-between p-3 bg-default-50 rounded-lg">
-              <div>
-                <p className="text-small font-medium">Текущее устройство</p>
-                <p className="text-tiny text-default-400">
-                  {typeof window !== "undefined"
-                    ? navigator.userAgent.substring(0, 50) + "..."
-                    : "Browser"}
-                </p>
-              </div>
-              <span className="text-tiny text-success">Активна</span>
+          </div>
+          <div className="flex items-center justify-between p-2 bg-muted/50 rounded-md border">
+            <div className="overflow-hidden pr-4">
+              <p className="text-xs font-medium">Текущее устройство</p>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {typeof window !== "undefined"
+                  ? navigator.userAgent
+                  : "Browser"}
+              </p>
             </div>
+            <span className="text-[10px] uppercase font-semibold text-green-500 tracking-wider shrink-0">
+              Активна
+            </span>
           </div>
+        </div>
 
-          <div className="flex justify-end pt-4">
-            <Button
-              color="primary"
-              isDisabled={isLoadingUpdate}
-              isLoading={isLoadingUpdate}
-              type="submit"
-            >
-              {t("saveChanges")}
-            </Button>
-          </div>
-        </form>
+        <div className="flex justify-end pt-2">
+          <Button
+            className="h-8 px-4 text-xs"
+            disabled={isLoadingUpdate}
+            type="submit"
+          >
+            {isLoadingUpdate ? "..." : t("saveChanges")}
+          </Button>
+        </div>
+      </form>
 
-        {/* Модалка смены пароля */}
-        <ChangePasswordModal isOpen={isOpen} onClose={onClose} />
-      </CardBody>
-    </Card>
+      {/* Модалка смены пароля */}
+      <ChangePasswordModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </div>
   );
 }

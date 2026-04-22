@@ -1,26 +1,18 @@
 "use client";
 
 import React from "react";
-import { Edit2, LayoutTemplate } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useOnlineStatus } from "../../chat";
 
+import { ProfileActions } from "./ProfileActions";
 import { ProfileInfo } from "./ProfileInfo";
 import { ProfileStatus } from "./ProfileStatus";
 import StatusModal from "./modals/Status.Modals";
 import { SelectAppearanceModal } from "./modals/SelectAppearanceModal";
 import { ConfirmAppearanceModal } from "./modals/ConfirmAppearanceModal";
 
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import defaultProfileBg from "@/public/images/default_profile_bg.png";
 
 interface ProfileHeaderProps {
@@ -76,16 +68,11 @@ export function ProfileHeader({
   const isOwnProfile = externalIsOwnProfile ?? hookIsOwnProfile;
   const isAuthenticated = externalIsAuthenticated ?? hookIsAuthenticated;
 
-  const pathname = usePathname();
-  const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/);
-  const locale = localeMatch?.[1];
-
-  const prefix = locale ? `/${locale}` : "";
-
+  const t = useTranslations("Profile");
   const { isOnline } = useOnlineStatus(userId, currentUser?.id);
 
   if (!data) {
-    return <div>Загрузка профиля...</div>;
+    return <div>{t("loading") || "Загрузка..."}</div>;
   }
 
   const isvideo = data.backgroundUrl?.endsWith(".mp4") || false;
@@ -126,45 +113,7 @@ export function ProfileHeader({
 
           {/* Кнопки редактирования (только для своего профиля И авторизованных) */}
           {isOwnProfile && isAuthenticated && (
-            <div className="absolute top-4 right-4 flex gap-2">
-              <Button
-                asChild
-                className="bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white border-white/20 hover:text-white rounded-[1rem]"
-                size="sm"
-                variant="outline"
-              >
-                <Link href={`${prefix}/dashboard/settings/profile`}>
-                  <Edit2 className="mr-1.5" size={14} />
-                  Редактировать
-                </Link>
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    className="bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white border-white/20 hover:text-white rounded-[1rem]"
-                    size="sm"
-                    variant="outline"
-                  >
-                    <LayoutTemplate className="mr-1.5" size={14} />
-                    Оформление
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-[1rem]">
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => openAppearance("frame")}
-                  >
-                    Рамка аватара
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => openAppearance("background")}
-                  >
-                    Фон профиля
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <ProfileActions onOpenAppearance={openAppearance} />
           )}
         </div>
 
@@ -262,25 +211,23 @@ export function ProfileHeader({
 
       {/* Модалка выбора оформления */}
       <SelectAppearanceModal
-        isOpen={appearanceModal.isOpen}
-        onOpenChange={appearanceModal.onOpenChange}
-        onClose={appearanceModal.onClose}
         appearanceType={appearanceType}
+        isOpen={appearanceModal.isOpen}
+        items={appearanceType === "frame" ? FRAME_PRESETS : BACKGROUND_PRESETS}
         selectedItem={selectedItem}
-        items={
-          appearanceType === "frame" ? FRAME_PRESETS : BACKGROUND_PRESETS
-        }
         userAvatarUrl={data?.avatarUrl}
+        onClose={appearanceModal.onClose}
+        onOpenChange={appearanceModal.onOpenChange}
         onSelectAppearance={handleSelectAppearance}
       />
 
       {/* Модалка подтверждения */}
       <ConfirmAppearanceModal
-        isOpen={confirmModal.isOpen}
-        onOpenChange={confirmModal.onOpenChange}
         appearanceType={appearanceType}
+        isOpen={confirmModal.isOpen}
         isUpdating={isUpdating}
         onConfirm={handleConfirmAppearance}
+        onOpenChange={confirmModal.onOpenChange}
       />
     </>
   );

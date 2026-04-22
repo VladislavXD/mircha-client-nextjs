@@ -1,4 +1,3 @@
-export * from "./SettingsForm";
 export * from "./SettingsSidebar";
 export * from "./SettingsPageWrapper";
 export * from "./ProfileSettings";

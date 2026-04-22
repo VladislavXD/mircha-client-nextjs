@@ -4,10 +4,6 @@ const createNextIntlPlugin  = require('next-intl/plugin')
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-},
-  
   images: {
     remotePatterns: [
       {
@@ -36,12 +32,14 @@ const nextConfig = {
   },
 
   experimental: {
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+    cacheComponents: true,
+  },
+
+  turbo: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },

@@ -2,7 +2,13 @@
 
 import React, { useState } from "react";
 import { BsEmojiSmile } from "react-icons/bs";
-import { Popover, PopoverTrigger, PopoverContent, Button } from "@heroui/react";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 interface EmojiPickerProps {
   onEmojiSelect: (emojiUrl: string) => void;
@@ -57,29 +63,36 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
   };
 
   return (
-    <Popover isOpen={isOpen} placement="bottom-start" onOpenChange={setIsOpen}>
-      <PopoverTrigger>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
         <Button
-          isIconOnly
           aria-label="Emoji"
-          className="bg-default-100 hover:bg-default-200"
-          isDisabled={disabled}
+          className="bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 h-8 w-8 rounded-full"
+          disabled={disabled}
+          size="icon"
           type="button"
-          variant="flat"
+          variant="ghost"
         >
-          <BsEmojiSmile className="text-default-600" size={20} />
+          <BsEmojiSmile
+            className="text-neutral-600 dark:text-neutral-400"
+            size={16}
+          />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-2">
-        <div className="w-[260px]">
-          <div className="text-xs font-medium text-default-500 mb-2 px-1">
+      <PopoverContent
+        align="start"
+        className="w-[280px] p-3 z-[100]"
+        sideOffset={4}
+      >
+        <div>
+          <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2 px-1">
             Выберите emoji
           </div>
           <div className="grid grid-cols-8 gap-1">
             {EMOJI_LIST.map((emoji) => (
               <button
                 key={emoji.url}
-                className="w-8 h-8 flex items-center justify-center rounded hover:bg-default-100 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors disabled:opacity-50"
                 disabled={disabled}
                 title={emoji.name}
                 type="button"

@@ -66,7 +66,6 @@ export const PostPreview: React.FC<PostPreviewProps> = ({ post }) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #000;
         }
         .comments-modal-media img,
         .comments-modal-media video {
@@ -118,7 +117,7 @@ export const PostPreview: React.FC<PostPreviewProps> = ({ post }) => {
 
       {/* Media */}
       {postMedia.length > 0 && (
-        <div className="mb-3 sm:mb-4 rounded-lg sm:rounded-xl overflow-hidden comments-modal-media">
+        <div className="mb-3 sm:mb-4 rounded-lg  sm:rounded-xl overflow-hidden comments-modal-media">
           <PostMediaSlider media={postMedia} />
         </div>
       )}

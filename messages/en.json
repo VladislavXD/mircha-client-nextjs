@@ -322,7 +322,10 @@
     "unfollow": "Unfollow",
     "edit": "Edit",
     "loading": "Loading...",
-    "loadError": "Error loading data"
+    "loadError": "Error loading data",
+    "appearance": "Appearance",
+    "avatarFrame": "Avatar Frame",
+    "profileBackground": "Background"
   },
   "Common": {
     "loading": "Loading...",

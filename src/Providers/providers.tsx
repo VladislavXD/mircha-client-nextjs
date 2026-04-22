@@ -9,8 +9,8 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
 import { QueryProvider } from "./QueryProvider";
+import { ViewsProvider } from "./ViewsProvider";
 
-import { ViewsProvider } from "@/shared/components/providers/ViewsProvider";
 import { persistor, store } from "@/src/store/store";
 import SocketConnectionManager from "@/src/features/socket/SocketConnectionManager";
 
@@ -26,7 +26,6 @@ export function Providers({ children, themeProps }: ProvidersProps) {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <SocketConnectionManager />
-
             <NextThemesProvider {...themeProps}>
               <ViewsProvider>{children}</ViewsProvider>
             </NextThemesProvider>

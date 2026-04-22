@@ -64,7 +64,7 @@ export function useProfile() {
   };
 }
 
-export function getProfileById(userId: string) {
+export function useProfileById(userId: string) {
   const {
     data: user,
     isLoading,
