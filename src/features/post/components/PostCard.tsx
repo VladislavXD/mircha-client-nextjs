@@ -422,7 +422,7 @@ const PostCard = ({
             }
           >
             <EmojiText
-              className="font-serif text-[13px] sm:text-[15px] md:text-[16px] leading-relaxed tracking-wide break-words"
+              className="font-serif text-[13px] sm:text-[15px] md:text-[16px] leading-relaxed tracking-wide whitespace-pre-wrap"
               emojiUrls={emojiUrls}
               text={safeContent}
             />
