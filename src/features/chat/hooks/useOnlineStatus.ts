@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { socketService } from "@/src/features/socket/socketService";
+import { socketService } from "@/src/socket/socketService";
 import { useAppSelector } from "@/src/hooks/reduxHooks";
 
 /**

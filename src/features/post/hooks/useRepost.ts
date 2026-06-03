@@ -9,11 +9,8 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import {
-  repostService,
-  type Repost,
-  type RepostResponse,
-} from "../services/repost.service";
+import { type Repost, type RepostResponse } from "../types/repost.types";
+import { repostService } from "../services/repost.service";
 
 import { postKeys } from "./usePostQueries";
 
@@ -124,6 +121,7 @@ export function useCreateRepost(
         queryKey: repostKeys.postReposters(postId),
       });
       queryClient.invalidateQueries({ queryKey: repostKeys.check(postId) });
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
 
       toast.success("Репост создан!");
     },
@@ -213,6 +211,7 @@ export function useDeleteRepost(
         queryKey: repostKeys.postReposters(postId),
       });
       queryClient.invalidateQueries({ queryKey: repostKeys.check(postId) });
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
 
       toast.success("Репост удалён");
     },

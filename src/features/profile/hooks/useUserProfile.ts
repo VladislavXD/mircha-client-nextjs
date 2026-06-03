@@ -97,11 +97,10 @@ export function useUserProfile(userId?: string) {
       }
 
       // Обновляем данные
-      await Promise.all([
-        refetchProfile(),
-        refetchIsFollowing(),
-        refetchStats(),
-      ]);
+      await queryClient.invalidateQueries({ queryKey: ["isFollowing", userId] });
+    await queryClient.invalidateQueries({ queryKey: ["followStats", userId] });
+    await refetchProfile();
+
     } catch (error) {
       console.error("Follow error:", error);
     }

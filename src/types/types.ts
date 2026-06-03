@@ -13,6 +13,7 @@ export type User = {
   dateOfBirth?: Date;
   createdAt: Date;
   updatedAt: Date;
+  isActive: boolean;
   bio?: string;
   location?: string;
   provider?: string;

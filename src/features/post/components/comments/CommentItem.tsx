@@ -174,7 +174,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
           {/* Reply Form */}
           {showReplyForm && (
-            <div className="mt-3 sm:mt-4">
+            <div className="mt-3 sm:mt-4 w-full ">
               <CommentForm
                 compact
                 currentUser={currentUser}

@@ -19,6 +19,7 @@ export function useFollow() {
       queryClient.invalidateQueries({ queryKey: ["followers"] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
       queryClient.invalidateQueries({ queryKey: ["followStats"] });
+      queryClient.invalidateQueries({ queryKey: ["isFollowing"] });
 
       toast.success("Вы успешно подписались");
     },
@@ -43,7 +44,8 @@ export function useUnfollow() {
       queryClient.invalidateQueries({ queryKey: ["followers"] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
       queryClient.invalidateQueries({ queryKey: ["followStats"] });
-
+      queryClient.invalidateQueries({ queryKey: ["isFollowing"] });
+      
       toast.success("Вы успешно отписались");
     },
     onError: (error: any) => {

@@ -12,16 +12,13 @@ const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
 export const useMediaUpload = () => {
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
 
-  const handleMediaSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-
+  const addFiles = useCallback(
+    (files: File[]) => {
       if (!files.length) return;
 
       // Проверка количества файлов
       if (mediaFiles.length + files.length > MAX_MEDIA) {
         alert(`Максимум ${MAX_MEDIA} медиа файлов`);
-        e.target.value = "";
 
         return;
       }
@@ -32,6 +29,9 @@ export const useMediaUpload = () => {
         // Проверка размера
         const isImage = file.type.startsWith("image/");
         const isVideo = file.type.startsWith("video/");
+
+        if (!isImage && !isVideo) return; // Ignore unsupported files
+
         const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE;
 
         if (file.size > maxSize) {
@@ -58,9 +58,25 @@ export const useMediaUpload = () => {
       });
 
       setMediaFiles((prev) => [...prev, ...newMediaFiles]);
-      e.target.value = "";
     },
     [mediaFiles.length],
+  );
+
+  const handleMediaSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+
+      addFiles(files);
+      e.target.value = "";
+    },
+    [addFiles],
+  );
+
+  const handleFilesDrop = useCallback(
+    (files: File[]) => {
+      addFiles(files);
+    },
+    [addFiles],
   );
 
   const handleRemoveMedia = useCallback((id: string) => {
@@ -89,6 +105,7 @@ export const useMediaUpload = () => {
   return {
     mediaFiles,
     handleMediaSelect,
+    handleFilesDrop,
     handleRemoveMedia,
     handleToggleSpoiler,
     clearMedia,

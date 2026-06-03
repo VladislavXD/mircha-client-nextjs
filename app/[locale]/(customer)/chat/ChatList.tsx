@@ -16,7 +16,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-import { socketService } from "../../../../src/features/socket/socketService";
+import { socketService } from "../../../../src/socket/socketService";
 import { formatChatTime } from "../../../utils/formatChatTime";
 
 import { OnlineBadge } from "@/src/features/chat/components";

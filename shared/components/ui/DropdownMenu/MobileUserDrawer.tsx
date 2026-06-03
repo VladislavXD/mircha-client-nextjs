@@ -17,13 +17,10 @@ import {
 } from "lucide-react";
 
 import { LocaleSwitcherSelect } from "../selects/localeSwitcherSelect";
+
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { openSettingsModal } from "@/src/store/settingsModal/settingsModal.slice";
 
 interface MobileUserDrawerProps {
@@ -86,18 +83,20 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
               <AvatarFallback>{getInitials()}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <p className="text-base font-semibold leading-none">{user.name}</p>
+              <p className="text-base font-semibold leading-none">
+                {user.name}
+              </p>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 pb-1">
                 @{user.username}
               </p>
             </div>
           </div>
         </div>
-        
+
         <div className="overflow-y-auto py-2 px-3 flex flex-col gap-1 max-h-[55vh]">
           <Button
-            variant="ghost"
             className="w-full justify-start font-normal h-12"
+            variant="ghost"
             onClick={handleThemeToggle}
           >
             {theme === "dark" ? (
@@ -109,9 +108,9 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
           </Button>
 
           <Button
-            variant="ghost"
-            className="w-full justify-start font-normal h-12"
             asChild
+            className="w-full justify-start font-normal h-12"
+            variant="ghost"
             onClick={() => setIsOpen(false)}
           >
             <Link href={`/user/${user.id}`}>
@@ -121,8 +120,8 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
           </Button>
 
           <Button
-            variant="ghost"
             className="w-full justify-start font-normal h-12"
+            variant="ghost"
             onClick={() => {
               setIsOpen(false);
               dispatch(openSettingsModal("profile"));
@@ -133,8 +132,8 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
           </Button>
 
           <Button
-            variant="ghost"
             className="w-full justify-start font-normal h-12"
+            variant="ghost"
             onClick={() => {
               setIsOpen(false);
               onOpenFeedback();
@@ -145,9 +144,9 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
           </Button>
 
           <Button
-            variant="ghost"
-            className="w-full justify-start font-normal h-12"
             asChild
+            className="w-full justify-start font-normal h-12"
+            variant="ghost"
           >
             <div className="flex items-center">
               <Globe className="mr-3 h-5 w-5 text-neutral-500" />
@@ -156,9 +155,9 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
           </Button>
 
           <Button
-            variant="ghost"
-            className="w-full justify-start font-normal h-12"
             asChild
+            className="w-full justify-start font-normal h-12"
+            variant="ghost"
             onClick={() => setIsOpen(false)}
           >
             <Link href="/about">
@@ -170,9 +169,9 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
 
         <div className="p-4 border-t border-neutral-100 dark:border-neutral-800/60 mt-auto mb-4">
           <Button
-            variant="ghost"
             className="w-full justify-start font-normal text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 h-12"
             disabled={isLoadingLogout}
+            variant="ghost"
             onClick={handleLogout}
           >
             <LogOut className="mr-3 h-5 w-5" />

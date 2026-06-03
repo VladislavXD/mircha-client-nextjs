@@ -229,7 +229,7 @@ const EditPostModal: React.FC<EditPostModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" onClick={e=> e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Редактировать пост</DialogTitle>
         </DialogHeader>

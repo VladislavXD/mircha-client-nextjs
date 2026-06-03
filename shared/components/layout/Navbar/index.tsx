@@ -57,7 +57,7 @@ const Navbar = () => {
           </NavButton>
         </li>
         <li>
-          <NavButton href="/search" icon={<Bell size="1em" />}>
+          <NavButton href="/activity" icon={<Bell size="1em" />}>
             {t("nottifications")}
           </NavButton>
         </li>

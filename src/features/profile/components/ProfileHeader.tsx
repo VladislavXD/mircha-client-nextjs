@@ -80,7 +80,7 @@ export function ProfileHeader({
   return (
     <>
       <div
-        className="relative rounded-2xl overflow-hidden mb-6 shadow-2xl"
+        className="relative  rounded-2xl overflow-hidden mb-6 shadow-2xl"
         style={{
           backgroundImage: `url(${
             data.backgroundUrl === "none" ? defaultProfileBg.src : ""
@@ -89,27 +89,33 @@ export function ProfileHeader({
       >
         {/* Фон профиля */}
         <div className="relative h-64 md:h-80">
-          {isvideo ? (
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover"
-            >
-              <source src={`${data.backgroundUrl}`} type="video/mp4" />
-            </video>
-          ) : (
-            data.backgroundUrl !== "none" && (
-              <img
-                alt="Profile background"
+          {data.backgroundUrl && data.backgroundUrl !== "none" ? (
+            isvideo ? (
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
                 className="absolute inset-0 w-full h-full object-cover"
-                src={data.backgroundUrl}
-              />
+              >
+                <source src={`${data.backgroundUrl}`} type="video/mp4" />
+              </video>
+            ) : (
+              data.backgroundUrl !== "none" && (
+                <img
+                  alt="Profile background"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  src={data.backgroundUrl}
+                />
+              )
             )
-          )}
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-blue-900/60 to-black " />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-[#101010]/80 dark:from-black/80 via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-transparent to-transparent" />
+            </>
+          )}
 
           {/* Кнопки редактирования (только для своего профиля И авторизованных) */}
           {isOwnProfile && isAuthenticated && (

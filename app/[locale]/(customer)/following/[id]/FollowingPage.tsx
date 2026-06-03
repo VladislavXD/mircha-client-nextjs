@@ -47,7 +47,7 @@ const Following = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <GoBack />
+      <GoBack title="Подписки"/>
 
       {data.following.length > 0 ? (
         <div className="bg-white dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 rounded-[1.5rem] overflow-hidden">

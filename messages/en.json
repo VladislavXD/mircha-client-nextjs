@@ -345,7 +345,8 @@
     "CreatePostInput": "What are you thinking?",
     "addImage": "Add image",
     "previewPost": "Post preview",
-    "EmojiPicker": "Choose emoji"
+    "EmojiPicker": "Choose emoji",
+    "dropFilesHere": "Drop files here"
   },
   "Toasts": {
     "linkCopied": "Link copied",

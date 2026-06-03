@@ -12,7 +12,7 @@ import { QueryProvider } from "./QueryProvider";
 import { ViewsProvider } from "./ViewsProvider";
 
 import { persistor, store } from "@/src/store/store";
-import SocketConnectionManager from "@/src/features/socket/SocketConnectionManager";
+import SocketConnectionManager from "@/src/socket/SocketConnectionManager";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -26,6 +26,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <SocketConnectionManager />
+
             <NextThemesProvider {...themeProps}>
               <ViewsProvider>{children}</ViewsProvider>
             </NextThemesProvider>

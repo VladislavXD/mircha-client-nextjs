@@ -27,6 +27,8 @@ import Mention from "@/shared/components/ui/inputs/Mention";
 import { useAppDispatch } from "@/src/hooks/reduxHooks";
 import { setCreatePostView } from "@/src/store/CreatePostModal/CreatePostModal.slice";
 
+import { PollCreator, PollDraft } from "./Poll/components/PollCreator";
+
 interface FormData {
   post: string;
 }
@@ -62,6 +64,10 @@ const CreatePost = ({
     useCreatePost();
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const [showPoll, setShowPoll] = useState(false);
+  const [pollDraft, setPollDraft] = useState<PollDraft | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +77,7 @@ const CreatePost = ({
   const {
     mediaFiles,
     handleMediaSelect,
+    handleFilesDrop,
     handleRemoveMedia,
     handleToggleSpoiler,
     clearMedia,
@@ -309,6 +316,47 @@ const CreatePost = ({
     }, 0);
   };
 
+  // Drag and drop handlers
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDragging(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Проверяем, что курсор действительно покинул форму
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    if (
+      e.clientX < rect.left ||
+      e.clientX >= rect.right ||
+      e.clientY < rect.top ||
+      e.clientY >= rect.bottom
+    ) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const files = Array.from(e.dataTransfer.files);
+
+        handleFilesDrop(files);
+      }
+    },
+    [handleFilesDrop],
+  );
+
   const onSubmit = handleSubmit(async () => {
     if (!currentUser) {
       toast.error("Вы не авторизованы");
@@ -316,7 +364,7 @@ const CreatePost = ({
       return;
     }
 
-    if (!postContent.trim() && mediaFiles.length === 0) {
+    if (!postContent.trim() && mediaFiles.length === 0 && !pollDraft) {
       toast.error("Пост не может быть пустым");
 
       return;
@@ -341,6 +389,10 @@ const CreatePost = ({
     if (selectedEmojis?.length) {
       formData.append("emojiUrls", JSON.stringify(selectedEmojis));
     }
+    if (pollDraft) {
+      formData.append("poll", JSON.stringify(pollDraft));
+    }
+    console.log("poll draft", pollDraft);
 
     toast.promise(createPostAsync(formData), {
       loading: "Публикация поста",
@@ -349,6 +401,8 @@ const CreatePost = ({
         clearMedia();
         setSelectedEmojis([]);
         resetMention();
+        setShowPoll(false);
+        setPollDraft(null);
 
         if (onSuccessComplete) {
           onSuccessComplete();
@@ -362,6 +416,13 @@ const CreatePost = ({
     });
   });
 
+  const handleTogglePoll = () => {
+    setShowPoll((prev) => {
+      if (prev) setPollDraft(null); // сбрасываем при закрытии
+      return !prev;
+    });
+  };
+
   if (!currentUser) {
     return null;
   }
@@ -369,9 +430,36 @@ const CreatePost = ({
   return (
     <form
       ref={disableViewportTracking ? undefined : ref}
-      className={`bg-white dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 p-4 sm:p-5 rounded-[1.5rem] mb-6 flex flex-col gap-4 shadow-sm ${className || ""}`}
+      className={`bg-white dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 p-4 sm:p-5 rounded-[1.5rem] mb-6 flex flex-col gap-4 shadow-sm relative ${className || ""}`}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       onSubmit={onSubmit}
     >
+      {/* Overlay for Drag and Drop */}
+      {isDragging && (
+        <div className="absolute inset-0 z-50 bg-neutral-100/90 dark:bg-[#101010]/90 backdrop-blur-sm rounded-[1.5rem] flex items-center justify-center border-2 border-dashed border-primary transition-all duration-200 pointer-events-none">
+          <div className="flex flex-col items-center text-primary">
+            <svg
+              className="w-12 h-12 mb-2 animate-bounce"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+            <span className="font-semibold text-lg">
+              {t("CreatePost.dropFilesHere")}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div ref={containerRef} className="relative">
         {/* contentEditable editor */}
         <div className="group relative min-h-[100px] max-h-[400px] overflow-y-auto overflow-x-hidden rounded-[1.25rem] transition-colors bg-neutral-50 dark:bg-[#161616] border border-neutral-200 dark:border-neutral-800/70 focus-within:border-neutral-400 dark:focus-within:border-neutral-600">
@@ -443,6 +531,13 @@ const CreatePost = ({
         onToggleSpoiler={handleToggleSpoiler}
       />
 
+      {showPoll && (
+        <PollCreator
+          onChange={setPollDraft}
+          onClose={handleTogglePoll}
+          disabled={isLoading}
+        />
+      )}
       {/* Toolbar: Formatting, Media Upload, Emoji Picker */}
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center pt-2">
         <PostEditorToolbar
@@ -453,6 +548,8 @@ const CreatePost = ({
           onEmojiSelect={handleEmojiSelect}
           onFormat={applyFormat}
           onMediaSelect={handleMediaSelect}
+          hasPoll={showPoll}
+          onTogglePoll={handleTogglePoll}
         />
 
         <Button

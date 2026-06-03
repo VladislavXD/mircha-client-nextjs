@@ -6,6 +6,7 @@
 
 import type { User } from "@/src/types/types";
 import type { MediaFile } from "./media.types";
+import { PollFormatted } from "../components/Poll/types/poll.types";
 
 /**
  * Интерфейс лайка
@@ -32,6 +33,10 @@ export interface Comment {
   updatedAt?: string;
 }
 
+
+
+
+
 /**
  * Основной интерфейс поста с медиа и спойлерами
  */
@@ -49,6 +54,7 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
   isEdited: boolean;
+  poll?: PollFormatted;
 
   // Вычисляемые поля
   likesCount?: number;
@@ -59,6 +65,7 @@ export interface Post {
   // Поля для репостов
   repostCount?: number;
   repostedByUser?: boolean;
+  originalPost?: Post;
   repostData?: {
     id: string;
     repostComment?: string;

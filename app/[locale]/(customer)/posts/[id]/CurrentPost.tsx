@@ -99,88 +99,91 @@ const CurrentPost = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <GoBack />
+    <div className="space-y-4 overflow-hidden  flex flex-col h-[calc(100vh-100px)] sm:h-[calc(100vh-50px)]">
+      <GoBack title="Пост" />
 
-      <div className="flex flex-col mb-10 overflow-hidden border border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010] rounded-[1.5rem]">
-        <PostCard cardFor="current-post" post={post} />
+      <div className="flex flex-col  mb-10 overflow-hidden  border border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010] rounded-[1.5rem] ">
 
-        <div className="px-4 py-4 border-b border-neutral-200 dark:border-neutral-800/70">
+      {/* скролл контента */}
+        <div className="flex-1 overflow-x-auto overscroll-contain ">
+          <PostCard cardFor="current-post" post={post} />
+
+          <div className="px-4 py-3 flex items-center justify-between gap-4 font-semibold border-b border-neutral-200 dark:border-neutral-800/70 bg-neutral-50 dark:bg-[#161616]">
+            <div className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300">
+              <MessageCircle size={18} strokeWidth={2} />
+              <span className="text-[15px]">Комментарии</span>
+              <span className="text-sm font-medium text-neutral-400">
+                ({comments.length || post.commentsCount || 0})
+              </span>
+            </div>
+
+            <Select
+              defaultValue="newest"
+              onValueChange={(value) => setSortKey(value as SortKey)}
+            >
+              <SelectTrigger className="w-[160px] h-8 bg-transparent border-neutral-200 dark:border-neutral-800 focus:ring-0 focus:ring-offset-0 focus:bg-neutral-100 dark:focus:bg-[#202020] rounded-full text-xs font-medium cursor-pointer">
+                <SelectValue placeholder="Сортировать по" />
+              </SelectTrigger>
+              <SelectContent className="rounded-[1rem] border-neutral-200 dark:border-neutral-800/70 shadow-lg">
+                {sortOptions.map((option) => (
+                  <SelectItem
+                    key={option.key}
+                    className="cursor-pointer rounded-[0.75rem] text-sm focus:bg-neutral-100 dark:focus:bg-[#202020] focus:text-neutral-900 dark:focus:text-neutral-100"
+                    value={option.key}
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="bg-white dark:bg-[#101010]">
+            {isLoadingComments ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="animate-spin text-neutral-500" size={24} />
+              </div>
+            ) : comments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <MessageCircle
+                  className="text-neutral-300 dark:text-neutral-700 mb-4"
+                  size={40}
+                  strokeWidth={1}
+                />
+                <p className="text-neutral-600 dark:text-neutral-300 font-medium">
+                  Пока нет комментариев
+                </p>
+                <p className="text-neutral-400 text-sm mt-1">
+                  Станьте первым, кто оставит комментарий!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1 p-2 sm:p-3">
+                {comments.map((comment) => (
+                  <CommentItem
+                    key={comment.id}
+                    {...comment}
+                    currentUser={currentUser}
+                    user={comment.user}
+                    onDelete={(id) => {
+                      if (window.confirm("Удалить комментарий?"))
+                        deleteComment({ id, postId });
+                    }}
+                    onLike={handleCommentLike}
+                    onReply={(commentId, content) =>
+                      createReply({ postId, content, replyToId: commentId })
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className=" px-4 py-4 border-b border-neutral-200 dark:border-neutral-800/70 ">
           <CommentForm
             currentUser={currentUser}
             onSubmit={(content) => createComment({ postId, content })}
           />
-        </div>
-
-        <div className="px-4 py-3 flex items-center justify-between gap-4 font-semibold border-b border-neutral-200 dark:border-neutral-800/70 bg-neutral-50 dark:bg-[#161616]">
-          <div className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300">
-            <MessageCircle size={18} strokeWidth={2} />
-            <span className="text-[15px]">Комментарии</span>
-            <span className="text-sm font-medium text-neutral-400">
-              ({comments.length || post.commentsCount || 0})
-            </span>
-          </div>
-
-          <Select
-            defaultValue="newest"
-            onValueChange={(value) => setSortKey(value as SortKey)}
-          >
-            <SelectTrigger className="w-[160px] h-8 bg-transparent border-neutral-200 dark:border-neutral-800 focus:ring-0 focus:ring-offset-0 focus:bg-neutral-100 dark:focus:bg-[#202020] rounded-full text-xs font-medium cursor-pointer">
-              <SelectValue placeholder="Сортировать по" />
-            </SelectTrigger>
-            <SelectContent className="rounded-[1rem] border-neutral-200 dark:border-neutral-800/70 shadow-lg">
-              {sortOptions.map((option) => (
-                <SelectItem
-                  key={option.key}
-                  className="cursor-pointer rounded-[0.75rem] text-sm focus:bg-neutral-100 dark:focus:bg-[#202020] focus:text-neutral-900 dark:focus:text-neutral-100"
-                  value={option.key}
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="bg-white dark:bg-[#101010]">
-          {isLoadingComments ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="animate-spin text-neutral-500" size={24} />
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <MessageCircle
-                className="text-neutral-300 dark:text-neutral-700 mb-4"
-                size={40}
-                strokeWidth={1}
-              />
-              <p className="text-neutral-600 dark:text-neutral-300 font-medium">
-                Пока нет комментариев
-              </p>
-              <p className="text-neutral-400 text-sm mt-1">
-                Станьте первым, кто оставит комментарий!
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-1 p-2 sm:p-3">
-              {comments.map((comment) => (
-                <CommentItem
-                  key={comment.id}
-                  {...comment}
-                  currentUser={currentUser}
-                  user={comment.user}
-                  onDelete={(id) => {
-                    if (window.confirm("Удалить комментарий?"))
-                      deleteComment({ id, postId });
-                  }}
-                  onLike={handleCommentLike}
-                  onReply={(commentId, content) =>
-                    createReply({ postId, content, replyToId: commentId })
-                  }
-                />
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -92,5 +92,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function PostDetailsPage() {
-  return <CurrentPost />;
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+
+    <div className="flex-1 overflow-hidden">
+      <CurrentPost />
+    </div>
+    </div>
+  )
+  
+  
+
 }

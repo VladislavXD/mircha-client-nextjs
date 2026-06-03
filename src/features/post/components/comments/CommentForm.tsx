@@ -1,26 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
-import { Send, X, Loader2 } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Send, X, Loader2, Maximize2 } from "lucide-react";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ExpandedEditorModal } from "./ExpandedEditorModal"; 
+
+
+
+// ─── CommentForm ──────────────────────────────────────────────────────────────
 
 interface CommentFormProps {
   onSubmit: (content: string, replyToId?: string) => void;
-  currentUser?: {
-    name?: string;
-    avatarUrl?: string;
-  };
-  replyingTo?: {
-    id: string;
-    username: string;
-  } | null;
+  currentUser?: { name?: string; avatarUrl?: string };
+  replyingTo?: { id: string; username: string } | null;
   onCancelReply?: () => void;
   placeholder?: string;
   maxLength?: number;
-  compact?: boolean; // Компактный режим для вложенных форм
+  compact?: boolean;
 }
 
 export const CommentForm: React.FC<CommentFormProps> = ({
@@ -34,15 +32,18 @@ export const CommentForm: React.FC<CommentFormProps> = ({
 }) => {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const hasContent = content.trim().length > 0;
 
   const handleSubmit = async () => {
     if (!content.trim() || isSubmitting) return;
-
     setIsSubmitting(true);
     try {
       await onSubmit(content.trim(), replyingTo?.id);
       setContent("");
       onCancelReply?.();
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to submit comment:", error);
     } finally {
@@ -50,7 +51,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       handleSubmit();
@@ -58,99 +59,129 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   };
 
   return (
-    <div
-      className={`${
-        compact
-          ? "bg-neutral-100 dark:bg-[#161616] border border-neutral-200 dark:border-neutral-800/70 rounded-[1.25rem] p-3 sm:p-4 shadow-sm"
-          : ""
-      }`}
-    >
-      {/* Reply Indicator */}
-      {replyingTo && !compact && (
-        <div className="flex items-center gap-2 mb-3 px-3 py-1.5 bg-neutral-100 dark:bg-[#161616] rounded-xl border border-neutral-200 dark:border-neutral-800/70">
-          <span className="text-[11px] sm:text-xs text-neutral-600 dark:text-neutral-400 flex-1 font-medium">
-            Ответ на комментарий{" "}
-            <span className="font-semibold text-neutral-900 dark:text-neutral-200">
-              @{replyingTo.username}
-            </span>
-          </span>
-          <button
-            className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-            onClick={onCancelReply}
-          >
-            <X size={14} />
-          </button>
-        </div>
-      )}
+    <>
+      <ExpandedEditorModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        content={content}
+        setContent={setContent}
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        replyingTo={replyingTo}
+        currentUser={currentUser}
+        placeholder={placeholder}
+        maxLength={maxLength}
+      />
 
-      <div className="flex gap-3 sm:gap-4 items-start">
-        {/* User Avatar */}
-        {currentUser && !compact && (
-          <Avatar className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 hidden sm:block border border-neutral-200 dark:border-neutral-800/70">
-            <AvatarImage
-              alt={currentUser.name || "User"}
-              className="object-cover"
-              src={currentUser.avatarUrl}
-            />
-            <AvatarFallback className="bg-neutral-100 dark:bg-[#1a1a1a] text-neutral-600 dark:text-neutral-400">
-              {currentUser.name?.[0]?.toUpperCase() || "?"}
-            </AvatarFallback>
-          </Avatar>
+      <div className={
+        compact
+          ? "bg-neutral-100 dark:bg-[#161616] border border-neutral-200 dark:border-neutral-800/70 rounded-[1.25rem] p-2 shadow-sm"
+          : ""
+      }>
+        {/* Reply indicator */}
+        {replyingTo && compact && (
+          <div className="flex items-center gap-2 mb-1.5 px-2 py-1 bg-white dark:bg-[#101010] rounded-xl border border-neutral-200 dark:border-neutral-800/70">
+            <span className="text-[11px] text-neutral-600 dark:text-neutral-400 flex-1 font-medium">
+              Ответ{" "}
+              <span className="font-semibold text-neutral-900 dark:text-neutral-200">
+                @{replyingTo.username}
+              </span>
+            </span>
+            <button
+              onClick={onCancelReply}
+              className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+            >
+              <X size={12} />
+            </button>
+          </div>
         )}
 
-        {/* Input Area */}
-        <div className="flex-1 flex flex-col gap-2">
-          <Textarea
-            className={`resize-none whitespace-pre-wrap break-words bg-neutral-50 dark:bg-[#161616] border-neutral-200 dark:border-neutral-800/70 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-neutral-400 dark:focus-visible:border-neutral-600 text-sm placeholder:text-neutral-400 dark:placeholder:text-neutral-500 rounded-[1rem] px-4 py-3 min-h-[44px]`}
-            maxLength={maxLength}
-            placeholder={placeholder}
-            rows={compact ? 2 : 3}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyDown as any}
-          />
+        {/* Row: avatar + input + icon */}
+        <div className="flex items-center gap-2">
 
-          <div className="flex justify-between items-center sm:pl-1">
-            {!compact ? (
-              <div className="text-[11px] text-neutral-400 dark:text-neutral-500 font-medium hidden sm:block">
-                Ctrl + Enter для отправки
-              </div>
-            ) : (
-              <div />
-            )}
+          {/* Avatar — компактная, вровень с полем */}
+          {currentUser && (
+            <Avatar className="flex-shrink-0 w-7 h-7 border border-neutral-200 dark:border-neutral-800/70">
+              <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name || "User"} className="object-cover" />
+              <AvatarFallback className="bg-neutral-100 dark:bg-[#1a1a1a] text-neutral-600 dark:text-neutral-400 text-[10px]">
+                {currentUser.name?.[0]?.toUpperCase() || "?"}
+              </AvatarFallback>
+            </Avatar>
+          )}
 
-            <div className="flex gap-2">
-              {compact && onCancelReply && (
-                <Button
-                  className="rounded-full text-xs font-medium px-4 h-8 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-[#202020]"
-                  size="sm"
-                  variant="ghost"
-                  onClick={onCancelReply}
-                >
-                  <span className="hidden sm:inline">Отмена</span>
-                  <span className="sm:hidden">
-                    <X size={14} />
-                  </span>
-                </Button>
-              )}
+          {/* Input + right icon */}
+          <div className="relative flex-1">
+            <Textarea
+              className="resize-none w-full bg-white dark:bg-[#1a1a1a] border-neutral-200 dark:border-neutral-800/70 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-neutral-400 dark:focus-visible:border-neutral-600 text-sm placeholder:text-neutral-400 dark:placeholder:text-neutral-500 rounded-[1rem] pl-3 pr-9 py-2 min-h-[38px] leading-snug"
+              maxLength={maxLength}
+              placeholder={
+                compact && replyingTo
+                  ? `Ответить @${replyingTo.username}...`
+                  : placeholder
+              }
+              rows={1}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
 
-              <Button
-                className="rounded-full text-xs font-semibold px-4 h-8 bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 disabled:opacity-50"
-                disabled={!content.trim() || isSubmitting}
-                size="sm"
-                onClick={handleSubmit}
+            {/* Иконки справа — с плавной анимацией */}
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+
+              {/* Loader */}
+              <span
+                className="absolute inset-0 flex items-center justify-center transition-all duration-200"
+                style={{
+                  opacity: isSubmitting ? 1 : 0,
+                  transform: isSubmitting ? "scale(1)" : "scale(0.6)",
+                  pointerEvents: isSubmitting ? "auto" : "none",
+                }}
               >
-                {isSubmitting ? (
-                  <Loader2 className="animate-spin mr-1.5" size={14} />
-                ) : (
-                  <Send className="mr-1.5" size={14} />
-                )}
-                {replyingTo ? "Ответить" : "Отправить"}
-              </Button>
+                <Loader2 className="animate-spin text-neutral-400" size={16} />
+              </span>
+
+              {/* Send */}
+              <span
+                className="absolute inset-0 flex items-center justify-center transition-all duration-200"
+                style={{
+                  opacity: hasContent && !isSubmitting ? 1 : 0,
+                  transform: hasContent && !isSubmitting ? "scale(1)" : "scale(0.6)",
+                  pointerEvents: hasContent && !isSubmitting ? "auto" : "none",
+                }}
+              >
+                <button
+                  onClick={handleSubmit}
+                  className="text-neutral-900 dark:text-white hover:opacity-60 transition-opacity"
+                  title="Отправить"
+                >
+                  <Send size={15} />
+                </button>
+              </span>
+
+              {/* Expand */}
+              <span
+                className="absolute inset-0 flex items-center justify-center transition-all duration-200"
+                style={{
+                  opacity: !hasContent && !isSubmitting ? 1 : 0,
+                  transform: !hasContent && !isSubmitting ? "scale(1)" : "scale(0.6)",
+                  pointerEvents: !hasContent && !isSubmitting ? "auto" : "none",
+                }}
+              >
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                  title="Расширенный редактор"
+                >
+                  <Maximize2 size={15} />
+                </button>
+              </span>
+
+              {/* Spacer — держит размер блока */}
+              <span className="invisible flex items-center justify-center w-4 h-4" aria-hidden />
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };

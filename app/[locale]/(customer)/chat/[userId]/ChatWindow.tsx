@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 
 import { useGetOrCreateChat, useMarkMessagesAsRead } from "@/src/features/chat";
 import { useOnlineStatus } from "@/src/features/chat/hooks/useOnlineStatus";
-import { socketService } from "@/src/features/socket/socketService";
+import { socketService } from "@/src/socket/socketService";
 import { useProfile } from "@/src/features/profile";
 import {
   ChatHeader,

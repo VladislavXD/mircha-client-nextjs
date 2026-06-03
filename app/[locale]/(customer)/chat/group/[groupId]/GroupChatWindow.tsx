@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 import { useGetGroupById, useMarkMessagesAsRead } from "@/src/features/chat";
-import { socketService } from "@/src/features/socket/socketService";
+import { socketService } from "@/src/socket/socketService";
 import { useProfile } from "@/src/features/profile";
 import {
   ChatHeader,

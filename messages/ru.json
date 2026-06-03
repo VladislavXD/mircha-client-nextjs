@@ -344,7 +344,8 @@
     "CreatePostInput": "О чем думаете?",
     "addImage": "Добавить фото",
     "previewPost": "Превью поста",
-    "EmojiPicker": "Выберите эмодзи"
+    "EmojiPicker": "Выберите эмодзи",
+    "dropFilesHere": "Отпустите файлы здесь"
   },
   "Toasts": {
     "linkCopied": "Ссылка скопирована",

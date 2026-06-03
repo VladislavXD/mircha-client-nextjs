@@ -1,24 +1,23 @@
 "use client";
 
-import type { Post } from "../types";
+import type { Post, User } from "../../types";
 
 import React, { useState } from "react";
-import { Repeat } from "lucide-react";
+import { Repeat, Loader2 } from "lucide-react";
+
+import { useCreateRepost, useDeleteRepost } from "../../hooks/useRepost";
+
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Textarea,
-  Avatar,
-  Card,
-  CardBody,
-} from "@heroui/react";
-
-import { useCreateRepost, useDeleteRepost } from "../hooks/useRepost";
-
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { EmojiText } from "@/shared/components/ui/EmojiText";
 
 interface RepostButtonProps {
@@ -27,6 +26,7 @@ interface RepostButtonProps {
   repostCount?: number;
   showCount?: boolean;
   post?: Post; // Добавляем данные о посте для превью
+  author?: User;
 }
 
 /**
@@ -52,6 +52,7 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
   repostCount = 0,
   showCount = true,
   post,
+  author,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comment, setComment] = useState("");
@@ -118,7 +119,7 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
         <Repeat
           className={`
             w-5 h-5 sm:w-5 sm:h-6 stroke-1 transition-colors
-            ${repostedByUser ? "text-green-500" : "text-default-600"}
+            ${repostedByUser ? "text-green-500" : "text-muted-foreground"}
           `}
           size={24}
         />
@@ -126,7 +127,7 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
           <span
             className={`
             font-normal text-l
-            ${repostedByUser ? "text-green-500" : "text-default-600"}
+            ${repostedByUser ? "text-green-500" : "text-muted-foreground"}
           `}
           >
             {repostCount}
@@ -135,44 +136,52 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
       </button>
 
       {/* Модалка для добавления комментария к репосту */}
-      <Modal
-        isOpen={isModalOpen}
-        scrollBehavior="inside"
-        size="lg"
-        onClose={() => setIsModalOpen(false)}
-      >
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            Добавить комментарий к репосту
-          </ModalHeader>
-          <ModalBody>
-            <Textarea
-              maxLength={280}
-              maxRows={6}
-              minRows={3}
-              placeholder="Ваш комментарий (опционально)..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-            <p className="text-xs text-default-400">{comment.length}/280</p>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent
+          className="sm:max-w-[500px]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DialogHeader>
+            <DialogTitle>Добавить комментарий к репосту</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex flex-col gap-1.5">
+              <Textarea
+                className="min-h-[80px]"
+                maxLength={280}
+                placeholder="Ваш комментарий (опционально)..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground text-right">
+                {comment.length}/280
+              </p>
+            </div>
 
             {/* Превью поста */}
             {post && (
-              <Card className="mt-4 border border-default-200 dark:border-default-100">
-                <CardBody className="p-4">
+              <Card className="mt-2 border border-border">
+                <CardContent className="p-4">
                   {/* Автор поста */}
                   <div className="flex items-center gap-3 mb-3">
-                    <Avatar
-                      className="flex-shrink-0"
-                      name={post.author?.name || post.author?.username}
-                      size="sm"
-                      src={post.author?.avatarUrl}
-                    />
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        alt={post.author?.name || post.author?.username || ""}
+                        src={post.author?.avatarUrl || ""}
+                      />
+                      <AvatarFallback>
+                        {(
+                          post.author?.name?.[0] ||
+                          post.author?.username?.[0] ||
+                          "U"
+                        ).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-default-900">
+                      <span className="text-sm font-semibold text-foreground">
                         {post.author?.name || post.author?.username}
                       </span>
-                      <span className="text-xs text-default-500">
+                      <span className="text-xs text-muted-foreground">
                         @{post.author?.username}
                       </span>
                     </div>
@@ -181,7 +190,7 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
                   {/* Содержимое поста с правильным рендерингом */}
                   <div className="text-sm line-clamp-6">
                     <EmojiText
-                      className="text-default-700"
+                      className="text-foreground/80"
                       emojiUrls={post.emojiUrls || []}
                       text={
                         typeof post.content === "string"
@@ -190,28 +199,25 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
                       }
                     />
                   </div>
-                </CardBody>
+                </CardContent>
               </Card>
             )}
-          </ModalBody>
-          <ModalFooter>
+          </div>
+          <DialogFooter>
             <Button
-              color="default"
-              variant="light"
-              onPress={() => setIsModalOpen(false)}
+              disabled={isPending}
+              variant="ghost"
+              onClick={() => setIsModalOpen(false)}
             >
               Отмена
             </Button>
-            <Button
-              color="primary"
-              isLoading={isPending}
-              onPress={handleConfirmRepost}
-            >
+            <Button disabled={isPending} onClick={handleConfirmRepost}>
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Репостнуть
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

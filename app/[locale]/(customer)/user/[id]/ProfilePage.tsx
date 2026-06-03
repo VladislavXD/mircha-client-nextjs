@@ -24,7 +24,7 @@ const UserProfile = () => {
   if (isLoading) {
     return (
       <>
-        <GoBack />
+        <GoBack title={user?.name || "Назад"} />
         <ProfileSkeleton />
       </>
     );
@@ -33,7 +33,7 @@ const UserProfile = () => {
   if (!user) {
     return (
       <>
-        <GoBack />
+        <GoBack title={"Назад"} />
         <div className="text-center py-8">
           <p className="text-default-500">Пользователь не найден</p>
         </div>
@@ -43,7 +43,7 @@ const UserProfile = () => {
 
   return (
     <>
-      <GoBack />
+      <GoBack title={user?.name || "Назад"} />
       <div className="max-w-4xl mx-auto px-0 sm:px-4">
         {/* ✅ Передаём флаги для скрытия кнопок редактирования */}
         <ProfileHeader

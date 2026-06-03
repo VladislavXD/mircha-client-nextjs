@@ -25,7 +25,7 @@ export function ProfileActions({ onOpenAppearance }: ProfileActionsProps) {
   return (
     <div className="absolute top-4 right-4 flex gap-2 z-10">
       <Button
-        className="bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white border-white/20 hover:text-white rounded-[1rem]"
+        className="bg-white hover:bg-gray-50 text-black border-2 border-black rounded-lg font-medium shadow-md transition-all duration-200"
         size="sm"
         variant="outline"
         onClick={() => dispatch(openSettingsModal("profile"))}
@@ -37,7 +37,7 @@ export function ProfileActions({ onOpenAppearance }: ProfileActionsProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className="bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white border-white/20 hover:text-white rounded-[1rem]"
+            className="bg-white hover:bg-gray-50 text-black border-2 border-black rounded-lg font-medium shadow-md transition-all duration-200"
             size="sm"
             variant="outline"
           >

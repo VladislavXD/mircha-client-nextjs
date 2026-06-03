@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react";
 
 import { useAppDispatch } from "@/src/hooks/reduxHooks";
-import { socketService } from "@/src/features/socket/socketService";
+import { socketService } from "@/src/socket/socketService";
 import { useProfile } from "@/src/features/profile/hooks/useProfile";
+import { useRealtimeNotificationsListener } from "@/src/features/notification/hooks/useRealTimeNotifications";
 import {
   setMultipleStatuses,
   setUserStatus,
@@ -21,6 +22,9 @@ export default function SocketConnectionManager() {
   const { user, isLoading } = useProfile();
   const dispatch = useAppDispatch();
   const subscribedRef = useRef(false);
+
+  // Инициализируем слушатель реалтайм-уведомлений
+  useRealtimeNotificationsListener();
 
   console.log("🔌 SocketConnectionManager render:", {
     user: !!user,

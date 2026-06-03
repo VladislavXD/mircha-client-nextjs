@@ -13,9 +13,10 @@ import {
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 
-import { MobileUserDrawer } from "./MobileUserDrawer";
 import { LocaleSwitcherSelect } from "../selects/localeSwitcherSelect";
 import FeedBackModal from "../Modals/FeedBack.modal";
+
+import { MobileUserDrawer } from "./MobileUserDrawer";
 
 import { useProfile } from "@/src/features/profile/hooks";
 import { useLogoutMutation } from "@/src/features/user/hooks";
@@ -159,17 +160,17 @@ const MenuDropdown = () => {
         </DropdownMenu>
       ) : (
         <MobileUserDrawer
-          isOpen={isOpen}
+          getInitials={getInitials}
           isLoadingLogout={isLoadingLogout}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
           user={{
             id,
             name,
             username,
             avatarUrl,
           }}
-          getInitials={getInitials}
           onLogout={logoutAsync}
-          setIsOpen={setIsOpen}
           onOpenFeedback={() => setIsFeedbackOpen(true)}
         />
       )}

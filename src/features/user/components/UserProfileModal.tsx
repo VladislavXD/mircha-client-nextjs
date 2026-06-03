@@ -22,6 +22,7 @@ interface UserProfileModalProps {
   isOnline?: boolean;
   createdAt?: Date;
   status?: string;
+  showFollowBadge?: boolean;
   onFollowToggle?: () => void;
 }
 
@@ -44,6 +45,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   createdAt,
   status,
   onFollowToggle,
+  showFollowBadge = false,
 }) => {
   const profileHref = userId ? `/user/${userId}` : "#";
   const displayBio = bio || description || "";
@@ -56,6 +58,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       month: "long",
     });
   };
+  const isvideo = backgroundUrl?.endsWith(".mp4") || false;
+
+  const canFollow =
+    showFollowBadge && !!onFollowToggle && currentUserId !== userId;
 
   return (
     <Modal
@@ -73,7 +79,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         <ModalBody className="p-0 overflow-hidden rounded-2xl">
           {/* ── Cover ── */}
           <div className="relative h-[90px] w-full shrink-0">
-            {backgroundUrl ? (
+            {backgroundUrl && backgroundUrl !== "none" ? (
+            isvideo ? (
               <video
                 autoPlay
                 loop
@@ -81,11 +88,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover"
               >
-                <source src={backgroundUrl} type="video/mp4" />
+                <source src={`${backgroundUrl}`} type="video/mp4" />
               </video>
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-blue-900/60 to-black" />
-            )}
+              backgroundUrl !== "none" && (
+                <img
+                  alt="Profile background"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  src={backgroundUrl}
+                />
+              )
+            )
+          ) : (
+             <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-blue-900/60 to-black" />
+          )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-transparent to-transparent" />
           </div>
 
@@ -118,27 +134,28 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 {isOnline && (
                   <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-[#101010] z-20" />
                 )}
+               
               </div>
             </Link>
 
             {/* Follow button — always reserve space if callback present */}
-            {userId !== currentUserId && (
-              <button
-                className={`mb-1 px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
-                  !onFollowToggle
-                    ? "invisible pointer-events-none border-transparent bg-white text-black"
-                    : isFollowing
-                      ? "border-white/20 text-white/80 hover:border-red-500/60 hover:text-red-400 bg-white/5"
-                      : "border-transparent bg-white text-black hover:bg-white/90"
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onFollowToggle?.();
-                }}
-              >
-                {isFollowing ? "Отписаться" : "Подписаться"}
-              </button>
-            )}
+            {canFollow && onFollowToggle && (
+          <button
+            className={`mb-1 mt-2 px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
+              isFollowing
+                ? "border-white/20 text-white/80 hover:border-red-500/60 hover:text-red-400 bg-white/5"
+                : "border-transparent bg-white text-black hover:bg-white/90"
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onFollowToggle();
+            }}
+          >
+            {isFollowing ? "Отписаться" : "Подписаться"}
+          </button>
+        )}
+            
           </div>
 
           {/* ── Status badge ── */}

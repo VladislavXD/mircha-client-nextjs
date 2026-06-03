@@ -1,5 +1,6 @@
 import React from "react";
 import { IconType } from "react-icons";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   count?: number;
@@ -25,7 +26,18 @@ const MetaInfo = ({ count, Icon, type, ...props }: Props) => {
         <p
           className={`font-normal text-default-600 text-xs sm:text-sm ${type === "heart" ? "text-red-500" : ""}`}
         >
-          {count}
+          <AnimatePresence mode="wait">
+
+          <motion.span
+            key={count}
+            initial={{ y: 12, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -12, opacity: 0 }}
+            transition={{ duration: 0.12 }}
+          >
+            {count}
+          </motion.span>
+          </AnimatePresence>
         </p>
       )}
     </div>

@@ -11,7 +11,7 @@ import { useInView } from "react-intersection-observer";
 import { usePosts } from "../hooks/usePostQueries";
 import Notice from "../../notice/components/Notice";
 
-import PostCard from "./PostCard";
+import PostCard from "./PostCard/index";
 import CreatePost from "./CreatePost";
 import { RecommendedUsersBlock } from "./RecommendedUsers/RecommendedUsersBlock";
 
@@ -46,6 +46,8 @@ const PostList = () => {
     isFetchingNextPage,
     fetchNextPage,
   } = usePosts();
+
+  
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -127,7 +129,7 @@ const PostList = () => {
         {posts.pages.map((page, pageIndex) =>
           page.items.map((post, postIndex) => (
             <React.Fragment key={post.id}>
-              <PostCard cardFor="post" post={post} />
+              <PostCard cardFor="post" post={post}  />
               {pageIndex === 0 && postIndex === 4 && (
                 <div className=" bg-neutral-50 dark:bg-black/50 border-y border-neutral-200 dark:border-neutral-800/70">
                   <RecommendedUsersBlock />

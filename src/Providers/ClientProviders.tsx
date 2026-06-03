@@ -5,8 +5,10 @@ import NextTopLoader from "nextjs-toploader";
 import LayoutContent from "../../app/LayoutContent";
 
 import { Providers } from "./providers";
+import PageLoader from "./PageLoader";
 
 import { Toaster } from "@/components/ui/sonner";
+
 
 export default function ClientProviders({
   children,
@@ -15,6 +17,7 @@ export default function ClientProviders({
 }) {
   return (
     <>
+      <PageLoader />
       <NextTopLoader
         crawl
         showSpinner
@@ -28,6 +31,7 @@ export default function ClientProviders({
       />
       <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
         <Toaster />
+        
         <LayoutContent>{children}</LayoutContent>
       </Providers>
     </>

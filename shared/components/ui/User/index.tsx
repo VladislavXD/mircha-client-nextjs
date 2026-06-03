@@ -7,6 +7,9 @@ import {
 } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserProfileModal } from "@/src/features/user/components";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { BadgePlus } from "lucide-react";
 
 type Props = {
   userId?: string;
@@ -30,7 +33,7 @@ type Props = {
   descriptionClassName?: string;
   status?: string;
   /** Режим: default | avatar-only | name-only */
-  variant?: "default" | "avatar-only" | "name-only";
+  variant?: "default" | "avatar-only" | "name-only" | "mention";
   /** Показывать badge с плюсом на аватаре */
   showFollowBadge?: boolean;
   /** id текущего юзера, чтобы не показывать + на своём посте */
@@ -60,7 +63,7 @@ const User = ({
   status,
   variant = "default",
   showFollowBadge = false,
-  currentUserId,
+  currentUserId,  
 }: Props) => {
   const truncateText = (text: string, maxLength: number = 80) => {
     if (text.length <= maxLength) return text;
@@ -72,6 +75,7 @@ const User = ({
   const canFollow =
     showFollowBadge && !!onFollowToggle && currentUserId !== userId;
 
+  
   const formatDate = (date: Date | undefined) => {
     if (!date) return "";
 
@@ -84,22 +88,43 @@ const User = ({
 
   const tooltipDescription = bio || description || "Нет описания";
 
+  const isvideo = backgroundUrl?.endsWith(".mp4") || false;
+
   const tooltipContent = (
     <div className="relative w-[300px] rounded-2xl overflow-hidden bg-[#101010] border border-white/10 shadow-2xl">
       {/* Обложка */}
       <div className="relative h-20 w-full">
-        {backgroundUrl ? (
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src={backgroundUrl} type="video/mp4" />
-          </video>
+        {/* Градиент обложки */}
+
+        {backgroundUrl && backgroundUrl !== "none" ? (
+          isvideo ? (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            >
+              <source src={`${backgroundUrl}`} type="video/mp4" />
+            </video>
+            
+          ) : (
+            backgroundUrl !== "none" && (
+              <>
+              <img
+                alt="Profile background"
+                className="absolute inset-0 w-full h-full object-cover"
+                src={backgroundUrl}
+              />
+              
+              </>
+            )
+          )
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-blue-900/60 to-black" />
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-blue-900/60 to-black " />
+
+          </>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-transparent to-transparent" />
       </div>
@@ -133,7 +158,7 @@ const User = ({
         {/* Кнопка подписки — справа */}
         {canFollow && onFollowToggle && (
           <button
-            className={`mb-1 px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
+            className={`mb-1 mt-9 px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200  ${
               isFollowing
                 ? "border-white/20 text-white/80 hover:border-red-500/60 hover:text-red-400 bg-white/5"
                 : "border-transparent bg-white text-black hover:bg-white/90"
@@ -260,9 +285,14 @@ const User = ({
               </AvatarFallback>
             </Avatar>
 
-            {/* {isOnline && (
-              <span className="absolute bottom-0 right-0 block w-3 h-3 rounded-full bg-green-500 border-2 border-black" />
-            )} */}
+            {isOnline && (
+              <span className="absolute bottom-0 right-0 block w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-black" />
+            )}
+            {
+              currentUserId !== userId && !isFollowing && (
+                <span className="absolute bottom-0 bg-white border-2  rounded-full right-0 block w-2.5 h-2.5 z-0 flex items-center justify-center before:absolute before:w-1.5 before:h-0.5 before:bg-black before:rounded-full after:absolute after:w-0.5 after:h-1.5 after:bg-black after:rounded-full" />
+              )
+            }
 
             {canFollow && !isFollowing && (
               <button
@@ -295,6 +325,7 @@ const User = ({
           isOpen={isModalOpen}
           name={name}
           status={status}
+          showFollowBadge={showFollowBadge}
           userId={userId}
           usernameFrameUrl={usernameFrameUrl}
           onClose={() => setIsModalOpen(false)}
@@ -327,6 +358,42 @@ const User = ({
               </span>
             ) : (
               name
+            )}
+          </span>
+        </HoverCardTrigger>
+        <HoverCardContent
+          className="w-[300px] p-0 border-none bg-transparent shadow-none z-50"
+          side="top"
+        >
+          {tooltipContent}
+        </HoverCardContent>
+      </HoverCard>
+    );
+  }
+
+  // ====================== NAME-ONLY ======================
+  if (variant === "mention") {
+    return (
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <span
+            className={`font-semibold truncate hover:underline cursor-pointer ${nameClassName || "text-sm"}`}
+          >
+            {usernameFrameUrl && usernameFrameUrl.trim() !== "" ? (
+              <span className="relative inline-block">
+                <span
+                  className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+                  style={{
+                    backgroundImage: `url(${usernameFrameUrl})`,
+                    backgroundRepeat: "repeat-x",
+                    backgroundSize: "auto 200%",
+                    backgroundPosition: "left center",
+                  }}
+                />
+                <span className="relative z-0 px-1">{name}</span>
+              </span>
+            ) : (
+              <Link href={`/user/${userId}`} onClick={e=> e.stopPropagation()} className="!text-blue-500 inline ">{`@${name}`}</Link>
             )}
           </span>
         </HoverCardTrigger>

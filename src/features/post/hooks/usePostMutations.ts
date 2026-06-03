@@ -1,4 +1,4 @@
-import type { Post, PostsResponse, UpdatePostDto, User } from "../types";
+import type { Post, PostsResponse, UpdatePostDto } from "../types";
 
 import {
   useMutation,
@@ -47,9 +47,6 @@ export function useCreatePost(
       const previousPosts = queryClient.getQueryData<
         InfiniteData<PostsResponse, unknown>
       >(postKeys.lists());
-
-      // Получаем текущего пользователя из кэша
-      const currentUser = queryClient.getQueryData<User>(["profile"]);
 
       // Создаём временный пост (без оптимистичного обновления для упрощения)
       // Оптимистичное обновление будет добавлено после успешного ответа

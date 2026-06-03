@@ -1,32 +1,6 @@
-import type { Post } from "../types";
+import { Repost, RepostResponse } from "../types/repost.types";
 
 import { api } from "@/src/api";
-
-export interface CreateRepostDto {
-  postId: string;
-  comment?: string;
-}
-
-export interface Repost {
-  id: string;
-  userId: string;
-  postId: string;
-  repostComment?: string;
-  createdAt: string;
-  user: {
-    id: string;
-    username: string;
-    name: string;
-    avatarUrl?: string;
-  };
-  post: Post;
-}
-
-export interface RepostResponse {
-  items: Repost[];
-  nextCursor: string | null;
-  hasMore: boolean;
-}
 
 /**
  * API сервис для работы с репостами.

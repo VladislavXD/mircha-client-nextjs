@@ -8,6 +8,7 @@ import {
   Underline,
   Strikethrough,
   Highlighter,
+  BarChart2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,8 @@ interface PostEditorToolbarProps {
   isLoading: boolean;
   mediaFiles: any[];
   maxMedia: number;
+  hasPoll?: boolean;
+  onTogglePoll?: () => void;
   onFormat: (command: string, value?: string) => void;
   onMediaSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onEmojiSelect: (url: string) => void;
@@ -36,6 +39,8 @@ const PostEditorToolbar: React.FC<PostEditorToolbarProps> = ({
   onFormat,
   onMediaSelect,
   onEmojiSelect,
+  hasPoll = false,
+  onTogglePoll,
 }) => {
   return (
     <div className="mb-5 flex gap-2 flex-wrap items-center">
@@ -162,6 +167,23 @@ const PostEditorToolbar: React.FC<PostEditorToolbarProps> = ({
       />
       {/* Emoji Picker */}
       <EmojiPicker disabled={isLoading} onEmojiSelect={onEmojiSelect} />
+
+      {/* Poll Button */}
+      <Button
+        className={cn(
+          "h-8 w-8 rounded-full",
+          hasPoll &&
+            "bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100",
+        )}
+        disabled={isLoading}
+        size="icon"
+        title="Добавить опрос"
+        type="button"
+        variant="ghost"
+        onClick={onTogglePoll}
+      >
+        <BarChart2 size={16} />
+      </Button>
     </div>
   );
 };
