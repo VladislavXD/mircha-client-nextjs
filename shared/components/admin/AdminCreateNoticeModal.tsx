@@ -1,20 +1,27 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  Textarea,
-  Switch,
-  Select,
-  SelectItem,
-} from "@heroui/react";
 import { toast } from "sonner";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { useCreateNotice } from "@/src/features/notice/hooks/useCreateNotice";
 import EmojiPicker from "@/shared/components/ui/inputs/EmojiPicker";
@@ -31,7 +38,7 @@ const AdminCreateNoticeModal: React.FC<AdminCreateNoticeModalProps> = ({
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { createNotice, isPending } = useCreateNotice();
+  const { createNotice } = useCreateNotice();
   const submittingRef = useRef(false);
 
   const [formData, setFormData] = useState({
@@ -52,7 +59,6 @@ const AdminCreateNoticeModal: React.FC<AdminCreateNoticeModalProps> = ({
     if (isLoading || submittingRef.current) return;
     if (!formData.content.trim()) {
       toast.error("Содержимое уведомления обязательно");
-
       return;
     }
 
@@ -71,9 +77,7 @@ const AdminCreateNoticeModal: React.FC<AdminCreateNoticeModalProps> = ({
       if (formData.durationDays && Number.isInteger(formData.durationDays))
         payload.durationDays = formData.durationDays;
       if (formData.expiredAt) {
-        const iso = new Date(formData.expiredAt).toISOString();
-
-        payload.expiredAt = iso;
+        payload.expiredAt = new Date(formData.expiredAt).toISOString();
       }
 
       await createNotice(payload);
@@ -100,74 +104,92 @@ const AdminCreateNoticeModal: React.FC<AdminCreateNoticeModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} size="lg" onClose={onClose}>
-      <ModalContent>
-        <ModalHeader>
-          <h3 className="text-lg font-semibold">Создать уведомление</h3>
-        </ModalHeader>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Создать уведомление</DialogTitle>
+        </DialogHeader>
 
-        <ModalBody className="space-y-4">
-          <Textarea
-            isRequired
-            label="Текст уведомления"
-            maxRows={6}
-            placeholder="Текст"
-            value={formData.content}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, content: e.target.value }))
-            }
-          />
-
-          <Input
-            label="Заголовок (необязательно)"
-            placeholder="Короткий заголовок"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, title: e.target.value }))
-            }
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
-              label="Тип"
-              selectedKeys={[formData.type]}
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="content">Текст уведомления *</Label>
+            <Textarea
+              id="content"
+              placeholder="Текст"
+              rows={4}
+              value={formData.content}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, type: e.target.value }))
-              }
-            >
-              <SelectItem key="default">Default</SelectItem>
-              <SelectItem key="info">Info</SelectItem>
-              <SelectItem key="warning">Warning</SelectItem>
-              <SelectItem key="error">Error</SelectItem>
-            </Select>
-
-            <Input
-              label="Продолжительность (дней)"
-              max={365}
-              min={1}
-              type="number"
-              value={
-                formData.durationDays ? formData.durationDays.toString() : ""
-              }
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  durationDays: e.target.value
-                    ? parseInt(e.target.value)
-                    : undefined,
-                }))
+                setFormData((prev) => ({ ...prev, content: e.target.value }))
               }
             />
           </div>
 
-          <Input
-            label="Дата истечения (если указать, имеет приоритет)"
-            type="datetime-local"
-            value={formData.expiredAt}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, expiredAt: e.target.value }))
-            }
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor="notice-title">Заголовок (необязательно)</Label>
+            <Input
+              id="notice-title"
+              placeholder="Короткий заголовок"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Тип</Label>
+              <Select
+                value={formData.type}
+                onValueChange={(val) =>
+                  setFormData((prev) => ({ ...prev, type: val }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default</SelectItem>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="warning">Warning</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="duration">Продолжительность (дней)</Label>
+              <Input
+                id="duration"
+                max={365}
+                min={1}
+                type="number"
+                value={formData.durationDays ?? ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    durationDays: e.target.value
+                      ? parseInt(e.target.value)
+                      : undefined,
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="expiredAt">
+              Дата истечения (если указать, имеет приоритет)
+            </Label>
+            <Input
+              id="expiredAt"
+              type="datetime-local"
+              value={formData.expiredAt}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, expiredAt: e.target.value }))
+              }
+            />
+          </div>
 
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0">
@@ -184,11 +206,10 @@ const AdminCreateNoticeModal: React.FC<AdminCreateNoticeModalProps> = ({
                   src={formData.emojiUrl}
                 />
                 <Button
-                  color="danger"
                   disabled={isLoading}
                   size="sm"
-                  variant="flat"
-                  onPress={() =>
+                  variant="destructive"
+                  onClick={() =>
                     setFormData((prev) => ({ ...prev, emojiUrl: "" }))
                   }
                 >
@@ -198,37 +219,28 @@ const AdminCreateNoticeModal: React.FC<AdminCreateNoticeModalProps> = ({
             )}
           </div>
 
-          <Switch
-            isSelected={formData.active}
-            onValueChange={(checked) =>
-              setFormData((prev) => ({ ...prev, active: checked }))
-            }
-          >
-            Активно
-          </Switch>
-        </ModalBody>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.active}
+              id="active"
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, active: checked }))
+              }
+            />
+            <Label htmlFor="active">Активно</Label>
+          </div>
+        </div>
 
-        <ModalFooter className="flex flex-col sm:flex-row gap-3">
-          <Button
-            className="w-full sm:w-auto order-2 sm:order-1"
-            color="danger"
-            disabled={isLoading}
-            variant="light"
-            onPress={onClose}
-          >
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+          <Button disabled={isLoading} variant="ghost" onClick={onClose}>
             Отмена
           </Button>
-          <Button
-            className="w-full sm:w-auto order-1 sm:order-2"
-            color="primary"
-            disabled={isLoading}
-            onPress={handleSubmit}
-          >
+          <Button disabled={isLoading} onClick={handleSubmit}>
             {isLoading ? "Создаём..." : "Создать"}
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

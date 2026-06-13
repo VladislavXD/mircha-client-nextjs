@@ -10,7 +10,7 @@ import { fontSans, fontSerif } from "@/src/config/fonts";
 import ClientProviders from "@/src/Providers/ClientProviders";
 import { Locale, routing } from "@/src/i18n/routing";
 import VisitorTracker from "@/app/api/checkClient/VisitorTracker";
-
+import { ThemeProvider } from "@wrksz/themes/next";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -76,7 +76,7 @@ export const viewport: Viewport = {
 
 interface RootLayoutProps {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>; // ← Promise
 }
 
 export default async function RootLayout({
@@ -99,16 +99,13 @@ export default async function RootLayout({
           fontSerif.variable,
         )}
       >
-
-     
-        
-        <NextIntlClientProvider locale={locale} messages={messages}>
-
-          <Suspense fallback={null}>
-            <VisitorTracker />
-          </Suspense>
-          <ClientProviders>{children}</ClientProviders>
-        </NextIntlClientProvider>
+        <Suspense fallback={null}>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProvider attribute="class" defaultTheme="dark">
+              <ClientProviders>{children}</ClientProviders>
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </Suspense>
       </body>
     </html>
   );

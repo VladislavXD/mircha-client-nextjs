@@ -3,17 +3,11 @@
 import type { Thread } from "@/src/features/forum/types/forum.types";
 
 import React, { useState } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Textarea,
-  Input,
-  Chip,
-} from "@heroui/react";
+import { Dialog, DialogContent, DialogHeader, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -135,50 +129,45 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} size="xl" onClose={onClose}>
-      <ModalContent>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
         <form onSubmit={handleSubmit}>
-          <ModalHeader className="flex flex-col gap-1">
+          <DialogHeader className="flex flex-col gap-1">
             <h2 className="text-xl font-bold">{t("title")}</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {thread.subject || `Тред #${thread.id}`}
             </p>
-          </ModalHeader>
+          </DialogHeader>
 
-          <ModalBody className="gap-4">
-            {/* Имя автора */}
-            <Input
-              description={t("nameDescription")}
-              label={t("nameLabel")}
-              placeholder={t("namePlaceholder")}
-              value={formData.authorName}
-              variant="bordered"
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, authorName: e.target.value }))
-              }
-            />
+          <div className="space-y-4 py-4">
+            {/* Author name */}
+            <div>
+              <label className="block text-sm font-medium mb-1">{t("nameLabel")}</label>
+              <Input
+                placeholder={t("namePlaceholder")}
+                value={formData.authorName}
+                onChange={(e) => setFormData((prev) => ({ ...prev, authorName: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">{t("nameDescription")}</p>
+            </div>
 
-            {/* Содержание */}
-            <Textarea
-              isRequired
-              label={t("contentLabel")}
-              maxRows={8}
-              minRows={3}
-              placeholder="Введите ваш ответ..."
-              value={formData.content}
-              variant="bordered"
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, content: e.target.value }))
-              }
-            />
+            {/* Content */}
+            <div>
+              <label className="block text-sm font-medium mb-1">{t("contentLabel")}</label>
+              <Textarea
+                placeholder="Введите ваш ответ..."
+                value={formData.content}
+                onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
+              />
+            </div>
 
-            {/* Загрузка файлов */}
+            {/* File upload */}
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("fileLabel")}</label>
               <input
                 multiple
                 accept=".jpg,.jpeg,.png,.gif,.webp,.webm,.mp4"
-                className="block w-full text-sm text-gray-500
+                className="block w-full text-sm text-muted-foreground
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-full file:border-0
                   file:text-sm file:font-semibold
@@ -188,12 +177,10 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
                 onChange={handleFileChange}
               />
 
-              {/* Список выбранных файлов */}
+              {/* Selected files */}
               {selectedFiles.length > 0 && (
                 <div className="space-y-3">
-                  <p className="text-sm font-medium">
-                    Выбранные файлы ({selectedFiles.length}/5):
-                  </p>
+                  <p className="text-sm font-medium">Выбранные файлы ({selectedFiles.length}/5):</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {selectedFiles.map((file, index) => {
                       const fileURL = URL.createObjectURL(file);
@@ -201,71 +188,33 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
                       const isVideo = file.type.startsWith("video/");
 
                       return (
-                        <div
-                          key={index}
-                          className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
-                        >
-                          {/* Превью медиа */}
-                          <div className="aspect-square relative bg-gray-200 dark:bg-gray-700">
+                        <div key={index} className="relative bg-muted rounded-lg overflow-hidden border border-border">
+                          <div className="aspect-square relative bg-muted">
                             {isImage ? (
-                              <img
-                                alt={file.name}
-                                className="w-full h-full object-cover"
-                                src={fileURL}
-                                onLoad={() => URL.revokeObjectURL(fileURL)}
-                              />
+                              <img alt={file.name} className="w-full h-full object-cover" src={fileURL} onLoad={() => URL.revokeObjectURL(fileURL)} />
                             ) : isVideo ? (
-                              <video
-                                muted
-                                className="w-full h-full object-cover"
-                                src={fileURL}
-                                onLoadedData={() =>
-                                  URL.revokeObjectURL(fileURL)
-                                }
-                              />
+                              <video muted className="w-full h-full object-cover" src={fileURL} onLoadedData={() => URL.revokeObjectURL(fileURL)} />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <div className="text-center">
-                                  <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 bg-muted rounded-lg flex items-center justify-center">
                                     <span className="text-xl">📄</span>
                                   </div>
-                                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                                    {file.name.split(".").pop()?.toUpperCase()}
-                                  </span>
+                                  <span className="text-xs text-muted-foreground">{file.name.split(".").pop()?.toUpperCase()}</span>
                                 </div>
                               </div>
                             )}
 
-                            {/* Кнопка удаления */}
-                            <Button
-                              className="absolute top-1 right-1 min-w-unit-6 w-6 h-6 p-0"
-                              color="danger"
-                              size="sm"
-                              variant="solid"
-                              onPress={() => removeFile(index)}
-                            >
-                              ×
-                            </Button>
+                            <button type="button" className="absolute top-1 right-1 inline-flex items-center justify-center w-6 h-6 rounded bg-destructive text-destructive-foreground" onClick={() => removeFile(index)}>×</button>
 
-                            {/* Индикатор типа файла */}
                             {isVideo && (
-                              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">
-                                ▶
-                              </div>
+                              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">▶</div>
                             )}
                           </div>
 
-                          {/* Информация о файле */}
                           <div className="p-2">
-                            <p
-                              className="text-xs text-gray-600 dark:text-gray-400 truncate"
-                              title={file.name}
-                            >
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {formatFileSize(file.size)}
-                            </p>
+                            <p className="text-xs text-muted-foreground truncate" title={file.name}>{file.name}</p>
+                            <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
                           </div>
                         </div>
                       );
@@ -274,38 +223,26 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
                 </div>
               )}
 
-              {/* Информация о лимитах */}
-              <div className="text-xs text-gray-500 space-y-1">
+              <div className="text-xs text-muted-foreground space-y-1">
                 <p>Максимальный размер файла: 5MB</p>
                 <p>Максимум файлов: 5</p>
                 <div className="flex flex-wrap gap-1">
                   <span>Поддерживаемые форматы:</span>
                   {["JPG", "PNG", "GIF", "WEBP", "WEBM", "MP4"].map((type) => (
-                    <Chip key={type} color="default" size="sm" variant="flat">
-                      {type}
-                    </Chip>
+                    <Badge key={type} variant="default" className="text-xs px-2 py-0.5">{type}</Badge>
                   ))}
                 </div>
               </div>
             </div>
-          </ModalBody>
+          </div>
 
-          <ModalFooter>
-            <Button
-              color="danger"
-              disabled={isLoading}
-              variant="light"
-              onPress={onClose}
-            >
-              {t("cancel")}
-            </Button>
-            <Button color="primary" isLoading={isLoading} type="submit">
-              {t("submit")}
-            </Button>
-          </ModalFooter>
+          <DialogFooter className="flex items-center justify-end gap-2">
+            <Button variant="outline" disabled={isLoading} onClick={onClose}>{t("cancel")}</Button>
+            <Button type="submit" disabled={isLoading}>{t("submit")}</Button>
+          </DialogFooter>
         </form>
-      </ModalContent>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 

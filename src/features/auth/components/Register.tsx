@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import ReCAPTCHA from "react-google-recaptcha";
-import { useTheme } from "next-themes";
+import { useTheme } from "@wrksz/themes/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 
@@ -23,14 +23,27 @@ type Props = {
   setSelected: (value: string) => void;
 };
 
+const RecaptchaWithRef = ReCAPTCHA as React.ComponentType<
+  React.ComponentProps<typeof ReCAPTCHA> & { ref?: React.RefObject<any> }
+>;
+type ReCAPTCHAInstance = {
+  reset: () => void;
+  execute: () => void;
+  executeAsync: () => Promise<string | null>;
+};
+
 const Register = ({ setSelected }: Props) => {
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
-  const { theme } = useTheme();
+  const recaptchaRef = useRef<ReCAPTCHAInstance>(null);
+  const recaptchaTimerRef = useRef<NodeJS.Timeout | null>(null); // 👈 таймер
+
+  const { resolvedTheme } = useTheme();
   const t = useTranslations("Auth.register");
 
   const {
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<TypeRegisterSchema>({
     resolver: zodResolver(RegisterSchema),
@@ -49,21 +62,54 @@ const Register = ({ setSelected }: Props) => {
   // React Query mutation для регистрации
   const { registerAsync, isLoadingRegister } = useRegisterMutation();
 
-  const onSubmit = async (values: TypeRegisterSchema) => {
-    if (recaptchaValue) {
-      toast.promise(registerAsync({ values, recaptcha: recaptchaValue }), {
-        loading: t("verifying"),
-        success: {
-          message: t("success"),
-          description: t("registerDescription"),
-        },
-        error: t("error"),
-      });
+  const handleRecaptchaChange = (value: string | null) => {
+    setRecaptchaValue(value);
 
-      control._resetDefaultValues();
-    } else {
-      toast.error("Пожалуйста, завершите проверку reCAPTCHA");
+    if (recaptchaTimerRef.current) {
+      clearTimeout(recaptchaTimerRef.current);
     }
+
+    if (value) {
+      recaptchaTimerRef.current = setTimeout(
+        () => {
+          recaptchaRef.current?.reset();
+          setRecaptchaValue(null);
+          toast.info("reCAPTCHA сброшена, пожалуйста, подтвердите снова");
+        },
+        110 * 1000,
+      ); // 1:50 (чуть меньше 2 минут, чтобы успеть подтвердить повторно до истечения срока действия токена)
+    }
+  };
+
+  // чистим таймер при размонтировании компонента
+  useEffect(() => {
+    return () => {
+      if (recaptchaTimerRef.current) {
+        clearTimeout(recaptchaTimerRef.current);
+      }
+    };
+  }, []);
+
+  const onSubmit = async (values: TypeRegisterSchema) => {
+    if (!recaptchaValue) {
+      toast.error("Пожалуйста, завершите проверку reCAPTCHA");
+      return;
+    }
+
+    toast.promise(registerAsync({ values, recaptcha: recaptchaValue }).finally(()=> {
+      recaptchaRef.current?.reset();
+      setRecaptchaValue(null);
+      reset();
+
+    }), {
+      loading: t("verifying"),
+      success: {
+        message: t("success"),
+        description: t("registerDescription"),
+      },
+      error: t("error"),
+    });
+
   };
 
   return (
@@ -98,10 +144,11 @@ const Register = ({ setSelected }: Props) => {
         required="Обязательное поле"
         type="password"
       />
-      <ReCAPTCHA
+      <RecaptchaWithRef
+        ref={recaptchaRef}
         sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
-        theme={theme === "dark" ? "dark" : "light"}
-        onChange={setRecaptchaValue}
+        theme={resolvedTheme === "dark" ? "dark" : "light"}
+        onChange={handleRecaptchaChange}
       />
       <ErrorMessage error={error} />
       <p className="text-center text-sm">

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useDispatch } from "react-redux";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerFooter, DrawerHeader } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 import {
   closeCreatePostModal,
@@ -18,6 +18,8 @@ export function CreatePostModal() {
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const dispatch = useDispatch();
+
+
 
   const handleClose = () => dispatch(closeCreatePostModal());
 
@@ -37,6 +39,7 @@ export function CreatePostModal() {
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+
       <DrawerContent className="p-0 border-none bg-transparent ">
         <CreatePost
           className="mb-0 rounded-b-none border-b-0"
@@ -44,6 +47,9 @@ export function CreatePostModal() {
           onSuccessComplete={handleClose}
         />
       </DrawerContent>
+      <DrawerFooter>
+        
+      </DrawerFooter>
     </Drawer>
   );
 }

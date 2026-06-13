@@ -1,21 +1,28 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  Textarea,
-  Chip,
-  Select,
-  SelectItem,
-} from "@heroui/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   useCreateThreadInCategory,
@@ -54,46 +61,17 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 
     if (!formData.content.trim()) {
       toast.error(t("errorRequired"));
-
       return;
     }
-
     if (selectedFiles.length > 5) {
       toast.error("Максимум 5 файлов");
-
       return;
     }
 
     try {
-      const formDataToSend = new FormData();
-
-      formDataToSend.append("subject", formData.subject);
-      formDataToSend.append("content", formData.content);
-      formDataToSend.append("authorName", formData.authorName || "Аноним");
-
-      // Добавляем slug если указан
-      if (formData.threadSlug.trim()) {
-        formDataToSend.append("slug", formData.threadSlug.trim());
-      }
-
-      // Добавляем выбранные теги как массив ID
-      if (selectedTags.size > 0) {
-        const tagIds = Array.from(selectedTags)
-          .map((slug) => {
-            const tag = tags?.find((t) => t.slug === slug);
-
-            return tag?.id;
-          })
-          .filter(Boolean);
-
-        tagIds.forEach((id) => {
-          if (id) formDataToSend.append("tagIds[]", id);
-        });
-      }
-
-      selectedFiles.forEach((file) => {
-        formDataToSend.append("images", file);
-      });
+      const tagIds = Array.from(selectedTags)
+        .map((slug) => tags?.find((t) => t.slug === slug)?.id)
+        .filter(Boolean) as string[];
 
       await createThread({
         slug: categorySlug,
@@ -101,29 +79,16 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
           subject: formData.subject,
           content: formData.content,
           authorName: formData.authorName || "Аноним",
-          tagIds: Array.from(selectedTags)
-            .map((slug) => {
-              const tag = tags?.find((t) => t.slug === slug);
-
-              return tag?.id;
-            })
-            .filter(Boolean) as string[],
+          tagIds,
         },
         files: selectedFiles,
       });
 
       toast.success("Тред создан успешно!");
       onClose();
-      setFormData({
-        subject: "",
-        content: "",
-        authorName: "",
-        threadSlug: "",
-      });
+      setFormData({ subject: "", content: "", authorName: "", threadSlug: "" });
       setSelectedFiles([]);
       setSelectedTags(new Set());
-
-      // Перезагрузка страницы для обновления списка тредов
       window.location.reload();
     } catch (error: any) {
       toast.error(error?.message || t("errorCreate"));
@@ -132,36 +97,22 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-    if (files.length === 0) return;
-
-    // Проверка количества файлов
     if (selectedFiles.length + files.length > 5) {
       toast.error("Максимум 5 файлов");
-
       return;
     }
 
-    // Проверка каждого файла (базовые ограничения)
+    const allowedTypes = ["jpg", "jpeg", "png", "gif", "webp", "webm", "mp4"];
     for (const file of files) {
-      // Проверка размера файла (5MB по умолчанию)
       if (file.size > 5242880) {
-        toast.error(
-          `Файл ${file.name} слишком большой. Максимальный размер: 5MB`,
-        );
-
+        toast.error(`Файл ${file.name} слишком большой. Максимум: 5MB`);
         return;
       }
-
-      // Проверка типа файла
-      const fileExt = file.name.split(".").pop()?.toLowerCase();
-      const allowedTypes = ["jpg", "jpeg", "png", "gif", "webp", "webm", "mp4"];
-
-      if (fileExt && !allowedTypes.includes(fileExt)) {
-        toast.error(
-          `Тип файла ${fileExt} не поддерживается. Разрешённые типы: ${allowedTypes.join(", ")}`,
-        );
-
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (ext && !allowedTypes.includes(ext)) {
+        toast.error(`Тип .${ext} не поддерживается`);
         return;
       }
     }
@@ -173,704 +124,275 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const generateSlug = (subject: string) => {
-    return subject
+  const generateSlug = (subject: string) =>
+    subject
       .toLowerCase()
       .replace(/[^a-zA-Zа-яё0-9\s-]/g, "")
       .replace(/\s+/g, "-")
       .slice(0, 50);
+
+  const toggleTag = (slug: string) => {
+    setSelectedTags((prev) => {
+      const next = new Set(prev);
+      next.has(slug) ? next.delete(slug) : next.add(slug);
+      return next;
+    });
   };
 
   return (
-    <Modal isOpen={isOpen} scrollBehavior="inside" size="2xl" onClose={onClose}>
-      <ModalContent>
-        <form onSubmit={handleSubmit}>
-          <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold">
-              {t("title")} {category.name}
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Создайте новую тему для обсуждения в категории
-            </p>
-          </ModalHeader>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {t("title")} {category.name}
+          </DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Создайте новую тему для обсуждения в категории
+          </p>
+        </DialogHeader>
 
-          <ModalBody className="gap-4">
-            {/* Имя автора */}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-1.5">
+            <Label htmlFor="authorName">{t("nameLabel")}</Label>
             <Input
-              description={t("nameDescription")}
-              label={t("nameLabel")}
+              id="authorName"
               placeholder={t("namePlaceholder")}
               value={formData.authorName}
-              variant="bordered"
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, authorName: e.target.value }))
               }
             />
+            <p className="text-xs text-muted-foreground">
+              {t("nameDescription")}
+            </p>
+          </div>
 
-            {/* Тема треда */}
+          <div className="space-y-1.5">
+            <Label htmlFor="subject">{t("subjectLabel")} *</Label>
             <Input
-              isRequired
-              label={t("subjectLabel")}
+              required
+              id="subject"
               placeholder={t("subjectPlaceholder")}
               value={formData.subject}
-              variant="bordered"
               onChange={(e) => {
                 const subject = e.target.value;
-
                 setFormData((prev) => ({
                   ...prev,
                   subject,
-                  // Автогенерация slug только если он пустой
                   threadSlug: prev.threadSlug || generateSlug(subject),
                 }));
               }}
             />
+          </div>
 
-            {/* Slug треда */}
-            <Input
-              description="Используется в URL. Оставьте пустым для автогенерации"
-              label="URL-адрес (slug)"
-              placeholder="thread-url-slug"
-              startContent={
-                <span className="text-sm text-gray-500">
-                  /forum/categories/{categorySlug}/
-                </span>
-              }
-              value={formData.threadSlug}
-              variant="bordered"
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, threadSlug: e.target.value }))
-              }
-            />
+          <div className="space-y-1.5">
+            <Label htmlFor="threadSlug">URL-адрес (slug)</Label>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
+                /forum/categories/{categorySlug}/
+              </span>
+              <Input
+                id="threadSlug"
+                placeholder="thread-url-slug"
+                value={formData.threadSlug}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    threadSlug: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Используется в URL. Оставьте пустым для автогенерации
+            </p>
+          </div>
 
-            {/* Выбор тегов */}
-            {tags && tags.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="thread-tags">
-                  {t("tagsLabel")}
-                </label>
-                <Select
-                  id="thread-tags"
-                  items={tags}
-                  label={t("tagsLabel")}
-                  placeholder={t("tagsPlaceholder")}
-                  selectedKeys={selectedTags}
-                  selectionMode="multiple"
-                  variant="bordered"
-                  onSelectionChange={(keys) =>
-                    setSelectedTags(keys as Set<string>)
-                  }
-                >
-                  {(tag: any) => (
-                    <SelectItem
-                      key={tag.slug}
-                      description={tag.description || undefined}
-                      startContent={
-                        tag.icon ? (
-                          /^https?:\/\//.test(tag.icon) ? (
+          {tags && tags.length > 0 && (
+            <div className="space-y-2">
+              <Label>{t("tagsLabel")}</Label>
+              <Select
+                onValueChange={(val) => {
+                  if (val) toggleTag(val);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("tagsPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {tags.map((tag: any) => (
+                    <SelectItem key={tag.slug} value={tag.slug}>
+                      {tag.icon && (
+                        <span className="mr-1">
+                          {/^https?:\/\//.test(tag.icon) ? (
                             <img
                               alt=""
-                              className="w-4 h-4 object-cover rounded"
+                              className="inline w-4 h-4 object-cover rounded"
                               src={tag.icon}
                             />
                           ) : (
-                            <span className="text-sm">{tag.icon}</span>
-                          )
-                        ) : null
-                      }
-                      textValue={tag.name}
-                    >
+                            tag.icon
+                          )}
+                        </span>
+                      )}
                       {tag.name}
                     </SelectItem>
-                  )}
-                </Select>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                {/* Превью выбранных тегов */}
-                {selectedTags.size > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {Array.from(selectedTags).map((tagSlug) => {
-                      const tag = tags.find((t) => t.slug === tagSlug);
+              {selectedTags.size > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(selectedTags).map((tagSlug) => {
+                    const tag = tags.find((t: any) => t.slug === tagSlug);
+                    if (!tag) return null;
+                    return (
+                      <Badge
+                        key={tag.slug}
+                        className="cursor-pointer gap-1"
+                        style={{ backgroundColor: tag.color || undefined }}
+                        variant="secondary"
+                        onClick={() => toggleTag(tagSlug)}
+                      >
+                        {tag.name} ×
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
-                      if (!tag) return null;
-
-                      return (
-                        <Chip
-                          key={tag.slug}
-                          size="sm"
-                          style={{ backgroundColor: tag.color || undefined }}
-                          variant="flat"
-                          onClose={() => {
-                            const newTags = new Set(selectedTags);
-
-                            newTags.delete(tagSlug);
-                            setSelectedTags(newTags);
-                          }}
-                        >
-                          {tag.icon ? (
-                            /^https?:\/\//.test(tag.icon) ? (
-                              <img
-                                alt=""
-                                className="inline-block w-4 h-4 object-cover rounded mr-1 align-[-2px]"
-                                loading="lazy"
-                                src={tag.icon}
-                              />
-                            ) : (
-                              <span className="mr-1">{tag.icon}</span>
-                            )
-                          ) : null}
-                          {tag.name}
-                        </Chip>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Содержание */}
+          <div className="space-y-1.5">
+            <Label htmlFor="content">{t("contentLabel")} *</Label>
             <Textarea
-              isRequired
-              label={t("contentLabel")}
-              maxRows={8}
-              minRows={4}
+              required
+              id="content"
               placeholder="Введите содержание треда..."
+              rows={5}
               value={formData.content}
-              variant="bordered"
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, content: e.target.value }))
               }
             />
+          </div>
 
-            {/* Загрузка файла */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t("fileLabel")}</label>
-              <input
-                multiple
-                accept=".jpg,.jpeg,.png,.gif,.webp,.webm,.mp4"
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-primary-50 file:text-primary-700
-                  hover:file:bg-primary-100"
-                type="file"
-                onChange={handleFileChange}
-              />
+          <div className="space-y-2">
+            <Label htmlFor="files">{t("fileLabel")}</Label>
+            <input
+              multiple
+              accept=".jpg,.jpeg,.png,.gif,.webp,.webm,.mp4"
+              className="block w-full text-sm text-muted-foreground
+                file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+                file:text-sm file:font-semibold file:bg-primary/10 file:text-primary
+                hover:file:bg-primary/20"
+              id="files"
+              type="file"
+              onChange={handleFileChange}
+            />
 
-              {/* Список выбранных файлов */}
-              {selectedFiles.length > 0 && (
-                <div className="space-y-3">
-                  <p className="text-sm font-medium">
-                    Выбранные файлы ({selectedFiles.length}/5):
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {selectedFiles.map((file, index) => {
-                      const fileURL = URL.createObjectURL(file);
-                      const isImage = file.type.startsWith("image/");
-                      const isVideo = file.type.startsWith("video/");
+            {selectedFiles.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  Выбранные файлы ({selectedFiles.length}/5):
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {selectedFiles.map((file, index) => {
+                    const fileURL = URL.createObjectURL(file);
+                    const isImage = file.type.startsWith("image/");
+                    const isVideo = file.type.startsWith("video/");
 
-                      return (
-                        <div
-                          key={index}
-                          className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
-                        >
-                          {/* Превью медиа */}
-                          <div className="aspect-square relative bg-gray-200 dark:bg-gray-700">
-                            {isImage ? (
-                              <img
-                                alt={file.name}
-                                className="w-full h-full object-cover"
-                                src={fileURL}
-                                onLoad={() => URL.revokeObjectURL(fileURL)}
-                              />
-                            ) : isVideo ? (
-                              <video
-                                muted
-                                className="w-full h-full object-cover"
-                                src={fileURL}
-                                onLoadedData={() =>
-                                  URL.revokeObjectURL(fileURL)
-                                }
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <div className="text-center">
-                                  <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                                    <span className="text-xl">📄</span>
-                                  </div>
-                                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                                    {file.name.split(".").pop()?.toUpperCase()}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
+                    return (
+                      <div
+                        key={index}
+                        className="relative rounded-lg overflow-hidden border bg-muted"
+                      >
+                        <div className="aspect-square relative">
+                          {isImage ? (
+                            <img
+                              alt={file.name}
+                              className="w-full h-full object-cover"
+                              src={fileURL}
+                              onLoad={() => URL.revokeObjectURL(fileURL)}
+                            />
+                          ) : isVideo ? (
+                            <video
+                              muted
+                              className="w-full h-full object-cover"
+                              src={fileURL}
+                              onLoadedData={() => URL.revokeObjectURL(fileURL)}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-2xl">📄</span>
+                            </div>
+                          )}
 
-                            {/* Кнопка удаления */}
-                            <Button
-                              className="absolute top-1 right-1 min-w-unit-6 w-6 h-6 p-0"
-                              color="danger"
-                              size="sm"
-                              variant="solid"
-                              onPress={() => removeFile(index)}
-                            >
-                              ×
-                            </Button>
+                          <Button
+                            className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
+                            size="sm"
+                            type="button"
+                            variant="destructive"
+                            onClick={() => removeFile(index)}
+                          >
+                            ×
+                          </Button>
 
-                            {/* Индикатор типа файла */}
-                            {isVideo && (
-                              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">
-                                ▶
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Информация о файле */}
-                          <div className="p-2">
-                            <p
-                              className="text-xs text-gray-600 dark:text-gray-400 truncate"
-                              title={file.name}
-                            >
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {(file.size / 1024 / 1024).toFixed(1)}MB
-                            </p>
-                          </div>
+                          {isVideo && (
+                            <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">
+                              ▶
+                            </div>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
-              {/* Информация о лимитах */}
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>Максимальный размер файла: 5MB</p>
-                <p>Максимум файлов: 5</p>
-                <div className="flex flex-wrap gap-1">
-                  <span>Поддерживаемые форматы:</span>
-                  {["JPG", "PNG", "GIF", "WEBP", "WEBM", "MP4"].map((type) => (
-                    <Chip key={type} color="default" size="sm" variant="flat">
-                      {type}
-                    </Chip>
-                  ))}
+                        <div className="p-2">
+                          <p
+                            className="text-xs text-muted-foreground truncate"
+                            title={file.name}
+                          >
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {(file.size / 1024 / 1024).toFixed(1)}MB
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-          </ModalBody>
+            )}
 
-          <ModalFooter>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>Максимальный размер файла: 5MB · Максимум файлов: 5</p>
+              <div className="flex flex-wrap gap-1">
+                <span>Форматы:</span>
+                {["JPG", "PNG", "GIF", "WEBP", "WEBM", "MP4"].map((type) => (
+                  <Badge key={type} variant="outline">
+                    {type}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
             <Button
-              color="danger"
               disabled={isLoading}
-              variant="light"
-              onPress={onClose}
+              type="button"
+              variant="ghost"
+              onClick={onClose}
             >
               {t("cancel")}
             </Button>
-            <Button color="primary" isLoading={isLoading} type="submit">
-              {t("submit")}
+            <Button disabled={isLoading} type="submit">
+              {isLoading ? "Создаём..." : t("submit")}
             </Button>
-          </ModalFooter>
+          </DialogFooter>
         </form>
-      </ModalContent>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 
 export default CreateThreadModal;
-
-//   const [formData, setFormData] = useState({
-//     subject: '',
-//     content: '',
-//     authorName: '',
-//     threadSlug: ''
-//   })
-//   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-//   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault()
-
-//     if (!formData.content.trim()) {
-//       toast.error(t('errorRequired'))
-//       return
-//     }
-
-//     if (selectedFiles.length > 5) {
-//       toast.error('Максимум 5 файлов')
-//       return
-//     }
-
-//     try {
-//       const formDataToSend = new FormData()
-//       formDataToSend.append('subject', formData.subject)
-//       formDataToSend.append('content', formData.content)
-//       formDataToSend.append('authorName', formData.authorName || 'Аноним')
-
-//       // Добавляем slug если указан
-//       if (formData.threadSlug.trim()) {
-//         formDataToSend.append('threadSlug', formData.threadSlug.trim())
-//       }
-
-//       selectedFiles.forEach(file => {
-//         formDataToSend.append('images', file)
-//       })
-
-//       const thread = await createThread({
-//         slug: categorySlug,
-//         formData: formDataToSend
-//       }).unwrap()
-
-//       // Назначаем выбранные теги
-//       if (selectedTags.size > 0) {
-//         const tagSlugs = Array.from(selectedTags)
-//         for (const tagSlug of tagSlugs) {
-//           try {
-//             await assignTag({ threadId: thread.id, tagSlug }).unwrap()
-//           } catch (tagError) {
-//             console.error('Ошибка назначения тега:', tagError)
-//           }
-//         }
-//       }
-
-//       toast.success('Тред создан успешно!')
-//       onClose()
-//       setFormData({
-//         subject: '',
-//         content: '',
-//         authorName: '',
-//         threadSlug: ''
-//       })
-//       setSelectedFiles([])
-//       setSelectedTags(new Set())
-//     } catch (error: any) {
-//       toast.error(error?.data?.error || t('errorCreate'))
-//     }
-//   }
-
-//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const files = Array.from(e.target.files || [])
-
-//     if (files.length === 0) return
-
-//     // Проверка количества файлов
-//     if (selectedFiles.length + files.length > 5) {
-//       toast.error('Максимум 5 файлов')
-//       return
-//     }
-
-//     // Проверка каждого файла (базовые ограничения)
-//     for (const file of files) {
-//       // Проверка размера файла (5MB по умолчанию)
-//       if (file.size > 5242880) {
-//         toast.error(`Файл ${file.name} слишком большой. Максимальный размер: 5MB`)
-//         return
-//       }
-
-//       // Проверка типа файла
-//       const fileExt = file.name.split('.').pop()?.toLowerCase()
-//       const allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'webm', 'mp4']
-//       if (fileExt && !allowedTypes.includes(fileExt)) {
-//         toast.error(`Тип файла ${fileExt} не поддерживается. Разрешённые типы: ${allowedTypes.join(', ')}`)
-//         return
-//       }
-//     }
-
-//     setSelectedFiles(prev => [...prev, ...files])
-//   }
-
-//   const removeFile = (index: number) => {
-//     setSelectedFiles(prev => prev.filter((_, i) => i !== index))
-//   }
-
-//   const generateSlug = (subject: string) => {
-//     return subject
-//       .toLowerCase()
-//       .replace(/[^a-zA-Zа-яё0-9\s-]/g, '')
-//       .replace(/\s+/g, '-')
-//       .slice(0, 50)
-//   }
-
-//   return (
-//     <Modal
-//       isOpen={isOpen}
-//       onClose={onClose}
-//       size="2xl"
-//       scrollBehavior="inside"
-//     >
-//       <ModalContent>
-//         <form onSubmit={handleSubmit}>
-//           <ModalHeader className="flex flex-col gap-1">
-//             <h2 className="text-xl font-bold">{t('title')} {category.name}</h2>
-//             <p className="text-sm text-gray-600 dark:text-gray-400">
-//               Создайте новую тему для обсуждения в категории
-//             </p>
-//           </ModalHeader>
-
-//           <ModalBody className="gap-4">
-//             {/* Имя автора */}
-//             <Input
-//               label={t('nameLabel')}
-//               placeholder={t('namePlaceholder')}
-//               value={formData.authorName}
-//               onChange={(e) => setFormData(prev => ({ ...prev, authorName: e.target.value }))}
-//               variant="bordered"
-//               description={t('nameDescription')}
-//             />
-
-//             {/* Тема треда */}
-//             <Input
-//               label={t('subjectLabel')}
-//               placeholder={t('subjectPlaceholder')}
-//               value={formData.subject}
-//               onChange={(e) => {
-//                 const subject = e.target.value
-//                 setFormData(prev => ({
-//                   ...prev,
-//                   subject,
-//                   // Автогенерация slug только если он пустой
-//                   threadSlug: prev.threadSlug || generateSlug(subject)
-//                 }))
-//               }}
-//               variant="bordered"
-//               isRequired
-//             />
-
-//             {/* Slug треда */}
-//             <Input
-//               label="URL-адрес (slug)"
-//               placeholder="thread-url-slug"
-//               value={formData.threadSlug}
-//               onChange={(e) => setFormData(prev => ({ ...prev, threadSlug: e.target.value }))}
-//               variant="bordered"
-//               description="Используется в URL. Оставьте пустым для автогенерации"
-//               startContent={<span className="text-sm text-gray-500">/forum/categories/{categorySlug}/</span>}
-//             />
-
-//             {/* Выбор тегов */}
-//             {tags && tags.length > 0 && (
-//               <div className="space-y-2">
-//                 <label className="text-sm font-medium" htmlFor="thread-tags">{t('tagsLabel')}</label>
-//                 <Select
-//                   id="thread-tags"
-//                   label={t('tagsLabel')}
-//                   placeholder={t('tagsPlaceholder')}
-//                   selectionMode="multiple"
-//                   selectedKeys={selectedTags}
-//                   onSelectionChange={(keys) => setSelectedTags(keys as Set<string>)}
-//                   variant="bordered"
-//                   items={tags}
-//                 >
-//                   {(tag) => (
-//                     <SelectItem
-//                     // @ts-ignore
-//                       key={tag.slug}
-//                     // @ts-ignore
-//                       textValue={tag.name}
-//                       startContent={
-//                     // @ts-ignore
-//                         tag.icon ? (
-//                     // @ts-ignore
-//                           /^https?:\/\//.test(tag.icon) ? (
-//                     // @ts-ignore
-//                             <img src={tag.icon} alt="" className="w-4 h-4 object-cover rounded" />
-//                           ) : (
-//                     // @ts-ignore
-//                             <span className="text-sm">{tag.icon}</span>
-//                           )
-//                         ) : null
-//                       }
-//                     // @ts-ignore
-//                       description={tag.description || undefined}
-//                     >
-//                     {/* @ts-ignore */}
-//                       {tag.name}
-//                     </SelectItem>
-//                   )}
-//                 </Select>
-
-//                 {/* Превью выбранных тегов */}
-//                 {selectedTags.size > 0 && (
-//                   <div className="flex flex-wrap gap-2">
-//                     {Array.from(selectedTags).map((tagSlug) => {
-//                     {/* @ts-ignore */}
-//                       const tag = tags.find(t => t.slug === tagSlug)
-//                       if (!tag) return null
-//                       return (
-//                         <Chip
-//                           key={tag.slug}
-//                           size="sm"
-//                           variant="flat"
-//                           style={{ backgroundColor: tag.color || undefined }}
-//                           onClose={() => {
-//                             const newTags = new Set(selectedTags)
-//                             newTags.delete(tagSlug)
-//                             setSelectedTags(newTags)
-//                           }}
-//                         >
-//                           {tag.icon ? (
-//                             /^https?:\/\//.test(tag.icon) ? (
-//                               <img
-//                                 src={tag.icon}
-//                                 alt=""
-//                                 className="inline-block w-4 h-4 object-cover rounded mr-1 align-[-2px]"
-//                                 loading="lazy"
-//                               />
-//                             ) : (
-//                               <span className="mr-1">{tag.icon}</span>
-//                             )
-//                           ) : null}
-//                           {tag.name}
-//                         </Chip>
-//                       )
-//                     })}
-//                   </div>
-//                 )}
-//               </div>
-//             )}
-
-//             {/* Содержание */}
-//             <Textarea
-//               label={t('contentLabel')}
-//               placeholder="Введите содержание треда..."
-//               value={formData.content}
-//               onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-//               variant="bordered"
-//               minRows={4}
-//               maxRows={8}
-//               isRequired
-//             />
-
-//             {/* Загрузка файла */}
-//             <div className="space-y-2">
-//               <label className="text-sm font-medium">{t('fileLabel')}</label>
-//               <input
-//                 type="file"
-//                 multiple
-//                 accept=".jpg,.jpeg,.png,.gif,.webp,.webm,.mp4"
-//                 onChange={handleFileChange}
-//                 className="block w-full text-sm text-gray-500
-//                   file:mr-4 file:py-2 file:px-4
-//                   file:rounded-full file:border-0
-//                   file:text-sm file:font-semibold
-//                   file:bg-primary-50 file:text-primary-700
-//                   hover:file:bg-primary-100"
-//               />
-
-//               {/* Список выбранных файлов */}
-//               {selectedFiles.length > 0 && (
-//                 <div className="space-y-3">
-//                   <p className="text-sm font-medium">Выбранные файлы ({selectedFiles.length}/5):</p>
-//                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-//                     {selectedFiles.map((file, index) => {
-//                       const fileURL = URL.createObjectURL(file);
-//                       const isImage = file.type.startsWith('image/');
-//                       const isVideo = file.type.startsWith('video/');
-
-//                       return (
-//                         <div key={index} className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-//                           {/* Превью медиа */}
-//                           <div className="aspect-square relative bg-gray-200 dark:bg-gray-700">
-//                             {isImage ? (
-//                               <img
-//                                 src={fileURL}
-//                                 alt={file.name}
-//                                 className="w-full h-full object-cover"
-//                                 onLoad={() => URL.revokeObjectURL(fileURL)}
-//                               />
-//                             ) : isVideo ? (
-//                               <video
-//                                 src={fileURL}
-//                                 className="w-full h-full object-cover"
-//                                 muted
-//                                 onLoadedData={() => URL.revokeObjectURL(fileURL)}
-//                               />
-//                             ) : (
-//                               <div className="w-full h-full flex items-center justify-center">
-//                                 <div className="text-center">
-//                                   <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-//                                     <span className="text-xl">📄</span>
-//                                   </div>
-//                                   <span className="text-xs text-gray-600 dark:text-gray-400">
-//                                     {file.name.split('.').pop()?.toUpperCase()}
-//                                   </span>
-//                                 </div>
-//                               </div>
-//                             )}
-
-//                             {/* Кнопка удаления */}
-//                             <Button
-//                               size="sm"
-//                               color="danger"
-//                               variant="solid"
-//                               className="absolute top-1 right-1 min-w-unit-6 w-6 h-6 p-0"
-//                               onPress={() => removeFile(index)}
-//                             >
-//                               ×
-//                             </Button>
-
-//                             {/* Индикатор типа файла */}
-//                             {isVideo && (
-//                               <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">
-//                                 ▶
-//                               </div>
-//                             )}
-//                           </div>
-
-//                           {/* Информация о файле */}
-//                           <div className="p-2">
-//                             <p className="text-xs text-gray-600 dark:text-gray-400 truncate" title={file.name}>
-//                               {file.name}
-//                             </p>
-//                             <p className="text-xs text-gray-500">
-//                               {(file.size / 1024 / 1024).toFixed(1)}MB
-//                             </p>
-//                           </div>
-//                         </div>
-//                       );
-//                     })}
-//                   </div>
-//                 </div>
-//               )}
-
-//               {/* Информация о лимитах */}
-//               <div className="text-xs text-gray-500 space-y-1">
-//                 <p>Максимальный размер файла: 5MB</p>
-//                 <p>Максимум файлов: 5</p>
-//                 <div className="flex flex-wrap gap-1">
-//                   <span>Поддерживаемые форматы:</span>
-//                   {['JPG', 'PNG', 'GIF', 'WEBP', 'WEBM', 'MP4'].map(type => (
-//                     <Chip key={type} size="sm" variant="flat" color="default">
-//                       {type}
-//                     </Chip>
-//                   ))}
-//                 </div>
-//               </div>
-//             </div>
-//           </ModalBody>
-
-//           <ModalFooter>
-//             <Button
-//               color="danger"
-//               variant="light"
-//               onPress={onClose}
-//               disabled={isLoading}
-//             >
-//               {t('cancel')}
-//             </Button>
-//             <Button
-//               color="primary"
-//               type="submit"
-//               isLoading={isLoading}
-//             >
-//               {t('submit')}
-//             </Button>
-//           </ModalFooter>
-//         </form>
-//       </ModalContent>
-//     </Modal>
-//   )
-// }
-
-// export default CreateThreadModal

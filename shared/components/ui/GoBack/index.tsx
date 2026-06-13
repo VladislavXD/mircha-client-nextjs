@@ -2,7 +2,7 @@
 import { ArrowLeft, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const GoBack = ({title}: {title: string}) => {
+const GoBack = ({title, className}: {title: string; className?: string}) => {
   const router = useRouter();
 
   const handleGoBack = () => {
@@ -16,7 +16,7 @@ const GoBack = ({title}: {title: string}) => {
       onClick={handleGoBack}
     >
       <ChevronLeft
-      className="transition-transform group-hover:-translate-x-0.5 !p-0 !m-0"
+      className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform !p-0 !m-0"
       size={25}
       strokeWidth={2.5}
       color="white"
@@ -25,7 +25,7 @@ const GoBack = ({title}: {title: string}) => {
      
       
     </button>
-      <span className="text-2xl font-semibold text-white ">{title}</span>
+      <span className={`text-2xl font-semibold text-white ${className}`}>{title}</span>
     </div>
     
   );

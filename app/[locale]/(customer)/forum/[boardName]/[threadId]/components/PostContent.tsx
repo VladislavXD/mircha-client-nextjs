@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Modal, ModalContent, ModalBody } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
 
 interface PostContentProps {
@@ -106,14 +107,9 @@ const PostContent: React.FC<PostContentProps> = ({
 
       {/* Модальное окно для полноразмерного изображения */}
       {imageUrl && !isVideo(imageUrl) && (
-        <Modal
-          className="bg-black bg-opacity-90"
-          isOpen={showFullImage}
-          size="full"
-          onClose={() => setShowFullImage(false)}
-        >
-          <ModalContent className="bg-transparent shadow-none">
-            <ModalBody className="flex items-center justify-center p-4">
+        <Dialog open={showFullImage} onOpenChange={(open) => { if (!open) setShowFullImage(false); }}>
+          <DialogContent className="bg-transparent shadow-none">
+            <div className="flex items-center justify-center p-4">
               <div className="relative max-w-full max-h-full">
                 <Image
                   unoptimized
@@ -123,18 +119,13 @@ const PostContent: React.FC<PostContentProps> = ({
                   src={imageUrl}
                   width={1200}
                 />
-                <Button
-                  className="absolute top-4 right-4"
-                  color="danger"
-                  variant="flat"
-                  onPress={() => setShowFullImage(false)}
-                >
+                <Button className="absolute top-4 right-4" variant="ghost" onClick={() => setShowFullImage(false)}>
                   Закрыть
                 </Button>
               </div>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

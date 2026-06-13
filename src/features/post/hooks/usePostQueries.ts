@@ -84,6 +84,8 @@ export function usePost(
 
       return pages?.pages.flatMap((p) => p.items).find((p) => p.id === id);
     },
+    initialDataUpdatedAt: () => queryClient.getQueryState(postKeys.lists())?.dataUpdatedAt,
+
     ...options,
   });
 }

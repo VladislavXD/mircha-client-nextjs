@@ -1,10 +1,11 @@
 "use client";
-
 import type { Board } from "@/src/features/forum";
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { Card, CardBody, CardHeader, Chip, Pagination } from "@heroui/react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 type Props = {
   boards: Board[];
@@ -53,31 +54,17 @@ export default function BoardsList({ boards, pageSize = 10 }: Props) {
                 </div>
                 <div className="flex flex-col gap-1 ml-2 shrink-0">
                   {board.isNsfw && (
-                    <Chip
-                      className="text-xs"
-                      color="danger"
-                      size="sm"
-                      variant="flat"
-                    >
-                      18+
-                    </Chip>
+                    <Badge className="text-xs px-2 py-1" variant="destructive">18+</Badge>
                   )}
-                  <Chip
-                    className="text-xs"
-                    color="default"
-                    size="sm"
-                    variant="flat"
-                  >
-                    {board._count?.threads || 0}
-                  </Chip>
+                  <Badge className="text-xs px-2 py-1" variant="outline">{board._count?.threads || 0}</Badge>
                 </div>
               </CardHeader>
               {board.description && (
-                <CardBody className="pt-2 px-4 pb-4">
+                <CardContent className="pt-2 px-4 pb-4">
                   <p className="text-sm text-foreground-500 line-clamp-3 break-words">
                     {board.description}
                   </p>
-                </CardBody>
+                </CardContent>
               )}
             </Card>
           </Link>
@@ -88,18 +75,16 @@ export default function BoardsList({ boards, pageSize = 10 }: Props) {
       {totalPages > 1 && (
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-sm text-foreground-500">
-            Показано {pageBoards.length} из {boards.length}. Страница {page} из{" "}
-            {totalPages}
+            Показано {pageBoards.length} из {boards.length}. Страница {page} из {totalPages}
           </div>
-          <Pagination
-            showControls
-            color="primary"
-            initialPage={1}
-            page={page}
-            size="md"
-            total={totalPages}
-            onChange={setPage}
-          />
+          <div className="flex gap-2 items-center">
+            <Button size="sm" variant="ghost" onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1}>
+              Назад
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page >= totalPages}>
+              Вперёд
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -4,15 +4,14 @@ import type { Thread } from "@/src/features/forum";
 
 import React, { useState } from "react";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Textarea,
-  Input,
-} from "@heroui/react";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
 
@@ -118,42 +117,42 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} size="xl" onClose={onClose}>
-      <ModalContent>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="w-full sm:max-w-xl p-0">
         <form onSubmit={handleSubmit}>
-          <ModalHeader className="flex flex-col gap-1">
+          <DialogHeader className="flex flex-col gap-1">
             <h2 className="text-xl font-bold">{t("title")}</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {thread.subject || `Тред #${thread.id}`}
-            </p>
-          </ModalHeader>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{thread.subject || `Тред #${thread.id}`}</p>
+          </DialogHeader>
 
-          <ModalBody className="gap-4">
+          <div className="gap-4 p-4">
             {/* Имя автора */}
-            <Input
-              description={t("nameDescription")}
-              label={t("nameLabel")}
-              placeholder={t("namePlaceholder")}
-              value={formData.authorName}
-              variant="bordered"
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, authorName: e.target.value }))
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">{t("nameLabel")}</label>
+              <Input
+                placeholder={t("namePlaceholder")}
+                value={formData.authorName}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, authorName: e.target.value }))
+                }
+              />
+              <p className="text-xs text-gray-500">{t("nameDescription")}</p>
+            </div>
 
             {/* Содержание */}
-            <Textarea
-              isRequired
-              label={t("contentLabel")}
-              maxRows={6}
-              minRows={3}
-              placeholder="Введите ваш ответ..."
-              value={formData.content}
-              variant="bordered"
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, content: e.target.value }))
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">{t("contentLabel")} <span className="text-red-500">*</span></label>
+              <Textarea
+                required
+                maxLength={10000}
+                rows={4}
+                placeholder="Введите ваш ответ..."
+                value={formData.content}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, content: e.target.value }))
+                }
+              />
+            </div>
 
             {/* Загрузка файлов */}
             <div className="space-y-2">
@@ -224,11 +223,10 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
 
                             {/* Кнопка удаления */}
                             <Button
-                              className="absolute top-1 right-1 min-w-unit-6 w-6 h-6 p-0"
-                              color="danger"
-                              size="sm"
-                              variant="solid"
-                              onPress={() => removeFile(index)}
+                              className="absolute top-1 right-1 w-6 h-6 p-0"
+                              size="icon-sm"
+                              variant="destructive"
+                              onClick={() => removeFile(index)}
                             >
                               ×
                             </Button>
@@ -267,28 +265,14 @@ const CreateReplyModal: React.FC<CreateReplyModalProps> = ({
                 <p>Поддерживаемые форматы: JPG, PNG, GIF, WEBP, MP4, WEBM</p>
               </div>
             </div>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button
-              color="danger"
-              disabled={createReply.isPending}
-              variant="light"
-              onPress={onClose}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              color="primary"
-              isLoading={createReply.isPending}
-              type="submit"
-            >
-              {t("submit")}
-            </Button>
-          </ModalFooter>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" disabled={createReply.isPending} onClick={onClose}>{t("cancel")}</Button>
+            <Button type="submit" disabled={createReply.isPending}>{t("submit")}</Button>
+          </DialogFooter>
         </form>
-      </ModalContent>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 

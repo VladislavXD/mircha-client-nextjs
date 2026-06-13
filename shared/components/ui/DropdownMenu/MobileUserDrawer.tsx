@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
+import { useTheme } from "@wrksz/themes/client";
 import { useTranslations } from "next-intl";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ import { openSettingsModal } from "@/src/store/settingsModal/settingsModal.slice
 interface MobileUserDrawerProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  isAuth?: boolean;
   user: {
     id: string | number;
     name?: string;
@@ -42,18 +43,19 @@ interface MobileUserDrawerProps {
 export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
   isOpen,
   setIsOpen,
+  isAuth,
   user,
   getInitials,
   isLoadingLogout,
   onLogout,
   onOpenFeedback,
 }) => {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations("HomePage.navbar.dropdownMenu");
   const dispatch = useDispatch();
 
   const handleThemeToggle = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
   const handleLogout = () => {
@@ -76,61 +78,67 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
         </Button>
       </DrawerTrigger>
       <DrawerContent className="bg-white dark:bg-[#101010] outline-none border-t border-neutral-200 dark:border-neutral-800">
-        <div className="p-6 border-b border-neutral-100 dark:border-neutral-800/60 pb-6 text-left">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage alt={user.name} src={user.avatarUrl} />
-              <AvatarFallback>{getInitials()}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <p className="text-base font-semibold leading-none">
-                {user.name}
-              </p>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 pb-1">
-                @{user.username}
-              </p>
+        {isAuth && (
+          <div className="p-6 border-b border-neutral-100 dark:border-neutral-800/60 pb-6 text-left">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage alt={user.name} src={user.avatarUrl} />
+                <AvatarFallback>{getInitials()}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <p className="text-base font-semibold leading-none">
+                  {user.name}
+                </p>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 pb-1">
+                  @{user.username}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-
+        )}
         <div className="overflow-y-auto py-2 px-3 flex flex-col gap-1 max-h-[55vh]">
           <Button
             className="w-full justify-start font-normal h-12"
             variant="ghost"
             onClick={handleThemeToggle}
           >
-            {theme === "dark" ? (
+            {resolvedTheme === "dark" ? (
               <Sun className="mr-3 h-5 w-5 text-neutral-500" />
             ) : (
               <Moon className="mr-3 h-5 w-5 text-neutral-500" />
             )}
-            <span>{theme === "dark" ? "Light Theme" : "Dark Theme"}</span>
+            <span>
+              {resolvedTheme === "dark" ? "Light Theme" : "Dark Theme"}
+            </span>
           </Button>
 
-          <Button
-            asChild
-            className="w-full justify-start font-normal h-12"
-            variant="ghost"
-            onClick={() => setIsOpen(false)}
-          >
-            <Link href={`/user/${user.id}`}>
-              <UserIcon className="mr-3 h-5 w-5 text-neutral-500" />
-              <span>{t("profile")}</span>
-            </Link>
-          </Button>
+          {isAuth && (
+            <>
+              <Button
+                asChild
+                className="w-full justify-start font-normal h-12"
+                variant="ghost"
+                onClick={() => setIsOpen(false)}
+              >
+                <Link href={`/user/${user.id}`}>
+                  <UserIcon className="mr-3 h-5 w-5 text-neutral-500" />
+                  <span>{t("profile")}</span>
+                </Link>
+              </Button>
 
-          <Button
-            className="w-full justify-start font-normal h-12"
-            variant="ghost"
-            onClick={() => {
-              setIsOpen(false);
-              dispatch(openSettingsModal("profile"));
-            }}
-          >
-            <Settings className="mr-3 h-5 w-5 text-neutral-500" />
-            <span>{t("settings")}</span>
-          </Button>
-
+              <Button
+                className="w-full justify-start font-normal h-12"
+                variant="ghost"
+                onClick={() => {
+                  setIsOpen(false);
+                  dispatch(openSettingsModal("profile"));
+                }}
+              >
+                <Settings className="mr-3 h-5 w-5 text-neutral-500" />
+                <span>{t("settings")}</span>
+              </Button>
+            </>
+          )}
           <Button
             className="w-full justify-start font-normal h-12"
             variant="ghost"
@@ -167,7 +175,9 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
           </Button>
         </div>
 
-        <div className="p-4 border-t border-neutral-100 dark:border-neutral-800/60 mt-auto mb-4">
+       {
+        isAuth&& (
+           <div className="p-4 border-t border-neutral-100 dark:border-neutral-800/60 mt-auto mb-4">
           <Button
             className="w-full justify-start font-normal text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 h-12"
             disabled={isLoadingLogout}
@@ -178,6 +188,8 @@ export const MobileUserDrawer: React.FC<MobileUserDrawerProps> = ({
             <span>{t("logout")}</span>
           </Button>
         </div>
+        )
+       }
       </DrawerContent>
     </Drawer>
   );

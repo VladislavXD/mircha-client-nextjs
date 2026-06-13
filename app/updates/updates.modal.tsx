@@ -1,203 +1,134 @@
 import React from "react";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Chip,
-} from "@heroui/react";
-import { CheckCircle2, Circle, Zap, Map } from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerFooter,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
-type UpdatesModalProps = {
+import { changelog } from "./changeLog.data";
+import ChangelogItem from "./changeLogItem.data";
+import { useMediaQuery } from "@/src/hooks/useMediaQuery";
+
+// ─────────────────────────────────────────────
+//  Пропсы
+// ─────────────────────────────────────────────
+
+type Props = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-type PhaseStatus = "done" | "active" | "planned";
+// ─────────────────────────────────────────────
+//  Шапка — одна для модалки и drawer
+// ─────────────────────────────────────────────
 
-const phases: { status: PhaseStatus; phase: string; items: string[] }[] = [
-  {
-    status: "done",
-    phase: "Фаза 1 — Основа",
-    items: [
-      "Регистрация и авторизация http-only cookie",
-      "Лента постов с бесконечным скроллом",
-      "Лайки с оптимистичным UI",
-      "Загрузка медиа (фото / видео)",
-      "Система спойлеров в тексте",
-      "Комментарии и ответы",
-      "Система подписок",
-    ],
-  },
-  {
-    status: "done",
-    phase: "Фаза 2 — Социальность",
-    items: [
-      "Страница поста с полной лентой комментариев",
-      "Карта развития проекта ",
-      "Репосты",
-      "Система упоминаний @username",
-      "Уведомления в реальном времени",
-      "Поиск пользователей и постов",
-    ],
-  },
-  {
-    status: "active",
-    phase: "Фаза 3 — Мессенджер",
-    items: [
-      "Приватные чаты",
-      "Групповые чаты",
-      "Медиа в чатах",
-      "Статус онлайн и индикатор набора",
-      "Прочитанность сообщений",
-      "Уведомления о новых сообщениях",
-      "голосовые сообщения/каналы",
-    ],
-  },
-  {
-    status: "planned",
-    phase: "Фаза 4 — Форум (50/50)",
-    items: [
-      "Доски и темы форума",
-      "Категории и теги",
-      "Модерация и роли",
-      "Голосования в постах",
-    ],
-  },
-  {
-    status: "planned",
-    phase: "Фаза 5 — Платформа",
-    items: [
-      "Мобильное приложение (React Native)",
-      "Рекомендательная лента",
-      "Профильные кастомизации",
-      "API для сторонних клиентов",
-    ],
-  },
-];
-
-const statusConfig: Record<
-  PhaseStatus,
-  { icon: any; color: string; dot: string; label: string; chip: string }
-> = {
-  done: {
-    icon: CheckCircle2,
-    color: "text-success",
-    dot: "bg-success",
-    label: "Готово",
-    chip: "success",
-  },
-  active: {
-    icon: Zap,
-    color: "text-warning",
-    dot: "bg-warning",
-    label: "В разработке",
-    chip: "warning",
-  },
-  planned: {
-    icon: Circle,
-    color: "text-default-400",
-    dot: "bg-default-300",
-    label: "Запланировано",
-    chip: "default",
-  },
-} as const satisfies Record<PhaseStatus, any>;
-
-export default function UpdatesModal({ isOpen, onClose }: UpdatesModalProps) {
+function ChangelogHeader() {
   return (
-    <Modal
-      classNames={{ base: "max-h-[90vh]", body: "py-4 px-4 sm:px-6" }}
-      isOpen={isOpen}
-      scrollBehavior="inside"
-      size="2xl"
-      onClose={onClose}
-    >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex items-center gap-2 border-b border-divider pb-3">
-              <Map className="text-primary" size={20} />
-              <span>Карта развития Mirchan</span>
-              <Chip
-                className="ml-auto"
-                color="warning"
-                size="sm"
-                variant="flat"
-              >
-                В разработке
-              </Chip>
-            </ModalHeader>
-
-            <ModalBody>
-              <p className="text-sm text-default-500 mb-4">
-                Mirchan — социальная сеть. Ниже — дорожная карта проекта: что
-                уже работает, что делается прямо сейчас и что будет дальше.
-              </p>
-
-              <div className="relative">
-                {/* Вертикальная линия */}
-                <div className="absolute left-[11px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-success via-warning to-default-200 rounded-full" />
-
-                <div className="flex flex-col gap-6 pl-1">
-                  {phases.map((phase) => {
-                    const cfg = statusConfig[phase.status];
-                    const Icon = cfg.icon;
-
-                    return (
-                      <div key={phase.phase} className="flex gap-4">
-                        {/* Иконка-маркер */}
-                        <div className="flex-shrink-0 w-6 flex flex-col items-center pt-0.5">
-                          <Icon className={cfg.color} size={22} />
-                        </div>
-
-                        {/* Контент фазы */}
-                        <div className="flex-1 pb-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold text-sm">
-                              {phase.phase}
-                            </span>
-                            <Chip
-                              color={cfg.chip as any}
-                              size="sm"
-                              variant="flat"
-                            >
-                              {cfg.label}
-                            </Chip>
-                          </div>
-                          <ul className="space-y-1">
-                            {phase.items.map((item) => (
-                              <li
-                                key={item}
-                                className="flex items-start gap-2 text-sm text-default-600"
-                              >
-                                <span
-                                  className={`mt-[6px] w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`}
-                                />
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </ModalBody>
-
-            <ModalFooter className="border-t border-divider pt-3">
-              <span className="text-xs text-default-400 mr-auto">
-                Обновляется по мере разработки
-              </span>
-              <Button variant="flat" onPress={onClose}>
-                Закрыть
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
+    <div className="flex items-center gap-2">
+      <Sparkles size={18} className="text-primary" />
+      <span className="font-semibold text-base flex-1">Последние обновления</span>
+      <span className="text-xs text-muted-foreground">
+        {changelog.length} релиза
+      </span>
+    </div>
   );
+}
+
+// ─────────────────────────────────────────────
+//  Тело — список записей
+// ─────────────────────────────────────────────
+
+function ChangelogBody() {
+  return (
+    <div className="px-4 sm:px-6 py-4">
+      {changelog.map((entry, i) => (
+        <ChangelogItem key={entry.version} entry={entry} isFirst={i === 0} />
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+//  Футер
+// ─────────────────────────────────────────────
+
+function ChangelogFooter({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="flex items-center justify-between w-full">
+      <span className="text-xs text-muted-foreground">
+        Обновляется с каждым релизом
+      </span>
+      <Button variant="outline" size="sm" onClick={onClose}>
+        Закрыть
+      </Button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+//  Модалка (ПК)
+// ─────────────────────────────────────────────
+
+function ChangelogDesktopModal({ isOpen, onClose }: Props) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-5 pb-4 border-b">
+          <ChangelogHeader />
+        </DialogHeader>
+
+        <div className="max-h-[60vh] overflow-y-auto">
+          <ChangelogBody />
+        </div>
+
+        <DialogFooter className="px-6 py-3 border-t">
+          <ChangelogFooter onClose={onClose} />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────
+//  Drawer (телефон)
+// ─────────────────────────────────────────────
+
+function ChangelogMobileDrawer({ isOpen, onClose }: Props) {
+  return (
+    <Drawer open={isOpen} onOpenChange={onClose}>
+      <DrawerContent className="max-h-[90dvh] flex flex-col">
+        <DrawerHeader className="px-4 pt-4 pb-3 border-b text-left">
+          <ChangelogHeader />
+        </DrawerHeader>
+
+        <div className="flex-1 overflow-y-auto">
+          <ChangelogBody />
+        </div>
+
+        <DrawerFooter className="px-4 py-3 border-t">
+          <ChangelogFooter onClose={onClose} />
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+// ─────────────────────────────────────────────
+//  Точка входа — выбирает нужный вариант
+// ─────────────────────────────────────────────
+
+export default function ChangelogModal(props: Props) {
+  const isMobile = useMediaQuery("(max-width: 640px)");
+
+  if (isMobile) return <ChangelogMobileDrawer {...props} />;
+  return <ChangelogDesktopModal {...props} />;
 }

@@ -48,9 +48,6 @@ export function useCreatePost(
         InfiniteData<PostsResponse, unknown>
       >(postKeys.lists());
 
-      // Создаём временный пост (без оптимистичного обновления для упрощения)
-      // Оптимистичное обновление будет добавлено после успешного ответа
-
       return { previousPosts };
     },
 

@@ -18,20 +18,8 @@ export default function ClientProviders({
   return (
     <>
       <PageLoader />
-      <NextTopLoader
-        crawl
-        showSpinner
-        color="#2299DD"
-        crawlSpeed={200}
-        easing="ease"
-        height={3}
-        initialPosition={0.08}
-        shadow="0 0 10px #2299DD,0 0 5px #2299DD"
-        speed={200}
-      />
-      <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
+      <Providers>
         <Toaster />
-        
         <LayoutContent>{children}</LayoutContent>
       </Providers>
     </>

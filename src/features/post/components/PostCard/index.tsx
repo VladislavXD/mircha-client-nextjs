@@ -18,12 +18,11 @@ import { PostCardHeader } from "./PostCardHeader";
 import { PostCardContent } from "./PostCardContent";
 import { PostCardActions } from "./PostCardActions";
 import { PostCardModals } from "./PostCardModals";
-import { usePostCardModals } from "./hooks/usePostCardModals";
+import { useModals } from "../../../../hooks/useModals";
 
 import { Card } from "@/components/ui/card";
-import { useThrottle } from "@/src/hooks/useAntiSpam";
-import { useIsFollowing } from "@/src/features/follow";
-import { useUserProfile } from "@/src/features/profile";
+import { useFollowToggle } from "@/src/features/follow/hooks/useFollowToggle";
+import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 
 type Props = {
   post?: Post;
@@ -42,6 +41,8 @@ const PostCard = ({
   const router = useRouter();
   const queryClient = useQueryClient();
   const currentUser = queryClient.getQueryData<User>(["profile"]);
+
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const { data: fetchedPost, isLoading: isRepostLoading } = usePost(
     repostId ?? "",
@@ -115,15 +116,17 @@ const PostCard = ({
   const { mutate: deletePost, isPending: isDeleteLoading } = useDeletePost();
   const { mutate: addView } = useAddView();
 
-  const { handleFollow, isFollowing } = useUserProfile(authorId);
+  const { handleFollow, isFollowing } = useFollowToggle(authorId);
 
   const [error, setError] = useState("");
   const [viewSent, setViewSent] = useState(false);
 
   // Modals hook
-  const modals = usePostCardModals();
+  const modals = useModals();
 
   const inViewRef = useRef<HTMLDivElement | null>(null);
+
+  // PostCard.tsx
 
   const handleLike = () => {
     if (!currentUser) return setError("Вы не авторизованы");
@@ -199,6 +202,9 @@ const PostCard = ({
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
 
+   
+
+
     if (
       target.closest("a") ||
       target.closest("button") ||
@@ -242,7 +248,7 @@ const PostCard = ({
           : "rounded-none border-x-0 border-t-0 border-b last:border-b-0 border-neutral-200 dark:border-neutral-800/70  "
       }`}
       onAuxClick={handleCardAuxClick}
-      onClick={handleCardClick}
+      onClick={isDesktop ? handleCardClick : modals.commentsModal.onOpen}
     >
       <div
         className={`flex gap-3.5 px-4 sm:px-5 pt-4 pb-3 ${cardFor === "repost" ? "sm:px-2 px-2 !pt-2 !pb-0" : ""}`}
@@ -320,32 +326,30 @@ const PostCard = ({
             />
           )}
 
-          {content && (
-            <PostCardContent
-              cardFor={cardFor}
-              content={content as string}
-              emojiUrls={emojiUrls}
-              hasOriginalPost={!!originalPost}
-              inViewRef={inViewRef}
-              poll={poll}
-              postId={id}
-              originalPostElement={
-                originalPost ? (
-                  <PostCard
-                    cardFor="repost"
-                    repostId={originalPost.id}
-                    onFollowToggle={handleFollow}
-                  />
-                ) : null
-              }
-              postMedia={postMedia}
-              onContentClick={
-                cardFor !== "current-post"
-                  ? () => router.push(`/posts/${id}`)
-                  : undefined
-              }
-            />
-          )}
+          <PostCardContent
+            cardFor={cardFor}
+            content={content as string}
+            emojiUrls={emojiUrls}
+            hasOriginalPost={!!originalPost}
+            inViewRef={inViewRef}
+            poll={poll}
+            postId={id}
+            originalPostElement={
+              originalPost ? (
+                <PostCard
+                  cardFor="repost"
+                  repostId={originalPost.id}
+                  onFollowToggle={handleFollow}
+                />
+              ) : null
+            }
+            postMedia={postMedia}
+            // onContentClick={
+            //   cardFor !== "current-post" && isDesktop
+            //     ? () => router.push(`/posts/${id}`)
+            //     : undefined
+            // }
+          />
 
           <PostCardActions
             cardFor={cardFor}
@@ -353,6 +357,7 @@ const PostCard = ({
             handleLike={handleLike}
             isLikeLoading={isLikeLoading}
             isUnlikeLoading={isUnlikeLoading}
+            isAuthenticated={!!currentUser}
             likeByUser={likeByUser}
             likesCount={likesCount}
             post={post}

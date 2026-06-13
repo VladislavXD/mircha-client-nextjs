@@ -1,12 +1,20 @@
 import type { Post } from "../../types";
 
 import React from "react";
-import { Heart, Eye, Send, MessageCircle } from "lucide-react";
+import { Heart, Eye, Send, MessageCircle, Pencil } from "lucide-react";
 
 import { getEditedText } from "../../utils/editedText.utils";
 import { RepostButton } from "../PostCardActions/RepostButton";
 
 import MetaInfo from "@/shared/components/ui/MetaInfo";
+import Link from "next/link";
+import { useMediaQuery } from "@/src/hooks/useMediaQuery";
+import { useDispatch } from "react-redux";
+import { openCreatePostModal } from "@/src/store/CreatePostModal/CreatePostModal.slice";
+import { useModals } from "@/src/hooks/useModals";
+import AuthDialog from "@/shared/components/ui/Modals/IsAuthModal";
+import { useRouter } from "next/navigation";
+import { openAuthModal } from "@/src/store/authModal/authModal.slice";
 
 type Props = {
   post: Post;
@@ -19,6 +27,7 @@ type Props = {
 
   isLikeLoading: boolean;
   isUnlikeLoading: boolean;
+  isAuthenticated: boolean;
   handleLike: () => void;
   onCommentsOpen: () => void;
   onShareOpen: () => void;
@@ -36,16 +45,19 @@ export const PostCardActions = ({
   repostedByUser,
   isLikeLoading,
   isUnlikeLoading,
+  isAuthenticated,
   handleLike,
   onCommentsOpen,
   onShareOpen,
   cardFor,
   onActionsClick,
 }: Props) => {
-  if (cardFor === "comment" || cardFor === "repost") {
-    return null;
-  }
+  const { id } = post;
+  const dispatch = useDispatch();
+  const { isAuthModal } = useModals();
+  const router = useRouter();
 
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   return (
     <div
       className="flex items-center justify-between mt-1"
@@ -56,7 +68,15 @@ export const PostCardActions = ({
           className={`cursor-pointer transition-opacity `}
           onClick={(e) => {
             e.stopPropagation();
-            handleLike();
+            if (isAuthenticated) handleLike();
+            else
+              dispatch(
+                openAuthModal({
+                  title: "Понравился пост?",
+                  description: "Войдите, чтобы ставить лайки.",
+                  icon: "Heart"
+                }),
+              );
           }}
         >
           <MetaInfo
@@ -66,28 +86,35 @@ export const PostCardActions = ({
             type="heart"
           />
         </div>
-        <div
+        <Link
+          href={isDesktop ? `/posts/${id}` : ""}
           className="cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
-            onCommentsOpen();
+            !isDesktop && onCommentsOpen();
           }}
         >
           <MetaInfo Icon={MessageCircle} count={commentsCount} />
-        </div>
+        </Link>
         <RepostButton
           author={post.author}
           post={post}
           postId={post.id}
           repostCount={repostCount}
           repostedByUser={repostedByUser}
+          isAtuhenticated={isAuthenticated}
         />
 
         <div
           className=" flex items-center"
           onClick={(e) => {
             e.stopPropagation();
-            onShareOpen();
+            if (isAuthenticated) onShareOpen();
+            else dispatch(openAuthModal({
+              title: "Войдите, чтобы делиться постами",
+              description: "присоединяйтесь, чтобы делиться идеями и общаться.",
+              icon: "Send"
+            }));
           }}
         >
           <MetaInfo Icon={Send} />
@@ -106,6 +133,7 @@ export const PostCardActions = ({
             })}
           </p>
         )}
+
         {cardFor === "current-post" && (
           <div className="text-xs text-default-400 flex items-center gap-1">
             <Eye size={13} />

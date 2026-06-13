@@ -22,7 +22,7 @@ interface PollCardProps {
 }
 
 export function PollCard({ postId, poll }: PollCardProps) {
-  console.log("poll from poll card", poll);
+
   const { mutate: vote, isPending: isVoting } = useVotePoll(
     poll?.id ?? "",
     postId,

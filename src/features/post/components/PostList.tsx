@@ -17,7 +17,8 @@ import { RecommendedUsersBlock } from "./RecommendedUsers/RecommendedUsersBlock"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile } from "@/src/features/profile/hooks";
-import CardSkeleton from "@/shared/components/ui/post/Card/Skeleton";
+import CardSkeleton from "@/src/features/post/components/Skeleton";
+import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 
 /**
  * PostList - основной компонент для отображения ленты постов
@@ -34,8 +35,8 @@ const PostList = () => {
   const { ref, inView } = useInView();
 
   // Инициализируем запрос профиля на главной, чтобы состояние авторизации было доступно
-  useProfile();
   const currentUser = queryClient.getQueryData<User>(["profile"]);
+
 
   const {
     data: posts,
@@ -43,17 +44,17 @@ const PostList = () => {
     isError,
     error,
     hasNextPage,
-    isFetchingNextPage,
     fetchNextPage,
   } = usePosts();
 
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   
 
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage();
     }
-  }, [inView]);
+  }, [inView, hasNextPage, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -92,12 +93,17 @@ const PostList = () => {
   }
 
   return (
-    <div className="space-y-5 mt-5">
+    <div className="space-y-5">
       <Notice />
 
       {currentUser && (
         <div className="flex flex-col gap-4">
-          <CreatePost />
+          {
+            isDesktop && (
+              <CreatePost />
+            )
+          }
+          
           <Tabs className="w-full" defaultValue="recommended">
             <TabsList className="grid w-full grid-cols-2 rounded-[1.5rem] bg-neutral-100 dark:bg-[#101010]  border border-neutral-200 dark:border-neutral-800/70  auto-rows-fr h-auto">
               <TabsTrigger

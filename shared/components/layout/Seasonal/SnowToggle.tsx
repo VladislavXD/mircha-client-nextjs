@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 import { Snowflake } from "lucide-react";
 
 /**
@@ -37,12 +37,11 @@ export default function SnowToggle({
 
   return (
     <Button
-      isIconOnly
       aria-label="Переключить снегопад"
       className={`transition-all ${enabled ? "text-blue-400" : "text-gray-400"}`}
       size="sm"
-      variant="light"
-      onPress={handleToggle}
+      variant="default"
+      onClick={handleToggle}
     >
       <Snowflake
         className={`transition-transform ${enabled ? "animate-spin-slow" : ""}`}

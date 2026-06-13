@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { Button, Input, Card, CardBody, Spinner } from "@heroui/react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 
 import {
   useCategories,
@@ -22,18 +25,22 @@ const CategoryManagement: React.FC = () => {
 
   return (
     <Card>
-      <CardBody>
-        <h2>Управление категориями</h2>
+      <CardContent className="pt-6 space-y-4">
+        <h2 className="text-lg font-semibold">Управление категориями</h2>
+
         {isLoading ? (
-          <Spinner />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         ) : (
-          <ul>
+          <ul className="space-y-1">
             {categories?.map((category) => (
-              <li key={category.id}>{category.name}</li>
+              <li key={category.id} className="text-sm">
+                {category.name}
+              </li>
             ))}
           </ul>
         )}
-        <div>
+
+        <div className="flex gap-2">
           <Input
             placeholder="Название новой категории"
             value={newCategory}
@@ -41,7 +48,7 @@ const CategoryManagement: React.FC = () => {
           />
           <Button onClick={handleCreateCategory}>Создать категорию</Button>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   );
 };

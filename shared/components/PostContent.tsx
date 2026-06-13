@@ -3,20 +3,26 @@
 import type { Thread, Reply } from "@/src/types/types";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Card, CardBody, CardHeader, Chip, Tooltip } from "@heroui/react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 
 import PostTooltip from "./PostTooltip";
-
 import MediaThumbnail from "@/shared/components/MediaThumbnail";
 
 interface PostContentProps {
   post: Thread | Reply;
-  isOP?: boolean; // Является ли пост оригинальным постом треда
-  showReplyTo?: boolean; // Показывать ли ссылки на цитируемые посты
-  onReplyToPost?: (postId: string, post?: Thread | Reply) => void; // Колбек для ответа на пост
-  allPosts?: (Thread | Reply)[]; // Все посты в треде для тултипов
+  isOP?: boolean;
+  showReplyTo?: boolean;
+  onReplyToPost?: (postId: string, post?: Thread | Reply) => void;
+  allPosts?: (Thread | Reply)[];
 }
 
 const PostContent: React.FC<PostContentProps> = ({
@@ -32,7 +38,6 @@ const PostContent: React.FC<PostContentProps> = ({
   const [isMobile, setIsMobile] = useState(false);
   const hoverTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
-  // Определение размера экрана
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640);
@@ -46,7 +51,6 @@ const PostContent: React.FC<PostContentProps> = ({
     };
   }, []);
 
-  // Очистка таймеров при размонтировании компонента
   useEffect(() => {
     return () => {
       hoverTimeoutRef.current.forEach((timeout) => clearTimeout(timeout));
@@ -54,11 +58,9 @@ const PostContent: React.FC<PostContentProps> = ({
     };
   }, []);
 
-  // Определяем, является ли пост Thread или Reply
   const isThread = "boardId" in post;
   const postNumber = isThread ? 1 : (post as Reply).postNumber;
 
-  // Находим пост по ID
   const findPostById = useCallback(
     (id: string): Thread | Reply | undefined => {
       return allPosts.find((p) => p.id === id);
@@ -66,7 +68,6 @@ const PostContent: React.FC<PostContentProps> = ({
     [allPosts],
   );
 
-  // Находим пост по shortId (для парсинга >>shortId в тексте)
   const findPostByShortId = useCallback(
     (shortId: string): Thread | Reply | undefined => {
       return allPosts.find((p) => p.shortId === shortId);
@@ -74,7 +75,6 @@ const PostContent: React.FC<PostContentProps> = ({
     [allPosts],
   );
 
-  // Находим пост по номеру (для обратной совместимости)
   const findPostByNumber = useCallback(
     (num: number): Thread | Reply | undefined => {
       if (num === 1) {
@@ -88,7 +88,6 @@ const PostContent: React.FC<PostContentProps> = ({
     [allPosts],
   );
 
-  // Обработка наведения на ссылку поста (для >>shortId в тексте)
   const handlePostShortIdHover = useCallback(
     (shortId: string, isEntering: boolean) => {
       const referencedPost = findPostByShortId(shortId);
@@ -110,18 +109,15 @@ const PostContent: React.FC<PostContentProps> = ({
           );
 
           if (existingIndex !== -1) {
-            // Пост уже отображается, обновляем его позицию в цепочке
             const newPosts = [...prev];
             const [existingPost] = newPosts.splice(existingIndex, 1);
 
             return [...newPosts, existingPost];
           }
 
-          // Добавляем новый пост в цепочку
           return [...prev, { postId }];
         });
       } else {
-        // Устанавливаем задержку перед скрытием
         const timeoutId = setTimeout(() => {
           setHoveredPosts((prev) =>
             prev.filter((item) => item.postId !== postId),
@@ -135,7 +131,6 @@ const PostContent: React.FC<PostContentProps> = ({
     [findPostByShortId],
   );
 
-  // Обработка наведения на ссылку поста по номеру (для обратной совместимости)
   const handlePostNumberHover = useCallback(
     (postNum: number, isEntering: boolean) => {
       const referencedPost = findPostByNumber(postNum);
@@ -157,18 +152,15 @@ const PostContent: React.FC<PostContentProps> = ({
           );
 
           if (existingIndex !== -1) {
-            // Пост уже отображается, обновляем его позицию в цепочке
             const newPosts = [...prev];
             const [existingPost] = newPosts.splice(existingIndex, 1);
 
             return [...newPosts, existingPost];
           }
 
-          // Добавляем новый пост в цепочку
           return [...prev, { postId }];
         });
       } else {
-        // Устанавливаем задержку перед скрытием
         const timeoutId = setTimeout(() => {
           setHoveredPosts((prev) =>
             prev.filter((item) => item.postId !== postId),
@@ -182,7 +174,6 @@ const PostContent: React.FC<PostContentProps> = ({
     [findPostByNumber],
   );
 
-  // Обработка клика на ID поста для ответа
   const handlePostClick = useCallback(
     (clickedPost: Thread | Reply) => {
       if (onReplyToPost) {
@@ -192,7 +183,6 @@ const PostContent: React.FC<PostContentProps> = ({
     [onReplyToPost],
   );
 
-  // Обработка клика на номер поста в тексте (>>номер)
   const handlePostNumberClick = useCallback(
     (postNum: number, referencedPost?: Thread | Reply) => {
       if (onReplyToPost && referencedPost) {
@@ -202,9 +192,7 @@ const PostContent: React.FC<PostContentProps> = ({
     [onReplyToPost],
   );
 
-  // Разбираем контент для выделения цитат
   const parseContent = (content: string) => {
-    // Сначала ищем новый формат >>shortId (6 символов)
     const shortIdParts = content.split(/(\>\>[a-z0-9]{6})/g);
 
     return shortIdParts
@@ -212,93 +200,108 @@ const PostContent: React.FC<PostContentProps> = ({
         if (part.match(/\>\>[a-z0-9]{6}/)) {
           const shortId = part.slice(2);
           const referencedPost = findPostByShortId(shortId);
+          const isHovered = hoveredPosts.some((item) => {
+            const refPost = findPostByShortId(shortId);
+
+            return refPost && item.postId === refPost.id;
+          });
 
           return (
-            <Tooltip
-              key={`shortId-${index}`}
-              showArrow
-              closeDelay={0}
-              content={
-                referencedPost ? (
-                  <PostTooltip
-                    isOP={"boardId" in referencedPost}
-                    post={referencedPost}
-                  />
-                ) : (
-                  <div className="p-2 text-sm">Пост не найден</div>
-                )
-              }
-              isOpen={hoveredPosts.some((item) => {
-                const refPost = findPostByShortId(shortId);
-
-                return refPost && item.postId === refPost.id;
-              })}
-              placement="top"
-            >
-              <span
-                className={`text-blue-500 hover:text-blue-700 cursor-pointer hover:underline ${
-                  referencedPost ? "" : "line-through text-gray-400"
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (referencedPost) {
-                    handlePostClick(referencedPost);
-                  }
-                }}
-                onMouseEnter={() => handlePostShortIdHover(shortId, true)}
-                onMouseLeave={() => handlePostShortIdHover(shortId, false)}
-              >
-                {part}
-              </span>
-            </Tooltip>
+            <TooltipProvider key={`shortId-${index}`} delayDuration={0}>
+              <Tooltip open={isHovered}>
+                <TooltipTrigger asChild>
+                  <span
+                    className={`cursor-pointer hover:underline ${
+                      referencedPost
+                        ? "text-blue-500 hover:text-blue-700"
+                        : "line-through text-muted-foreground"
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (referencedPost) {
+                        handlePostClick(referencedPost);
+                      }
+                    }}
+                    onMouseEnter={() => handlePostShortIdHover(shortId, true)}
+                    onMouseLeave={() => handlePostShortIdHover(shortId, false)}
+                  >
+                    {part}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="p-0 border-0 bg-transparent shadow-none">
+                  {referencedPost ? (
+                    <PostTooltip
+                      isOP={"boardId" in referencedPost}
+                      post={referencedPost}
+                    />
+                  ) : (
+                    <div className="p-2 text-sm bg-popover border rounded-md shadow-md">
+                      Пост не найден
+                    </div>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           );
         }
 
-        // Обратная совместимость с номерами >>123
         const numberParts = part.split(/(\>\>\d+)/g);
 
         return numberParts.map((numPart, numIndex) => {
           if (numPart.match(/\>\>\d+/)) {
             const replyNum = parseInt(numPart.slice(2));
             const referencedPost = findPostByNumber(replyNum);
+            const isHovered = hoveredPosts.some((item) => {
+              const refPost = findPostByNumber(replyNum);
+
+              return refPost && item.postId === refPost.id;
+            });
 
             return (
-              <Tooltip
+              <TooltipProvider
                 key={`number-${index}-${numIndex}`}
-                showArrow
-                closeDelay={0}
-                content={
-                  referencedPost ? (
-                    <PostTooltip isOP={replyNum === 1} post={referencedPost} />
-                  ) : (
-                    <div className="p-2 text-sm">Пост не найден</div>
-                  )
-                }
-                isOpen={hoveredPosts.some((item) => {
-                  const refPost = findPostByNumber(replyNum);
-
-                  return refPost && item.postId === refPost.id;
-                })}
-                placement="top"
+                delayDuration={0}
               >
-                <span
-                  className={`text-blue-500 hover:text-blue-700 cursor-pointer hover:underline ${
-                    referencedPost ? "" : "line-through text-gray-400"
-                  }`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (referencedPost) {
-                      handlePostClick(referencedPost);
-                    }
-                  }}
-                  onMouseEnter={() => handlePostNumberHover(replyNum, true)}
-                  onMouseLeave={() => handlePostNumberHover(replyNum, false)}
-                >
-                  {numPart}
-                </span>
-              </Tooltip>
+                <Tooltip open={isHovered}>
+                  <TooltipTrigger asChild>
+                    <span
+                      className={`cursor-pointer hover:underline ${
+                        referencedPost
+                          ? "text-blue-500 hover:text-blue-700"
+                          : "line-through text-muted-foreground"
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (referencedPost) {
+                          handlePostClick(referencedPost);
+                        }
+                      }}
+                      onMouseEnter={() =>
+                        handlePostNumberHover(replyNum, true)
+                      }
+                      onMouseLeave={() =>
+                        handlePostNumberHover(replyNum, false)
+                      }
+                    >
+                      {numPart}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="p-0 border-0 bg-transparent shadow-none">
+                    {referencedPost ? (
+                      <PostTooltip
+                        isOP={replyNum === 1}
+                        post={referencedPost}
+                      />
+                    ) : (
+                      <div className="p-2 text-sm bg-popover border rounded-md shadow-md">
+                        Пост не найден
+                      </div>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             );
           }
 
@@ -309,20 +312,22 @@ const PostContent: React.FC<PostContentProps> = ({
   };
 
   return (
-    <Card className={`${isOP ? "border-l-4 border-l-primary" : ""} w-full`}>
+    <Card
+      className={`w-full ${isOP ? "border-l-4 border-l-primary" : ""}`}
+    >
       <CardHeader className="pb-2 px-3 sm:px-6">
         <div className="flex justify-between items-start w-full">
           <div className="flex items-center gap-1 sm:gap-2 flex-wrap min-w-0 flex-1">
             <span className="font-medium text-green-600 text-sm sm:text-base truncate">
               {post.authorName || "Аноним"}
             </span>
-            <span className="text-xs sm:text-sm text-gray-500">
+            <span className="text-xs sm:text-sm text-muted-foreground">
               {formatDistanceToNow(new Date(post.createdAt), {
                 addSuffix: true,
                 locale: ru,
               })}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground/70">
               {new Date(post.createdAt).toLocaleString("ru-RU", {
                 day: "2-digit",
                 month: "2-digit",
@@ -342,51 +347,32 @@ const PostContent: React.FC<PostContentProps> = ({
             >
               {post.shortId}
             </span>
+
             {isOP && (
-              <Chip
-                className="text-xs"
-                color="primary"
-                size="sm"
-                variant="flat"
-              >
+              <Badge variant="default" className="text-xs px-1.5 py-0.5">
                 OP
-              </Chip>
+              </Badge>
             )}
-            <Chip
-              className="text-xs shrink-0"
-              color="default"
-              size="sm"
-              variant="flat"
-            >
+
+            <Badge variant="secondary" className="text-xs shrink-0 px-1.5 py-0.5">
               #{postNumber}
-            </Chip>
+            </Badge>
           </div>
 
           <div className="flex gap-1 shrink-0 ml-2">
             {isThread && (post as Thread).isPinned && (
-              <Chip
-                className="text-xs"
-                color="warning"
-                size="sm"
-                variant="flat"
-              >
+              <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-400 px-1.5 py-0.5">
                 Закреплён
-              </Chip>
+              </Badge>
             )}
             {isThread && (post as Thread).isLocked && (
-              <Chip
-                className="text-xs"
-                color="secondary"
-                size="sm"
-                variant="flat"
-              >
+              <Badge variant="outline" className="text-xs text-purple-600 border-purple-400 px-1.5 py-0.5">
                 Заблокирован
-              </Chip>
+              </Badge>
             )}
           </div>
         </div>
 
-        {/* Тема треда для OP поста */}
         {isOP && isThread && (post as Thread).subject && (
           <div className="w-full mt-2">
             <h2 className="text-base sm:text-lg font-semibold text-blue-600 break-words">
@@ -396,19 +382,17 @@ const PostContent: React.FC<PostContentProps> = ({
         )}
       </CardHeader>
 
-      <CardBody className="pt-0 px-3 sm:px-6">
+      <CardContent className="pt-0 px-3 sm:px-6">
         <div className="flex flex-col gap-3 sm:gap-4">
           {/* Медиа превью */}
           {(post.mediaFiles && post.mediaFiles.length > 0) || post.imageUrl ? (
             <div className="w-full">
-              {/* Новый формат - множественные медиафайлы */}
               {post.mediaFiles && post.mediaFiles.length > 0 ? (
                 <div className="space-y-2">
-                  {/* Один файл - показываем большим */}
                   {post.mediaFiles.length === 1 ? (
                     <div className="max-w-lg">
                       <MediaThumbnail
-                        className="border border-gray-200 dark:border-gray-700 w-full"
+                        className="border border-border w-full"
                         name={post.mediaFiles[0].name}
                         showInfo={true}
                         size={post.mediaFiles[0].size}
@@ -419,7 +403,6 @@ const PostContent: React.FC<PostContentProps> = ({
                       />
                     </div>
                   ) : (
-                    /* Множественные файлы - адаптивная сетка */
                     <>
                       <div
                         className={`grid gap-2 ${
@@ -435,7 +418,7 @@ const PostContent: React.FC<PostContentProps> = ({
                           .map((media, index) => (
                             <div key={media.id} className="relative">
                               <MediaThumbnail
-                                className="border border-gray-200 dark:border-gray-700 w-full h-full aspect-square object-cover"
+                                className="border border-border w-full h-full aspect-square object-cover"
                                 name={media.name}
                                 showInfo={index < 2}
                                 size={media.size}
@@ -448,14 +431,13 @@ const PostContent: React.FC<PostContentProps> = ({
                                     : "small"
                                 }
                               />
-                              {/* Показать "+N" для оставшихся файлов */}
                               {((isMobile &&
                                 index === 3 &&
                                 post.mediaFiles!.length > 4) ||
                                 (!isMobile &&
                                   index === 5 &&
                                   post.mediaFiles!.length > 6)) && (
-                                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg">
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-lg">
                                   <span className="text-white font-bold text-lg">
                                     +
                                     {post.mediaFiles!.length -
@@ -467,9 +449,8 @@ const PostContent: React.FC<PostContentProps> = ({
                           ))}
                       </div>
 
-                      {/* Показать количество файлов */}
                       {post.mediaFiles.length > 1 && (
-                        <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
                           <span>📎 {post.mediaFiles.length} файлов</span>
                           <span>•</span>
                           <span>
@@ -489,10 +470,9 @@ const PostContent: React.FC<PostContentProps> = ({
                   )}
                 </div>
               ) : (
-                /* Старый формат - одиночный файл для обратной совместимости */
                 <div className="max-w-lg">
                   <MediaThumbnail
-                    className="border border-gray-200 dark:border-gray-700 w-full"
+                    className="border border-border w-full"
                     name={post.imageName}
                     showInfo={true}
                     size={post.imageSize}
@@ -512,32 +492,56 @@ const PostContent: React.FC<PostContentProps> = ({
               !isThread &&
               (post as Reply).replyTo &&
               (post as Reply).replyTo.length > 0 && (
-                <div className="mb-2 flex gap-1 flex-wrap overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent py-1 -mx-1 sm:mx-0">
+                <div className="mb-2 flex gap-1 flex-wrap overflow-x-auto py-1 -mx-1 sm:mx-0">
                   {(post as Reply).replyTo.map((shortId) => {
                     const referencedPost = findPostByShortId(shortId);
+                    const isHovered = hoveredPosts.some((item) => {
+                      const refPost = findPostByShortId(shortId);
+
+                      return refPost && item.postId === refPost.id;
+                    });
 
                     return (
-                      <Tooltip
-                        key={shortId}
-                        showArrow
-                        closeDelay={0}
-                        content={
-                          referencedPost ? (
-                            <PostTooltip
-                              isOP={"boardId" in referencedPost}
-                              post={referencedPost}
-                            />
-                          ) : (
-                            <div className="p-2 text-sm">Пост не найден</div>
-                          )
-                        }
-                        isOpen={hoveredPosts.some((item) => {
-                          const refPost = findPostByShortId(shortId);
-
-                          return refPost && item.postId === refPost.id;
-                        })}
-                        placement="top"
-                      />
+                      <TooltipProvider key={shortId} delayDuration={0}>
+                        <Tooltip open={isHovered}>
+                          <TooltipTrigger asChild>
+                            <span
+                              className={`text-xs cursor-pointer hover:underline font-mono ${
+                                referencedPost
+                                  ? "text-blue-500 hover:text-blue-700"
+                                  : "line-through text-muted-foreground"
+                              }`}
+                              onMouseEnter={() =>
+                                handlePostShortIdHover(shortId, true)
+                              }
+                              onMouseLeave={() =>
+                                handlePostShortIdHover(shortId, false)
+                              }
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (referencedPost) {
+                                  handlePostClick(referencedPost);
+                                }
+                              }}
+                            >
+                              &gt;&gt;{shortId}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="p-0 border-0 bg-transparent shadow-none">
+                            {referencedPost ? (
+                              <PostTooltip
+                                isOP={"boardId" in referencedPost}
+                                post={referencedPost}
+                              />
+                            ) : (
+                              <div className="p-2 text-sm bg-popover border rounded-md shadow-md">
+                                Пост не найден
+                              </div>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     );
                   })}
                 </div>
@@ -551,7 +555,7 @@ const PostContent: React.FC<PostContentProps> = ({
             </div>
           </div>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   );
 };

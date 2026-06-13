@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import Link from "next/link";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ReCAPTCHA from "react-google-recaptcha";
-import { useTheme } from "next-themes";
+import { useTheme } from "@wrksz/themes/client";
 import { useTranslations } from "next-intl";
 
 import { useLoginMutation } from "../hooks";
@@ -20,6 +20,10 @@ import {
 import { Button } from "@/components/ui/button";
 import Input from "@/shared/components/ui/Input/Input";
 
+
+
+
+
 type Login = {
   email: string;
   password: string;
@@ -32,14 +36,26 @@ type Props = {
   isShowTwoFactor: boolean;
 };
 
+
+type ReCAPTCHAInstance = {
+  reset: () => void;
+  execute: () => void;
+  executeAsync: () => Promise<string | null>;
+};
+
+
 const Login = ({ setSelected, setIsShowFactor, isShowTwoFactor }: Props) => {
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHAInstance>(null);
+  const recaptchaTimerRef = useRef<NodeJS.Timeout | null>(null); // 👈 таймер
+
   const t = useTranslations("Auth.login");
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   const {
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<Login>({
     resolver: isShowTwoFactor ? undefined : zodResolver(LoginSchema), // Отключаем валидацию на экране 2FA
@@ -50,18 +66,45 @@ const Login = ({ setSelected, setIsShowFactor, isShowTwoFactor }: Props) => {
       password: "",
       code: "",
     },
+    
   });
-
   const [error, setError] = useState("");
+  const { loginAsync, isLoadingLogin } = useLoginMutation(setIsShowFactor);
+
+;
+  const handleRecaptchaChange = (value: string | null) => {
+    setRecaptchaValue(value)
+
+    if(recaptchaTimerRef.current) {
+      clearTimeout(recaptchaTimerRef.current);
+    }
+
+    if(value){
+      recaptchaTimerRef.current = setTimeout(()=> {
+        recaptchaRef.current?.reset();
+        setRecaptchaValue(null);
+        toast.info("reCAPTCHA сброшена, пожалуйста, подтвердите снова");
+      }, 110 * 1000) // 1:50 
+    }
+  }
+
+// чистим таймер при размонтировании компонента
+  useEffect(()=>{
+    return () => {
+      if(recaptchaTimerRef.current) {
+        clearTimeout(recaptchaTimerRef.current);
+      }
+    }
+
+  }, [])
+
 
   // React Query mutation для логина
-
-  const { loginAsync, isLoadingLogin } = useLoginMutation(setIsShowFactor);
   const onSubmit = async (values: TypeLoginSchema) => {
     // Для 2FA проверяем код
     if (isShowTwoFactor) {
       if (!values.code || values.code.length !== 6) {
-        toast.error(t("enterCode"));
+        toast.error(t("Введите корректный 6-значный код"));
 
         return;
       }
@@ -70,24 +113,45 @@ const Login = ({ setSelected, setIsShowFactor, isShowTwoFactor }: Props) => {
 
       toast.promise(loginAsync({ values, recaptcha: recaptchaValue || "" }), {
         loading: t("verifying"),
-        success: t("success"),
+        success: { message: t("success")},
         error: (err) => err.message || t("error"),
       });
+      return;
+    }
 
+    if (!recaptchaValue) {
+      toast.error("Пожалуйста, завершите проверку reCAPTCHA");
       return;
     }
 
     // Для обычного логина проверяем recaptcha
-    if (recaptchaValue) {
-      toast.promise(loginAsync({ values, recaptcha: recaptchaValue }), {
+    toast.promise(
+      loginAsync({ values, recaptcha: recaptchaValue }).finally(() => {
+        // Сбрасываем капчу после попытки входа (токен одноразовый)
+        recaptchaRef.current?.reset();
+        setRecaptchaValue(null);
+        reset()
+      }),
+      {
         loading: t("verifying"),
         success: t("success"),
-        error: (err) => err.message || t("error"),
-      });
-    } else {
-      toast.error("Пожалуйста, завершите проверку reCAPTCHA");
-    }
+        error: (err) => {
+          // При ошибке пользователь должен пройти капчу снова
+          recaptchaRef.current?.reset();
+          setRecaptchaValue(null);
+          return err.message || t("error");
+        },
+      }
+    );
+
   };
+
+
+
+    const RecaptchaWithRef = ReCAPTCHA as React.ComponentType<
+    React.ComponentProps<typeof ReCAPTCHA> & { ref?: React.RefObject<any> }
+  >;
+
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
@@ -149,10 +213,11 @@ const Login = ({ setSelected, setIsShowFactor, isShowTwoFactor }: Props) => {
             {t("forgotPassword")}
           </Link>
         </div>
-        <ReCAPTCHA
+        <RecaptchaWithRef
+          ref={recaptchaRef}
           sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
-          theme={theme === "dark" ? "dark" : "light"}
-          onChange={setRecaptchaValue}
+          theme={resolvedTheme === "dark" ? "dark" : "light"}
+          onChange={handleRecaptchaChange}
         />
         <ErrorMessage error={error} />
         <p className="text-center text-sm">

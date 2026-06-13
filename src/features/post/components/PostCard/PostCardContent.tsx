@@ -4,7 +4,7 @@ import PostMediaSlider, { type PostMedia } from "../PostMediaSlider/index";
 
 import { EmojiText } from "@/shared/components/ui/EmojiText";
 import { PollFormatted } from "../Poll/types/poll.types";
-import { PollItem } from "@/components/ui/PollItem";
+
 import { PollCard } from "../Poll/components/PollCard";
 
 // Because we're in /PostCard it's easiest to take PostCard from the parent or we'll inject it.
@@ -80,7 +80,7 @@ export const PostCardContent = ({
       {
         poll && (
           <PollCard postId={postId} poll={poll}/>
-        )
+        ) 
       }
       {/* Repost */}
       {hasRepost && (

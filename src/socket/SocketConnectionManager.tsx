@@ -37,6 +37,24 @@ export default function SocketConnectionManager() {
       user: !!user,
       isLoading,
     });
+    // Ждем загрузки пользователя
+    if (isLoading) {
+      console.log("🔌 Waiting for user loading...");
+
+      return;
+    }
+
+    // Нет пользователя - очищаем данные и отключаем сокет
+    if (!user) {
+      console.log("🔌 No user, disconnecting socket...");
+      if (socketService.connected) {
+        socketService.disconnect();
+      }
+      dispatch(clearStatuses());
+      subscribedRef.current = false;
+
+      return;
+    }
 
     // Временно подключаем сокет всегда для тестирования
     console.log("🔌 Connecting socket for testing...");
@@ -64,25 +82,6 @@ export default function SocketConnectionManager() {
         .catch((err) => {
           console.error("Socket connection error:", err);
         });
-    }
-
-    // Ждем загрузки пользователя
-    if (isLoading) {
-      console.log("🔌 Waiting for user loading...");
-
-      return;
-    }
-
-    // Нет пользователя - очищаем данные и отключаем сокет
-    if (!user) {
-      console.log("🔌 No user, disconnecting socket...");
-      if (socketService.connected) {
-        socketService.disconnect();
-      }
-      dispatch(clearStatuses());
-      subscribedRef.current = false;
-
-      return;
     }
 
     console.log("🔌 User loaded, socket already connected");

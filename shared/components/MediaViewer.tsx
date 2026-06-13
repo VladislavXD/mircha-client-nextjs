@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Modal, ModalContent, ModalBody, Button, Chip } from "@heroui/react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import {
@@ -30,16 +32,11 @@ interface MediaViewerProps {
   media: MediaItem;
 }
 
-const MediaViewer: React.FC<MediaViewerProps> = ({
-  isOpen,
-  onClose,
-  media,
-}) => {
+const MediaViewer: React.FC<MediaViewerProps> = ({ isOpen, onClose, media }) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,14 +44,10 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
   const playerRef = useRef<HTMLVideoElement>(null);
   const dragStartRef = useRef({ x: 0, y: 0 });
 
-  // Определяем тип медиа по URL
   const getMediaType = (url: string): "image" | "video" => {
     const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
 
-    const extension = url.toLowerCase().split(".").pop();
-
-    if (extension && videoExtensions.some((ext) => url.includes(ext))) {
+    if (videoExtensions.some((ext) => url.toLowerCase().includes(ext))) {
       return "video";
     }
 
@@ -63,7 +56,6 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
 
   const mediaType = media.type || getMediaType(media.url);
 
-  // Сброс состояния при открытии/закрытии
   useEffect(() => {
     if (isOpen) {
       setScale(1);
@@ -74,7 +66,6 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
     }
   }, [isOpen, mediaType]);
 
-  // Zoom функции
   const handleZoomIn = useCallback(() => {
     setScale((prev) => Math.min(prev * 1.5, 5));
   }, []);
@@ -88,7 +79,6 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
     setPosition({ x: 0, y: 0 });
   }, []);
 
-  // Drag функции
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (mediaType === "image" && scale > 1) {
@@ -119,7 +109,6 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
     setIsDragging(false);
   }, []);
 
-  // Wheel zoom для изображений
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
       if (mediaType === "image") {
@@ -132,7 +121,6 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
     [mediaType],
   );
 
-  // Download
   const handleDownload = useCallback(() => {
     const link = document.createElement("a");
 
@@ -144,7 +132,6 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
     document.body.removeChild(link);
   }, [media]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -196,32 +183,26 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
       {mediaType === "image" && (
         <>
           <Button
-            isIconOnly
-            className="bg-black/50 text-white"
-            color="default"
-            size="sm"
-            variant="flat"
-            onPress={handleZoomOut}
+            size="icon"
+            variant="ghost"
+            className="bg-black/50 text-white hover:bg-black/70 h-8 w-8"
+            onClick={handleZoomOut}
           >
             <MdZoomOut />
           </Button>
           <Button
-            isIconOnly
-            className="bg-black/50 text-white"
-            color="default"
-            size="sm"
-            variant="flat"
-            onPress={resetZoom}
+            size="icon"
+            variant="ghost"
+            className="bg-black/50 text-white hover:bg-black/70 h-8 w-8"
+            onClick={resetZoom}
           >
             <MdRefresh />
           </Button>
           <Button
-            isIconOnly
-            className="bg-black/50 text-white"
-            color="default"
-            size="sm"
-            variant="flat"
-            onPress={handleZoomIn}
+            size="icon"
+            variant="ghost"
+            className="bg-black/50 text-white hover:bg-black/70 h-8 w-8"
+            onClick={handleZoomIn}
           >
             <MdZoomIn />
           </Button>
@@ -231,12 +212,10 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
       {mediaType === "video" && (
         <>
           <Button
-            isIconOnly
-            className="bg-black/50 text-white"
-            color="default"
-            size="sm"
-            variant="flat"
-            onPress={() => {
+            size="icon"
+            variant="ghost"
+            className="bg-black/50 text-white hover:bg-black/70 h-8 w-8"
+            onClick={() => {
               if (playerRef.current) {
                 if (playerRef.current.paused) {
                   playerRef.current.play();
@@ -251,12 +230,10 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
             {isPlaying ? <MdPause /> : <MdPlayArrow />}
           </Button>
           <Button
-            isIconOnly
-            className="bg-black/50 text-white"
-            color="default"
-            size="sm"
-            variant="flat"
-            onPress={() => {
+            size="icon"
+            variant="ghost"
+            className="bg-black/50 text-white hover:bg-black/70 h-8 w-8"
+            onClick={() => {
               if (playerRef.current) {
                 playerRef.current.muted = !playerRef.current.muted;
                 setIsMuted(playerRef.current.muted);
@@ -269,23 +246,19 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
       )}
 
       <Button
-        isIconOnly
-        className="bg-black/50 text-white"
-        color="default"
-        size="sm"
-        variant="flat"
-        onPress={handleDownload}
+        size="icon"
+        variant="ghost"
+        className="bg-black/50 text-white hover:bg-black/70 h-8 w-8"
+        onClick={handleDownload}
       >
         <MdDownload />
       </Button>
 
       <Button
-        isIconOnly
-        className="bg-black/50"
-        color="danger"
-        size="sm"
-        variant="flat"
-        onPress={onClose}
+        size="icon"
+        variant="ghost"
+        className="bg-black/50 text-white hover:bg-red-600/70 h-8 w-8"
+        onClick={onClose}
       >
         <MdClose />
       </Button>
@@ -294,132 +267,110 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
 
   const renderMediaInfo = () => (
     <div className="absolute bottom-4 left-4 flex gap-2 z-50">
-      <Chip className="bg-black/50 text-white" color="default" variant="flat">
+      <Badge className="bg-black/50 text-white border-0 hover:bg-black/50">
         {mediaType === "image" ? "Изображение" : "Видео"}
-      </Chip>
+      </Badge>
       {media.name && (
-        <Chip className="bg-black/50 text-white" color="default" variant="flat">
+        <Badge className="bg-black/50 text-white border-0 hover:bg-black/50">
           {media.name}
-        </Chip>
+        </Badge>
       )}
       {media.size && (
-        <Chip className="bg-black/50 text-white" color="default" variant="flat">
+        <Badge className="bg-black/50 text-white border-0 hover:bg-black/50">
           {(media.size / 1024 / 1024).toFixed(1)} MB
-        </Chip>
+        </Badge>
       )}
       {mediaType === "image" && scale !== 1 && (
-        <Chip className="bg-black/50" color="primary" variant="flat">
+        <Badge className="bg-primary/80 text-primary-foreground border-0">
           {Math.round(scale * 100)}%
-        </Chip>
+        </Badge>
       )}
     </div>
   );
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <Modal
-          hideCloseButton
-          classNames={{
-            base: "bg-black/95",
-            backdrop: "bg-black/80",
-            wrapper: "items-center justify-center",
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="max-w-none w-screen h-screen p-0 bg-black/95 border-0 rounded-none [&>button]:hidden"
+      >
+        <div
+          ref={containerRef}
+          className="relative w-full h-full flex items-center justify-center"
+          style={{
+            cursor: isDragging
+              ? "grabbing"
+              : mediaType === "image" && scale > 1
+                ? "grab"
+                : "default",
           }}
-          isOpen={isOpen}
-          size="full"
-          onClose={onClose}
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onWheel={handleWheel}
         >
-          <ModalContent>
-            <ModalBody className="p-0 relative w-full h-full flex items-center justify-center overflow-hidden">
-              <div
-                ref={containerRef}
-                className="relative w-full h-full flex items-center justify-center"
-                style={{
-                  cursor: isDragging
-                    ? "grabbing"
-                    : mediaType === "image" && scale > 1
-                      ? "grab"
-                      : "default",
-                }}
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseUp}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onWheel={handleWheel}
-              >
-                {mediaType === "image" ? (
-                  <motion.div
-                    animate={{
-                      scale,
-                      x: position.x,
-                      y: position.y,
-                    }}
-                    className="relative max-w-full max-h-full"
-                    transition={{
-                      type: "tween",
-                      duration: isDragging ? 0 : 0.2,
-                    }}
-                  >
-                    <Image
-                      priority
-                      unoptimized
-                      alt={media.name || "Media"}
-                      className="max-w-full max-h-[90vh] object-contain"
-                      height={800}
-                      src={media.url}
-                      width={1200}
-                      onError={() => setIsLoading(false)}
-                      onLoad={() => setIsLoading(false)}
-                    />
-                  </motion.div>
-                ) : (
-                  <div className="w-full h-full max-w-[90vw] max-h-[90vh] flex items-center justify-center">
-                    <video
-                      ref={playerRef}
-                      controls
-                      autoPlay={isPlaying}
-                      className="max-w-full max-h-full"
-                      muted={isMuted}
-                      src={media.url}
-                      style={{ maxWidth: "90vw", maxHeight: "90vh" }}
-                      onError={() => setIsLoading(false)}
-                      onLoadedData={() => setIsLoading(false)}
-                    />
-                  </div>
-                )}
+          {mediaType === "image" ? (
+            <motion.div
+              animate={{ scale, x: position.x, y: position.y }}
+              className="relative max-w-full max-h-full"
+              transition={{ type: "tween", duration: isDragging ? 0 : 0.2 }}
+            >
+              <Image
+                priority
+                unoptimized
+                alt={media.name || "Media"}
+                className="max-w-full max-h-[90vh] object-contain"
+                height={800}
+                src={media.url}
+                width={1200}
+                onError={() => setIsLoading(false)}
+                onLoad={() => setIsLoading(false)}
+              />
+            </motion.div>
+          ) : (
+            <div className="w-full h-full max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+              <video
+                ref={playerRef}
+                controls
+                autoPlay={isPlaying}
+                className="max-w-full max-h-full"
+                muted={isMuted}
+                src={media.url}
+                style={{ maxWidth: "90vw", maxHeight: "90vh" }}
+                onError={() => setIsLoading(false)}
+                onLoadedData={() => setIsLoading(false)}
+              />
+            </div>
+          )}
 
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
-                  </div>
-                )}
-              </div>
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+            </div>
+          )}
+        </div>
 
-              {renderControls()}
-              {renderMediaInfo()}
+        {renderControls()}
+        {renderMediaInfo()}
 
-              {/* Инструкции */}
-              <div className="absolute bottom-4 right-4 text-white/70 text-sm max-w-xs text-right">
-                {mediaType === "image" ? (
-                  <div>
-                    <p>Колесо мыши: зум</p>
-                    <p>Drag: перемещение</p>
-                    <p>+/- : зум, 0: сброс</p>
-                    <p>ESC: закрыть</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p>Пробел: пауза/воспроизведение</p>
-                    <p>M: звук вкл/выкл</p>
-                    <p>ESC: закрыть</p>
-                  </div>
-                )}
-              </div>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
-      )}
-    </AnimatePresence>
+        <div className="absolute bottom-4 right-4 text-white/70 text-sm max-w-xs text-right pointer-events-none">
+          {mediaType === "image" ? (
+            <div>
+              <p>Колесо мыши: зум</p>
+              <p>Drag: перемещение</p>
+              <p>+/- : зум, 0: сброс</p>
+              <p>ESC: закрыть</p>
+            </div>
+          ) : (
+            <div>
+              <p>Пробел: пауза/воспроизведение</p>
+              <p>M: звук вкл/выкл</p>
+              <p>ESC: закрыть</p>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -2,7 +2,7 @@
 
 import React from "react";
 // import { useForumStats } from '@/src/hooks/forum'
-import { Spinner } from "@heroui/react";
+import { Spinner } from "@/components/ui/spinner";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useTranslations } from "next-intl";
@@ -47,7 +47,7 @@ export default function ForumStats() {
       <h3 className="text-sm font-semibold mb-2">{t("statisticforum")}</h3>
       {isLoading && (
         <div className="flex justify-center py-4">
-          <Spinner size="sm" />
+          <Spinner />
         </div>
       )}
       {error && <div className="text-xs text-danger py-2">Ошибка загрузки</div>}

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTheme } from "next-themes";
+import { useTheme } from "@wrksz/themes/client";
 import { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Controller, useForm } from "react-hook-form";
@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
  * Форма для сброса пароля.
  */
 export function ResetPasswordForm() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
   const t = useTranslations("Auth.resetPassword");
 
@@ -96,7 +96,7 @@ export function ResetPasswordForm() {
         >
           <ReCAPTCHA
             sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
-            theme={theme === "light" ? "light" : "dark"}
+            theme={resolvedTheme === "light" ? "light" : "dark"}
             onChange={setRecaptchaValue}
             onExpired={() => setRecaptchaValue(null)}
           />

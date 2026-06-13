@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
 
 import { useFollow, useUnfollow } from "../hooks/useFollowMutations";
@@ -11,13 +11,11 @@ import { useProfile } from "@/src/features/profile/hooks/useProfile";
 interface FollowButtonProps {
   userId: string;
   variant?:
-    | "solid"
-    | "bordered"
-    | "light"
-    | "flat"
-    | "faded"
-    | "shadow"
-    | "ghost";
+    | "outline"
+    | "ghost"
+    | "link"
+    | "default"
+    | "destructive"
   color?:
     | "default"
     | "primary"
@@ -36,9 +34,9 @@ interface FollowButtonProps {
  */
 export function FollowButton({
   userId,
-  variant = "solid",
+  variant = "outline",
   color = "primary",
-  size = "md",
+  size = "sm",
   className = "",
   followText = "Подписаться",
   unfollowText = "Отписаться",
@@ -84,10 +82,10 @@ export function FollowButton({
       className={className}
       color={isFollowing ? "default" : color}
       disabled={isLoading}
-      isLoading={isLoading}
-      size={size}
-      variant={isFollowing ? "bordered" : variant}
-      onPress={handleClick}
+      
+      size={"sm"}
+      variant={isFollowing ? "outline" : variant}
+      onClick={handleClick}
     >
       {isFollowing ? unfollowText : followText}
     </Button>

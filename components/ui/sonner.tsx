@@ -1,4 +1,4 @@
-import { useTheme } from "next-themes";
+import { useTheme } from "@wrksz/themes/client";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 import {
   CircleCheckIcon,
@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   return (
     <Sonner
@@ -29,7 +29,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--border-radius": "var(--radius)",
         } as React.CSSProperties
       }
-      theme={theme as ToasterProps["theme"]}
+      theme={resolvedTheme as ToasterProps["theme"]}
       toastOptions={{
         classNames: {
           toast: "cn-toast",

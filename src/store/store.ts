@@ -14,6 +14,9 @@ import onlineStatusReducer from "./onlineStatus/onlineStatus.slice";
 import sidebarReducer from "./sidebar/sidebar.slice";
 import settingsModalReducer from "./settingsModal/settingsModal.slice";
 import { createPostModalSlice } from "./CreatePostModal/CreatePostModal.slice";
+import { unsavedChangesSlice } from "./unsavedChange/unsavedChanges";
+import { authModalSlice } from "./authModal/authModal.slice";
+
 
 // import { filtersSlice } from './filters/filters.slice'
 
@@ -30,7 +33,8 @@ const combinedReducers = combineReducers({
   sidebar: sidebarReducer,
   settingsModal: settingsModalReducer,
   createPostModal: createPostModalSlice.reducer,
-  // filters: filtersSlice.reducer
+  unsavedChanges: unsavedChangesSlice.reducer,
+  authModal: authModalSlice.reducer,
 });
 
 let mainReducer = combinedReducers;

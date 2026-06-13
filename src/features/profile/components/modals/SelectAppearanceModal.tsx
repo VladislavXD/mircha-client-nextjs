@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
 
 interface SelectAppearanceModalProps {
   isOpen: boolean;
@@ -27,6 +28,69 @@ interface SelectAppearanceModalProps {
   onSelectAppearance: (item: SelectedAppearanceItem) => void;
 }
 
+// Максимум одновременно играющих видео
+const MAX_PLAYING = 4;
+let playingCount = 0;
+
+function LazyVideo({ url, scrollRoot }: { url: string; scrollRoot: React.RefObject<HTMLDivElement | null> }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [canPlay, setCanPlay] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setCanPlay(true);
+        } else {
+          setCanPlay(false);
+        }
+      },
+      {
+        root: scrollRoot.current,
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [scrollRoot]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (canPlay && playingCount < MAX_PLAYING) {
+      playingCount++;
+      video.play().catch(() => {});
+      return () => {
+        playingCount = Math.max(0, playingCount - 1);
+        video.pause();
+      };
+    } else if (!canPlay) {
+      video.pause();
+    }
+  }, [canPlay]);
+
+  return (
+    <div ref={containerRef} className="absolute inset-0 w-full h-full">
+      {canPlay && (
+        <video
+          ref={videoRef}
+          loop
+          muted
+          playsInline
+          src={url}
+          className="absolute inset-0 w-full h-full object-cover rounded-[0.75rem]"
+        />
+      )}
+    </div>
+  );
+}
+
 export function SelectAppearanceModal({
   isOpen,
   onOpenChange,
@@ -37,9 +101,18 @@ export function SelectAppearanceModal({
   userAvatarUrl,
   onSelectAppearance,
 }: SelectAppearanceModalProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Сбрасываем счётчик при закрытии модалки
+  useEffect(() => {
+    if (!isOpen) {
+      playingCount = 0;
+    }
+  }, [isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[98vw] max-w-5xl bg-white dark:bg-[#101010] border-neutral-200 dark:border-neutral-800/70 rounded-[1.25rem] sm:rounded-[1.75rem] h-auto max-h-[85vh] flex flex-col p-0 overflow-hidden gap-0">
+      <DialogContent className="w-[98vw] max-w-3xl bg-white dark:bg-[#101010] border-neutral-200 dark:border-neutral-800/70 rounded-[1.25rem] sm:rounded-[1.75rem] h-auto max-h-[85vh] flex flex-col p-0 overflow-hidden gap-0">
 
         {/* Header */}
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4 border-b border-neutral-200 dark:border-neutral-800/50 shrink-0">
@@ -49,8 +122,11 @@ export function SelectAppearanceModal({
         </DialogHeader>
 
         {/* Scrollable grid */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700"
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3 sm:gap-5">
             {items.map((item) => (
               <div
                 key={item.id}
@@ -69,7 +145,7 @@ export function SelectAppearanceModal({
               >
                 {/* Preview area */}
                 <div
-                  className={`relative flex items-center justify-center rounded-[0.75rem] bg-neutral-200 dark:bg-neutral-900 overflow-visible ${
+                  className={`relative flex items-center justify-center rounded-[0.75rem] bg-neutral-200 dark:bg-neutral-900 overflow-hidden ${
                     appearanceType === "frame" ? "aspect-square" : "aspect-[16/9]"
                   }`}
                 >
@@ -78,11 +154,13 @@ export function SelectAppearanceModal({
                       <div className="relative w-full h-full flex items-center justify-center p-[10%]">
                         <img
                           alt="preview"
+                          loading="lazy"
                           className="relative w-full h-full object-cover rounded-[0.75rem] z-0 shadow-sm"
                           src={userAvatarUrl || "/default-avatar.png"}
                         />
                         <img
                           alt={item.label}
+                          loading="lazy"
                           className="absolute z-10 pointer-events-none"
                           style={{
                             width: "130%",
@@ -97,18 +175,11 @@ export function SelectAppearanceModal({
                       </div>
                     </div>
                   ) : item.type === "video" ? (
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="absolute inset-0 w-full h-full object-cover rounded-[0.75rem]"
-                    >
-                      <source src={item.url} type="video/mp4" />
-                    </video>
+                    <LazyVideo url={item.url} scrollRoot={scrollRef} />
                   ) : item.type === "image" ? (
                     <img
                       alt={item.label}
+                      loading="lazy"
                       className="absolute inset-0 w-full h-full object-cover rounded-[0.75rem]"
                       src={item.url}
                     />
@@ -121,7 +192,7 @@ export function SelectAppearanceModal({
 
                 {/* Label row */}
                 <div className="mt-2.5 flex justify-between items-center gap-1.5">
-                  <span className="text-xs sm:text-sm font-semibold text-neutral-700 dark:text-neutral-300 truncate flex-1 leading-tight">
+                  <span className="text-sm sm:text-base font-semibold text-neutral-700 dark:text-neutral-300 truncate flex-1 leading-tight">
                     {item.label}
                   </span>
                   {selectedItem?.id === item.id && (

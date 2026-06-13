@@ -11,6 +11,7 @@ import { userService } from "@/src/features/user/services";
  * Хук для получения профиля текущего пользователя.
  * Поддерживает как NextAuth, так и кастомную аутентификацию.
  */
+
 export function useProfile() {
   const pathname = usePathname();
 
@@ -54,6 +55,7 @@ export function useProfile() {
     enabled: !isPublicPage,
     retry: false,
     staleTime: 60 * 1000,
+
   });
 
   return {

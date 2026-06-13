@@ -4,13 +4,8 @@ import type { Thread, Reply } from "@/src/features/forum/types/forum.types";
 
 import React, { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
-import {
-  Chip,
-  Spinner,
-  Button,
-  Breadcrumbs,
-  BreadcrumbItem,
-} from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 import CreateReplyModal from "./components/CreateReplyModal";
@@ -53,7 +48,7 @@ const CategoryThreadPage = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <div className="w-9 h-9 border-2 border-primary rounded-full border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -84,25 +79,26 @@ const CategoryThreadPage = () => {
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-6xl">
       {/* Хлебные крошки */}
-      <Breadcrumbs className="mb-4 text-sm">
-        <BreadcrumbItem>
-          <Link href="/forum">Форум</Link>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <Link href="/forum/categories">Категории</Link>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <Link href={`/forum/categories/${categorySlug}`}>
-            {category?.name || categorySlug}
-          </Link>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <span className="hidden sm:inline">
-            {thread.subject || `Тред #${thread.id}`}
-          </span>
-          <span className="sm:hidden">#{thread.id}</span>
-        </BreadcrumbItem>
-      </Breadcrumbs>
+      <nav className="mb-4 text-sm text-muted-foreground" aria-label="breadcrumbs">
+        <ol className="flex gap-2 items-center">
+          <li>
+            <Link href="/forum" className="hover:underline">Форум</Link>
+          </li>
+          <li>•</li>
+          <li>
+            <Link href="/forum/categories" className="hover:underline">Категории</Link>
+          </li>
+          <li>•</li>
+          <li>
+            <Link href={`/forum/categories/${categorySlug}`} className="hover:underline">{category?.name || categorySlug}</Link>
+          </li>
+          <li>•</li>
+          <li className="font-medium">
+            <span className="hidden sm:inline">{thread.subject || `Тред #${thread.id}`}</span>
+            <span className="sm:hidden">#{thread.id}</span>
+          </li>
+        </ol>
+      </nav>
 
       {/* Информация о треде */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
@@ -112,24 +108,10 @@ const CategoryThreadPage = () => {
               {thread.subject || `Тред #${thread.id}`}
             </span>
             {thread.isPinned && (
-              <Chip
-                className="text-xs"
-                color="warning"
-                size="sm"
-                variant="flat"
-              >
-                Закреплён
-              </Chip>
+              <Badge className="text-xs px-2 py-1" variant="default">Закреплён</Badge>
             )}
             {thread.isLocked && (
-              <Chip
-                className="text-xs"
-                color="secondary"
-                size="sm"
-                variant="flat"
-              >
-                Заблокирован
-              </Chip>
+              <Badge className="text-xs px-2 py-1" variant="outline">Заблокирован</Badge>
             )}
           </h1>
 
@@ -160,13 +142,7 @@ const CategoryThreadPage = () => {
         </div>
 
         {!thread.isLocked && (
-          <Button
-            className="self-start sm:self-auto"
-            color="primary"
-            size="sm"
-            variant="flat"
-            onPress={() => setShowReplyModal(true)}
-          >
+          <Button className="self-start sm:self-auto" color="primary" size="sm" variant="ghost" onClick={() => setShowReplyModal(true)}>
             Ответить
           </Button>
         )}
@@ -202,11 +178,7 @@ const CategoryThreadPage = () => {
             Пока нет ответов в этом треде
           </p>
           {!thread.isLocked && (
-            <Button
-              color="primary"
-              size="sm"
-              onPress={() => setShowReplyModal(true)}
-            >
+            <Button color="primary" size="sm" onClick={() => setShowReplyModal(true)}>
               Написать первый ответ
             </Button>
           )}
@@ -216,12 +188,7 @@ const CategoryThreadPage = () => {
       {/* Быстрый ответ */}
       {!thread.isLocked && (
         <div className="fixed bottom-4 right-2 sm:right-4 z-50">
-          <Button
-            className="rounded-full shadow-lg text-sm sm:text-base"
-            color="primary"
-            size="md"
-            onPress={() => setShowReplyModal(true)}
-          >
+          <Button className="rounded-full shadow-lg text-sm sm:text-base" color="primary" size="lg" onClick={() => setShowReplyModal(true)}>
             <span className="hidden sm:inline">Ответить</span>
             <span className="sm:hidden">+</span>
           </Button>

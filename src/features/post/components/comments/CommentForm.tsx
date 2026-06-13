@@ -75,7 +75,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
 
       <div className={
         compact
-          ? "bg-neutral-100 dark:bg-[#161616] border border-neutral-200 dark:border-neutral-800/70 rounded-[1.25rem] p-2 shadow-sm"
+          ? "bg-neutral-100 dark:bg-[#161616] border border-neutral-200 dark:border-neutral-800/70 rounded-[1.25rem] p-2 shadow-sm "
           : ""
       }>
         {/* Reply indicator */}

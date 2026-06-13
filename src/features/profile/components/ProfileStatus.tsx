@@ -8,49 +8,54 @@ interface ProfileStatusProps {
   isOwner?: boolean;
 }
 
-/**
- * Компонент отображения статуса пользователя.
- * Для владельца профиля - кнопка редактирования статуса.
- * Для других - только отображение.
- */
 export function ProfileStatus({
   status,
   onOpen,
   isOwner = false,
 }: ProfileStatusProps) {
-  return (
-    <div className="relative inline-flex justify-center md:max-w-[150px] max-w-[130px] md:mt-0 mt-2">
-      <div
-        className={`
-          relative
-          bg-neutral-900 dark:bg-white text-white dark:text-black
-          text-sm ${status ? "px-3 py-1" : ""}
-          rounded-[1rem]
-          min-w-[44px] min-h-[24px]
-          break-words whitespace-normal text-center shadow-lg
-          after:content-['']
-          after:absolute
-          after:left-1/2 after:-translate-x-1/2
-          after:-top-2
-          after:w-0 after:h-0
-          after:border-l-[6px] after:border-l-transparent
-          after:border-r-[6px] after:border-r-transparent
-          after:border-b-[6px] after:border-b-neutral-900 dark:after:border-b-white
-        `}
+  const content = status || (isOwner ? "Добавить статус" : null);
+  if (!content) return null;
+
+  const bubble = (
+    <div className="relative inline-flex max-w-[140px]">
+      {/* Tail */}
+      <span
+        aria-hidden
+        className="
+          absolute -top-[7px] left-1/2 -translate-x-1/2
+          w-0 h-0
+          border-l-[5px] border-l-transparent
+          border-r-[5px] border-r-transparent
+          border-b-[7px] border-b-neutral-900 dark:border-b-white
+        "
+      />
+      {/* Bubble */}
+      <span
+        className="
+          block px-2.5 py-1 rounded-[10px]
+          bg-neutral-900 dark:bg-white
+          text-white dark:text-black
+          text-[11px] leading-snug text-center
+          break-words whitespace-normal shadow-md
+        "
       >
-        {isOwner ? (
-          <button
-            className="p-0 h-auto min-w-0 text-xs w-full px-2 py-1 whitespace-normal break-words leading-tight bg-transparent border-none text-current hover:opacity-80 transition-opacity"
-            onClick={onOpen}
-          >
-            {status ? status : "Добавить статус"}
-          </button>
-        ) : (
-          <div className="px-2 py-1 text-xs">{status}</div>
-        )}
-      </div>
+        {content}
+      </span>
     </div>
   );
+
+  if (isOwner) {
+    return (
+      <button
+        className="mt-2 flex justify-center w-full hover:opacity-75 transition-opacity focus-visible:outline-none"
+        onClick={onOpen}
+      >
+        {bubble}
+      </button>
+    );
+  }
+
+  return <div className="mt-2 flex justify-center">{bubble}</div>;
 }
 
 export default ProfileStatus;

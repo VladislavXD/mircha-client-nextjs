@@ -1,9 +1,11 @@
 "use client";
 import React from "react";
-import { Card, CardBody, Avatar, Chip } from "@heroui/react";
 import Link from "next/link";
 import { Repeat } from "lucide-react";
 
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { EmojiText } from "@/shared/components/ui/EmojiText";
 import { formatToClientDate } from "@/app/utils/formatToClientDate";
 
@@ -33,57 +35,53 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
   createdAt,
 }) => {
   const safeContent = typeof postContent === "string" ? postContent : "";
+  const initials = postAuthorName
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) ?? "?";
 
   return (
-    <Card
-      className="w-full hover:shadow-lg transition-all duration-300 border border-default-200"
-      shadow="sm"
-    >
-      <CardBody className="p-5 gap-4">
+    <Card className="w-full hover:shadow-lg transition-all duration-300 border border-border shadow-sm">
+      <CardContent className="p-5 flex flex-col gap-4">
         {/* Заголовок репоста */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 bg-success-100 dark:bg-success-900/30 rounded-full">
-              <Repeat
-                className="text-success-600 dark:text-success-400"
-                size={16}
-              />
+            <div className="flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full">
+              <Repeat className="text-green-600 dark:text-green-400" size={16} />
             </div>
-            <span className="text-sm font-medium text-default-700">
+            <span className="text-sm font-medium text-foreground/70">
               Вы репостнули
             </span>
           </div>
           {createdAt && (
-            <Chip className="text-xs bg-default-100" size="sm" variant="flat">
+            <Badge className="text-xs" variant="secondary">
               {formatToClientDate(createdAt)}
-            </Chip>
+            </Badge>
           )}
         </div>
 
         {/* Комментарий к репосту */}
         {repostComment && (
-          <div className="px-4 py-3 bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-xl border-l-4 border-primary-500">
-            <p className="text-sm text-default-900 font-medium leading-relaxed">
-              {repostComment}
-            </p>
+          <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl border-l-4 border-primary">
+            <p className="text-sm font-medium leading-relaxed">{repostComment}</p>
           </div>
         )}
 
         {/* Оригинальный пост */}
-        <div className="p-4 bg-default-50 dark:bg-default-100/50 rounded-xl border border-default-200">
+        <div className="p-4 bg-muted/50 rounded-xl border border-border">
           {/* Автор */}
           {postAuthorId && (
             <Link
               className="flex items-center gap-3 mb-3 group"
               href={`/user/${postAuthorId}`}
             >
-              <Avatar
-                className="flex-shrink-0 ring-2 ring-default-200 group-hover:ring-primary-400 transition-all"
-                name={postAuthorName}
-                size="sm"
-                src={postAuthorAvatarUrl}
-              />
-              <span className="text-sm font-semibold text-default-900 group-hover:text-primary-600 transition-colors">
+              <Avatar className="flex-shrink-0 ring-2 ring-border group-hover:ring-primary transition-all size-8">
+                <AvatarImage src={postAuthorAvatarUrl} alt={postAuthorName} />
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-semibold group-hover:text-primary transition-colors">
                 {postAuthorName}
               </span>
             </Link>
@@ -94,14 +92,13 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
             {safeContent && (
               <div className="mb-3">
                 <EmojiText
-                  className="text-sm text-default-700 leading-relaxed line-clamp-4 group-hover:text-default-900 transition-colors"
+                  className="text-sm text-muted-foreground leading-relaxed line-clamp-4 group-hover:text-foreground transition-colors"
                   emojiUrls={postEmojiUrls}
                   text={safeContent}
                 />
               </div>
             )}
 
-            {/* Изображение */}
             {postImageUrl && (
               <div className="rounded-lg overflow-hidden shadow-sm">
                 <img
@@ -113,7 +110,7 @@ const ProfileRepostItem: React.FC<ProfileRepostItemProps> = ({
             )}
           </Link>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   );
 };

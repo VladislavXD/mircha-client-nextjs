@@ -37,7 +37,7 @@
     "src/i18n/request.ts",
     "shared/components/ui/Notice/index.tsx",
     ".next/dev/types/**/*.ts"
-  ],
+, "src/features/user/hooks/useProfileTabsGuard"  ],
   "exclude": [
     "node_modules",
     ".next",

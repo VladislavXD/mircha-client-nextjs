@@ -98,9 +98,6 @@ export function useCreateComment() {
         queryClient.invalidateQueries({
           queryKey: ["comments", "post", context.postId],
         });
-        queryClient.invalidateQueries({
-          queryKey: postKeys.detail(context.postId),
-        });
         // Также обновляем списки постов
         queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       }
@@ -197,9 +194,6 @@ export function useDeleteComment() {
       if (context?.postId) {
         queryClient.invalidateQueries({
           queryKey: ["comments", "post", context.postId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: postKeys.detail(context.postId),
         });
         // Также обновляем списки постов
         queryClient.invalidateQueries({ queryKey: postKeys.lists() });

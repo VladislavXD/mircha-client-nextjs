@@ -64,6 +64,7 @@ export function useLikePost() {
                 ]
               : [],
           };
+          
 
           return updated;
         });
@@ -114,7 +115,6 @@ export function useLikePost() {
     },
     onSettled: (data, error, postId) => {
       inFlightLikes.delete(postId);
-      queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
       // Списки инвалидации только при успешном ответе
       if (!error) {
         queryClient.invalidateQueries({ queryKey: postKeys.lists() });
@@ -216,7 +216,6 @@ export function useUnlikePost() {
     },
     onSettled: (data, error, postId) => {
       inFlightLikes.delete(postId);
-      queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
       if (!error) {
         queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       }

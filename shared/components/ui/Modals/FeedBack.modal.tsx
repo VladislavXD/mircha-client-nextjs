@@ -3,14 +3,16 @@ import type { User } from "@/src/types/types";
 
 import React, { useMemo, useState, useTransition } from "react";
 import {
-  Button,
-  Input,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  Textarea,
-} from "@heroui/react";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
@@ -53,14 +55,12 @@ const FeedBackModal: React.FC<Props> = ({ isOpen, onOpenChange, onClosse }) => {
   const onSubmit = handleSubmit(async (data) => {
     setServerError(null);
     try {
-      // Создаем FormData для отправки
       const formData = new FormData();
 
       formData.append("type", "GENERAL_FEEDBACK");
       formData.append("subject", data.subject);
       formData.append("description", data.description);
 
-      // Добавляем информацию о пользователе
       if (currentUser?.username || currentUser?.name) {
         formData.append(
           "userName",
@@ -84,9 +84,7 @@ const FeedBackModal: React.FC<Props> = ({ isOpen, onOpenChange, onClosse }) => {
 
       startTransition(() => {
         reset();
-        if (onClosse) {
-          onClosse();
-        }
+        if (onClosse) onClosse();
         toast.success("Ваше сообщение отправлено в Telegram!");
       });
     } catch (e: any) {
@@ -95,93 +93,88 @@ const FeedBackModal: React.FC<Props> = ({ isOpen, onOpenChange, onClosse }) => {
   });
 
   return (
-    <Modal
-      backdrop="blur"
-      classNames={{
-        backdrop:
-          "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20 ",
-      }}
-      isOpen={isOpen}
-      scrollBehavior="inside"
-      size="lg"
-      onOpenChange={onOpenChange}
-    >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex flex-col gap-1 text-center">
-              <h2 className="text-xl font-semibold">📧 Обратная связь</h2>
-              <p className="text-foreground/80 text-sm">
-                Опишите проблему, идею или пожелания — мы получим это в
-                Telegram.
-              </p>
-              {currentUser && (
-                <p className="text-foreground/60 text-xs">
-                  От: {currentUser.username || currentUser.name || "Аноним"}
-                </p>
-              )}
-            </ModalHeader>
-            <ModalBody className="pb-6">
-              <form className="space-y-4" onSubmit={onSubmit}>
-                <Input
-                  label="Тема"
-                  placeholder="Краткое описание"
-                  {...register("subject", {
-                    required: "Тема обязательна",
-                    minLength: { value: 5, message: "Минимум 5 символов" },
-                    maxLength: { value: 100, message: "Максимум 100 символов" },
-                  })}
-                  errorMessage={errors.subject?.message}
-                  isInvalid={!!errors.subject}
-                />
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-xl font-semibold">
+            📧 Обратная связь
+          </DialogTitle>
+          <DialogDescription className="text-sm">
+            Опишите проблему, идею или пожелания — мы получим это в Telegram.
+          </DialogDescription>
+          {currentUser && (
+            <p className="text-muted-foreground text-xs">
+              От: {currentUser.username || currentUser.name || "Аноним"}
+            </p>
+          )}
+        </DialogHeader>
 
-                <div>
-                  <Textarea
-                    label="Сообщение"
-                    labelPlacement="outside"
-                    minRows={5}
-                    placeholder="Опишите суть обратной связи подробно…"
-                    {...register("description", {
-                      required: "Сообщение обязательно",
-                      minLength: { value: 20, message: "Минимум 20 символов" },
-                      maxLength: {
-                        value: MAX_LEN,
-                        message: `Максимум ${MAX_LEN} символов`,
-                      },
-                    })}
-                    isInvalid={!!errors.description}
-                  />
-                  <div className="mt-1 flex items-center justify-between text-xs text-foreground/60">
-                    <span className="text-danger">
-                      {errors.description?.message}
-                    </span>
-                    <span>{left} символов</span>
-                  </div>
-                </div>
+        <form className="space-y-4 pb-2" onSubmit={onSubmit}>
+          {/* Тема */}
+          <div className="space-y-1">
+            <Label htmlFor="subject">Тема</Label>
+            <Input
+              id="subject"
+              placeholder="Краткое описание"
+              {...register("subject", {
+                required: "Тема обязательна",
+                minLength: { value: 5, message: "Минимум 5 символов" },
+                maxLength: { value: 100, message: "Максимум 100 символов" },
+              })}
+              className={errors.subject ? "border-destructive" : ""}
+            />
+            {errors.subject && (
+              <p className="text-destructive text-xs">{errors.subject.message}</p>
+            )}
+          </div>
 
-                {serverError && (
-                  <div className="text-danger text-sm">{serverError}</div>
-                )}
+          {/* Сообщение */}
+          <div className="space-y-1">
+            <Label htmlFor="description">Сообщение</Label>
+            <Textarea
+              id="description"
+              placeholder="Опишите суть обратной связи подробно…"
+              rows={5}
+              {...register("description", {
+                required: "Сообщение обязательно",
+                minLength: { value: 20, message: "Минимум 20 символов" },
+                maxLength: {
+                  value: MAX_LEN,
+                  message: `Максимум ${MAX_LEN} символов`,
+                },
+              })}
+              className={errors.description ? "border-destructive" : ""}
+            />
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="text-destructive">
+                {errors.description?.message}
+              </span>
+              <span>{left} символов</span>
+            </div>
+          </div>
 
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button variant="flat" onPress={() => onClose()}>
-                    Отмена
-                  </Button>
-                  <Button
-                    color="primary"
-                    isDisabled={description.length < 20}
-                    isLoading={isSubmitting || isPending}
-                    type="submit"
-                  >
-                    Отправить
-                  </Button>
-                </div>
-              </form>
-            </ModalBody>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
+          {serverError && (
+            <p className="text-destructive text-sm">{serverError}</p>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange?.(false)}
+            >
+              Отмена
+            </Button>
+            <Button
+              type="submit"
+              disabled={description.length < 20 || isSubmitting || isPending}
+            >
+              {(isSubmitting || isPending) ? "Отправка…" : "Отправить"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

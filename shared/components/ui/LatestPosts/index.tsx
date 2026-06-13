@@ -4,7 +4,7 @@ import type { LatestThread } from "@/src/features/forum/types/forum.types";
 
 import React from "react";
 import Link from "next/link";
-import { Spinner } from "@heroui/react";
+import { Spinner } from "@/components/ui/spinner";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useTranslations } from "next-intl";
@@ -36,7 +36,7 @@ const LatestPosts = ({ limit = 8 }: Props) => {
 
       {isLoading && (
         <div className="flex justify-center py-6">
-          <Spinner size="sm" />
+          <Spinner/>
         </div>
       )}
 

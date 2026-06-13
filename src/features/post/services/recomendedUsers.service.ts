@@ -7,7 +7,6 @@ class RecomendedUsersService {
 
       return response;
     } catch (err) {
-      console.error("❌ Error fetching recommended users:", err);
       throw err;
     }
   }

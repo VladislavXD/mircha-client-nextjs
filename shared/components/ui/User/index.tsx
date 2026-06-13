@@ -8,8 +8,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserProfileModal } from "@/src/features/user/components";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { BadgePlus } from "lucide-react";
+
 
 type Props = {
   userId?: string;

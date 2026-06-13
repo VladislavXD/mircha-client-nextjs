@@ -1,7 +1,3 @@
-import {heroui as heroTheme} from "@heroui/theme"
-const {heroui} = require('@heroui/react')
-
-
 /** @type {import('tailwindcss').Config} */
 const config = {
   content: [
@@ -34,8 +30,6 @@ const config = {
   },
   darkMode: "class",
   plugins: [
-    heroui(), 
-    heroTheme(),
     function({ addUtilities }) {
       addUtilities({
         '.scrollbar-hide': {

@@ -25,7 +25,6 @@ class UserService {
         // Не авторизован — возвращаем undefined для корректной работы публичного UI
         return undefined as unknown as IUser;
       }
-      console.error("❌ Error fetching current profile:", error);
       throw error;
     }
   }

@@ -4,24 +4,66 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { Shield, Key, Smartphone } from "lucide-react";
+import { Key, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 import { useUpdateProfileMutation } from "../hooks";
-
 import { ChangePasswordModal } from "./ChangePasswordModal";
-
 import { useProfile } from "@/src/features/profile/hooks";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
+// ── shared design tokens ───────────────────────────────────
+const card = "rounded-[14px] bg-[#1c1c1c] overflow-hidden";
+const lbl = "text-[11px] text-[#555]";
+const saveBtn =
+  "flex-1 rounded-[11px] bg-[#f0f0f0] py-[10px] text-[13px] font-semibold text-[#111] transition-opacity hover:opacity-90 active:opacity-75 disabled:opacity-40";
+const cancelBtn =
+  "rounded-[11px] px-5 py-[10px] text-[13px] text-[#555] hover:text-[#aaa] transition-colors";
+
+// ─────────────────────────────────────────────────────────
 const securitySchema = z.object({
   isTwoFactorEnabled: z.boolean(),
 });
-
 type SecurityFormData = z.infer<typeof securitySchema>;
 
+// ── Row inside a card ─────────────────────────────────────
+function SettingsRow({
+  icon: Icon,
+  title,
+  description,
+  last = false,
+  children,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  last?: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-3 px-4 py-3",
+        !last && "border-b border-[#242424]"
+      )}
+    >
+      <Icon className="w-[15px] h-[15px] text-[#555] shrink-0" />
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-medium text-[#e0e0e0] leading-none">
+          {title}
+        </p>
+        <p className="text-[11px] text-[#555] mt-1 leading-snug">
+          {description}
+        </p>
+      </div>
+      {children && <div className="shrink-0">{children}</div>}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 export function SecuritySettings() {
   const { user, isLoading } = useProfile();
   const { updateAsync, isLoadingUpdate } = useUpdateProfileMutation();
@@ -49,109 +91,101 @@ export function SecuritySettings() {
 
   if (isLoading) {
     return (
-      <div className="py-8 text-center text-muted-foreground text-sm">
+      <div className="py-8 text-center text-[13px] text-[#555]">
         {t("loading")}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <Shield className="w-5 h-5 text-primary" />
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">{t("title")}</h2>
-          <p className="text-xs text-muted-foreground">{t("description")}</p>
-        </div>
-      </div>
-
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
-        {/* Смена пароля */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 border rounded-lg bg-card">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <Key className="hidden sm:block w-4 h-4 text-muted-foreground" />
-            <div>
-              <h3 className="text-sm font-medium">{t("password")}</h3>
-              <p className="text-xs text-muted-foreground">
-                {t("passwordDesc")}
-              </p>
-            </div>
-          </div>
-          <Button
-            className="h-8 text-xs shrink-0"
-            size="sm"
+    <form
+      className="flex flex-col gap-2.5"
+      onSubmit={form.handleSubmit(onSubmit)}
+    >
+      {/* Password + 2FA */}
+      <div className={card}>
+        <SettingsRow
+          icon={Key}
+          title={t("password") || "Пароль"}
+          description={t("passwordDesc") || "Изменить пароль аккаунта"}
+        >
+          <button
             type="button"
-            variant="outline"
+            disabled={isLoadingUpdate}
             onClick={() => setIsOpen(true)}
+            className="rounded-[9px] bg-[#252525] px-3 py-1.5 text-[12px] text-[#e0e0e0] hover:bg-[#2a2a2a] transition-colors disabled:opacity-40"
           >
-            {t("changePassword")}
-          </Button>
-        </div>
+            {t("changePassword") || "Изменить"}
+          </button>
+        </SettingsRow>
 
-        {/* Двухфакторная аутентификация */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 border rounded-lg bg-card">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
-            <Smartphone className="hidden sm:block w-4 h-4 text-muted-foreground" />
-            <div>
-              <h3 className="text-sm font-medium">{t("twoFactor")}</h3>
-              <p className="text-xs text-muted-foreground">
-                {t("twoFactorDesc")}
-              </p>
-            </div>
-          </div>
-          <Controller
-            control={form.control}
-            name="isTwoFactorEnabled"
-            render={({ field }) => (
+        <Controller
+          control={form.control}
+          name="isTwoFactorEnabled"
+          render={({ field }) => (
+            <SettingsRow
+              icon={Smartphone}
+              title={t("twoFactor") || "Двухфакторная аутентификация"}
+              description={
+                t("twoFactorDesc") ||
+                "Дополнительная защита при входе в аккаунт"
+              }
+              last
+            >
               <Switch
                 checked={field.value}
                 disabled={isLoadingUpdate}
                 onCheckedChange={field.onChange}
               />
-            )}
-          />
-        </div>
+            </SettingsRow>
+          )}
+        />
+      </div>
 
-        {/* Активные сессии */}
-        <div className="p-3 border rounded-lg bg-card">
-          <div className="mb-3">
-            <h3 className="text-sm font-medium">Активные сессии</h3>
-            <p className="text-xs text-muted-foreground">
-              Здесь будут отображаться ваши активные сеансы на разных
-              устройствах
-            </p>
-          </div>
-          <div className="flex items-center justify-between p-2 bg-muted/50 rounded-md border">
-            <div className="overflow-hidden pr-4">
-              <p className="text-xs font-medium">Текущее устройство</p>
-              <p className="text-[10px] text-muted-foreground truncate">
+      {/* Active sessions */}
+      <div className={card}>
+        <div className="px-4 pt-3 pb-2">
+          <p className="text-[11px] font-medium tracking-[.04em] text-[#aaa]">
+            Активные сессии
+          </p>
+        </div>
+        <div className="px-4 pb-3">
+          <div className="flex items-center justify-between rounded-[9px] bg-[#252525] px-3 py-2.5">
+            <div className="min-w-0 pr-4">
+              <p className="text-[12px] font-medium text-[#e0e0e0]">
+                Текущее устройство
+              </p>
+              <p className={cn(lbl, "mt-0.5 truncate")}>
                 {typeof window !== "undefined"
                   ? navigator.userAgent
                   : "Browser"}
               </p>
             </div>
-            <span className="text-[10px] uppercase font-semibold text-green-500 tracking-wider shrink-0">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-green-500 shrink-0">
               Активна
             </span>
           </div>
         </div>
+      </div>
 
-        <div className="flex justify-end pt-2">
-          <Button
-            className="h-8 px-4 text-xs"
-            disabled={isLoadingUpdate}
-            type="submit"
-          >
-            {isLoadingUpdate ? "..." : t("saveChanges")}
-          </Button>
-        </div>
-      </form>
+      {/* Actions */}
+      <div className="flex gap-2 mt-0.5">
+        <button
+          type="button"
+          className={cancelBtn}
+          disabled={isLoadingUpdate}
+          onClick={() => form.reset()}
+        >
+          {t("cancel") || "Отмена"}
+        </button>
+        <button type="submit" className={saveBtn} disabled={isLoadingUpdate}>
+          {isLoadingUpdate
+            ? "Сохранение..."
+            : t("saveChanges") || "Сохранить изменения"}
+        </button>
+      </div>
 
-      {/* Модалка смены пароля */}
       <ChangePasswordModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
-    </div>
+    </form>
   );
 }

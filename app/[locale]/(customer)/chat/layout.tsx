@@ -55,7 +55,7 @@ export default function ChatLayout({
   }
 
   return (
-    <div className="flex h-[calc(100dvh-12rem)] sm:h-[calc(100vh-8rem)] w-full overflow-hidden border border-border sm:rounded-xl bg-background relative mt-0 shadow-sm">
+    <div className="flex h-[calc(100dvh-12rem)] sm:h-[calc(100vh-8rem)] w-full overflow-hidden border border-border sm:rounded-xl bg-background relative mt-0 shadow-sm transition-all ">
       <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel
           className="bg-background flex flex-col min-w-0 overflow-hidden"

@@ -88,7 +88,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         style={depth > 0 ? { paddingLeft: `${depth * 20}px` } : {}}
       >
         {/* Avatar */}
-        <Link href={`/profile/${user.id}`}>
+        <Link href={`/user/${user.id}`}>
           <Avatar className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity w-8 h-8 sm:w-10 sm:h-10 border border-neutral-200 dark:border-neutral-800/70">
             <AvatarImage
               alt={user.name || "User"}
@@ -107,13 +107,13 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
             <Link
               className="font-semibold text-xs sm:text-sm hover:underline truncate text-neutral-900 dark:text-neutral-100"
-              href={`/profile/${user.id}`}
+              href={`/user/${user.id}`}
             >
               {user.name}
             </Link>
             <Link
               className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 hover:underline truncate"
-              href={`/profile/${user.id}`}
+              href={`/user/${user.id}`}
             >
               @{user.username}
             </Link>

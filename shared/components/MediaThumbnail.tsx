@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Chip } from "@heroui/react";
+import { Badge } from "@/components/ui/badge";
 import { MdPlayArrow, MdImage, MdMovie } from "react-icons/md";
 
 import MediaViewer from "./MediaViewer";
@@ -17,8 +17,8 @@ interface MediaThumbnailProps {
   width?: number;
   height?: number;
   showOverlay?: boolean;
-  showInfo?: boolean; // Показывать ли информацию под превью
-  variant?: "small" | "medium" | "large"; // Размер превью
+  showInfo?: boolean;
+  variant?: "small" | "medium" | "large";
 }
 
 const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
@@ -37,17 +37,16 @@ const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
   const [showViewer, setShowViewer] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Размеры по умолчанию в зависимости от варианта
   const getDefaultSize = () => {
     switch (variant) {
       case "small":
-        return { width: 100, height: 100, smWidth: 120, smHeight: 120 };
+        return { width: 100, height: 100 };
       case "medium":
-        return { width: 180, height: 180, smWidth: 200, smHeight: 200 };
+        return { width: 180, height: 180 };
       case "large":
-        return { width: 280, height: 220, smWidth: 350, smHeight: 280 };
+        return { width: 280, height: 220 };
       default:
-        return { width: 180, height: 180, smWidth: 200, smHeight: 200 };
+        return { width: 180, height: 180 };
     }
   };
 
@@ -55,7 +54,6 @@ const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
   const finalWidth = width || defaultSize.width;
   const finalHeight = height || defaultSize.height;
 
-  // Определяем тип медиа по URL если не указан
   const getMediaType = (url: string): "image" | "video" => {
     const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
 
@@ -93,15 +91,10 @@ const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
           height: finalHeight,
           maxWidth: "100%",
           minWidth:
-            variant === "small"
-              ? "100px"
-              : variant === "medium"
-                ? "180px"
-                : "280px",
+            variant === "small" ? "100px" : variant === "medium" ? "180px" : "280px",
         }}
         onClick={handleClick}
       >
-        {/* Изображение/превью */}
         {!imageError ? (
           <Image
             fill
@@ -112,48 +105,37 @@ const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
             onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-800">
+          <div className="w-full h-full flex items-center justify-center bg-muted">
             {mediaType === "video" ? (
-              <MdMovie className="w-8 h-8 text-gray-400" />
+              <MdMovie className="w-8 h-8 text-muted-foreground" />
             ) : (
-              <MdImage className="w-8 h-8 text-gray-400" />
+              <MdImage className="w-8 h-8 text-muted-foreground" />
             )}
           </div>
         )}
 
-        {/* Оверлей с информацией */}
         {showOverlay && (
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors">
             {/* Тип медиа */}
             <div className="absolute top-2 left-2">
-              <Chip
-                className="bg-black/50 text-white"
-                color={mediaType === "video" ? "secondary" : "primary"}
-                size="sm"
-                startContent={
-                  mediaType === "video" ? (
-                    <MdPlayArrow className="w-3 h-3" />
-                  ) : (
-                    <MdImage className="w-3 h-3" />
-                  )
-                }
-                variant="flat"
+              <Badge
+                className="bg-black/50 text-white border-0 text-xs gap-1 hover:bg-black/50"
               >
+                {mediaType === "video" ? (
+                  <MdPlayArrow className="w-3 h-3" />
+                ) : (
+                  <MdImage className="w-3 h-3" />
+                )}
                 {mediaType === "video" ? "Video" : "Image"}
-              </Chip>
+              </Badge>
             </div>
 
             {/* Размер файла */}
             {size && !showInfo && (
               <div className="absolute top-2 right-2">
-                <Chip
-                  className="bg-black/50 text-white text-xs"
-                  color="default"
-                  size="sm"
-                  variant="flat"
-                >
+                <Badge className="bg-black/50 text-white border-0 text-xs hover:bg-black/50">
                   {formatFileSize(size)}
-                </Chip>
+                </Badge>
               </div>
             )}
 
@@ -166,7 +148,7 @@ const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
               </div>
             )}
 
-            {/* Название файла только если не показываем информацию отдельно */}
+            {/* Название файла */}
             {name && !showInfo && (
               <div className="absolute bottom-2 left-2 right-2">
                 <div className="bg-black/50 rounded px-2 py-1">
@@ -180,60 +162,38 @@ const MediaThumbnail: React.FC<MediaThumbnailProps> = ({
 
       {/* Информация под превью */}
       {showInfo && (
-        <div
-          className="space-y-1 w-full max-w-full"
-          style={{ maxWidth: finalWidth }}
-        >
+        <div className="space-y-1 w-full max-w-full" style={{ maxWidth: finalWidth }}>
           {name && (
-            <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 truncate font-medium">
+            <p className="text-xs sm:text-sm text-foreground truncate font-medium">
               {name}
             </p>
           )}
           <div className="flex gap-1 sm:gap-2 flex-wrap">
-            <Chip
-              className="text-xs"
-              color={mediaType === "video" ? "secondary" : "primary"}
-              size="sm"
-              startContent={
-                mediaType === "video" ? (
-                  <MdMovie className="w-3 h-3" />
-                ) : (
-                  <MdImage className="w-3 h-3" />
-                )
-              }
-              variant="flat"
-            >
+            <Badge variant="secondary" className="text-xs gap-1">
+              {mediaType === "video" ? (
+                <MdMovie className="w-3 h-3" />
+              ) : (
+                <MdImage className="w-3 h-3" />
+              )}
               <span className="hidden sm:inline">
                 {mediaType === "video" ? "Видео" : "Изображение"}
               </span>
               <span className="sm:hidden">
                 {mediaType === "video" ? "Vid" : "Img"}
               </span>
-            </Chip>
+            </Badge>
             {size && (
-              <Chip
-                className="text-xs"
-                color="default"
-                size="sm"
-                variant="flat"
-              >
+              <Badge variant="secondary" className="text-xs">
                 {formatFileSize(size)}
-              </Chip>
+              </Badge>
             )}
           </div>
         </div>
       )}
 
-      {/* Медиа просмотрщик */}
       <MediaViewer
         isOpen={showViewer}
-        media={{
-          url,
-          thumbnailUrl,
-          type: mediaType,
-          name,
-          size,
-        }}
+        media={{ url, thumbnailUrl, type: mediaType, name, size }}
         onClose={() => setShowViewer(false)}
       />
     </div>

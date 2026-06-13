@@ -1,22 +1,13 @@
 import React from "react";
-import { Skeleton } from "@heroui/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProfileHeaderSkeleton() {
   return (
     <div className="flex items-center gap-3">
-      {/* Avatar Skeleton */}
-      <Skeleton className="rounded-full">
-        <div className="w-10 h-10 rounded-full bg-default-300" />
-      </Skeleton>
-
-      {/* Name and Username Skeleton */}
+      <Skeleton className="w-10 h-10 rounded-full" />
       <div className="space-y-2">
-        <Skeleton className="w-24 rounded-lg">
-          <div className="h-4 w-24 rounded-lg bg-default-300" />
-        </Skeleton>
-        <Skeleton className="w-16 rounded-lg">
-          <div className="h-3 w-16 rounded-lg bg-default-200" />
-        </Skeleton>
+        <Skeleton className="h-4 w-24 rounded-lg" />
+        <Skeleton className="h-3 w-16 rounded-lg" />
       </div>
     </div>
   );

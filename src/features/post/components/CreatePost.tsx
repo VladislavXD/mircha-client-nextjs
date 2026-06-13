@@ -392,7 +392,7 @@ const CreatePost = ({
     if (pollDraft) {
       formData.append("poll", JSON.stringify(pollDraft));
     }
-    console.log("poll draft", pollDraft);
+
 
     toast.promise(createPostAsync(formData), {
       loading: "Публикация поста",

@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Chip } from "@heroui/react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export type TagChipData = {
   id?: string;
@@ -25,6 +26,18 @@ export interface TagChipProps {
   onClick?: (e: React.MouseEvent) => void;
 }
 
+const sizeClasses: Record<Size, string> = {
+  sm: "text-xs px-1.5 py-0",
+  md: "text-sm px-2 py-0.5",
+  lg: "text-base px-2.5 py-1",
+};
+
+const variantMap: Record<Variant, "default" | "outline" | "secondary"> = {
+  flat: "secondary",
+  bordered: "outline",
+  solid: "default",
+};
+
 /**
  * Единый чип для тега: показывает иконку (URL/эмодзи) и имя, опционально подкрашивает фон по цвету тега.
  */
@@ -44,35 +57,31 @@ export default function TagChip({
   const style: React.CSSProperties = {};
 
   if (withColorBackground && tag.color) {
-    style.backgroundColor = tag.color || undefined;
+    style.backgroundColor = tag.color;
   }
 
   const content = (
-    <Chip
-      className={`items-center gap-1 text-xs flex   ${className || ""}`}
-      size={size}
+    <Badge
+      className={cn("items-center gap-1 cursor-default", sizeClasses[size], className)}
       style={style}
-      variant={variant}
+      variant={variantMap[variant]}
       onClick={onClick}
     >
-      <div className="flex items-center gap-1">
-        {icon ? (
-          isUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img alt="" className="w-4 h-4 object-cover rounded" src={icon} />
-          ) : (
-            <span>{icon}</span>
-          )
-        ) : null}
-        <span>{tag.name}</span>
-      </div>
-    </Chip>
+      {icon ? (
+        isUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img alt="" className="w-4 h-4 object-cover rounded" src={icon} />
+        ) : (
+          <span>{icon}</span>
+        )
+      ) : null}
+      <span>{tag.name}</span>
+    </Badge>
   );
 
   if (asLink && href) {
-    // Оборачиваем в ссылку, но оставляем вид Chip
     return (
-      <a className=" flex" href={href} onClick={onClick}>
+      <a className="flex" href={href} onClick={onClick}>
         {content}
       </a>
     );

@@ -1,10 +1,8 @@
-"use client";
+'use client'
 
-import type { ThemeProviderProps } from "next-themes";
+import type { ThemeProviderProps } from "@wrksz/themes/next";
 
 import * as React from "react";
-import { HeroUIProvider } from "@heroui/system";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
@@ -16,23 +14,21 @@ import SocketConnectionManager from "@/src/socket/SocketConnectionManager";
 
 export interface ProvidersProps {
   children: React.ReactNode;
-  themeProps?: ThemeProviderProps;
+  themeProps?: ThemeProviderProps<"light" | "dark">
 }
 
 export function Providers({ children, themeProps }: ProvidersProps) {
   return (
     <QueryProvider>
-      <HeroUIProvider>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <SocketConnectionManager />
 
-            <NextThemesProvider {...themeProps}>
+
               <ViewsProvider>{children}</ViewsProvider>
-            </NextThemesProvider>
+
           </PersistGate>
         </Provider>
-      </HeroUIProvider>
     </QueryProvider>
   );
 }

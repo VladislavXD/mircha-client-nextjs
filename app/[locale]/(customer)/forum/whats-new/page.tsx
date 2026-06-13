@@ -4,7 +4,8 @@ import type { LatestThread } from "@/src/features/forum/types/forum.types";
 
 import Link from "next/link";
 import React, { useState } from "react";
-import { Card, CardBody, Pagination, Spinner } from "@heroui/react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useTranslations } from "next-intl";
@@ -26,7 +27,7 @@ export default function WhatsNewPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <div className="w-9 h-9 border-2 border-primary rounded-full border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -70,10 +71,10 @@ export default function WhatsNewPage() {
           return (
             <Card key={thread.id} className="hover:shadow-md transition-shadow">
               <Link className="block" href={href}>
-                <CardBody className="p-3 sm:p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex gap-3">
-                    {/* Превью картинки слева */}
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-md overflow-hidden bg-default-200 flex-shrink-0">
+                    {/* Preview image */}
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-md overflow-hidden bg-muted flex-shrink-0">
                       {thread.thumbnailUrl || thread.imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -92,28 +93,27 @@ export default function WhatsNewPage() {
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      {/* Заголовок треда */}
                       <h3 className="text-base sm:text-lg font-semibold line-clamp-2 break-words">
-                        {thread.subject ||
-                          `Тред #${thread.shortId || thread.id}`}
+                        {thread.subject || `Тред #${thread.shortId || thread.id}`}
                       </h3>
 
-                      {/* Последний: имя — время */}
-                      <div className="mt-1 text-xs sm:text-sm text-foreground-600">
+                      <div className="mt-1 text-xs sm:text-sm text-muted-foreground">
                         {t("lastReply")}:{" "}
-                        {thread.lastReplyAuthorName || t("anonymous")} — {when}
+                        <span className="font-medium">
+                          {thread.lastReplyAuthorName || t("anonymous")}
+                        </span>
+                        {" — "}
+                        <span>{when}</span>
                       </div>
 
-                      {/* Категория или борд */}
-                      <div className="mt-1 text-xs text-foreground-500">
+                      <div className="mt-1 text-xs text-muted-foreground">
                         {thread.category?.slug
                           ? `/c/${thread.category.slug}`
                           : thread.board?.name
-                            ? `/${thread.board.name}/`
-                            : ""}
+                          ? `/${thread.board.name}/`
+                          : ""}
                       </div>
 
-                      {/* Теги под превью */}
                       {Array.isArray(thread.tags) && thread.tags.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
                           {thread.tags.map((tag) => (
@@ -132,7 +132,7 @@ export default function WhatsNewPage() {
                       )}
                     </div>
                   </div>
-                </CardBody>
+                </CardContent>
               </Link>
             </Card>
           );
@@ -140,15 +140,26 @@ export default function WhatsNewPage() {
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="mt-6 flex justify-center">
-          <Pagination
-            showControls
-            color="primary"
-            page={page}
-            size="md"
-            total={pagination.totalPages}
-            onChange={setPage}
-          />
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <Button
+            variant="outline"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Назад
+          </Button>
+
+          <div className="text-sm text-muted-foreground">
+            Страница {page} из {pagination.totalPages}
+          </div>
+
+          <Button
+            variant="outline"
+            disabled={page >= pagination.totalPages}
+            onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+          >
+            Вперёд
+          </Button>
         </div>
       )}
     </div>

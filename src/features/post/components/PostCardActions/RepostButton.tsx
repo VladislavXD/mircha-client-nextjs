@@ -19,6 +19,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { EmojiText } from "@/shared/components/ui/EmojiText";
+import { useDispatch } from "react-redux";
+import { useModals } from "@/src/hooks/useModals";
+import { openAuthModal } from "@/src/store/authModal/authModal.slice";
 
 interface RepostButtonProps {
   postId: string;
@@ -27,6 +30,7 @@ interface RepostButtonProps {
   showCount?: boolean;
   post?: Post; // Добавляем данные о посте для превью
   author?: User;
+  isAtuhenticated?: boolean;
 }
 
 /**
@@ -51,6 +55,7 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
   repostedByUser = false,
   repostCount = 0,
   showCount = true,
+  isAtuhenticated,
   post,
   author,
 }) => {
@@ -62,6 +67,8 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
 
   const isPending = isCreating || isDeleting;
 
+  const dispatch = useDispatch();
+  const { isAuthModal } = useModals();
   /**
    * ✅ Fire-and-forget: немедленный UI отклик
    * ❌ НЕ используй async/await - это задерживает optimistic update
@@ -112,7 +119,15 @@ export const RepostButton: React.FC<RepostButtonProps> = ({
         }
         onClick={(e) => {
           e.stopPropagation(); // Предотвращаем всплытие, чтобы не открывать пост
-          handleRepost();
+          if (isAtuhenticated) handleRepost();
+          else
+            dispatch(
+              openAuthModal({
+                title: "Войдите, чтобы репостить",
+                description: "присоединяйтесь, чтобы делиться идеями и общаться.",
+                icon: "Repeat"
+              }),
+            );
         }}
         onClickCapture={handleQuickRepost}
       >

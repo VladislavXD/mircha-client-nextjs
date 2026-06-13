@@ -1,7 +1,8 @@
 import type { Message } from "@/src/features/chat/types";
 
 import React, { useRef, useEffect } from "react";
-import { Avatar } from "@heroui/react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ChatMessageListProps {
   messages: Message[];
@@ -47,12 +48,15 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
           >
             {!isOwn && isGroup ? (
               isLastInGroup ? (
-                <Avatar
-                  className="flex-shrink-0 w-7 h-7 rounded-full mb-0.5"
-                  icon={<div />}
-                  name={message.sender?.name?.[0] || "?"}
-                  src={message.sender?.avatarUrl || undefined}
-                />
+                <Avatar className="flex-shrink-0 w-7 h-7 mb-0.5">
+                  <AvatarImage
+                    src={message.sender?.avatarUrl || undefined}
+                    alt={message.sender?.name || "?"}
+                  />
+                  <AvatarFallback className="text-xs">
+                    {message.sender?.name?.[0]?.toUpperCase() || "?"}
+                  </AvatarFallback>
+                </Avatar>
               ) : (
                 <div className="w-7 flex-shrink-0" />
               )
@@ -99,7 +103,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
           <div className="bg-background border shadow-sm px-3 py-1.5 rounded-2xl rounded-bl-sm">
             <div className="text-xs text-muted-foreground flex items-center gap-1.5">
               <span className="font-medium">
-                {typingUsers.map((user) => user.userName).join(", ")}
+                {typingUsers.map((u) => u.userName).join(", ")}
               </span>
               <span>печатает</span>
               <span className="flex gap-0.5 mt-1">
@@ -120,6 +124,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
           </div>
         </div>
       )}
+
       <div ref={messagesEndRef} className="h-2" />
     </div>
   );

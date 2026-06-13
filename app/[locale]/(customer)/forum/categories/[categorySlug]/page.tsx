@@ -2,19 +2,17 @@
 
 import React, { useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Chip,
-  Spinner,
-  Button,
-  Breadcrumbs,
-  BreadcrumbItem,
-  Select,
-  SelectItem,
-} from "@heroui/react";
 import Link from "next/link";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 
@@ -28,6 +26,7 @@ import {
 import MediaThumbnail from "@/shared/components/MediaThumbnail";
 import TagChip from "@/shared/components/TagChip";
 import MobileForumExtras from "@/shared/components/forum/MobileForumExtras";
+import { Tag } from "@/src/types/forum.types";
 
 const CategoryPage = () => {
   const params = useParams();
@@ -62,7 +61,7 @@ const CategoryPage = () => {
   if (categoryLoading || threadsLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <div className="w-9 h-9 border-2 border-primary rounded-full border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -96,15 +95,19 @@ const CategoryPage = () => {
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-6xl">
       {/* Хлебные крошки */}
-      <Breadcrumbs className="mb-4 text-sm">
-        <BreadcrumbItem>
-          <Link href="/forum">Форум</Link>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <Link href="/forum/categories">Категории</Link>
-        </BreadcrumbItem>
-        <BreadcrumbItem>{category.name}</BreadcrumbItem>
-      </Breadcrumbs>
+      <nav className="mb-4 text-sm text-muted-foreground" aria-label="breadcrumbs">
+        <ol className="flex gap-2 items-center">
+          <li>
+            <Link href="/forum" className="hover:underline">Форум</Link>
+          </li>
+          <li>•</li>
+          <li>
+            <Link href="/forum/categories" className="hover:underline">Категории</Link>
+          </li>
+          <li>•</li>
+          <li className="font-medium">{category.name}</li>
+        </ol>
+      </nav>
 
       {/* Заголовок категории */}
       <div className="mb-4 sm:mb-6">
@@ -125,13 +128,7 @@ const CategoryPage = () => {
               </p>
             )}
           </div>
-          <Button
-            className="self-start sm:self-auto"
-            color="primary"
-            size="sm"
-            variant="flat"
-            onPress={() => setShowCreateModal(true)}
-          >
+          <Button className="self-start sm:self-auto" size="sm" onClick={() => setShowCreateModal(true)}>
             <span className="hidden sm:inline">Создать тред</span>
             <span className="sm:hidden">Создать</span>
           </Button>
@@ -144,13 +141,11 @@ const CategoryPage = () => {
             <div className="flex flex-wrap gap-2">
               {category.children.map((child: any) => (
                 <Link key={child.id} href={`/forum/categories/${child.slug}`}>
-                  <Chip
-                    className="cursor-pointer hover:bg-primary-50"
-                    size="sm"
-                    variant="bordered"
-                  >
-                    {child.name} ({child._count?.threads || 0})
-                  </Chip>
+                  <a>
+                    <Badge className="cursor-pointer hover:bg-primary-50" variant="outline">
+                      {child.name} ({child._count?.threads || 0})
+                    </Badge>
+                  </a>
                 </Link>
               ))}
             </div>
@@ -160,49 +155,25 @@ const CategoryPage = () => {
         {/* Фильтр по тегам */}
         {tags && tags.length > 0 && (
           <div className="mb-4">
-            <Select
-              isClearable
-              className="max-w-xs"
-              items={tags}
-              label="Фильтр по тегу"
-              placeholder="Все треды"
-              selectedKeys={currentTag ? new Set([currentTag]) : new Set([])}
-              size="sm"
-              onSelectionChange={(keys) => {
-                const selectedTag = Array.from(keys as Set<string>)[0] || "";
-                const url = new URL(window.location.href);
+            <Select defaultValue={currentTag || ""} onValueChange={(val) => {
+              const selectedTag = val || "";
+              const url = new URL(window.location.href);
 
-                if (selectedTag) {
-                  url.searchParams.set("tag", selectedTag);
-                } else {
-                  url.searchParams.delete("tag");
-                }
-                url.searchParams.delete("page");
-                // Используем Next.js router вместо reload
-                router.push(url.pathname + url.search);
-              }}
-            >
-              {(tag: any) => (
-                <SelectItem
-                  key={tag.slug}
-                  startContent={
-                    tag.icon ? (
-                      /^https?:\/\//.test(tag.icon) ? (
-                        <img
-                          alt=""
-                          className="w-4 h-4 object-cover rounded"
-                          src={tag.icon}
-                        />
-                      ) : (
-                        <span className="text-sm">{tag.icon}</span>
-                      )
-                    ) : null
-                  }
-                  textValue={tag.name}
-                >
-                  {`${tag.name} (${tag._count?.threadTags || 0})`}
-                </SelectItem>
-              )}
+              if (selectedTag) url.searchParams.set("tag", selectedTag);
+              else url.searchParams.delete("tag");
+              url.searchParams.delete("page");
+              router.push(url.pathname + url.search);
+            }}>
+              <SelectTrigger className="max-w-xs">
+                <SelectValue placeholder="Все треды" />
+              </SelectTrigger>
+              <SelectContent>
+                {tags.map((tag: any) => (
+                  <SelectItem key={tag.slug} value={tag.slug}>
+                    {`${tag.name} (${tag._count?.threadTags || 0})`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         )}
@@ -212,7 +183,7 @@ const CategoryPage = () => {
           <span>Тредов: {category._count?.threads || 0}</span>
           {currentTag && (
             <span>
-              С тегом "{tags?.find((t) => t.slug === currentTag)?.name}":{" "}
+              С тегом "{tags?.find((t: any) => t.slug === currentTag)?.name}":{" "}
               {pagination?.total || 0}
             </span>
           )}
@@ -263,40 +234,15 @@ const CategoryPage = () => {
                     )}
                   </div>
 
-                  <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
-                    <Chip
-                      className="text-xs"
-                      color="default"
-                      size="sm"
-                      variant="flat"
-                    >
-                      {thread._count?.replies || 0} ответов
-                    </Chip>
-                    {thread.isPinned && (
-                      <Chip
-                        className="text-xs"
-                        color="warning"
-                        size="sm"
-                        variant="flat"
-                      >
-                        Закреплён
-                      </Chip>
-                    )}
-                    {thread.isLocked && (
-                      <Chip
-                        className="text-xs"
-                        color="secondary"
-                        size="sm"
-                        variant="flat"
-                      >
-                        Заблокирован
-                      </Chip>
-                    )}
-                  </div>
+                      <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
+                        <Badge className="text-xs px-2 py-1">{thread._count?.replies || 0} ответов</Badge>
+                        {thread.isPinned && <Badge className="text-xs px-2 py-1" variant="default">Закреплён</Badge>}
+                        {thread.isLocked && <Badge className="text-xs px-2 py-1" variant="outline">Заблокирован</Badge>}
+                      </div>
                 </div>
               </CardHeader>
 
-              <CardBody className="pt-0 px-3 sm:px-6">
+              <CardContent className="pt-0 px-3 sm:px-6">
                 {/* Превью контента треда */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                   {/* Отображение медиафайлов */}
@@ -352,7 +298,7 @@ const CategoryPage = () => {
                     </div>
                   </div>
                 )}
-              </CardBody>
+              </CardContent>
             </Card>
           </Link>
         ))}
@@ -366,7 +312,7 @@ const CategoryPage = () => {
               <Link
                 href={`/forum/categories/${categorySlug}?page=${currentPage - 1}${currentTag ? `&tag=${currentTag}` : ""}`}
               >
-                <Button size="sm" variant="flat">
+                <Button size="sm" variant="ghost">
                   Назад
                 </Button>
               </Link>
@@ -380,7 +326,7 @@ const CategoryPage = () => {
               <Link
                 href={`/forum/categories/${categorySlug}?page=${currentPage + 1}${currentTag ? `&tag=${currentTag}` : ""}`}
               >
-                <Button size="sm" variant="flat">
+                <Button size="sm" variant="ghost">
                   Вперёд
                 </Button>
               </Link>
@@ -394,10 +340,10 @@ const CategoryPage = () => {
           <h2 className="text-xl font-semibold mb-2">Нет тредов</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {currentTag
-              ? `Нет тредов с тегом "${tags?.find((t) => t.slug === currentTag)?.name}"`
+              ? `Нет тредов с тегом "${tags?.find((t: any) => t.slug === currentTag)?.name}"`
               : "Будьте первым, кто создаст тред в этой категории"}
           </p>
-          <Button color="primary" onPress={() => setShowCreateModal(true)}>
+          <Button color="primary" onClick={() => setShowCreateModal(true)}>
             Создать первый тред
           </Button>
         </div>

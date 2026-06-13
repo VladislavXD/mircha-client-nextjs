@@ -1,7 +1,7 @@
 "use client";
 
 import confetti from "canvas-confetti";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useAppearance } from "./useAppearance";
 import { useStatus } from "./useStatus";
@@ -20,7 +20,7 @@ import { useProfile } from "@/src/features/profile/hooks/useProfile";
  * Содержит логику: загрузка данных, follow/unfollow.
  * Оформление (appearance) и статус вынесены в отдельные хуки.
  */
-export function useUserProfile(userId?: string) {
+export function   useUserProfile(userId?: string) {
   const queryClient = useQueryClient();
   const { user: currentUser, isAuthenticated } = useProfile();
 
@@ -49,7 +49,7 @@ export function useUserProfile(userId?: string) {
     enabled: !!userId,
     staleTime: 1 * 60 * 1000, // Уменьшили staleTime до 1 минуты
     // Для своего профиля используем initialData из currentUser
-    initialData: isOwnProfile ? currentUser : undefined,
+    placeholderData: keepPreviousData
   });
 
   // Хук для управления статусом пользователя
@@ -99,7 +99,6 @@ export function useUserProfile(userId?: string) {
       // Обновляем данные
       await queryClient.invalidateQueries({ queryKey: ["isFollowing", userId] });
     await queryClient.invalidateQueries({ queryKey: ["followStats", userId] });
-    await refetchProfile();
 
     } catch (error) {
       console.error("Follow error:", error);

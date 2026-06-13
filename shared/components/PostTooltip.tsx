@@ -3,7 +3,8 @@
 import type { Thread, Reply } from "@/src/types/types";
 
 import React from "react";
-import { Card, CardBody, CardHeader, Chip } from "@heroui/react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 
@@ -26,13 +27,13 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
             <span className="font-medium text-green-600">
               {post.authorName || "Анон"}
             </span>
-            <span className="text-gray-500">
+            <span className="text-muted-foreground">
               {formatDistanceToNow(new Date(post.createdAt), {
                 addSuffix: true,
                 locale: ru,
               })}
             </span>
-            <span className="text-gray-400">
+            <span className="text-muted-foreground/70">
               {new Date(post.createdAt).toLocaleString("ru-RU", {
                 day: "2-digit",
                 month: "2-digit",
@@ -42,16 +43,11 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
               })}
             </span>
             <span className="text-blue-500 font-mono">#{postNumber}</span>
-            <span className="text-gray-400 font-mono">{post.shortId}</span>
+            <span className="text-muted-foreground/70 font-mono">{post.shortId}</span>
             {isOP && (
-              <Chip
-                className="text-xs"
-                color="primary"
-                size="sm"
-                variant="flat"
-              >
+              <Badge variant="default" className="text-xs px-1.5 py-0">
                 OP
-              </Chip>
+              </Badge>
             )}
           </div>
         </div>
@@ -66,17 +62,15 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
         )}
       </CardHeader>
 
-      <CardBody className="pt-0 px-3">
+      <CardContent className="pt-0 px-3">
         <div className="flex gap-2 sm:gap-3">
           {/* Медиа превью */}
           {(post.mediaFiles && post.mediaFiles.length > 0) || post.imageUrl ? (
             <div className="flex-shrink-0">
-              {/* Новый формат - множественные медиафайлы */}
               {post.mediaFiles && post.mediaFiles.length > 0 ? (
                 <div className="space-y-1">
-                  {/* Показываем только первый файл в тултипе */}
                   <MediaThumbnail
-                    className="border border-gray-200 dark:border-gray-700"
+                    className="border border-border"
                     name={post.mediaFiles[0].name}
                     showInfo={false}
                     size={post.mediaFiles[0].size}
@@ -85,17 +79,15 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
                     url={post.mediaFiles[0].url}
                     variant="small"
                   />
-                  {/* Показываем количество файлов если их больше одного */}
                   {post.mediaFiles.length > 1 && (
-                    <div className="text-xs text-gray-500 text-center">
+                    <div className="text-xs text-muted-foreground text-center">
                       +{post.mediaFiles.length - 1} файлов
                     </div>
                   )}
                 </div>
               ) : (
-                /* Старый формат - одиночный файл */
                 <MediaThumbnail
-                  className="border border-gray-200 dark:border-gray-700"
+                  className="border border-border"
                   name={post.imageName}
                   showInfo={false}
                   size={post.imageSize}
@@ -120,7 +112,7 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
             {/* Информация о файлах */}
             {((post.mediaFiles && post.mediaFiles.length > 0) ||
               post.imageUrl) && (
-              <div className="mt-2 text-xs text-gray-500">
+              <div className="mt-2 text-xs text-muted-foreground">
                 {post.mediaFiles && post.mediaFiles.length > 0 ? (
                   <>
                     <div className="truncate">
@@ -150,7 +142,7 @@ const PostTooltip: React.FC<PostTooltipProps> = ({ post, isOP = false }) => {
             )}
           </div>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   );
 };

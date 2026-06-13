@@ -1,11 +1,18 @@
-import { Select, SelectItem } from "@heroui/react";
 import { useLocale } from "next-intl";
 import React from "react";
 import { useParams } from "next/navigation";
 
-import { usePathname } from "@/src/i18n/navigation";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { usePathname, useRouter } from "@/src/i18n/navigation";
 import { Locale, routing } from "@/src/i18n/routing";
-import { useRouter } from "@/src/i18n/navigation";
 
 export const LocaleSwitcherSelect = () => {
   const locale: string = useLocale();
@@ -13,31 +20,25 @@ export const LocaleSwitcherSelect = () => {
   const pathname = usePathname();
   const params = useParams();
 
-  function handleSelect(keys: any) {
-    const nextLocale = Array.from(keys)[0] as Locale;
-
+  function handleSelect(nextLocale: string) {
     if (nextLocale && nextLocale !== locale) {
-      router.replace(pathname, { locale: nextLocale });
+      router.replace(pathname, { locale: nextLocale as Locale });
     }
   }
 
   return (
-    <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
-      <Select
-        isVirtualized
-        className="max-w-xs"
-        label="Language"
-        maxListboxHeight={90}
-        selectedKeys={[locale]}
-        size="sm"
-        variant="bordered"
-        onSelectionChange={handleSelect}
-      >
-        {routing.locales.map((loc) => (
-          <SelectItem key={loc}>
-            {loc === "en" ? "English" : loc === "ru" ? "Русский" : loc}
-          </SelectItem>
-        ))}
+    <div className="flex flex-col gap-1.5">
+      <Select value={locale} onValueChange={handleSelect}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {routing.locales.map((loc) => (
+            <SelectItem key={loc} value={loc}>
+              {loc === "en" ? "English" : loc === "ru" ? "Русский" : loc}
+            </SelectItem>
+          ))}
+        </SelectContent>
       </Select>
     </div>
   );

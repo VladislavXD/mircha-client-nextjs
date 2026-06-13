@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@wrksz/themes/client";
 
 import ForumHome from "@/shared/components/forum/ForumHome";
 import MobileForumExtras from "@/shared/components/forum/MobileForumExtras";
 
 const ForumPage = () => {
   // Фоновая загрузка перенесена внутрь ForumHome
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   // Спиннер на случай SSR-гидратации темы
   // Отдельные загрузчики реализованы внутри секций
@@ -21,9 +21,9 @@ const ForumPage = () => {
             alt="Mirchan Logo"
             className="w-8 h-8 sm:w-10 sm:h-10"
             src={
-              theme === "dark"
-                ? "/mirchan-logo-icon-light.svg"
-                : "/mirchan-logo-icon-dark.svg"
+              resolvedTheme === "dark"
+                ? "/mirchanLogo_light.svg"
+                : "/mirchanLogo_dark.svg"
             }
           />
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">

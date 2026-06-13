@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Spinner } from "@heroui/react";
+import { Spinner } from "@/components/ui/spinner";
 
 import BoardsList from "./BoardsList";
 import CategoriesListFull from "./CategoriesListFull";
@@ -24,7 +24,7 @@ export default function ForumHome() {
   if (loadingBoards) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <Spinner  />
       </div>
     );
   }

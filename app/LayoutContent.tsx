@@ -1,7 +1,7 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 
 import Header from "../shared/components/layout/Header";
 import Navbar from "../shared/components/layout/Navbar";
@@ -14,7 +14,13 @@ import { SettingsModal } from "@/src/features/user/components/SettingsModal/Sett
 import { RootState } from "@/src/store/store";
 import { openCreatePostModal } from "@/src/store/CreatePostModal/CreatePostModal.slice";
 import { CreatePostModal } from "@/shared/components/ui/Modals/CreatePostModal";
+import Link from "next/link";
+
+
+import { useProfile } from "@/src/features/profile";
+import AuthDialog from "@/shared/components/ui/Modals/IsAuthModal";
 import { useAppSelector } from "@/src/hooks/reduxHooks";
+import { closeAuthModal, openAuthModal } from "@/src/store/authModal/authModal.slice";
 
 export default function LayoutContent({
   children,
@@ -22,13 +28,19 @@ export default function LayoutContent({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isOpen = useSelector((state: RootState) => state.sidebar.isOpen);
+  const isOpen = useAppSelector((s) => s.sidebar.isOpen);
+  const { isOpen: isOpenAuthModal, title, description, icon } = useAppSelector((s) => s.authModal);
   const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/);
   const locale = localeMatch?.[1];
+  const { isAuthenticated } = useProfile();
 
+
+  const router = useRouter();
   // Убираем сложную логику проверки - middleware уже все сделал
-  const isAuthPage = pathname?.startsWith("/auth");
+  const isAuthPage = pathname?.includes("/auth");
   const isAdminPage = pathname?.includes("/admin");
+  const isLegalPage = pathname?.includes("/legal");
+
   const prefix = locale ? `/${locale}` : "";
 
   const hideRightSidebar =
@@ -36,9 +48,6 @@ export default function LayoutContent({
     pathname?.includes(`${prefix}/chat`);
 
   const dispatch = useDispatch();
-  const isCreatePostview = useAppSelector(
-    (state) => state.createPostModal.createPostView,
-  );
 
   return (
     <>
@@ -58,24 +67,47 @@ export default function LayoutContent({
             {children}
           </main>
         </div>
+      ) : isLegalPage ? (
+        <>{children}</>
       ) : (
         /* Обычный Layout с AuthGuard для защищённых страниц */
         <div className="relative flex flex-col h-screen mb-0">
           {/* Основной контент без отступа от header */}
 
           {/* Кнопка добавления поста в виде модалки */}
-          <div
-            className={`absolute right-4 bottom-20 md:right-10 md:bottom-10 z-50 rounded-[1.25rem] border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#101010] cursor-pointer w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-lg sm:hover:bg-neutral-50 sm:dark:hover:bg-[#181818] hover:scale-105 active:scale-95 transition-all duration-200 ${isCreatePostview ? "opacity-0 pointer-events-none translate-y-10" : "opacity-100 translate-y-0"}`}
-            onClick={() => dispatch(openCreatePostModal())}
-          >
-            <Plus
-              className="text-neutral-700 dark:text-neutral-300"
-              size={28}
-            />
-          </div>
+          {
+            <div
+              className={`absolute right-4 bottom-20 md:right-10 md:bottom-10 z-50 rounded-[1.25rem] border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#101010] cursor-pointer w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-lg sm:hover:bg-neutral-50 sm:dark:hover:bg-[#181818] hover:scale-105 active:scale-95 transition-all duration-200 `}
+              onClick={() =>
+                isAuthenticated
+                  ? dispatch(openCreatePostModal())
+                  : dispatch(
+                openAuthModal({
+                  title: "Войдите, чтобы создавать посты",
+                  description: "Войдите, чтобы создавать посты, делиться идеями и общаться.",
+                  icon: 'Pencil'
+                }),
+              )
+              }
+            >
+              <Plus
+                className="text-neutral-700 dark:text-neutral-300"
+                size={28}
+              />
+            </div>
+          }
+
+          <AuthDialog
+            open={isOpenAuthModal}
+            onOpenChange={(open) => !open && dispatch(closeAuthModal())}
+            title={title}
+            description={description}
+            onLogin={() => router.push("/auth")}
+            icon={icon}
+          />
           <CreatePostModal />
 
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 overflow-hidden relative">
             <div className="container mx-auto max-w-7xl flex flex-1 overflow-hidden flex-col">
               {/* Header с границей снизу, только над контентом */}
               <div className="bg-background border-b  border-zinc-700">
@@ -86,12 +118,12 @@ export default function LayoutContent({
               <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar с фиксированной высотой и границей справа */}
                 <div
-                  className={`hidden md:flex shrink-0 flex-col overflow-y-auto transition-[width] duration-300 ease-in-out ${
+                  className={`hidden  md:flex shrink-0 flex-col overflow-y-auto transition-[width] duration-300 ease-in-out ${
                     isOpen ? "w-56" : "w-[68px]"
                   }`}
                 >
                   <div
-                    className="p-4"
+                    className="p-4 h-full"
                     style={{
                       paddingLeft: isOpen ? "1rem" : "0.5rem",
                       paddingRight: isOpen ? "1rem" : "0.5rem",
@@ -103,7 +135,7 @@ export default function LayoutContent({
 
                 {/* Основной контент с прокруткой без видимого скроллбара */}
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                  <div className="flex-1 overflow-y-auto scrollbar-hide pb-24 md:pb-8">
+                  <div className="flex-1 mt-5 overflow-y-auto scrollbar-hide pb-24 md:pb-8">
                     <AuthGuard>{children}</AuthGuard>
                     <SettingsModal />
                   </div>
@@ -113,6 +145,27 @@ export default function LayoutContent({
                   <div className="hidden md:block w-72 shrink-0 flex-col  overflow-y-auto scrollbar-hide">
                     <div className="p-4">
                       <RightSideBar />
+                      <div className="mt-6 text-xs text-gray-500 flex flex-col gap-3">
+                        <Link
+                          href="/legal/terms"
+                          className="hover:text-gray-400 ease-in-out"
+                        >
+                          Условия использования
+                        </Link>
+                        <Link
+                          href="/legal/privacy"
+                          className="hover:text-gray-400 ease-in-out"
+                        >
+                          Конфиденциальность
+                        </Link>
+                        <Link
+                          href="/about"
+                          className="hover:text-gray-400 ease-in-out"
+                        >
+                          О нас
+                        </Link>
+                        <span>© 2026 ООО «Mirchan»</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -121,7 +174,7 @@ export default function LayoutContent({
           </div>
 
           {/* Bottom Navigation для мобильных */}
-          <div className="md:hidden">
+          <div className=" md:hidden">
             <BottomNav />
           </div>
         </div>

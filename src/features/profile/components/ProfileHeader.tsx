@@ -6,24 +6,19 @@ import { useTranslations } from "next-intl";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useOnlineStatus } from "../../chat";
 
-import { ProfileActions } from "./ProfileActions";
 import { ProfileInfo } from "./ProfileInfo";
 import { ProfileStatus } from "./ProfileStatus";
 import StatusModal from "./modals/Status.Modals";
 import { SelectAppearanceModal } from "./modals/SelectAppearanceModal";
 import { ConfirmAppearanceModal } from "./modals/ConfirmAppearanceModal";
 
-import defaultProfileBg from "@/public/images/default_profile_bg.png";
 
 interface ProfileHeaderProps {
   userId: string;
-  isAuthenticated?: boolean; // ✅ Флаг авторизации (если передан извне)
-  isOwnProfile?: boolean; // ✅ Флаг своего профиля (если передан извне)
+  isAuthenticated?: boolean;
+  isOwnProfile?: boolean;
 }
 
-/**
- * Компонент шапки профиля с аватаром, фоном и основной информацией.
- */
 export function ProfileHeader({
   userId,
   isAuthenticated: externalIsAuthenticated,
@@ -41,7 +36,6 @@ export function ProfileHeader({
     handleFollow,
     followError,
     unfollowError,
-    // Appearance из нового хука
     openAppearance,
     appearanceType,
     selectedItem,
@@ -51,8 +45,7 @@ export function ProfileHeader({
     BACKGROUND_PRESETS,
     handleSelectAppearance,
     handleConfirmAppearance,
-    isUpdating, // Флаг загрузки обновления appearance
-    // Status данные и действия
+    isUpdating,
     statusModal,
     updateStatus,
     setUpdateStatus,
@@ -64,7 +57,6 @@ export function ProfileHeader({
     handleOpenStatusModal,
   } = useUserProfile(userId);
 
-  // ✅ Используем внешние флаги если переданы, иначе из хука
   const isOwnProfile = externalIsOwnProfile ?? hookIsOwnProfile;
   const isAuthenticated = externalIsAuthenticated ?? hookIsAuthenticated;
 
@@ -77,122 +69,101 @@ export function ProfileHeader({
 
   const isvideo = data.backgroundUrl?.endsWith(".mp4") || false;
 
+  // Avatar size in px — single source of truth
+  const AVATAR_SIZE = 96; // mobile
+  const AVATAR_SIZE_LG = 120; // lg
+
   return (
     <>
-      <div
-        className="relative  rounded-2xl overflow-hidden mb-6 shadow-2xl"
-        style={{
-          backgroundImage: `url(${
-            data.backgroundUrl === "none" ? defaultProfileBg.src : ""
-          })`,
-        }}
-      >
-        {/* Фон профиля */}
-        <div className="relative h-64 md:h-80">
+      <div className="relative rounded-2xl overflow-hidden mb-6 shadow-2xl">
+        {/* ── Background ── */}
+        <div className="relative h-48 sm:h-64 md:h-72">
           {data.backgroundUrl && data.backgroundUrl !== "none" ? (
             isvideo ? (
               <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover"
+                autoPlay loop muted playsInline
+                className="absolute inset-0 h-full w-full object-cover"
               >
-                <source src={`${data.backgroundUrl}`} type="video/mp4" />
+                <source src={data.backgroundUrl} type="video/mp4" />
               </video>
             ) : (
-              data.backgroundUrl !== "none" && (
-                <img
-                  alt="Profile background"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  src={data.backgroundUrl}
-                />
-              )
+              <img
+                alt="Profile background"
+                className="absolute inset-0 h-full w-full object-cover"
+                src={data.backgroundUrl}
+              />
             )
           ) : (
             <>
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-blue-900/60 to-black " />
-
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-blue-900/60 to-black" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-transparent to-transparent" />
             </>
           )}
-
-          {/* Кнопки редактирования (только для своего профиля И авторизованных) */}
-          {isOwnProfile && isAuthenticated && (
-            <ProfileActions onOpenAppearance={openAppearance} />
-          )}
         </div>
 
-        {/* Основная информация */}
-        <div className="relative bg-white dark:bg-[#101010] p-6 rounded-t-[1.5rem] -mt-6">
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
-            {/* Аватар */}
-            <div className="relative shrink-0 mx-auto lg:mx-0">
-              <div className="relative w-32 h-32 lg:w-40 lg:h-40 -mt-16 lg:-mt-20">
-                <div className="absolute inset-0 flex items-center justify-center p-3 overflow-hidden">
+        {/* ── Card body ── */}
+        <div className="relative -mt-5 rounded-t-[1.5rem] bg-white dark:bg-[#101010] px-4 pb-5 pt-4 sm:px-6 sm:pb-6">
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
+
+            {/* ── Avatar column: avatar + status stacked vertically, centered ── */}
+            <div className="flex flex-col items-center shrink-0">
+
+              {/* Avatar wrapper — lifted above card */}
+              <div
+                className="relative shrink-0 -mt-14 lg:-mt-16"
+                style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
+              >
+                {/* Square crop container — forces 1:1 */}
+                <div className="relative w-full h-full overflow-hidden rounded-[20px] sm:rounded-[22px]">
                   <img
                     alt={data.name || "User avatar"}
-                    className={`w-full h-full object-cover rounded-[2rem] sm:rounded-[2.5rem] shadow-xl ${
-                      !data.avatarFrameUrl
-                        ? "border-[4px] border-white dark:border-[#101010]"
-                        : ""
-                    }`}
+                    className="absolute inset-0 h-full w-full object-cover"
                     src={data.avatarUrl || "/default-avatar.png"}
-                    style={{
-                      width: "150px",
-                      height: "150px",
-                    }}
                   />
-
-                  {/* Рамка аватара */}
-                  {data.avatarFrameUrl && data.avatarFrameUrl !== "none" && (
-                    <img
-                      alt=""
-                      aria-hidden="true"
-                      className="absolute inset-0 w-full h-full pointer-events-none select-none z-100"
-                      src={data.avatarFrameUrl}
-                    />
-                  )}
                 </div>
 
-                {/* Индикатор статуса онлайн */}
+                {/* Avatar frame — sits on top, same size, pointer-events none */}
+                {data.avatarFrameUrl && data.avatarFrameUrl !== "none" && (
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain z-10"
+                    src={data.avatarFrameUrl}
+                  />
+                )}
+
+                {/* Border fallback when no frame */}
+                {(!data.avatarFrameUrl || data.avatarFrameUrl === "none") && (
+                  <div className="pointer-events-none absolute inset-0 rounded-[20px] sm:rounded-[22px] ring-[3px] ring-white dark:ring-[#101010]" />
+                )}
+
+                {/* Online dot */}
                 {isOnline && (
                   <div
-                    className="absolute bottom-3 right-4 lg:bottom-4 lg:right-4 w-5 h-5 lg:w-6 lg:h-6 bg-emerald-500 rounded-full border-2 border-white dark:border-[#101010] shadow-sm z-20"
+                    className="absolute bottom-1.5 right-1.5 z-20 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 dark:border-[#101010]"
                     title="Онлайн"
                   />
                 )}
               </div>
 
-              {/* Статус пользователя */}
-              {!isOwnProfile
-                ? data.status && (
-                    <ProfileStatus isOwner={false} status={data.status} />
-                  )
-                : isAuthenticated && (
-                    <ProfileStatus
-                      isOwner={true}
-                      status={data.status}
-                      onOpen={handleOpenStatusModal}
-                    />
-                  )}
-
-              <StatusModal
-                currentLength={currentLength}
-                isMaxReached={isMaxReached}
-                isOpen={statusModal.isOpen}
-                isUpdating={isStatusUpdating}
-                maxLength={maxLength}
-                setUpdateStatus={setUpdateStatus}
-                updateStatus={updateStatus}
-                userAvatalUrl={data.avatarUrl}
-                onOpenChange={statusModal.onOpenChange}
-                onSave={handleSaveStatus}
-              />
+              {/* Status badge — always below avatar, centered */}
+              <div className="mt-2 flex justify-center">
+                {!isOwnProfile
+                  ? data.status && (
+                      <ProfileStatus isOwner={false} status={data.status} />
+                    )
+                  : isAuthenticated && (
+                      <ProfileStatus
+                        isOwner={true}
+                        status={data.status}
+                        onOpen={handleOpenStatusModal}
+                      />
+                    )}
+              </div>
             </div>
 
-            {/* Информация о пользователе */}
-            <div className="flex-1">
+            {/* ── Info column ── */}
+            <div className="flex-1 min-w-0 lg:pt-2">
               <ProfileInfo
                 currentUserId={currentUser?.id}
                 data={data}
@@ -215,7 +186,19 @@ export function ProfileHeader({
         </div>
       </div>
 
-      {/* Модалка выбора оформления */}
+      <StatusModal
+        currentLength={currentLength}
+        isMaxReached={isMaxReached}
+        isOpen={statusModal.isOpen}
+        isUpdating={isStatusUpdating}
+        maxLength={maxLength}
+        setUpdateStatus={setUpdateStatus}
+        updateStatus={updateStatus}
+        userAvatalUrl={data.avatarUrl}
+        onOpenChange={statusModal.onOpenChange}
+        onSave={handleSaveStatus}
+      />
+
       <SelectAppearanceModal
         appearanceType={appearanceType}
         isOpen={appearanceModal.isOpen}
@@ -227,7 +210,6 @@ export function ProfileHeader({
         onSelectAppearance={handleSelectAppearance}
       />
 
-      {/* Модалка подтверждения */}
       <ConfirmAppearanceModal
         appearanceType={appearanceType}
         isOpen={confirmModal.isOpen}
@@ -239,4 +221,4 @@ export function ProfileHeader({
   );
 }
 
-export default ProfileHeader;
+export default ProfileHeader; 

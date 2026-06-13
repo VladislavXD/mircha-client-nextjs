@@ -164,7 +164,7 @@ export const ChatList: React.FC<ChatListProps> = ({ isCollapsed = false }) => {
   if (!current) {
     return <NotAuthenticated />;
   }
-  // console.log('user chats', chats);
+
 
   return (
     <div className="flex flex-col h-full w-full bg-background overflow-hidden relative">

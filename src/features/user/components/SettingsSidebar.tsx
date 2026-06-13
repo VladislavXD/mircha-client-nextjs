@@ -1,10 +1,11 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/react";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { User, Shield, Lock, Palette, Bell, Globe } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface SettingsNavItem {
   href: string;
@@ -22,8 +23,8 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
   const t = useTranslations("Settings");
   const localeMatch = pathname?.match(/^\/(ru|en)(?=\/|$)/);
   const locale = localeMatch?.[1];
-
   const prefix = locale ? `/${locale}` : "";
+
   const settingsNavItems: SettingsNavItem[] = [
     {
       href: `${prefix}/dashboard/settings/profile`,
@@ -63,14 +64,11 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
     },
   ];
 
-  // Определяем активный путь (убираем locale prefix)
   const isActive = (href: string) => {
     const cleanPathname = pathname.replace(/^\/(ru|en)/, "");
-
     return cleanPathname === href || cleanPathname.startsWith(href + "/");
   };
 
-  // Для мобильного режима - полноэкранный список
   if (isMobile) {
     return (
       <div className="flex flex-col min-h-screen bg-background p-4">
@@ -78,96 +76,25 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
         <nav className="flex flex-col gap-2">
           {settingsNavItems.map((item) => {
             const active = isActive(item.href);
-
-            return (
-              <Card
-                key={item.href}
-                className={active ? "border-primary" : "border-default-200"}
-              >
-                <CardBody
-                  className={`
-								p-0
-								${
-                  active
-                    ? "bg-primary/10 border-primary text-primary"
-                    : "border-default-200 hover:border-default-300 hover:bg-default-50"
-                }
-							`}
-                >
-                  <Link
-                    key={item.href}
-                    className={`
-									flex items-center gap-4 p-4 rounded-xl
-									transition-all duration-150
-									border-2
-									${
-                    active
-                      ? "bg-primary/10 border-primary text-primary"
-                      : "border-default-200 hover:border-default-300 hover:bg-default-50"
-                  }
-								`}
-                    href={item.href}
-                  >
-                    <div
-                      className={`${active ? "text-primary" : "text-default-600"}`}
-                    >
-                      {item.icon}
-                    </div>
-                    <div className="flex-1">
-                      <div
-                        className={`text-base font-semibold ${active ? "text-primary" : "text-default-900"}`}
-                      >
-                        {t(item.labelKey)}
-                      </div>
-                      <div className="text-sm text-default-500 mt-1">
-                        {t(item.descKey)}
-                      </div>
-                    </div>
-                  </Link>
-                </CardBody>
-              </Card>
-            );
-          })}
-        </nav>
-      </div>
-    );
-  }
-
-  // Десктопный режим - компактный сайдбар
-  return (
-    <Card className="w-full">
-      <CardBody className="p-4">
-        <h2 className="text-lg font-semibold mb-4 px-2">{t("title")}</h2>
-        <nav className="flex flex-col gap-1">
-          {settingsNavItems.map((item) => {
-            const active = isActive(item.href);
-
             return (
               <Link
                 key={item.href}
-                className={`
-									flex items-start gap-3 px-3 py-3 rounded-lg
-									transition-colors duration-150
-									${
-                    active
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-default-100 text-default-700"
-                  }
-								`}
                 href={item.href}
+                className={cn(
+                  "flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-150",
+                  active
+                    ? "bg-primary/10 border-primary text-primary"
+                    : "border-border hover:border-border/60 hover:bg-muted/50"
+                )}
               >
-                <div
-                  className={`mt-0.5 ${active ? "text-primary" : "text-default-500"}`}
-                >
+                <div className={cn(active ? "text-primary" : "text-muted-foreground")}>
                   {item.icon}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div
-                    className={`text-sm font-medium ${active ? "text-primary" : ""}`}
-                  >
+                <div className="flex-1">
+                  <div className={cn("text-base font-semibold", active ? "text-primary" : "")}>
                     {t(item.labelKey)}
                   </div>
-                  <div className="text-xs text-default-500 mt-0.5">
+                  <div className="text-sm text-muted-foreground mt-1">
                     {t(item.descKey)}
                   </div>
                 </div>
@@ -175,7 +102,44 @@ export function SettingsSidebar({ isMobile = false }: SettingsSidebarProps) {
             );
           })}
         </nav>
-      </CardBody>
+      </div>
+    );
+  }
+
+  return (
+    <Card className="w-full">
+      <CardContent className="p-4">
+        <h2 className="text-lg font-semibold mb-4 px-2">{t("title")}</h2>
+        <nav className="flex flex-col gap-1">
+          {settingsNavItems.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-start gap-3 px-3 py-3 rounded-lg transition-colors duration-150",
+                  active
+                    ? "bg-primary/10 text-primary"
+                    : "hover:bg-muted text-muted-foreground"
+                )}
+              >
+                <div className={cn("mt-0.5", active ? "text-primary" : "text-muted-foreground")}>
+                  {item.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className={cn("text-sm font-medium", active ? "text-primary" : "")}>
+                    {t(item.labelKey)}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t(item.descKey)}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+      </CardContent>
     </Card>
   );
 }

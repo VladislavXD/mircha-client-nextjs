@@ -1,21 +1,28 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  Textarea,
-  Switch,
-  Select,
-  SelectItem,
-  Chip,
-} from "@heroui/react";
 import { toast } from "sonner";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { useCreateBoard } from "@/src/features/admin";
 import { handleApiError } from "@/src/services/admin.utils";
@@ -40,7 +47,7 @@ const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({
     title: "",
     description: "",
     isNsfw: false,
-    maxFileSize: 5242880, // 5MB
+    maxFileSize: 5242880,
     allowedFileTypes: ["jpg", "jpeg", "png", "gif", "webp"],
     postsPerPage: 15,
     threadsPerPage: 10,
@@ -49,22 +56,30 @@ const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({
   });
 
   const availableFileTypes = [
-    "jpg",
-    "jpeg",
-    "png",
-    "gif",
-    "webp",
-    "webm",
-    "mp4",
-    "mov",
+    "jpg", "jpeg", "png", "gif", "webp", "webm", "mp4", "mov",
   ];
+
+  const fileSizeOptions = [
+    { label: "1 MB", value: 1048576 },
+    { label: "5 MB", value: 5242880 },
+    { label: "10 MB", value: 10485760 },
+    { label: "25 MB", value: 26214400 },
+    { label: "50 MB", value: 52428800 },
+  ];
+
+  const handleFileTypeToggle = (fileType: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      allowedFileTypes: prev.allowedFileTypes.includes(fileType)
+        ? prev.allowedFileTypes.filter((t) => t !== fileType)
+        : [...prev.allowedFileTypes, fileType],
+    }));
+  };
 
   const handleSubmit = async () => {
     if (isLoading) return;
-
     if (!formData.name.trim() || !formData.title.trim()) {
       toast.error("Название и заголовок обязательны");
-
       return;
     }
 
@@ -72,13 +87,11 @@ const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({
     submittingRef.current = true;
 
     try {
-      console.log("Отправляем данные на создание борда:", formData);
       await createBoard(formData);
       toast.success("Борд создан успешно!");
       onClose();
       if (onSuccess) onSuccess();
 
-      // Сброс формы
       setFormData({
         name: "",
         title: "",
@@ -92,216 +105,199 @@ const AdminCreateBoardModal: React.FC<AdminCreateBoardModalProps> = ({
         imageLimit: 150,
       });
     } catch (error: any) {
-      console.error("Ошибка создания борда:", error);
-      const errorMessage = handleApiError(error);
-
-      toast.error(errorMessage);
+      toast.error(handleApiError(error));
     } finally {
       setIsLoading(false);
       submittingRef.current = false;
     }
   };
 
-  const handleFileTypeToggle = (fileType: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      allowedFileTypes: prev.allowedFileTypes.includes(fileType)
-        ? prev.allowedFileTypes.filter((type) => type !== fileType)
-        : [...prev.allowedFileTypes, fileType],
-    }));
-  };
-
-  const fileSizeOptions = [
-    { label: "1 MB", value: 1048576 },
-    { label: "5 MB", value: 5242880 },
-    { label: "10 MB", value: 10485760 },
-    { label: "25 MB", value: 26214400 },
-    { label: "50 MB", value: 52428800 },
-  ];
-
   return (
-    <Modal
-      classNames={{
-        base: "mx-2 sm:mx-4",
-        body: "px-4 sm:px-6",
-        header: "px-4 sm:px-6",
-        footer: "px-4 sm:px-6",
-      }}
-      isOpen={isOpen}
-      scrollBehavior="inside"
-      size="2xl"
-      onClose={onClose}
-    >
-      <ModalContent>
-        <ModalHeader>
-          <h3 className="text-lg sm:text-xl font-semibold">
-            Создать новый борд
-          </h3>
-        </ModalHeader>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Создать новый борд</DialogTitle>
+        </DialogHeader>
 
-        <ModalBody className="space-y-4">
-          <Input
-            isRequired
-            description="Только буквы и цифры, до 10 символов"
-            label="Короткое имя борда"
-            placeholder="b, g, pol..."
-            value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-          />
-
-          <Input
-            isRequired
-            label="Название борда"
-            placeholder="Random, Technology, Politics..."
-            value={formData.title}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, title: e.target.value }))
-            }
-          />
-
-          <Textarea
-            label="Описание"
-            maxRows={3}
-            placeholder="Описание борда..."
-            value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="board-name">Короткое имя борда *</Label>
             <Input
-              label="Постов на страницу"
-              max={50}
-              min={5}
-              type="number"
-              value={formData.postsPerPage.toString()}
+              id="board-name"
+              placeholder="b, g, pol..."
+              value={formData.name}
               onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  postsPerPage: parseInt(e.target.value) || 15,
-                }))
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
               }
             />
+            <p className="text-xs text-muted-foreground">
+              Только буквы и цифры, до 10 символов
+            </p>
+          </div>
 
+          <div className="space-y-1.5">
+            <Label htmlFor="board-title">Название борда *</Label>
             <Input
-              label="Тредов на страницу"
-              max={25}
-              min={5}
-              type="number"
-              value={formData.threadsPerPage.toString()}
+              id="board-title"
+              placeholder="Random, Technology, Politics..."
+              value={formData.title}
               onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  threadsPerPage: parseInt(e.target.value) || 10,
-                }))
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
               }
             />
+          </div>
 
-            <Input
-              label="Лимит бампа"
-              max={1000}
-              min={50}
-              type="number"
-              value={formData.bumpLimit.toString()}
+          <div className="space-y-1.5">
+            <Label htmlFor="board-desc">Описание</Label>
+            <Textarea
+              id="board-desc"
+              placeholder="Описание борда..."
+              rows={3}
+              value={formData.description}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
-                  bumpLimit: parseInt(e.target.value) || 500,
-                }))
-              }
-            />
-
-            <Input
-              label="Лимит изображений"
-              max={500}
-              min={10}
-              type="number"
-              value={formData.imageLimit.toString()}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  imageLimit: parseInt(e.target.value) || 150,
+                  description: e.target.value,
                 }))
               }
             />
           </div>
 
-          <Select
-            label="Максимальный размер файла"
-            selectedKeys={[formData.maxFileSize.toString()]}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                maxFileSize: parseInt(e.target.value),
-              }))
-            }
-          >
-            {fileSizeOptions.map((option) => (
-              <SelectItem key={option.value}>{option.label}</SelectItem>
-            ))}
-          </Select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="posts-per-page">Постов на страницу</Label>
+              <Input
+                id="posts-per-page"
+                max={50}
+                min={5}
+                type="number"
+                value={formData.postsPerPage}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    postsPerPage: parseInt(e.target.value) || 15,
+                  }))
+                }
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Разрешенные типы файлов
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {availableFileTypes.map((fileType) => (
-                <Chip
-                  key={fileType}
-                  className="cursor-pointer"
-                  color={
-                    formData.allowedFileTypes.includes(fileType)
-                      ? "primary"
-                      : "default"
-                  }
-                  variant={
-                    formData.allowedFileTypes.includes(fileType)
-                      ? "solid"
-                      : "bordered"
-                  }
-                  onClick={() => handleFileTypeToggle(fileType)}
-                >
-                  {fileType}
-                </Chip>
-              ))}
+            <div className="space-y-1.5">
+              <Label htmlFor="threads-per-page">Тредов на страницу</Label>
+              <Input
+                id="threads-per-page"
+                max={25}
+                min={5}
+                type="number"
+                value={formData.threadsPerPage}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    threadsPerPage: parseInt(e.target.value) || 10,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="bump-limit">Лимит бампа</Label>
+              <Input
+                id="bump-limit"
+                max={1000}
+                min={50}
+                type="number"
+                value={formData.bumpLimit}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    bumpLimit: parseInt(e.target.value) || 500,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="image-limit">Лимит изображений</Label>
+              <Input
+                id="image-limit"
+                max={500}
+                min={10}
+                type="number"
+                value={formData.imageLimit}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    imageLimit: parseInt(e.target.value) || 150,
+                  }))
+                }
+              />
             </div>
           </div>
 
-          <Switch
-            isSelected={formData.isNsfw}
-            onValueChange={(checked) =>
-              setFormData((prev) => ({ ...prev, isNsfw: checked }))
-            }
-          >
-            NSFW контент
-          </Switch>
-        </ModalBody>
+          <div className="space-y-1.5">
+            <Label>Максимальный размер файла</Label>
+            <Select
+              value={formData.maxFileSize.toString()}
+              onValueChange={(val) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  maxFileSize: parseInt(val),
+                }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {fileSizeOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value.toString()}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <ModalFooter className="flex flex-col sm:flex-row gap-3">
-          <Button
-            className="w-full sm:w-auto order-2 sm:order-1"
-            color="danger"
-            disabled={isLoading}
-            variant="light"
-            onPress={onClose}
-          >
+          <div className="space-y-2">
+            <Label>Разрешенные типы файлов</Label>
+            <div className="flex flex-wrap gap-2">
+              {availableFileTypes.map((fileType) => {
+                const active = formData.allowedFileTypes.includes(fileType);
+                return (
+                  <Badge
+                    key={fileType}
+                    className="cursor-pointer select-none"
+                    variant={active ? "default" : "outline"}
+                    onClick={() => handleFileTypeToggle(fileType)}
+                  >
+                    {fileType}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.isNsfw}
+              id="nsfw"
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, isNsfw: checked }))
+              }
+            />
+            <Label htmlFor="nsfw">NSFW контент</Label>
+          </div>
+        </div>
+
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+          <Button disabled={isLoading} variant="ghost" onClick={onClose}>
             Отмена
           </Button>
-          <Button
-            className="w-full sm:w-auto order-1 sm:order-2"
-            color="primary"
-            isLoading={isLoading}
-            onPress={handleSubmit}
-          >
-            Создать борд
+          <Button disabled={isLoading} onClick={handleSubmit}>
+            {isLoading ? "Создаём..." : "Создать борд"}
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

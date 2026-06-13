@@ -12,11 +12,14 @@ import {
   Cake,
   MapPin,
   CalendarDays,
+  Edit2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useDispatch } from "react-redux";
 
 import { formatToClientDate } from "@/app/utils/formatToClientDate";
 import { Button } from "@/components/ui/button";
+import { openSettingsModal } from "@/src/store/settingsModal/settingsModal.slice";
 
 interface ProfileInfoProps {
   data: ProfileData;
@@ -32,10 +35,6 @@ interface ProfileInfoProps {
   currentUserId?: string;
 }
 
-/**
- * Компонент информации о пользователе в профиле.
- * Отображает имя, bio, статистику, кнопки подписки/сообщений.
- */
 export function ProfileInfo({
   data,
   stats,
@@ -50,8 +49,9 @@ export function ProfileInfo({
   currentUserId,
 }: ProfileInfoProps) {
   const t = useTranslations("Toasts");
+  const profileEdit = useTranslations("Profile");
+  const dispatch = useDispatch();
 
-  // Показ ошибок подписки
   React.useEffect(() => {
     if (followError || unfollowError) {
       toast.error(t("subscriptionError"), {
@@ -60,16 +60,29 @@ export function ProfileInfo({
     }
   }, [followError, unfollowError]);
 
+  const handleFollowClick = () => {
+    if (!currentUserId) {
+      toast.error(t("notAuthorized"), { description: t("notAuthorizedDesc") });
+    } else {
+      onFollow();
+    }
+  };
+
+  const isActionLoading = isDataLoading || isFollowLoading || isUnfollowLoading;
+
   return (
-    <div className="flex flex-col gap-4 sm:gap-6">
-      {/* Верхняя часть: имя и кнопки */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start justify-between">
-        {/* Имя пользователя */}
-        <div className="flex-1 w-full text-center sm:text-left">
-          <div className="relative inline-block mb-2">
+    <div className="flex flex-col gap-3 px-1">
+
+      {/* ── Row 1: name + action button(s) ── */}
+      <div className="flex items-start justify-between gap-3">
+        {/* Name block */}
+        <div className="min-w-0">
+          {/* username frame decoration */}
+          <div className="relative inline-block">
             {data.usernameFrameUrl && data.usernameFrameUrl !== "none" && (
               <div
-                className="absolute inset-0 w-full h-full pointer-events-none select-none z-10"
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-10 select-none"
                 style={{
                   backgroundImage: `url(${data.usernameFrameUrl})`,
                   backgroundRepeat: "repeat-x",
@@ -78,46 +91,33 @@ export function ProfileInfo({
                 }}
               />
             )}
-            <h1 className="relative z-0 text-2xl sm:text-3xl lg:text-4xl font-bold px-0">
+            <h1 className="relative z-0 text-[22px] font-bold leading-tight tracking-tight text-white">
               {data.name}
             </h1>
           </div>
-          <p className="text-neutral-500 dark:text-neutral-400 text-base sm:text-lg">
+          <p className="mt-0.5 text-[13px] text-neutral-500">
             @{data.username}
           </p>
         </div>
 
-        {/* Кнопки действий (только для чужого профиля) - мобильная версия в конце */}
-        {!isOwner && (
-          <div className="hidden sm:flex flex-col gap-2 shrink-0 min-w-[150px]">
+        {/* Action buttons — desktop only, stacked */}
+        {!isOwner ? (
+          <div className="hidden sm:flex flex-col gap-2 shrink-0 min-w-[140px]">
             <Button
-              className="w-full font-semibold rounded-[1rem] sm:rounded-[1.25rem] text-sm h-10 sm:h-11 px-4 shadow-sm"
-              disabled={isDataLoading || isFollowLoading || isUnfollowLoading}
+              className="w-full h-9 rounded-full text-[13px] font-semibold"
+              disabled={isActionLoading}
               variant={isFollowing ? "secondary" : "default"}
-              onClick={() =>
-                !currentUserId
-                  ? toast.error(t("notAuthorized"), {
-                      description: t("notAuthorizedDesc"),
-                    })
-                  : onFollow()
-              }
+              onClick={handleFollowClick}
             >
               {isFollowing ? (
-                <>
-                  <UserMinus className="mr-2" size={18} />
-                  Отписаться
-                </>
+                <><UserMinus className="mr-1.5" size={15} />Отписаться</>
               ) : (
-                <>
-                  <UserPlus className="mr-2" size={18} />
-                  Подписаться
-                </>
+                <><UserPlus className="mr-1.5" size={15} />Подписаться</>
               )}
             </Button>
-
             <Button
               asChild
-              className="w-full rounded-[1rem] sm:rounded-[1.25rem] text-sm h-10 sm:h-11 px-4 border-neutral-200 dark:border-neutral-800/70"
+              className="w-full h-9 rounded-full text-[13px] border-neutral-800"
               variant="outline"
             >
               <Link
@@ -125,114 +125,89 @@ export function ProfileInfo({
                 onClick={(e) => {
                   if (!currentUserId) {
                     e.preventDefault();
-                    toast.error(t("notAuthorized"), {
-                      description: t("notAuthorizedDesc"),
-                    });
+                    toast.error(t("notAuthorized"), { description: t("notAuthorizedDesc") });
                   }
                 }}
               >
                 Сообщение
-                <SendHorizontal className="ml-2" size={16} />
+                <SendHorizontal className="ml-1.5" size={14} />
               </Link>
             </Button>
           </div>
+        ) : (
+          <Button
+            className="h-8 shrink-0 rounded-full border-neutral-700 bg-transparent px-4 text-[12px] font-medium text-neutral-200 hover:bg-neutral-800"
+            size="sm"
+            variant="outline"
+            onClick={() => dispatch(openSettingsModal("profile"))}
+          >
+            <Edit2 className="mr-1.5" size={13} />
+            {profileEdit("edit")}
+          </Button>
         )}
       </div>
 
-      {/* Bio */}
+      {/* ── Row 2: bio ── */}
       {data.bio && (
-        <p className="text-neutral-600 dark:text-neutral-300 text-sm sm:text-[15px] max-w-2xl leading-relaxed text-center sm:text-left font-serif whitespace-pre-wrap">
+        <p className="text-[13px] leading-relaxed text-neutral-300 whitespace-pre-wrap font-serif">
           {data.bio}
         </p>
       )}
 
-      {/* Метаинформация */}
-      <div className="flex flex-wrap gap-4 sm:gap-6 text-[13px] sm:text-sm text-neutral-500 dark:text-neutral-400 justify-center sm:justify-start items-center">
-        {data.dateOfBirth && (
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Cake size={16} />
-            <span className="truncate">
-              {formatToClientDate(data.dateOfBirth)}
-            </span>
-          </div>
-        )}
+      {/* ── Row 3: meta (location, birthday, joined) — compact single line ── */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-neutral-500">
         {data.location && (
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <MapPin size={16} />
-            <span className="truncate">{data.location}</span>
-          </div>
+          <span className="flex items-center gap-1">
+            <MapPin size={12} />
+            {data.location}
+          </span>
         )}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <CalendarDays size={16} />
-          <span className="truncate">
-            Присоединился {formatToClientDate(data.createdAt)}
+        {data.dateOfBirth && (
+          <span className="flex items-center gap-1">
+            <Cake size={12} />
+            {formatToClientDate(data.dateOfBirth)}
           </span>
+        )}
+        <span className="flex items-center gap-1">
+          <CalendarDays size={12} />
+          {formatToClientDate(data.createdAt)}
+        </span>
+      </div>
+
+      {/* ── Row 4: stats ── */}
+      <div className="flex items-center gap-5 text-[13px]">
+        <Link href={`/following/${data.id}`} className="flex items-center gap-1 hover:underline underline-offset-4 decoration-neutral-600">
+          <span className="font-bold text-white">{stats.followingCount}</span>
+          <span className="text-neutral-500">Подписки</span>
+        </Link>
+        <Link href={`/followers/${data.id}`} className="flex items-center gap-1 hover:underline underline-offset-4 decoration-neutral-600">
+          <span className="font-bold text-white">{stats.followersCount}</span>
+          <span className="text-neutral-500">Подписчики</span>
+        </Link>
+        <div className="flex items-center gap-1">
+          <span className="font-bold text-white">{stats.postsCount}</span>
+          <span className="text-neutral-500">Посты</span>
         </div>
       </div>
 
-      {/* Статистика подписок */}
-      <div className="flex flex-wrap gap-5 sm:gap-8 justify-center sm:justify-start pt-2">
-        <Link className="group" href={`/following/${data.id}`}>
-          <div className="flex items-center gap-1.5 hover:underline decoration-neutral-400 transition-all underline-offset-4">
-            <span className="font-bold text-neutral-900 dark:text-white text-base sm:text-lg">
-              {stats.followingCount}
-            </span>
-            <span className="text-neutral-500 dark:text-neutral-400 text-sm sm:text-[15px]">
-              Подписки
-            </span>
-          </div>
-        </Link>
-        <Link className="group" href={`/followers/${data.id}`}>
-          <div className="flex items-center gap-1.5 hover:underline decoration-neutral-400 transition-all underline-offset-4">
-            <span className="font-bold text-neutral-900 dark:text-white text-base sm:text-lg">
-              {stats.followersCount}
-            </span>
-            <span className="text-neutral-500 dark:text-neutral-400 text-sm sm:text-[15px]">
-              Подписчики
-            </span>
-          </div>
-        </Link>
-        <div className="flex items-center gap-1.5">
-          <span className="font-bold text-neutral-900 dark:text-white text-base sm:text-lg">
-            {stats.postsCount}
-          </span>
-          <span className="text-neutral-500 dark:text-neutral-400 text-sm sm:text-[15px]">
-            Посты
-          </span>
-        </div>
-      </div>
-
-      {/* Кнопки действий - мобильная версия */}
+      {/* ── Row 5: action buttons — mobile only, side by side ── */}
       {!isOwner && (
-        <div className="flex flex-col sm:hidden gap-2 w-full mt-2">
+        <div className="flex sm:hidden gap-2 pt-1">
           <Button
-            className="w-full font-semibold rounded-[1rem] text-sm h-11"
-            disabled={isDataLoading || isFollowLoading || isUnfollowLoading}
+            className="flex-1 h-9 rounded-full text-[13px] font-semibold"
+            disabled={isActionLoading}
             variant={isFollowing ? "secondary" : "default"}
-            onClick={() =>
-              !currentUserId
-                ? toast.error(t("notAuthorized"), {
-                    description: t("notAuthorizedDesc"),
-                  })
-                : onFollow()
-            }
+            onClick={handleFollowClick}
           >
             {isFollowing ? (
-              <>
-                <UserMinus className="mr-2" size={18} />
-                <span>Отписаться</span>
-              </>
+              <><UserMinus className="mr-1.5" size={15} />Отписаться</>
             ) : (
-              <>
-                <UserPlus className="mr-2" size={18} />
-                <span>Подписаться</span>
-              </>
+              <><UserPlus className="mr-1.5" size={15} />Подписаться</>
             )}
           </Button>
-
           <Button
             asChild
-            className="w-full rounded-[1rem] text-sm h-11 border-neutral-200 dark:border-neutral-800/70"
+            className="flex-1 h-9 rounded-full text-[13px] border-neutral-800"
             variant="outline"
           >
             <Link
@@ -240,14 +215,12 @@ export function ProfileInfo({
               onClick={(e) => {
                 if (!currentUserId) {
                   e.preventDefault();
-                  toast.error(t("notAuthorized"), {
-                    description: t("notAuthorizedDesc"),
-                  });
+                  toast.error(t("notAuthorized"), { description: t("notAuthorizedDesc") });
                 }
               }}
             >
-              <span>Сообщение</span>
-              <SendHorizontal className="ml-2" size={16} />
+              Сообщение
+              <SendHorizontal className="ml-1.5" size={14} />
             </Link>
           </Button>
         </div>

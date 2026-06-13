@@ -14,7 +14,8 @@
       "messages": "Messages",
       "forum": "Forum",
       "followers": "Followers",
-      "follows": "Follows"
+      "follows": "Follows",
+      "profile": "Profile"
     },
     "navbar": {
       "dropdownMenu": {
@@ -373,5 +374,137 @@
     "securityUpdateSuccess": "Security settings updated",
     "securityUpdateDesc": "Your security settings have been updated",
     "securityUpdateError": "Error updating security settings"
+  },
+
+
+
+
+  "Legal": {
+    "Terms": {
+      "title": "Terms of Service",
+      "subtitle": "By using mirchan.site you agree to the following terms. Please read them carefully.",
+      "updated": "Effective date: 08.06.2025",
+      "contact": "Questions about the Terms?",
+      "sections": {
+        "acceptance": {
+          "title": "Acceptance of Terms",
+          "body": "By accessing or using mirchan.site, you confirm that you have read, understood, and agree to be bound by these Terms. If you do not agree with any part, please refrain from using the Platform."
+        },
+        "description": {
+          "title": "Description of Service",
+          "body": "The Platform provides the following features:",
+          "items": [
+            "Social network: publishing posts, comments, reposts, likes, subscriptions, and direct messages.",
+            "Forums: topic discussions in dedicated sections.",
+            "Project management (coming soon): tools for team collaboration and task tracking."
+          ]
+        },
+        "account": {
+          "title": "Registration and Account",
+          "body": "To use most features you must create an account. You agree to:",
+          "items": [
+            "Provide accurate and up-to-date information during registration.",
+            "Keep your login credentials confidential and not share them with third parties.",
+            "Notify us immediately of any unauthorized access to your account."
+          ]
+        },
+        "conduct": {
+          "title": "Acceptable Use",
+          "body": "By using the Platform, you agree not to:",
+          "items": [
+            "Post content that violates applicable law or international norms.",
+            "Share material containing harassment, threats, hate speech, or promotion of violence.",
+            "Distribute spam, unauthorized advertising, or malicious software.",
+            "Impersonate other users or Platform administrators.",
+            "Perform actions that disrupt the Platform or place excessive load on servers.",
+            "Infringe on copyrights, trademarks, or any intellectual property rights."
+          ]
+        },
+        "content": {
+          "title": "User Content",
+          "body": "By posting content on the Platform, you retain all rights to your materials and grant mirchan.site a non-exclusive, royalty-free, worldwide license to use, reproduce, and display your content to operate the Service. You warrant that your content does not infringe any third-party rights. We reserve the right to remove content that violates these Terms without prior notice."
+        },
+        "liability": {
+          "title": "Limitation of Liability",
+          "body": "The Platform is provided \"as is\" without any warranties. We are not liable for losses arising from use or inability to use the Platform, content posted by other users, or temporary unavailability of the Service due to technical reasons."
+        },
+        "changes": {
+          "title": "Changes to Terms",
+          "body": "We reserve the right to modify these Terms at any time. We will notify users by posting the updated version on the Platform. Continued use after changes are posted constitutes your acceptance of the revised Terms."
+        },
+        "termination": {
+          "title": "Termination",
+          "body": "We may suspend or terminate your account without prior notice if you violate these Terms or for other legitimate reasons at our sole discretion."
+        }
+      }
+    },
+    "Privacy": {
+      "title": "Privacy Policy",
+      "subtitle": "We take your privacy seriously. This policy describes what data we collect and how we use it.",
+      "updated": "Effective date: 08.06.2025",
+      "contact": "Privacy-related questions?",
+      "sections": {
+        "collected": {
+          "title": "Data We Collect",
+          "body": "When you register and use the Platform, we may collect:",
+          "items": [
+            "Email address — used for authentication and notifications.",
+            "Password — stored as an encrypted hash; we never access your plaintext password.",
+            "Avatar and media files — photos and images you upload.",
+            "IP address — logged for security and abuse prevention.",
+            "Activity data — posts, likes, comments for analytics and improvement.",
+            "Technical data — browser type, OS, session cookies."
+          ]
+        },
+        "usage": {
+          "title": "How We Use Your Data",
+          "body": "Collected data is used exclusively to:",
+          "items": [
+            "Maintain your account and authenticate your sessions.",
+            "Display your profile to other users.",
+            "Send service-related notifications.",
+            "Ensure security and protect against fraud.",
+            "Improve Platform functionality and analyze performance."
+          ]
+        },
+        "storage": {
+          "title": "Data Storage",
+          "body": "User sessions are stored in encrypted form using Redis on secured servers. We apply technical and organizational measures to protect your data from unauthorized access, alteration, or destruction."
+        },
+        "sharing": {
+          "title": "Sharing Data with Third Parties",
+          "body": "We do not sell or rent your personal data. We may share it only in the following cases:",
+          "items": [
+            "Compliance with applicable law or court orders.",
+            "Protection of the Platform's rights in cases of abuse.",
+            "Technical service providers (hosting, CDN) who are contractually bound to confidentiality."
+          ]
+        },
+        "cookies": {
+          "title": "Cookies and Analytics",
+          "body": "The Platform uses HTTP-only cookies to manage user sessions. These cookies are inaccessible via JavaScript and protected against XSS attacks. We may also collect anonymous analytics data to evaluate traffic and improve the interface."
+        },
+        "rights": {
+          "title": "Your Rights",
+          "body": "You have the right to:",
+          "items": [
+            "Request access to your personal data.",
+            "Request correction of inaccurate data.",
+            "Request deletion of your data (right to be forgotten).",
+            "Withdraw consent to data processing at any time."
+          ]
+        },
+        "age": {
+          "title": "Age Requirements",
+          "body": "The Platform is not intended for users under 13 years of age. We do not knowingly collect data about children. If you believe a child has provided us their data without parental consent, please contact us."
+        },
+        "changes": {
+          "title": "Changes to This Policy",
+          "body": "We reserve the right to update this Privacy Policy. We will notify users by publishing the new version with an updated effective date. We encourage you to review this page periodically."
+        }
+      }
+    },
+    "back": "Back",
+    "about": "About us"
   }
 }

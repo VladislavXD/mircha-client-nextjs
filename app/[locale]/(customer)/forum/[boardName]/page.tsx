@@ -2,16 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Chip,
-  Spinner,
-  Button,
-  Breadcrumbs,
-  BreadcrumbItem,
-} from "@heroui/react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -22,6 +15,7 @@ import CreateThreadModal from "./components/CreateThreadModal";
 import MediaThumbnail from "@/shared/components/MediaThumbnail";
 import { useBoardByName, useBoardThreads } from "@/src/features/forum";
 import MobileForumExtras from "@/shared/components/forum/MobileForumExtras";
+import { Thread } from "@/src/types/types";
 
 const BoardPage = () => {
   const params = useParams();
@@ -85,7 +79,7 @@ const BoardPage = () => {
   if (boardLoading || threadsLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <div className="w-9 h-9 border-2 border-primary rounded-full border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -119,31 +113,16 @@ const BoardPage = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="max-w-md w-full">
             <CardHeader>
-              <h2 className="text-xl font-bold text-center">
-                Предупреждение о содержимом 18+
-              </h2>
+              <h2 className="text-xl font-bold text-center">Предупреждение о содержимом 18+</h2>
             </CardHeader>
-            <CardBody className="text-center space-y-4">
-              <p className="text-gray-600 dark:text-gray-400">
-                Этот борд содержит материалы для взрослых. Вам должно быть не
-                менее 18 лет для просмотра этого контента.
-              </p>
-              <p className="text-sm text-gray-500">
-                Подтвердите, что вам исполнилось 18 лет.
-              </p>
+            <CardContent className="text-center space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">Этот борд содержит материалы для взрослых. Вам должно быть не менее 18 лет для просмотра этого контента.</p>
+              <p className="text-sm text-gray-500">Подтвердите, что вам исполнилось 18 лет.</p>
               <div className="flex gap-3 justify-center">
-                <Button
-                  color="danger"
-                  variant="flat"
-                  onPress={handleNsfwDecline}
-                >
-                  Мне нет 18
-                </Button>
-                <Button color="primary" onPress={handleNsfwAccept}>
-                  Мне есть 18
-                </Button>
+                <Button variant="ghost" onClick={handleNsfwDecline} className="text-danger">Мне нет 18</Button>
+                <Button color="primary" onClick={handleNsfwAccept}>Мне есть 18</Button>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
       </>
@@ -153,12 +132,15 @@ const BoardPage = () => {
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-6xl">
       {/* Хлебные крошки */}
-      <Breadcrumbs className="mb-4 text-sm">
-        <BreadcrumbItem>
-          <Link href="/forum">Форум</Link>
-        </BreadcrumbItem>
-        <BreadcrumbItem>/{board.name}/</BreadcrumbItem>
-      </Breadcrumbs>
+      <nav className="mb-4 text-sm text-muted-foreground" aria-label="breadcrumbs">
+        <ol className="flex gap-2 items-center">
+          <li>
+            <Link href="/forum" className="hover:underline">Форум</Link>
+          </li>
+          <li>•</li>
+          <li className="font-medium">/{board.name}/</li>
+        </ol>
+      </nav>
 
       {/* Заголовок борда */}
       <div className="mb-4 sm:mb-6">
@@ -169,14 +151,7 @@ const BoardPage = () => {
                 /{board.name}/ - {board.title}
               </span>
               {board.isNsfw && (
-                <Chip
-                  className="text-xs"
-                  color="danger"
-                  size="sm"
-                  variant="flat"
-                >
-                  18+
-                </Chip>
+                <Badge className="text-xs px-2 py-1" variant="destructive">18+</Badge>
               )}
             </h1>
             {board.description && (
@@ -185,13 +160,7 @@ const BoardPage = () => {
               </p>
             )}
           </div>
-          <Button
-            className="self-start sm:self-auto"
-            color="primary"
-            size="sm"
-            variant="flat"
-            onPress={() => setShowCreateModal(true)}
-          >
+          <Button className="self-start sm:self-auto" color="primary" size="sm" variant="ghost" onClick={() => setShowCreateModal(true)}>
             <span className="hidden sm:inline">Создать тред</span>
             <span className="sm:hidden">Создать</span>
           </Button>
@@ -209,7 +178,7 @@ const BoardPage = () => {
 
       {/* Список тредов */}
       <div className="space-y-3 sm:space-y-4">
-        {threads?.map((thread) => (
+        {threads?.map((thread: any) => (
           <Link key={thread.id} href={`/forum/${boardName}/${thread.id}`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader className="pb-2 px-3 sm:px-6">
@@ -231,39 +200,14 @@ const BoardPage = () => {
                   </div>
 
                   <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
-                    <Chip
-                      className="text-xs"
-                      color="default"
-                      size="sm"
-                      variant="flat"
-                    >
-                      {thread._count?.replies || 0} ответов
-                    </Chip>
-                    {thread.isPinned && (
-                      <Chip
-                        className="text-xs"
-                        color="warning"
-                        size="sm"
-                        variant="flat"
-                      >
-                        Закреплён
-                      </Chip>
-                    )}
-                    {thread.isLocked && (
-                      <Chip
-                        className="text-xs"
-                        color="secondary"
-                        size="sm"
-                        variant="flat"
-                      >
-                        Заблокирован
-                      </Chip>
-                    )}
+                    <Badge className="text-xs px-2 py-1" variant="outline">{thread._count?.replies || 0} ответов</Badge>
+                    {thread.isPinned && <Badge className="text-xs px-2 py-1" variant="default">Закреплён</Badge>}
+                    {thread.isLocked && <Badge className="text-xs px-2 py-1" variant="outline">Заблокирован</Badge>}
                   </div>
                 </div>
               </CardHeader>
 
-              <CardBody className="pt-0 px-3 sm:px-6">
+              <CardContent className="pt-0 px-3 sm:px-6">
                 {/* Превью контента треда */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                   {/* Отображение медиафайлов */}
@@ -321,7 +265,7 @@ const BoardPage = () => {
                     </div>
                   </div>
                 )}
-              </CardBody>
+              </CardContent>
             </Card>
           </Link>
         ))}
@@ -333,7 +277,7 @@ const BoardPage = () => {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             Будьте первым, кто создаст тред в этом борде
           </p>
-          <Button color="primary" onPress={() => setShowCreateModal(true)}>
+          <Button color="primary" onClick={() => setShowCreateModal(true)}>
             Создать первый тред
           </Button>
         </div>

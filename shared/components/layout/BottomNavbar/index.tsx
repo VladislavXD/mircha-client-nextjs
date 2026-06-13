@@ -2,14 +2,25 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
+import { useTheme } from "@wrksz/themes/client";
 import { usePathname } from "next/navigation";
-import { Home, MessageCircle, Search, Theater } from "lucide-react";
+import {
+  Bell,
+  FolderKanban,
+  Home,
+  MessageCircle,
+  Search,
+  Theater,
+} from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/src/features/user";
 import { useGetUserChats } from "@/src/features/chat";
+import NavButton from "../../ui/navButton";
+import ProjectIcon from "../../icons/projectIcon";
+import { Badge } from "@/components/ui/badge";
+import { useUnreadNotificationCount } from "@/src/features/notification";
 
 const useScrollDirection = () => {
   const [scrollDirection, setScrollDirection] = useState("up");
@@ -55,10 +66,11 @@ const BottomNav = () => {
     scrollDirection === "up" ? "translate-y-0" : "translate-y-[150%]";
 
   const pathname = usePathname();
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   const { user: current, isLoading } = useCurrentUser();
   const { data: chats } = useGetUserChats();
+  const { data: unreadCount } = useUnreadNotificationCount();
 
   const totalUnreadCount = useMemo(() => {
     if (!chats) return 0;
@@ -83,7 +95,7 @@ const BottomNav = () => {
   };
 
   const getIconColor = (isActive: boolean) => {
-    const isDark = theme === "dark";
+    const isDark = resolvedTheme === "dark";
 
     if (isActive) {
       return isDark ? "#ffffff" : "#000000";
@@ -114,7 +126,7 @@ const BottomNav = () => {
                 size={20}
                 stroke={
                   isActivePage("/")
-                    ? theme === "dark"
+                    ? resolvedTheme === "dark"
                       ? "#000000"
                       : "#ffffff"
                     : getIconColor(false)
@@ -125,50 +137,72 @@ const BottomNav = () => {
 
             {/* Search */}
             <Link
-              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
-                isActivePage("/search")
+              className={`flex items-center relative justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
+                isActivePage("/activity")
                   ? "bg-neutral-900 dark:bg-white"
                   : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
               }`}
-              href="/search"
+              href="/activity"
             >
-              <Search
-                className="transition-colors ease-out"
+              <Bell
                 fill="none"
                 size={20}
                 stroke={
-                  isActivePage("/search")
-                    ? theme === "dark"
+                  isActivePage("/activity")
+                    ? resolvedTheme === "dark"
                       ? "#000000"
                       : "#ffffff"
                     : getIconColor(false)
                 }
-                strokeWidth={2.2}
               />
+              {(unreadCount ?? 0) > 0 && (
+                <Badge
+                  variant="destructive"
+                  className=" bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300 absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full  text-[9px] font-semibold flex items-center justify-center leading-none"
+                >
+                  {(unreadCount ?? 0) > 99 ? "99+" : unreadCount}
+                </Badge>
+              )}
             </Link>
 
             {/* Forum */}
             <Link
-              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
-                isActivePage("/forum")
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 relative ${
+                isActivePage("/workspace")
                   ? "bg-neutral-900 dark:bg-white"
                   : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
               }`}
-              href="/forum"
+              href="/workspace"
             >
-              <Theater
-                className="transition-colors ease-out"
-                fill="none"
-                size={20}
-                stroke={
-                  isActivePage("/forum")
-                    ? theme === "dark"
-                      ? "#000000"
-                      : "#ffffff"
-                    : getIconColor(false)
-                }
-                strokeWidth={2.2}
-              />
+              <div className="relative inline-flex items-center justify-center">
+                {/* Свечение вынесено через translate чтобы выходило за границы контейнера */}
+                <span
+                  className="absolute rounded-full animate-pulse pointer-events-none"
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    background:
+                      "radial-gradient(circle, rgba(255,255,255,0.35) 0%, rgba(186,230,255,0.2) 35%, rgba(147,197,253,0.08) 65%, transparent 80%)",
+                    filter: "blur(8px)",
+                    zIndex: -1,
+                  }}
+                />
+                <FolderKanban
+                  className="relative z-10 transition-colors ease-out"
+                  fill="none"
+                  size={22}
+                  stroke={
+                    isActivePage("/workspace")
+                      ? resolvedTheme === "dark"
+                        ? "#000000"
+                        : "#ffffff"
+                      : getIconColor(false)
+                  }
+                />
+              </div>
             </Link>
 
             {/* Chat */}
@@ -180,14 +214,14 @@ const BottomNav = () => {
               }`}
               href="/chat"
             >
-              <div className="relative">
+              <div>
                 <MessageCircle
                   className="transition-colors ease-out"
                   fill="none"
                   size={20}
                   stroke={
                     isActivePage("/chat")
-                      ? theme === "dark"
+                      ? resolvedTheme === "dark"
                         ? "#000000"
                         : "#ffffff"
                       : getIconColor(false)
@@ -195,44 +229,42 @@ const BottomNav = () => {
                   strokeWidth={2.2}
                 />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-red-500 px-[3px] text-[9px] font-bold text-white border-[1.5px] border-white dark:border-black backdrop-content">
-                    {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
-                  </span>
+                   <Badge
+                  variant="destructive"
+                  className=" bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300 absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full  text-[9px] font-semibold flex items-center justify-center leading-none"
+                >
+                  {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                </Badge>
                 )}
               </div>
             </Link>
 
             {/* Profile */}
-            {isLoading ? (
-              <div className="flex items-center justify-center w-10 h-10">
-                <Skeleton className="rounded-full w-[24px] h-[24px]" />
-              </div>
-            ) : (
-              current && (
-                <Link
-                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
+
+            {current && (
+              <Link
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
+                  isActivePage(`/user/${id}`)
+                    ? "bg-neutral-900 dark:bg-white"
+                    : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
+                }`}
+                href={`/user/${id}`}
+              >
+                <Avatar
+                  className={`w-[24px] h-[24px] ${
                     isActivePage(`/user/${id}`)
-                      ? "bg-neutral-900 dark:bg-white"
-                      : "hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50"
+                      ? "ring-2 ring-offset-2 ring-black dark:ring-white dark:ring-offset-black"
+                      : "opacity-80 hover:opacity-100 transition-opacity"
                   }`}
-                  href={`/user/${id}`}
                 >
-                  <Avatar
-                    className={`w-[24px] h-[24px] ${
-                      isActivePage(`/user/${id}`)
-                        ? "ring-2 ring-offset-2 ring-black dark:ring-white dark:ring-offset-black"
-                        : "opacity-80 hover:opacity-100 transition-opacity"
-                    }`}
-                  >
-                    <AvatarImage
-                      alt="Avatar"
-                      className="object-cover"
-                      src={avatarUrl || ""}
-                    />
-                    <AvatarFallback className="bg-neutral-200 dark:bg-neutral-800" />
-                  </Avatar>
-                </Link>
-              )
+                  <AvatarImage
+                    alt="Avatar"
+                    className="object-cover"
+                    src={avatarUrl || ""}
+                  />
+                  <AvatarFallback className="bg-neutral-200 dark:bg-neutral-800" />
+                </Avatar>
+              </Link>
             )}
           </div>
         </div>
