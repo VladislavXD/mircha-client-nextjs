@@ -2,41 +2,29 @@
 
 import type { User } from "../types";
 
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { HiOutlineSparkles, HiOutlineUserGroup } from "react-icons/hi2";
 import { Loader2 } from "lucide-react";
-import { useInView } from "react-intersection-observer";
 
 import { usePosts } from "../hooks/usePostQueries";
 import Notice from "../../notice/components/Notice";
 
 import PostCard from "./PostCard/index";
-import CreatePost from "./CreatePost";
+import CreatePost from "../createPost/CreatePost";
 import { RecommendedUsersBlock } from "./RecommendedUsers/RecommendedUsersBlock";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile } from "@/src/features/profile/hooks";
 import CardSkeleton from "@/src/features/post/components/Skeleton";
 import { useMediaQuery } from "@/src/hooks/useMediaQuery";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
-/**
- * PostList - основной компонент для отображения ленты постов
- *
- * Features:
- * - Fetches all posts using usePosts hook
- * - Shows CreatePost form for authenticated users
- * - Renders PostCard for each post
- * - Loading skeleton states
- * - Error handling
- */
 const PostList = () => {
   const queryClient = useQueryClient();
-  const { ref, inView } = useInView();
-
-  // Инициализируем запрос профиля на главной, чтобы состояние авторизации было доступно
   const currentUser = queryClient.getQueryData<User>(["profile"]);
-
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const listRef = useRef<HTMLDivElement>(null);
 
   const {
     data: posts,
@@ -47,14 +35,31 @@ const PostList = () => {
     fetchNextPage,
   } = usePosts();
 
-  const isDesktop = useMediaQuery("(min-width: 768px)");
-  
+  const allPosts = posts?.pages.flatMap((page) => page.items) ?? [];
 
+
+  const virtualizer = useWindowVirtualizer({
+    count: allPosts.length,
+    estimateSize: () => 400,
+    getItemKey: useCallback(
+      (index: number) => allPosts[index]?.id ?? index,
+      [allPosts],
+    ),
+    overscan: 3,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
+
+  // Подгрузка следующей страницы
   useEffect(() => {
-    if (inView && hasNextPage) {
+    const lastItem = virtualItems.at(-1);
+    if (!lastItem) return;
+    if (lastItem.index >= allPosts.length - 1 && hasNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, fetchNextPage]);
+  }, [virtualItems, allPosts.length, hasNextPage, fetchNextPage]);
+
 
   if (isLoading) {
     return (
@@ -93,19 +98,14 @@ const PostList = () => {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       <Notice />
 
       {currentUser && (
         <div className="flex flex-col gap-4">
-          {
-            isDesktop && (
-              <CreatePost />
-            )
-          }
-          
+          {isDesktop && <CreatePost />}
           <Tabs className="w-full" defaultValue="recommended">
-            <TabsList className="grid w-full grid-cols-2 rounded-[1.5rem] bg-neutral-100 dark:bg-[#101010]  border border-neutral-200 dark:border-neutral-800/70  auto-rows-fr h-auto">
+            <TabsList className="grid w-full grid-cols-2 rounded-[1.5rem] bg-neutral-100 dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 auto-rows-fr h-auto">
               <TabsTrigger
                 className="rounded-[1.25rem] h-full py-3 text-neutral-500 dark:text-neutral-400 data-[state=active]:text-black dark:data-[state=active]:text-white data-[state=active]:bg-white dark:data-[state=active]:bg-[#1c1c1c] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-2"
                 value="recommended"
@@ -131,23 +131,47 @@ const PostList = () => {
         </div>
       )}
 
-      <div className="rounded-[1.5rem] overflow-hidden border border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010] flex flex-col">
-        {posts.pages.map((page, pageIndex) =>
-          page.items.map((post, postIndex) => (
-            <React.Fragment key={post.id}>
-              <PostCard cardFor="post" post={post}  />
-              {pageIndex === 0 && postIndex === 4 && (
-                <div className=" bg-neutral-50 dark:bg-black/50 border-y border-neutral-200 dark:border-neutral-800/70">
-                  <RecommendedUsersBlock />
-                </div>
-              )}
-            </React.Fragment>
-          )),
-        )}
+      {/* Виртуальный список */}
+      <div
+        className="rounded-[1.5rem] overflow-hidden border border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010]"
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
+          }}
+        >
+          {virtualItems.map(({ index, key }) => {
+            const post = allPosts[index];
+            const isRecommendedBlock = index === 4;
+
+            return (
+              <div
+                key={key}
+                data-index={index}
+                ref={virtualizer.measureElement}
+              >
+                <PostCard cardFor="post" post={post} />
+                {isRecommendedBlock && (
+                  <div className="bg-neutral-50 dark:bg-black/50 border-y border-neutral-200 dark:border-neutral-800/70">
+                    <RecommendedUsersBlock />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {hasNextPage && (
-        <div ref={ref} className="flex justify-center py-4">
+        <div className="flex justify-center py-4">
           <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
         </div>
       )}

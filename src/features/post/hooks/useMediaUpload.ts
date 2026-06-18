@@ -1,4 +1,4 @@
-import type { MediaFile } from "../components/MediaPreviewSlider";
+import type { MediaFile } from "../createPost/MediaPreviewSlider";
 
 import { useState, useCallback } from "react";
 

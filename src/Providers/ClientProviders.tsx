@@ -8,7 +8,7 @@ import { Providers } from "./providers";
 import PageLoader from "./PageLoader";
 
 import { Toaster } from "@/components/ui/sonner";
-
+import { UIProvider } from "../context/UIContext";
 
 export default function ClientProviders({
   children,
@@ -20,7 +20,9 @@ export default function ClientProviders({
       <PageLoader />
       <Providers>
         <Toaster />
-        <LayoutContent>{children}</LayoutContent>
+        <UIProvider>
+          <LayoutContent>{children}</LayoutContent>
+        </UIProvider>
       </Providers>
     </>
   );

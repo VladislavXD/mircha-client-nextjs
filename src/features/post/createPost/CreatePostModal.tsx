@@ -11,7 +11,7 @@ import {
   selectIsCreatePostModalOpen,
 } from "@/src/store/CreatePostModal/CreatePostModal.slice";
 import { useAppSelector } from "@/src/hooks/reduxHooks";
-import CreatePost from "@/src/features/post/components/CreatePost";
+import CreatePost from "@/src/features/post/createPost/CreatePost";
 
 export function CreatePostModal() {
   const isOpen = useAppSelector(selectIsCreatePostModalOpen);

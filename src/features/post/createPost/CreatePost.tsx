@@ -19,7 +19,7 @@ import { useTextFormatting } from "../hooks/useTextFormatting";
 import { useSpoilerSelection } from "../hooks/useSpoilerSelection";
 import { useContentEditor } from "../hooks/useContentEditor";
 
-import PostEditorToolbar from "./PostEditorToolbar";
+import PostEditorToolbar from "../components/PostEditorToolbar";
 import MediaPreviewSlider from "./MediaPreviewSlider";
 
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ import Mention from "@/shared/components/ui/inputs/Mention";
 import { useAppDispatch } from "@/src/hooks/reduxHooks";
 import { setCreatePostView } from "@/src/store/CreatePostModal/CreatePostModal.slice";
 
-import { PollCreator, PollDraft } from "./Poll/components/PollCreator";
+import { PollCreator, PollDraft } from "../components/Poll/components/PollCreator";
 
 interface FormData {
   post: string;

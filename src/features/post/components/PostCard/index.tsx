@@ -1,7 +1,7 @@
 "use client";
 
 import type { Post, User } from "../../types";
-import type { PostMedia } from "../PostMediaSlider/index";
+import type { PostMedia } from "../PostMediaContent/index";
 
 import React, { useState, useRef, useEffect, memo } from "react";
 import { useRouter } from "next/navigation";
@@ -70,6 +70,8 @@ const PostCard = ({
     poll,
   } = post ?? {};
 
+
+
   const {
     id: authorId = "",
     name = "",
@@ -101,11 +103,14 @@ const PostCard = ({
           url: m.url || m,
           type: mediaType,
           spoiler: m.spoiler || false,
+          width: m.width,
+          height: m.height,
+          size: m.size,
         };
       });
     }
     if (imageUrl) {
-      return [{ url: imageUrl, type: "image" as const, spoiler: false }];
+      return [{ url: imageUrl, type: "image" as const, spoiler: false, width: undefined, height: undefined, size: undefined }];
     }
 
     return [];
@@ -247,7 +252,7 @@ const PostCard = ({
           ? "border-0 rounded-none dark:bg-[#0a0a0a] "
           : "rounded-none border-x-0 border-t-0 border-b last:border-b-0 border-neutral-200 dark:border-neutral-800/70  "
       }`}
-      onAuxClick={handleCardAuxClick}
+      onAuxClick={handleCardAuxClick} 
       onClick={isDesktop ? handleCardClick : modals.commentsModal.onOpen}
     >
       <div

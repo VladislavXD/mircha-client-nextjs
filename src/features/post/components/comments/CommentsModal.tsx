@@ -109,7 +109,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerOverlay onClick={(e) => e.stopPropagation()}/>
       <DrawerContent
-        className="flex flex-col h-[82dvh] rounded-t-[1.5rem] border-none bg-white dark:bg-[#101010] p-0"
+        className="flex flex-col !h-[95dvh] !max-h-[100dvh] rounded-t-[1.5rem] border-none bg-white dark:bg-[#101010] p-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

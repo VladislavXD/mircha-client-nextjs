@@ -89,6 +89,12 @@ export default async function RootLayout({
   if (!routing.locales.includes(locale as Locale)) {
     notFound();
   }
+  console.warn(`что ты делаешь???      
+ищешь секреты?
+не суй свой нос туда, куда не следует,
+или ты моожешь узнать что-то, что тебе Не понравится...
+хи-хи-хи`)
+
 
   return (
     <html suppressHydrationWarning lang={locale}>
@@ -99,6 +105,7 @@ export default async function RootLayout({
           fontSerif.variable,
         )}
       >
+       
         <Suspense fallback={null}>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ThemeProvider attribute="class" defaultTheme="dark">

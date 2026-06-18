@@ -40,7 +40,7 @@ export function usePosts(
     queryFn: ({ pageParam }) => {
       const cursor = typeof pageParam === "string" ? pageParam : undefined;
 
-      return postService.getPosts({ limit: 15, cursor });
+      return postService.getPosts({ limit: 7, cursor });
     },
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => {

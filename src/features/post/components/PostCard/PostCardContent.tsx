@@ -1,6 +1,6 @@
 import React from "react";
 
-import PostMediaSlider, { type PostMedia } from "../PostMediaSlider/index";
+import PostMediaSlider, { type PostMedia } from "../PostMediaContent/index";
 
 import { EmojiText } from "@/shared/components/ui/EmojiText";
 import { PollFormatted } from "../Poll/types/poll.types";
@@ -47,6 +47,8 @@ export const PostCardContent = ({
 	if (!hasContent && !hasMedia && !hasRepost && !poll) {
 		return null;
 	}
+
+
 
   return (
     <>

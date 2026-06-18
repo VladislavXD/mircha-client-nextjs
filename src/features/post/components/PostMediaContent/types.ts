@@ -2,6 +2,9 @@ export type PostMedia = {
   url: string;
   type: "image" | "video";
   spoiler?: boolean;
+  width?: number;
+  height?: number;
+  size?: number;
 };
 
 export type VideoState = {
@@ -12,4 +15,7 @@ export type VideoState = {
 export type MediaSliderProps = {
   media: PostMedia[];
   className?: string;
+  width?: number;
+  height?: number;
+  size?: number;
 };

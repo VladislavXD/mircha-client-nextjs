@@ -277,7 +277,7 @@ export function SettingsModal() {
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent
         className={cn(
-          "flex h-[82dvh] flex-col p-0",
+          "flex !h-[95dvh] !max-h-[100dvh] flex-col p-0",
           "rounded-t-[22px] border-none bg-[#141414]",
         )}
       >

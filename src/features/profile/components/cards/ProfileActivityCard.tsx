@@ -16,7 +16,7 @@ import { useProfile, useUserProfile } from "@/src/features/profile";
 import { useUserReposts } from "@/src/features/post/hooks/useRepost";
 import PostCard from "@/src/features/post/components/PostCard";
 import CardSkeleton from "@/src/features/post/components/Skeleton";
-import CreatePost from "@/src/features/post/components/CreatePost";
+import CreatePost from "@/src/features/post/createPost/CreatePost";
 
 export const ProfileActivityCard: React.FC = () => {
   const { id } = useParams<{ id: string }>();
