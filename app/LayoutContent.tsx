@@ -105,11 +105,11 @@ export default function LayoutContent({
       </header>
 
       {/* Main layout */}
-      <div className="container mx-auto max-w-7xl flex">
+      <div className="container mx-auto max-w-7xl flex  ">
 
         {/* Left Sidebar — sticky */}
         <aside
-          className={`hidden md:flex shrink-0 flex-col sticky top-[57px] self-start h-[calc(100vh-57px)] overflow-y-auto scrollbar-hide transition-[width] duration-300 ease-in-out ${
+          className={`hidden md:flex shrink-0 flex-col sticky top-[1px] self-start h-[calc(100vh-57px)] overflow-y-auto scrollbar-hide transition-[width] duration-300 ease-in-out ${
             isOpen ? "w-56" : "w-[68px]"
           }`}
         >
@@ -125,14 +125,14 @@ export default function LayoutContent({
         </aside>
 
         {/* Center — основной контент, скролл на window */}
-        <main className="flex-1 min-w-0 mt-5 pb-24 md:pb-8">
+        <main className="flex-1 min-w-0 sm:mt-5 mt-0 pb-24 md:pb-8">
           <AuthGuard>{children}</AuthGuard>
           <SettingsModal />
         </main>
 
         {/* Right Sidebar — sticky */}
         {!hideRightSidebar && (
-          <aside className="hidden md:block w-72 shrink-0 sticky top-[57px] self-start h-[calc(100vh-57px)] overflow-y-auto scrollbar-hide">
+          <aside className="hidden md:block w-72 shrink-0 sticky top-[1px] self-start h-[calc(100vh-57px)] overflow-y-auto scrollbar-hide ">
             <div className="p-4">
               <RightSideBar />
               <div className="mt-6 text-xs text-gray-500 flex flex-col gap-3">

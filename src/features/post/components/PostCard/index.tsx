@@ -131,8 +131,6 @@ const PostCard = ({
 
   const inViewRef = useRef<HTMLDivElement | null>(null);
 
-  // PostCard.tsx
-
   const handleLike = () => {
     if (!currentUser) return setError("Вы не авторизованы");
     if (isLikeLoading || isUnlikeLoading) return;
@@ -204,11 +202,16 @@ const PostCard = ({
 
   const { isOnline } = useOnlineStatus(authorId);
 
+  // Проверяем, открыт ли любой другой модал кроме commentsModal
+  const isAnyModalOpen =
+    modals.deleteModal.isOpen ||
+    modals.shareModal.isOpen ||
+    modals.editModal.isOpen ||
+    modals.reportModal.isOpen ||
+    modals.profileModal.isOpen;
+
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-
-   
-
 
     if (
       target.closest("a") ||
@@ -232,6 +235,12 @@ const PostCard = ({
     }
   };
 
+  // На мобильных не открываем commentsModal если уже открыт другой модал
+  const handleMobileCardClick = () => {
+    if (isAnyModalOpen) return;
+    modals.commentsModal.onOpen();
+  };
+
   if (!post) {
     if (isRepostLoading) {
       return (
@@ -252,8 +261,8 @@ const PostCard = ({
           ? "border-0 rounded-none dark:bg-[#0a0a0a] "
           : "rounded-none border-x-0 border-t-0 border-b last:border-b-0 border-neutral-200 dark:border-neutral-800/70  "
       }`}
-      onAuxClick={handleCardAuxClick} 
-      onClick={isDesktop ? handleCardClick : modals.commentsModal.onOpen}
+      onAuxClick={handleCardAuxClick}
+      onClick={isDesktop ? handleCardClick : handleMobileCardClick}
     >
       <div
         className={`flex gap-3.5 px-4 sm:px-5 pt-4 pb-3 ${cardFor === "repost" ? "sm:px-2 px-2 !pt-2 !pb-0" : ""}`}
@@ -276,6 +285,7 @@ const PostCard = ({
             name={name}
             usernameFrameUrl={usernameFrameUrl}
             onFollowToggle={onFollowToggle}
+            onAvatarClick={modals.profileModal.onOpen}
           />
         )}
 
@@ -304,6 +314,7 @@ const PostCard = ({
               onEdit={modals.editModal.onOpen}
               onFollowToggle={handleFollow}
               onReport={modals.reportModal.onOpen}
+              onAvatarClick={modals.profileModal.onOpen}
             />
           ) : (
             /* Для обычного поста: только имя + время + дропдаун */
@@ -349,11 +360,6 @@ const PostCard = ({
               ) : null
             }
             postMedia={postMedia}
-            // onContentClick={
-            //   cardFor !== "current-post" && isDesktop
-            //     ? () => router.push(`/posts/${id}`)
-            //     : undefined
-            // }
           />
 
           <PostCardActions
@@ -387,6 +393,10 @@ const PostCard = ({
         modals={modals}
         post={post}
         onDelete={handleDelete}
+        author={author as User}
+        currentUserId={currentUser?.id}
+        isFollowing={isFollowing}
+        onFollowToggle={handleFollow}
       />
     </Card>
   );

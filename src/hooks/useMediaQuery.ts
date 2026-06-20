@@ -19,8 +19,6 @@ export function useMediaQuery(
     initializeWithValue = true,
   }: UseMediaQueryOptions = {},
 ): boolean {
-  const [mounted, setMounted] = React.useState(false);
-
   const getMatches = (query: string): boolean => {
     if (IS_SERVER) return defaultValue;
     return window.matchMedia(query).matches;
@@ -32,7 +30,6 @@ export function useMediaQuery(
   });
 
   React.useEffect(() => {
-    setMounted(true);
     const matchMedia = window.matchMedia(query);
     const handleChange = () => setMatches(matchMedia.matches);
 
@@ -41,7 +38,5 @@ export function useMediaQuery(
     return () => matchMedia.removeEventListener("change", handleChange);
   }, [query]);
 
-  return mounted ? matches : defaultValue;  
+  return matches;
 }
-
-export type { UseMediaQueryOptions };

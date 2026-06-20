@@ -47,9 +47,6 @@ export function CreatePostModal() {
           onSuccessComplete={handleClose}
         />
       </DrawerContent>
-      <DrawerFooter>
-        
-      </DrawerFooter>
     </Drawer>
   );
 }

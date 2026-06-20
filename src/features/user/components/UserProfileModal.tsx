@@ -70,7 +70,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#101010] border border-white/10 rounded-2xl shadow-2xl max-w-[340px] p-0 overflow-hidden gap-0">
+      <DialogContent  className="bg-[#101010] border border-white/10 rounded-2xl shadow-2xl max-w-[340px] p-0 overflow-hidden gap-0">
         {/* Cover */}
         <div className="relative h-[90px] w-full shrink-0">
           {backgroundUrl && backgroundUrl !== "none" ? (

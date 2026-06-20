@@ -98,14 +98,14 @@ const PostList = () => {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-0 sm:gap-5 ">
       <Notice />
 
       {currentUser && (
         <div className="flex flex-col gap-4">
           {isDesktop && <CreatePost />}
           <Tabs className="w-full" defaultValue="recommended">
-            <TabsList className="grid w-full grid-cols-2 rounded-[1.5rem] bg-neutral-100 dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 auto-rows-fr h-auto">
+            <TabsList className="grid w-full grid-cols-2 roder-none rounded-none  sm:rounded-[1.5rem] bg-neutral-100 dark:bg-[#101010] sm:border sm:border-neutral-200 sm:dark:border-neutral-800/70 auto-rows-fr h-auto">
               <TabsTrigger
                 className="rounded-[1.25rem] h-full py-3 text-neutral-500 dark:text-neutral-400 data-[state=active]:text-black dark:data-[state=active]:text-white data-[state=active]:bg-white dark:data-[state=active]:bg-[#1c1c1c] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-2"
                 value="recommended"
@@ -114,7 +114,7 @@ const PostList = () => {
                   className="w-[18px] h-[18px] shrink-0"
                   strokeWidth={1.5}
                 />
-                <span className="font-medium text-[14px]">Рекомендуемые</span>
+                <span className="font-medium text-[14px]">Для вас</span>
               </TabsTrigger>
               <TabsTrigger
                 className="rounded-[1.25rem] h-full py-3 text-neutral-500 dark:text-neutral-400 data-[state=active]:text-black dark:data-[state=active]:text-white data-[state=active]:bg-white dark:data-[state=active]:bg-[#1c1c1c] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-2"
@@ -133,7 +133,7 @@ const PostList = () => {
 
       {/* Виртуальный список */}
       <div
-        className="rounded-[1.5rem] overflow-hidden border border-neutral-200 dark:border-neutral-800/70 bg-white dark:bg-[#101010]"
+        className="sm:rounded-[1.5rem] rounded-none  overflow-hidden sm:border border-neutral-200  dark:border-neutral-800/70 bg-white dark:bg-[#101010] "
         style={{
           height: `${virtualizer.getTotalSize()}px`,
           position: "relative",

@@ -17,12 +17,11 @@ export const PostCardHeader = {
     authorCreatedAt,
     followersCount,
     followingCount,
-    cardFor,
     isFollowing,
     isOnline,
-    createdAt,
     onFollowToggle,
     currentUserId,
+    onAvatarClick,
   }: any) => (
     <>
       <div className="flex flex-col items-center shrink-0">
@@ -43,6 +42,7 @@ export const PostCardHeader = {
             followingCount={followingCount}
             isFollowing={isFollowing}
             isOnline={isOnline}
+            onAvatarClick={onAvatarClick}
             name={name}
             userId={authorId}
             usernameFrameUrl={usernameFrameUrl}
@@ -142,6 +142,7 @@ export const PostCardHeader = {
     onFollowToggle,
     currentUserId,
     usernameFrameUrl,
+    onAvatarClick,
   }: any) => (
     <div className="flex items-center gap-2 mb-1">
       <div
@@ -157,6 +158,7 @@ export const PostCardHeader = {
           avatarUrl={avatarUrl}
           backgroundUrl={backgroundUrl}
           bio={bio}
+          onAvatarClick={onAvatarClick}
           createdAt={authorCreatedAt}
           currentUserId={currentUserId}
           followersCount={followersCount}

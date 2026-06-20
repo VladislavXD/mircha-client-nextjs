@@ -1,12 +1,9 @@
-import React, { useState } from "react";
-
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserProfileModal } from "@/src/features/user/components";
 import Link from "next/link";
 
 
@@ -27,6 +24,7 @@ type Props = {
   isFollowing?: boolean;
   isOnline?: boolean;
   onFollowToggle?: () => void;
+  onAvatarClick?: () => void;
   avatarClassName?: string;
   nameClassName?: string;
   descriptionClassName?: string;
@@ -56,6 +54,7 @@ const User = ({
   isFollowing = false,
   isOnline = false,
   onFollowToggle,
+  onAvatarClick,
   avatarClassName = "",
   nameClassName = "",
   descriptionClassName = "",
@@ -70,7 +69,7 @@ const User = ({
     return text.substring(0, maxLength) + "...";
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const canFollow =
     showFollowBadge && !!onFollowToggle && currentUserId !== userId;
 
@@ -263,13 +262,13 @@ const User = ({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setIsModalOpen(true);
+             onAvatarClick?.();
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               e.stopPropagation();
-              setIsModalOpen(true);
+              onAvatarClick?.();
             }
           }}
         >
@@ -309,27 +308,6 @@ const User = ({
           </div>
         </div>
 
-        <UserProfileModal
-          avatarFrameUrl={avatarFrameUrl}
-          avatarUrl={avatarUrl}
-          backgroundUrl={backgroundUrl}
-          bio={bio}
-          createdAt={createdAt}
-          currentUserId={currentUserId}
-          description={description}
-          followersCount={followersCount}
-          followingCount={followingCount}
-          isFollowing={isFollowing}
-          isOnline={isOnline}
-          isOpen={isModalOpen}
-          name={name}
-          status={status}
-          showFollowBadge={showFollowBadge}
-          userId={userId}
-          usernameFrameUrl={usernameFrameUrl}
-          onClose={() => setIsModalOpen(false)}
-          onFollowToggle={onFollowToggle}
-        />
       </>
     );
   }

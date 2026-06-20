@@ -10,7 +10,7 @@ const GoBack = ({title, className}: {title: string; className?: string}) => {
   };
 
   return (
-    <div className="flex items-center gap-2 mt-3">
+    <div className="hidden items-center gap-2 mt-3 sm:flex">
     <button
       className="group flex items-center gap-2 text-2xl font-semibold text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors w-fit bg-transparent hover:bg-neutral-100 dark:hover:bg-[#1a1a1a] px-3 py-1.5 -ml-3 rounded-full cursor-pointer"
       onClick={handleGoBack}

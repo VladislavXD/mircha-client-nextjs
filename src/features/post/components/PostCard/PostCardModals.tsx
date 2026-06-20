@@ -1,4 +1,4 @@
-import type { Post } from "../../types";
+import type { Post, User } from "../../types";
 
 import React, { lazy, Suspense } from "react";
 
@@ -13,11 +13,22 @@ const ReportPostModal = lazy(() => import("../../modals/report"));
 const CommentsModal = lazy(() =>
   import("../comments").then((m) => ({ default: m.CommentsModal })),
 );
+const UserProfileModal = lazy(
+  () => import("@/src/features/user/components/UserProfileModal"),
+);
+
+
+
+
 
 type Props = {
   post: Post;
   deleteError: string;
   isDeleteLoading: boolean;
+  author?: User
+  currentUserId?: string | undefined;
+  isFollowing?: boolean;
+  onFollowToggle?: () => void;
   onDelete: () => void;
   modals: {
     deleteModal: { isOpen: boolean; onClose: () => void };
@@ -25,6 +36,7 @@ type Props = {
     editModal: { isOpen: boolean; onClose: () => void };
     reportModal: { isOpen: boolean; onClose: () => void };
     commentsModal: { isOpen: boolean; onClose: () => void };
+    profileModal: { isOpen: boolean; onClose: () => void };
   };
 };
 
@@ -33,6 +45,10 @@ export const PostCardModals = ({
   deleteError,
   isDeleteLoading,
   onDelete,
+  author,
+  currentUserId,
+  isFollowing,
+  onFollowToggle,
   modals,
 }: Props) => {
   const safeContent = typeof post.content === "string" ? post.content : "";
@@ -77,6 +93,27 @@ export const PostCardModals = ({
           isOpen={modals.commentsModal.isOpen}
           post={post}
           onClose={modals.commentsModal.onClose}
+        />
+      )}
+       
+        {modals.profileModal.isOpen && author && (
+        <UserProfileModal
+          isOpen={modals.profileModal.isOpen}
+          onClose={modals.profileModal.onClose}
+          userId={author.id}
+          currentUserId={currentUserId}
+          name={author.name}
+          avatarUrl={author.avatarUrl}
+          bio={author.bio}
+          backgroundUrl={author.backgroundUrl}
+          avatarFrameUrl={author.avatarFrameUrl}
+          usernameFrameUrl={author.usernameFrameUrl}
+          followersCount={author._count?.followers ?? 0}
+          followingCount={author._count?.following ?? 0}
+          isFollowing={isFollowing}
+          createdAt={author.createdAt}
+          showFollowBadge={true}
+          onFollowToggle={onFollowToggle}
         />
       )}
     </Suspense>

@@ -8,6 +8,7 @@ export const useModals = () => {
   const commentsModal = useDisclosure();
   const SettingsDropdown = useDisclosure();
   const isAuthModal = useDisclosure();
+  const profileModal = useDisclosure();
 
 
   return {
@@ -17,6 +18,7 @@ export const useModals = () => {
     reportModal,
     commentsModal,
     SettingsDropdown,
-    isAuthModal
+    isAuthModal,
+    profileModal
   };
 };  

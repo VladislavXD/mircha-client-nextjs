@@ -40,7 +40,7 @@ export interface Comment {
 /**
  * Основной интерфейс поста с медиа и спойлерами
  */
-export interface Post {
+export interface  Post {
   id: string;
   content: string | object;
   contentSpoiler: boolean;
