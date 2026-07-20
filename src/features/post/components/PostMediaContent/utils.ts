@@ -30,7 +30,7 @@ export const getSingleMediaContainerStyle = (
   // Нет width/height с бэкенда — используем безопасный фоллбэк,
   // чтобы контейнер не схлопывался в 0px до загрузки контента.
   return {
-    height: 300,
+    height: 500,
     width: "auto",
     maxWidth: "100%",
   };

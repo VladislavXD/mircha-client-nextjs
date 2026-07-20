@@ -110,7 +110,7 @@ export const MediaCarousel = ({
           {media.map((item, index) => (
             <CarouselItem
               key={`${item.url}-${index}`}
-              className="pl-2 basis-auto h-[200px] sm:h-[300px] flex-shrink-0"
+              className="pl-2 basis-auto h-[300px] sm:h-[450px] flex-shrink-0 active:scale-[0.98] active:opacity-90 transition-all duration-200"
             >
               <div className="relative flex items-center justify-center overflow-hidden rounded-[16px] border border-neutral-200 dark:border-neutral-800/80 bg-neutral-100 dark:bg-neutral-900/50 w-auto h-full">
                 {renderItem(item, index)}

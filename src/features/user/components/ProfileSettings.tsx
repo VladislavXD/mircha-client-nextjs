@@ -36,6 +36,7 @@ const card = "rounded-[14px] bg-[#1c1c1c] p-[14px_16px]";
 const lbl = "block mb-[5px] text-[11px] text-[#555]";
 const inp =
   "w-full rounded-[9px] border-none bg-[#252525] px-[11px] py-2 text-[13px] text-[#e0e0e0] outline-none placeholder:text-[#404040] focus:bg-[#2a2a2a] transition-colors disabled:opacity-40";
+
 const saveBtn =
   "flex-1 rounded-[11px] bg-[#f0f0f0] py-[10px] text-[13px] font-semibold text-[#111] transition-opacity hover:opacity-90 active:opacity-75 disabled:opacity-40";
 const cancelBtn =

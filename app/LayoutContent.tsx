@@ -29,7 +29,7 @@ export default function LayoutContent({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isOpen = useAppSelector((s) => s.sidebar.isOpen);
+  const isOpen = useAppSelector((s) => s.sidebar.isOpen); 
   const {
     isOpen: isOpenAuthModal,
     title,

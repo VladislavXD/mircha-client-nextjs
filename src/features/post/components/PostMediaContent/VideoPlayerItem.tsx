@@ -49,7 +49,7 @@ export const VideoPlayerItem = ({ src, isSingle }: VideoPlayerItemProps) => {
         ref={videoRef}
         className={`${
           isSingle ? "w-full h-full object-contain" : "w-auto h-full object-contain min-w-[140px]"
-        } cursor-pointer rounded-[16px]`}
+        } cursor-pointer rounded-[16px]` }
         loop
         muted={isMuted}
         playsInline

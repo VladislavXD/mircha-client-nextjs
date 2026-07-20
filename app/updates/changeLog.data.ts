@@ -20,7 +20,7 @@ export type ChangelogEntry = {
     text: string;
   }[];
 };
-
+  
 export const changelog: ChangelogEntry[] = [
   // ──────────────────────────────────────────
   // 👇 НОВЫЕ ЗАПИСИ ДОБАВЛЯЙ СЮДА (в начало)
