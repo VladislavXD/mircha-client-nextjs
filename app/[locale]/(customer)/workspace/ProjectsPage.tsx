@@ -22,6 +22,7 @@ const features = [
   { icon: Users, label: "Команда" },
 ];
 
+
 export default function ProjectsComingSoon() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-16">
