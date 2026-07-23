@@ -2,7 +2,6 @@ import { MetadataRoute } from "next";
 
 export default function Robots(): MetadataRoute.Robots {
   const BASE_URL = "https://mirchan.site";
-
   return {
     rules: [
       {
@@ -13,3 +12,5 @@ export default function Robots(): MetadataRoute.Robots {
     sitemap: `${BASE_URL}/sitemap.xml`,
   };
 }
+
+

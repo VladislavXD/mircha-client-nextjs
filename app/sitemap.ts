@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.9,
     },
-    {
+    { 
       url: `${base}/en/about`,
       lastModified: now,
       changeFrequency: "monthly",
