@@ -18,5 +18,5 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     </UIContext.Provider>
   )
 }
-
+  
 export const useUI = () => useContext(UIContext)
