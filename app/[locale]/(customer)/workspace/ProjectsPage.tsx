@@ -45,7 +45,7 @@ export default function ProjectsComingSoon() {
         {/* Quote */}
         <blockquote className="mb-4">
           <p className="text-3xl font-light leading-snug tracking-tight text-foreground sm:text-4xl">
-            Великие проекты не рождаются из идей —
+            Великие проекты не рождаются из идей —  
           </p>
           <p className="text-3xl font-light leading-snug tracking-tight text-foreground sm:text-4xl">
             они рождаются из решения{" "}
