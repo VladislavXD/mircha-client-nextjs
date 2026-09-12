@@ -17,13 +17,14 @@ export function ProfileStatus({
   if (!content) return null;
 
   const bubble = (
-    <div className="relative inline-flex max-w-[140px]">
+    <div className="relative inline-flex max-w-[100px]">
       {/* Tail */}
       <span
         aria-hidden
         className="
           absolute -top-[7px] left-1/2 -translate-x-1/2
           w-0 h-0
+          
           border-l-[5px] border-l-transparent
           border-r-[5px] border-r-transparent
           border-b-[7px] border-b-neutral-900 dark:border-b-white
@@ -36,7 +37,8 @@ export function ProfileStatus({
           bg-neutral-900 dark:bg-white
           text-white dark:text-black
           text-[11px] leading-snug text-center
-          break-words whitespace-normal shadow-md
+          break-words whitespace-normal shadow-sm
+          max-w-[100px]
         "
       >
         {content}

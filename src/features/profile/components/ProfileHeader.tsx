@@ -12,17 +12,24 @@ import StatusModal from "./modals/Status.Modals";
 import { SelectAppearanceModal } from "./modals/SelectAppearanceModal";
 import { ConfirmAppearanceModal } from "./modals/ConfirmAppearanceModal";
 
-
 interface ProfileHeaderProps {
   userId: string;
   isAuthenticated?: boolean;
   isOwnProfile?: boolean;
+  /**
+   * Табы + лента постов передаются сюда снаружи (см. UserProfile.tsx).
+   * Это обязательно для sticky-эффекта: фон и контент, который должен
+   * его "задвигать" при скролле, обязаны жить в одном и том же
+   * непрерывном контейнере.
+   */
+  children?: React.ReactNode;
 }
 
 export function ProfileHeader({
   userId,
   isAuthenticated: externalIsAuthenticated,
   isOwnProfile: externalIsOwnProfile,
+  children,
 }: ProfileHeaderProps) {
   const {
     data,
@@ -70,51 +77,71 @@ export function ProfileHeader({
   const isvideo = data.backgroundUrl?.endsWith(".mp4") || false;
 
   // Avatar size in px — single source of truth
-  const AVATAR_SIZE = 96; // mobile
-  const AVATAR_SIZE_LG = 120; // lg
+  const AVATAR_SIZE = 88;
+  // Аватар "наезжает" на фон ровно на половину своей высоты — так он всегда
+  // одинаково перекрывает фон независимо от брейкпоинта, без подбора чисел
+  const AVATAR_OVERLAP = AVATAR_SIZE / 2;
 
   return (
     <>
-      <div className="relative rounded-2xl overflow-hidden mb-6 shadow-2xl">
-        {/* ── Background ── */}
-        <div className="relative h-48 sm:h-64 md:h-72">
-          {data.backgroundUrl && data.backgroundUrl !== "none" ? (
-            isvideo ? (
-              <video
-                autoPlay loop muted playsInline
-                className="absolute inset-0 h-full w-full object-cover"
-              >
-                <source src={data.backgroundUrl} type="video/mp4" />
-              </video>
+      {/*
+        Внешняя обёртка НЕ должна иметь overflow-hidden — иначе
+        position: sticky у фона просто перестанет работать
+        (браузер обрежет "прилипающий" элемент вместо того, чтобы дать
+        ему прилипнуть к верху вьюпорта).
+      */}
+      <div className="relative w-full">
+        {/* ── Sticky Header (Background + Profile Info) ── */}
+        <div className="sticky top-0 left-0 right-0 z-0 flex flex-col justify-end h-[45vh] min-h-[350px] overflow-hidden md:rounded-t-[2rem]">
+          
+          {/* Фоновая картинка */}
+          <div className="absolute inset-0 z-0">
+            {data.backgroundUrl && data.backgroundUrl !== "none" ? (
+              isvideo ? (
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 h-full w-full object-cover"
+                >
+                  <source src={data.backgroundUrl} type="video/mp4" />
+                </video>
+              ) : (
+                <img
+                  alt="Profile background"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  src={data.backgroundUrl}
+                />
+              )
             ) : (
-              <img
-                alt="Profile background"
-                className="absolute inset-0 h-full w-full object-cover"
-                src={data.backgroundUrl}
-              />
-            )
-          ) : (
-            <>
               <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-blue-900/60 to-black" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-transparent to-transparent" />
-            </>
-          )}
-        </div>
+            )}
 
-        {/* ── Card body ── */}
-        <div className="relative -mt-5 rounded-t-[1.5rem] bg-white dark:bg-[#101010] px-4 pb-5 pt-4 sm:px-6 sm:pb-6">
-          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
+            {/* Зона размытия, которая накладывается поверх нижней части фона */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-64 backdrop-blur-xl [mask-image:linear-gradient(to_top,black,transparent)]"
+            />
+            {/* Плавный переход фона в цвет страницы для читаемости текста */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-[#101010] dark:via-[#101010]/80"
+            />
+          </div>
 
-            {/* ── Avatar column: avatar + status stacked vertically, centered ── */}
-            <div className="flex flex-col items-center shrink-0">
-
-              {/* Avatar wrapper — lifted above card */}
+          {/* Инфо профиля (Аватар, Статус, Имя, Био, Кнопки) - прикреплено к низу sticky блока */}
+          <div className="relative z-10 px-4 pb-5 sm:px-6 flex flex-col md:flex-row md:gap-5 md:items-start w-full">
+            <div className="shrink-0" style={{ width: AVATAR_SIZE }}>
               <div
-                className="relative shrink-0 -mt-14 lg:-mt-16"
-                style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
+                className="relative shrink-0"
+                style={{
+                  width: AVATAR_SIZE,
+                  height: AVATAR_SIZE,
+                  marginTop: -AVATAR_OVERLAP,
+                }}
               >
-                {/* Square crop container — forces 1:1 */}
-                <div className="relative w-full h-full overflow-hidden rounded-[20px] sm:rounded-[22px]">
+                <div className="relative h-full w-full overflow-hidden rounded-[20px] sm:rounded-[22px]">
                   <img
                     alt={data.name || "User avatar"}
                     className="absolute inset-0 h-full w-full object-cover"
@@ -122,22 +149,19 @@ export function ProfileHeader({
                   />
                 </div>
 
-                {/* Avatar frame — sits on top, same size, pointer-events none */}
                 {data.avatarFrameUrl && data.avatarFrameUrl !== "none" && (
                   <img
                     alt=""
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain z-10"
+                    className="pointer-events-none absolute inset-0 z-10 h-full w-full select-none object-contain"
                     src={data.avatarFrameUrl}
                   />
                 )}
 
-                {/* Border fallback when no frame */}
                 {(!data.avatarFrameUrl || data.avatarFrameUrl === "none") && (
-                  <div className="pointer-events-none absolute inset-0 rounded-[20px] sm:rounded-[22px] ring-[3px] ring-white dark:ring-[#101010]" />
+                  <div className="pointer-events-none absolute inset-0 rounded-[20px] ring-[3px] ring-white dark:ring-[#101010] sm:rounded-[22px]" />
                 )}
 
-                {/* Online dot */}
                 {isOnline && (
                   <div
                     className="absolute bottom-1.5 right-1.5 z-20 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 dark:border-[#101010]"
@@ -146,8 +170,8 @@ export function ProfileHeader({
                 )}
               </div>
 
-              {/* Status badge — always below avatar, centered */}
-              <div className="mt-2 flex justify-center">
+              {/* Статус */}
+              <div className="relative z-30 mt-2.5 flex justify-center md:justify-start">
                 {!isOwnProfile
                   ? data.status && (
                       <ProfileStatus isOwner={false} status={data.status} />
@@ -162,8 +186,7 @@ export function ProfileHeader({
               </div>
             </div>
 
-            {/* ── Info column ── */}
-            <div className="flex-1 min-w-0 lg:pt-2">
+            <div className="mt-3 md:mt-0 flex-1 min-w-0 md:pt-2">
               <ProfileInfo
                 currentUserId={currentUser?.id}
                 data={data}
@@ -183,6 +206,17 @@ export function ProfileHeader({
               />
             </div>
           </div>
+        </div>
+
+        {/* ── Скроллящийся контент (Табы + Посты) ── 
+            Он следует за sticky-блоком в потоке документа, поэтому при скролле 
+            будет наезжать на него снизу. */}
+        <div className="relative z-20 w-full">
+          {children && (
+            <div className="bg-white dark:bg-[#101010] px-4 pt-6 pb-5 sm:px-6 w-full min-h-screen">
+              {children}
+            </div>
+          )}
         </div>
       </div>
 
@@ -221,4 +255,4 @@ export function ProfileHeader({
   );
 }
 
-export default ProfileHeader; 
+export default ProfileHeader;

@@ -1,43 +1,57 @@
 "use client";
 import type { Post } from "@/src/features/post/types";
 
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { Repeat } from "lucide-react";
-import { MdOutlineContentPaste } from "react-icons/md";
-import { FcLike } from "react-icons/fc";
 import { Loader2 } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 
 import RepostCard from "./RepostCard";
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useProfile, useUserProfile } from "@/src/features/profile";
 import { useUserReposts } from "@/src/features/post/hooks/useRepost";
 import PostCard from "@/src/features/post/components/PostCard";
 import CardSkeleton from "@/src/features/post/components/Skeleton";
-import CreatePost from "@/src/features/post/createPost/CreatePost";
+
+// Табы сделаны на чистой разметке (без @/components/ui/tabs), чтобы избежать
+// конфликтов со внутренними классами шадсn-компонента (inline-flex, rounded-md,
+// data-[state=active]:bg-background и т.п.), которые не всегда перебиваются
+// через className и портят вид (см. скрин с "таблеткой" на активном табе).
+const TABS = [
+  { key: "posts", label: "Посты" },
+  { key: "replies", label: "Ответы" },
+  { key: "media", label: "Медиа" },
+  { key: "reposts", label: "Репосты" },
+] as const;
+
+type TabKey = (typeof TABS)[number]["key"];
 
 export const ProfileActivityCard: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { ref, inView } = useInView();
+  const [activeTab, setActiveTab] = useState<TabKey>("posts");
 
   const { user: currentUser } = useProfile();
-  const { data, isLoading, isOwnProfile } = useUserProfile(id);
+  const { data, isLoading } = useUserProfile(id);
   const {
     data: repostsData,
     isLoading: isRepostsLoading,
-  
   } = useUserReposts(id, 20);
 
   const posts = useMemo(
     () => (Array.isArray(data?.post) ? data.post : []),
     [data?.post],
   );
-  const likes = useMemo(
-    () => (Array.isArray(data?.likes) ? data.likes : []),
-    [data?.likes],
+
+  // Медиа-таб — фильтруем посты, у которых есть медиа-вложения
+  const media = useMemo(
+    () => posts.filter((p: any) => Array.isArray(p?.media) && p.media.length > 0),
+    [posts],
   );
+
+  // TODO: подключить реальный источник данных для ответов, когда появится в API
+  const replies = useMemo(() => [], []);
+
   const reposts = useMemo(
     () => repostsData?.items || [],
     [repostsData?.items],
@@ -47,7 +61,6 @@ export const ProfileActivityCard: React.FC = () => {
     if (!currentUser?.id) return new Set<string>();
     const allPosts = [
       ...posts,
-      ...likes.map((l: any) => l.post).filter(Boolean),
       ...reposts.map((r: any) => r.post).filter(Boolean),
     ];
     return new Set(
@@ -57,11 +70,7 @@ export const ProfileActivityCard: React.FC = () => {
           .map((l: any) => l.postId ?? p?.id),
       ),
     );
-  }, [posts, likes, reposts, currentUser?.id]);
-
-  // useEffect(() => {
-  //   if (inView && hasNextPage) fetchNextPage();
-  // }, [inView, hasNextPage, fetchNextPage]);
+  }, [posts, reposts, currentUser?.id]);
 
   const toPostData = (p: any): Post =>
     ({
@@ -88,7 +97,7 @@ export const ProfileActivityCard: React.FC = () => {
   if (isLoading) {
     return (
       <div className="w-full space-y-3">
-        <div className="h-[52px] rounded-[1.5rem] bg-neutral-100 dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 animate-pulse" />
+        <div className="h-11 border-b border-neutral-200 dark:border-neutral-800/70 animate-pulse" />
         {skeletonList}
       </div>
     );
@@ -104,102 +113,83 @@ export const ProfileActivityCard: React.FC = () => {
 
   return (
     <div className="w-full">
-      <Tabs className="w-full" defaultValue="posts">
+      {/* ── Табы: равные по ширине, подчёркивание только у активного ── */}
+      <div className="flex w-full border-b border-neutral-200 dark:border-neutral-800/70 mb-3">
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.key;
 
-        <TabsList className="grid w-full grid-cols-3 rounded-[1.5rem] bg-neutral-100 dark:bg-[#101010] border border-neutral-200 dark:border-neutral-800/70 auto-rows-fr h-auto p-1 mb-3">
-          <TabsTrigger
-            value="posts"
-            className="rounded-[1.25rem] h-full py-3 text-neutral-500 dark:text-neutral-400 data-[state=active]:text-black dark:data-[state=active]:text-white data-[state=active]:bg-white dark:data-[state=active]:bg-[#1c1c1c] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-2"
-          >
-            <MdOutlineContentPaste className="w-[18px] h-[18px] shrink-0" />
-            <span className="font-medium text-[14px]">Посты</span>
-            <span className="text-xs opacity-60">({posts.length})</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="likes"
-            className="rounded-[1.25rem] h-full py-3 text-neutral-500 dark:text-neutral-400 data-[state=active]:text-black dark:data-[state=active]:text-white data-[state=active]:bg-white dark:data-[state=active]:bg-[#1c1c1c] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-2"
-          >
-            <FcLike className="w-[18px] h-[18px] shrink-0" />
-            <span className="font-medium text-[14px]">Лайки</span>
-            <span className="text-xs opacity-60">({likes.length})</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="reposts"
-            className="rounded-[1.25rem] h-full py-3 text-neutral-500 dark:text-neutral-400 data-[state=active]:text-black dark:data-[state=active]:text-white data-[state=active]:bg-white dark:data-[state=active]:bg-[#1c1c1c] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-2"
-          >
-            <Repeat className="w-[18px] h-[18px] shrink-0 text-blue-500" />
-            <span className="font-medium text-[14px]">Репосты</span>
-            <span className="text-xs opacity-60">({reposts.length})</span>
-          </TabsTrigger>
-        </TabsList>
+          return (
+            <button
+              key={tab.key}
+              className={`flex-1 -mb-px border-b-2 py-3 text-center text-[14px] transition-colors ${
+                isActive
+                  ? "border-black dark:border-white font-semibold text-black dark:text-white"
+                  : "border-transparent font-medium text-neutral-500 dark:text-neutral-400"
+              }`}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
+      {/* ── Контент таба ── */}
+      {activeTab === "posts" &&
+        (posts.length > 0
+          ? listWrapper(
+              posts.map((p: any) => (
+                <PostCard key={p.id} cardFor="post" post={toPostData(p)} />
+              )),
+            )
+          : emptyState("Постов пока нет"))}
 
-        {
-          isOwnProfile && (
-            <CreatePost />
-          )
-        }
+      {activeTab === "replies" &&
+        (replies.length > 0
+          ? listWrapper(
+              replies.map((p: any) => (
+                <PostCard key={p.id} cardFor="post" post={toPostData(p)} />
+              )),
+            )
+          : emptyState("Ответов пока нет"))}
 
+      {activeTab === "media" &&
+        (media.length > 0
+          ? listWrapper(
+              media.map((p: any) => (
+                <PostCard key={p.id} cardFor="post" post={toPostData(p)} />
+              )),
+            )
+          : emptyState("Медиа пока нет"))}
 
-        <TabsContent value="posts" className="focus-visible:outline-none focus-visible:ring-0">
-          {posts.length > 0
-            ? listWrapper(
-                posts.map((p: any) => (
-                  <PostCard key={p.id} cardFor="post" post={toPostData(p)} />
-                )),
-              )
-            : emptyState("Постов пока нет")}
-        </TabsContent>
+      {activeTab === "reposts" &&
+        (isRepostsLoading ? (
+          skeletonList
+        ) : reposts.length > 0 ? (
+          <>
+            {listWrapper(
+              reposts.map((repost: any) => {
+                if (!repost.post) return null;
 
-        <TabsContent value="likes" className="focus-visible:outline-none focus-visible:ring-0">
-          {likes.length > 0
-            ? listWrapper(
-                likes.map((l: any) => {
-                  const likedPost =
-                    l.post || posts.find((p: any) => p.id === l.postId);
-                  if (!likedPost) return null;
-                  return (
-                    <PostCard
-                      key={l.id}
-                      cardFor="post"
-                      post={toPostData(likedPost)}
-                    />
-                  );
-                }),
-              )
-            : emptyState("Лайков пока нет")}
-        </TabsContent>
-
-        <TabsContent value="reposts" className="focus-visible:outline-none focus-visible:ring-0">
-          {isRepostsLoading ? (
-            skeletonList
-          ) : reposts.length > 0 ? (
-            <>
-              {listWrapper(
-                reposts.map((repost: any) => {
-                  if (!repost.post) return null;
-                  return (
-                    <RepostCard
-                      key={repost.id}
-                      post={toPostData(repost.post)}
-                      repostComment={repost.repostComment}
-                      repostCreatedAt={repost.createdAt}
-                      repostId={repost.id}
-                    />
-                  );
-                }),
-              )}
-              {/* {hasNextPage && ( */}
-                <div ref={ref} className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
-                </div>
-              {/* )} */}
-            </>
-          ) : (
-            emptyState("Репостов пока нет")
-          )}
-        </TabsContent>
-      </Tabs>
+                return (
+                  <RepostCard
+                    key={repost.id}
+                    post={toPostData(repost.post)}
+                    repostComment={repost.repostComment}
+                    repostCreatedAt={repost.createdAt}
+                    repostId={repost.id}
+                  />
+                );
+              }),
+            )}
+            <div ref={ref} className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
+            </div>
+          </>
+        ) : (
+          emptyState("Репостов пока нет")
+        ))}
     </div>
   );
 };

@@ -13,12 +13,11 @@ import {
 const UserProfile = () => {
   const { id } = useParams<{ id: string }>();
 
-  // ✅ Используем useUserProfile вместо getProfileById
   const {
     data: user,
     isLoading,
-    isAuthenticated, // Флаг для скрытия кнопок редактирования
-    isOwnProfile, // Свой профиль или чужой
+    isAuthenticated,
+    isOwnProfile,
   } = useUserProfile(id);
 
   if (isLoading) {
@@ -45,16 +44,16 @@ const UserProfile = () => {
     <>
       <GoBack title={user?.name || "Назад"} />
       <div className="max-w-4xl mx-auto px-0 sm:px-4">
-        {/* ✅ Передаём флаги для скрытия кнопок редактирования */}
+        {/* ProfileActivityCard теперь передаётся как children — это нужно,
+            чтобы табы и лента постов жили в том же sticky-контейнере,
+            что и фон (иначе фон "отклеится" сразу после блока с био) */}
         <ProfileHeader
           isAuthenticated={isAuthenticated}
           isOwnProfile={isOwnProfile}
           userId={id}
-        />
-
-        <div className="mt-4 sm:mt-6 px-3 sm:px-0">
+        >
           <ProfileActivityCard />
-        </div>
+        </ProfileHeader>
       </div>
     </>
   );

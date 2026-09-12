@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   UserPlus,
   UserMinus,
-  SendHorizontal,
+  Mail,
   Cake,
   MapPin,
   CalendarDays,
@@ -70,14 +70,21 @@ export function ProfileInfo({
 
   const isActionLoading = isDataLoading || isFollowLoading || isUnfollowLoading;
 
+  const handleMessageClick = (e: React.MouseEvent) => {
+    if (!currentUserId) {
+      e.preventDefault();
+      toast.error(t("notAuthorized"), { description: t("notAuthorizedDesc") });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-3 px-1">
 
-      {/* ── Row 1: name + action button(s) ── */}
-      <div className="flex items-start justify-between gap-3">
+      {/* ── Row 1: имя/юзернейм + компактные кнопки действий (как на референсе) ── */}
+      <div className="flex items-center justify-between gap-3">
         {/* Name block */}
         <div className="min-w-0">
-          {/* username frame decoration */}
+          {/* username frame decoration — сохранена как есть */}
           <div className="relative inline-block">
             {data.usernameFrameUrl && data.usernameFrameUrl !== "none" && (
               <div
@@ -91,7 +98,7 @@ export function ProfileInfo({
                 }}
               />
             )}
-            <h1 className="relative z-0 text-[22px] font-bold leading-tight tracking-tight text-white">
+            <h1 className="relative z-0 text-[19px] sm:text-[22px] font-bold leading-tight tracking-tight text-black dark:text-white">
               {data.name}
             </h1>
           </div>
@@ -100,43 +107,38 @@ export function ProfileInfo({
           </p>
         </div>
 
-        {/* Action buttons — desktop only, stacked */}
+        {/* Action buttons — компактные, видны всегда (не скрываются на мобилке) */}
         {!isOwner ? (
-          <div className="hidden sm:flex flex-col gap-2 shrink-0 min-w-[140px]">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
-              className="w-full h-9 rounded-full text-[13px] font-semibold"
+              asChild
+              className="h-9 w-9 rounded-full p-0 border-neutral-200 dark:border-neutral-800"
+              size="icon"
+              variant="outline"
+            >
+              <Link
+                href={!currentUserId ? "#" : `/chat/${data.id}`}
+                onClick={handleMessageClick}
+              >
+                <Mail size={16} />
+              </Link>
+            </Button>
+            <Button
+              className="h-9 rounded-full px-4 text-[13px] font-semibold"
               disabled={isActionLoading}
               variant={isFollowing ? "secondary" : "default"}
               onClick={handleFollowClick}
             >
               {isFollowing ? (
-                <><UserMinus className="mr-1.5" size={15} />Отписаться</>
+                <><UserMinus className="mr-1.5" size={14} />Отписаться</>
               ) : (
-                <><UserPlus className="mr-1.5" size={15} />Подписаться</>
+                <><UserPlus className="mr-1.5" size={14} />Подписаться</>
               )}
-            </Button>
-            <Button
-              asChild
-              className="w-full h-9 rounded-full text-[13px] border-neutral-800"
-              variant="outline"
-            >
-              <Link
-                href={!currentUserId ? "#" : `/chat/${data.id}`}
-                onClick={(e) => {
-                  if (!currentUserId) {
-                    e.preventDefault();
-                    toast.error(t("notAuthorized"), { description: t("notAuthorizedDesc") });
-                  }
-                }}
-              >
-                Сообщение
-                <SendHorizontal className="ml-1.5" size={14} />
-              </Link>
             </Button>
           </div>
         ) : (
           <Button
-            className="h-8 shrink-0 rounded-full border-neutral-700 bg-transparent px-4 text-[12px] font-medium text-neutral-200 hover:bg-neutral-800"
+            className="h-8 shrink-0 rounded-full border-neutral-700 bg-transparent px-4 text-[12px] font-medium text-neutral-600 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             size="sm"
             variant="outline"
             onClick={() => dispatch(openSettingsModal("profile"))}
@@ -149,82 +151,52 @@ export function ProfileInfo({
 
       {/* ── Row 2: bio ── */}
       {data.bio && (
-        <p className="text-[13px] leading-relaxed text-neutral-300 whitespace-pre-wrap font-serif">
+        <p className="text-[14px] leading-relaxed text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap font-serif">
           {data.bio}
         </p>
       )}
 
-      {/* ── Row 3: meta (location, birthday, joined) — compact single line ── */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-neutral-500">
+      {/* ── Row 3: доп. инфо (локация, дата рождения, дата регистрации) ── */}
+      <div className="flex flex-wrap gap-x-4 gap-y-2 text-[13px] text-neutral-500">
         {data.location && (
           <span className="flex items-center gap-1">
-            <MapPin size={12} />
+            <MapPin size={14} />
             {data.location}
           </span>
         )}
         {data.dateOfBirth && (
           <span className="flex items-center gap-1">
-            <Cake size={12} />
+            <Cake size={14} />
             {formatToClientDate(data.dateOfBirth)}
           </span>
         )}
         <span className="flex items-center gap-1">
-          <CalendarDays size={12} />
+          <CalendarDays size={14} />
           {formatToClientDate(data.createdAt)}
         </span>
       </div>
 
-      {/* ── Row 4: stats ── */}
-      <div className="flex items-center gap-5 text-[13px]">
-        <Link href={`/following/${data.id}`} className="flex items-center gap-1 hover:underline underline-offset-4 decoration-neutral-600">
-          <span className="font-bold text-white">{stats.followingCount}</span>
+      {/* ── Row 4: статистика (Following / Followers / Posts) ── */}
+      <div className="flex items-center gap-5 text-[13px] mt-1">
+        <Link
+          className="flex items-center gap-1 hover:underline underline-offset-4 decoration-neutral-400 dark:decoration-neutral-600"
+          href={`/following/${data.id}`}
+        >
+          <span className="font-bold text-black dark:text-white">{stats.followingCount}</span>
           <span className="text-neutral-500">Подписки</span>
         </Link>
-        <Link href={`/followers/${data.id}`} className="flex items-center gap-1 hover:underline underline-offset-4 decoration-neutral-600">
-          <span className="font-bold text-white">{stats.followersCount}</span>
+        <Link
+          className="flex items-center gap-1 hover:underline underline-offset-4 decoration-neutral-400 dark:decoration-neutral-600"
+          href={`/followers/${data.id}`}
+        >
+          <span className="font-bold text-black dark:text-white">{stats.followersCount}</span>
           <span className="text-neutral-500">Подписчики</span>
         </Link>
         <div className="flex items-center gap-1">
-          <span className="font-bold text-white">{stats.postsCount}</span>
+          <span className="font-bold text-black dark:text-white">{stats.postsCount}</span>
           <span className="text-neutral-500">Посты</span>
         </div>
       </div>
-
-      {/* ── Row 5: action buttons — mobile only, side by side ── */}
-      {!isOwner && (
-        <div className="flex sm:hidden gap-2 pt-1">
-          <Button
-            className="flex-1 h-9 rounded-full text-[13px] font-semibold"
-            disabled={isActionLoading}
-            variant={isFollowing ? "secondary" : "default"}
-            onClick={handleFollowClick}
-          >
-            {isFollowing ? (
-              <><UserMinus className="mr-1.5" size={15} />Отписаться</>
-            ) : (
-              <><UserPlus className="mr-1.5" size={15} />Подписаться</>
-            )}
-          </Button>
-          <Button
-            asChild
-            className="flex-1 h-9 rounded-full text-[13px] border-neutral-800"
-            variant="outline"
-          >
-            <Link
-              href={!currentUserId ? "#" : `/chat/${data.id}`}
-              onClick={(e) => {
-                if (!currentUserId) {
-                  e.preventDefault();
-                  toast.error(t("notAuthorized"), { description: t("notAuthorizedDesc") });
-                }
-              }}
-            >
-              Сообщение
-              <SendHorizontal className="ml-1.5" size={14} />
-            </Link>
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
