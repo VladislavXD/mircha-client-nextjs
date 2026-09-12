@@ -49,7 +49,7 @@ export function ProfileStatus({
   if (isOwner) {
     return (
       <button
-        className="mt-2 flex justify-center w-full hover:opacity-75 transition-opacity focus-visible:outline-none"
+        className="mt-2 flex justify-center w-full hover:opacity-75 transition-opacity focus-visible:outline-none l"
         onClick={onOpen}
       >
         {bubble}
