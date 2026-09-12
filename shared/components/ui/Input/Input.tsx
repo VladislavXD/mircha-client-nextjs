@@ -4,17 +4,17 @@ import { useController, Control, FieldValues, Path } from "react-hook-form";
 import { Input as ShadcnInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Props<T extends FieldValues = FieldValues> = {
+type Props<T extends FieldValues = any> = {
   name: Path<T>;
   label: string;
   placeholder?: string;
   type?: string;
-  control: Control<T, any, T>;
+  control: Control<T>;
   required?: string;
   endContent?: JSX.Element;
 };
 
-const Input = <T extends FieldValues = FieldValues>({
+const Input = <T extends FieldValues = any>({
   name,
   label,
   placeholder,
